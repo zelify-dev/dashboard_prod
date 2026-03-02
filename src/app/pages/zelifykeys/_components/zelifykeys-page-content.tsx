@@ -7,12 +7,14 @@ import { ProductionSection } from "./production";
 import { SecureKeysInfo } from "./secure-keys-info";
 import { DataSection } from "./data";
 import { useZelifyKeysTranslations } from "./use-zelifykeys-translations";
+import { ZelifyKeysDataProvider } from "./zelify-keys-data-context";
 
 export function ZelifyKeysPageContent() {
   const translations = useZelifyKeysTranslations();
 
   return (
-    <div className="mx-auto w-full max-w-[1080px]">
+    <ZelifyKeysDataProvider>
+      <div className="mx-auto w-full max-w-[1080px]">
       <Breadcrumb pageName={translations.breadcrumb} />
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-[26px] font-bold leading-[30px] text-dark dark:text-white">
@@ -33,6 +35,7 @@ export function ZelifyKeysPageContent() {
         </div>
       </div>
     </div>
+    </ZelifyKeysDataProvider>
   );
 }
 

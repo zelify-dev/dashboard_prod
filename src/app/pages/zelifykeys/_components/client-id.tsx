@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { CLIENT_ID } from "./keys-data";
+import { useClientId } from "./use-client-id";
 import { useZelifyKeysTranslations } from "./use-zelifykeys-translations";
 
 export function ClientIdSection() {
   const translations = useZelifyKeysTranslations();
   const [copied, setCopied] = useState(false);
-  const clientId = CLIENT_ID;
+  const clientId = useClientId();
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(clientId);

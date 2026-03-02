@@ -1,23 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { CLIENT_ID, NAME_KEY, SECRET_KEY } from "./keys-data";
 import { useZelifyKeysTranslations } from "./use-zelifykeys-translations";
+import { useZelifyKeysData } from "./zelify-keys-data-context";
+import { maskApiKey } from "@/lib/organization-api-keys";
+
+const MASKED = "****************";
 
 export function DataSection() {
   const translations = useZelifyKeysTranslations();
-  
-  // Real values from components (for copying) - read from shared file
-  const accessData = {
-    [translations.data.clientId]: CLIENT_ID,
-    [translations.data.keyName]: NAME_KEY,
-    [translations.data.secretKey]: SECRET_KEY,
+  const { apiKey, apiSecret } = useZelifyKeysData();
+
+  // Valores reales para copiar (Key Name + Secret; la org se resuelve por token)
+  const accessDataToCopy = {
+    [translations.data.keyName]: apiKey ?? MASKED,
+    [translations.data.secretKey]: apiSecret ?? MASKED,
   };
 
-  // Masked values to display on screen
+  // Siempre enmascarado en pantalla
   const maskedAccessData = {
-    [translations.data.clientId]: "****************",
-    [translations.data.keyName]: "Sandbox - *******",
+    [translations.data.keyName]: apiKey ? maskApiKey(apiKey) : "Sandbox - *******",
     [translations.data.secretKey]: "**********",
   };
 
@@ -25,8 +27,7 @@ export function DataSection() {
 
   const handleCopy = async () => {
     try {
-      // Copy the real values
-      await navigator.clipboard.writeText(JSON.stringify(accessData, null, 2));
+      await navigator.clipboard.writeText(JSON.stringify(accessDataToCopy, null, 2));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (e) {

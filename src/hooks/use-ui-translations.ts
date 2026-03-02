@@ -220,6 +220,8 @@ export type UiTranslations = {
       teamName: string;
       teamDescription: string;
       memberName: string;
+      teamNameBusiness: string;
+      teamNameDevelopers: string;
     };
     createTeamModal: {
       title: string;
@@ -236,9 +238,58 @@ export type UiTranslations = {
       fullNamePlaceholder: string;
       emailLabel: string;
       emailPlaceholder: string;
-      phoneLabel: string;
-      phonePlaceholder: string;
+      passwordLabel: string;
+      passwordPlaceholder: string;
+      confirmPasswordLabel: string;
+      confirmPasswordPlaceholder: string;
+      passwordHelper: string;
       submit: string;
+    };
+  };
+  membersManagement: {
+    tableTitle: string;
+    searchPlaceholder: string;
+    filterStatus: string;
+    statusActive: string;
+    statusDisabled: string;
+    colEmail: string;
+    colFullName: string;
+    colTeamRole: string;
+    colStatus: string;
+    colActions: string;
+    pendingBadge: string;
+    noMembers: string;
+    noPermission: string;
+    addMember: string;
+    edit: string;
+    disable: string;
+    enable: string;
+    resetPassword: string;
+    editMember: string;
+    editRoles: string;
+    tempPasswordTitle: string;
+    tempPasswordCopy: string;
+    tempPasswordCopied: string;
+    tempPasswordWarning: string;
+    tempPasswordDone: string;
+    editMemberTitle: string;
+    editRolesTitle: string;
+    resetPasswordTitle: string;
+    resetPasswordConfirm: string;
+    resetPasswordSuccess: string;
+    roleLabel: string;
+    roleNames: {
+      OWNER: string;
+      ORG_ADMIN: string;
+      BUSINESS: string;
+      DEVELOPER: string;
+      ZELIFY_TEAM: string;
+    };
+    errors: {
+      noPermission: string;
+      lastAdmin: string;
+      emailExists: string;
+      sessionExpired: string;
     };
   };
   profilePage: {
@@ -252,6 +303,18 @@ export type UiTranslations = {
       address: string;
       addressPlaceholder: string;
       saveButton: string;
+      organizationSection: string;
+      organizationId: string;
+      accountSection: string;
+      fullName: string;
+      email: string;
+      country: string;
+      companyLegalName: string;
+      industry: string;
+      status: string;
+      createdAt: string;
+      updatedAt: string;
+      loading: string;
       branding: {
         title: string;
         logoLabel: string;
@@ -279,6 +342,18 @@ export type UiTranslations = {
     clickToUpload: string;
     orDragAndDrop: string;
     fileFormats: string;
+  };
+  changePasswordRequired: {
+    title: string;
+    description: string;
+    newPasswordLabel: string;
+    newPasswordPlaceholder: string;
+    confirmPasswordLabel: string;
+    confirmPasswordPlaceholder: string;
+    submit: string;
+    submitting: string;
+    errorMatch: string;
+    errorMinLength: string;
   };
   tourModal: {
     selectProductsTitle: string;
@@ -525,6 +600,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         teamName: "Administrators",
         teamDescription: "System administrators team",
         memberName: "Default user",
+        teamNameBusiness: "Business Team",
+        teamNameDevelopers: "Developers Team",
       },
       createTeamModal: {
         title: "Create New Team",
@@ -541,9 +618,58 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         fullNamePlaceholder: "e.g. Jane Doe",
         emailLabel: "Email",
         emailPlaceholder: "e.g. jane.doe@example.com",
-        phoneLabel: "Mobile phone (optional)",
-        phonePlaceholder: "e.g. +1 555 123 4567",
+        passwordLabel: "Temporary password",
+        passwordPlaceholder: "Assign a password for first login",
+        confirmPasswordLabel: "Confirm password",
+        confirmPasswordPlaceholder: "Repeat the password",
+        passwordHelper: "User will be marked as pending and must change this password on first login.",
         submit: "Add Member",
+      },
+    },
+    membersManagement: {
+      tableTitle: "Organization Members",
+      searchPlaceholder: "Search by name or email...",
+      filterStatus: "Status",
+      statusActive: "Active",
+      statusDisabled: "Disabled",
+      colEmail: "Email",
+      colFullName: "Full name",
+      colTeamRole: "Team / Role",
+      colStatus: "Status",
+      colActions: "Actions",
+      pendingBadge: "Pending",
+      noMembers: "No members found.",
+      noPermission: "You don't have permission to manage users.",
+      addMember: "Add member",
+      edit: "Edit",
+      disable: "Disable",
+      enable: "Enable",
+      resetPassword: "Reset password",
+      editMember: "Edit member",
+      editRoles: "Edit roles",
+      tempPasswordTitle: "Temporary password",
+      tempPasswordCopy: "Copy",
+      tempPasswordCopied: "Copied!",
+      tempPasswordWarning: "The user must change this password on first login.",
+      tempPasswordDone: "Done",
+      editMemberTitle: "Edit member",
+      editRolesTitle: "Edit roles",
+      resetPasswordTitle: "Reset password",
+      resetPasswordConfirm: "Generate a new temporary password for this user? They will need to change it on first login.",
+      resetPasswordSuccess: "Temporary password generated. Copy it now; it won't be shown again.",
+      roleLabel: "Team / Role",
+      roleNames: {
+        OWNER: "Owner",
+        ORG_ADMIN: "Administrators",
+        BUSINESS: "Business Team",
+        DEVELOPER: "Developers Team",
+        ZELIFY_TEAM: "Zelify Team",
+      },
+      errors: {
+        noPermission: "You don't have permission to manage users.",
+        lastAdmin: "There must be at least one active administrator in the organization.",
+        emailExists: "A user with this email already exists.",
+        sessionExpired: "Session expired. Retrying…",
       },
     },
     profilePage: {
@@ -556,11 +682,23 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         websitePlaceholder: "https://example.com",
         address: "Headquarters address",
         addressPlaceholder: "Enter the full address of the headquarters",
-        saveButton: "Save general information",
+        saveButton: "Save custom branding",
+        organizationSection: "Organization",
+        organizationId: "Organization ID",
+        accountSection: "Account",
+        fullName: "Full name",
+        email: "Email",
+        country: "Country",
+        companyLegalName: "Legal name",
+        industry: "Industry",
+        status: "Status",
+        createdAt: "Created",
+        updatedAt: "Updated",
+        loading: "Loading...",
         branding: {
-          title: "Branding",
+          title: "Custom Branding",
           logoLabel: "Logo",
-          logoHelper: "Drag, paste or select an image (PNG, JPG, SVG, WEBP)",
+          logoHelper: "Drag, paste or select an image (PNG, SVG)",
           uploadButton: "Select file",
           colorLabel: "Primary Color",
         },
@@ -584,6 +722,18 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       clickToUpload: "Click to upload",
       orDragAndDrop: "or drag and drop",
       fileFormats: "SVG, PNG, JPG or GIF (max, 800 X 800px)",
+    },
+    changePasswordRequired: {
+      title: "Change your password",
+      description: "For security, you must set a new password before continuing.",
+      newPasswordLabel: "New password",
+      newPasswordPlaceholder: "Enter your new password",
+      confirmPasswordLabel: "Confirm new password",
+      confirmPasswordPlaceholder: "Repeat the new password",
+      submit: "Change password",
+      submitting: "Updating...",
+      errorMatch: "Passwords do not match.",
+      errorMinLength: "Password must be at least 8 characters.",
     },
     tourModal: {
       selectProductsTitle: "Select Products",
@@ -829,6 +979,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         teamName: "Administradores",
         teamDescription: "Equipo de administradores del sistema",
         memberName: "Usuario por defecto",
+        teamNameBusiness: "Equipo de Negocios",
+        teamNameDevelopers: "Equipo de Desarrollo",
       },
       createTeamModal: {
         title: "Crear Nuevo Equipo",
@@ -845,9 +997,58 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         fullNamePlaceholder: "Ej: Juan Pérez",
         emailLabel: "Email",
         emailPlaceholder: "Ej: juan.perez@example.com",
-        phoneLabel: "Teléfono Móvil (Opcional)",
-        phonePlaceholder: "Ej: +52 55 1234 5678",
+        passwordLabel: "Contraseña temporal",
+        passwordPlaceholder: "Asigna una contraseña para el primer acceso",
+        confirmPasswordLabel: "Confirmar contraseña",
+        confirmPasswordPlaceholder: "Repite la contraseña",
+        passwordHelper: "El usuario quedará pendiente y deberá cambiar esta contraseña en su primer inicio de sesión.",
         submit: "Añadir Miembro",
+      },
+    },
+    membersManagement: {
+      tableTitle: "Miembros de la organización",
+      searchPlaceholder: "Buscar por nombre o email...",
+      filterStatus: "Estado",
+      statusActive: "Activo",
+      statusDisabled: "Deshabilitado",
+      colEmail: "Email",
+      colFullName: "Nombre completo",
+      colTeamRole: "Equipo / Rol",
+      colStatus: "Estado",
+      colActions: "Acciones",
+      pendingBadge: "Pendiente",
+      noMembers: "No hay miembros.",
+      noPermission: "No tienes permiso para gestionar usuarios.",
+      addMember: "Añadir miembro",
+      edit: "Editar",
+      disable: "Deshabilitar",
+      enable: "Habilitar",
+      resetPassword: "Restablecer contraseña",
+      editMember: "Editar miembro",
+      editRoles: "Editar roles",
+      tempPasswordTitle: "Contraseña temporal",
+      tempPasswordCopy: "Copiar",
+      tempPasswordCopied: "¡Copiado!",
+      tempPasswordWarning: "El usuario deberá cambiar esta contraseña en su primer inicio de sesión.",
+      tempPasswordDone: "Listo",
+      editMemberTitle: "Editar miembro",
+      editRolesTitle: "Editar roles",
+      resetPasswordTitle: "Restablecer contraseña",
+      resetPasswordConfirm: "¿Generar una nueva contraseña temporal? El usuario deberá cambiarla en el primer acceso.",
+      resetPasswordSuccess: "Contraseña temporal generada. Cópiala ahora; no se volverá a mostrar.",
+      roleLabel: "Equipo / Rol",
+      roleNames: {
+        OWNER: "Owner",
+        ORG_ADMIN: "Administradores",
+        BUSINESS: "Equipo de Negocios",
+        DEVELOPER: "Equipo de Desarrollo",
+        ZELIFY_TEAM: "Equipo Zelify",
+      },
+      errors: {
+        noPermission: "No tienes permisos para administrar usuarios.",
+        lastAdmin: "Debe existir al menos un administrador activo en la organización.",
+        emailExists: "Ya existe un usuario con ese email.",
+        sessionExpired: "Sesión expirada. Reintentando…",
       },
     },
     profilePage: {
@@ -861,12 +1062,24 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         address: "Dirección de la sede principal",
         addressPlaceholder:
           "Ingrese la dirección completa de la sede principal",
-        saveButton: "Guardar información general",
+        saveButton: "Guardar personalización de marca",
+        organizationSection: "Organización",
+        organizationId: "ID de organización",
+        accountSection: "Cuenta",
+        fullName: "Nombre completo",
+        email: "Correo electrónico",
+        country: "País",
+        companyLegalName: "Razón social",
+        industry: "Industria",
+        status: "Estado",
+        createdAt: "Creado",
+        updatedAt: "Actualizado",
+        loading: "Cargando...",
         branding: {
           title: "Personalización de marca",
           logoLabel: "Logo",
           logoHelper:
-            "Arrastra, pega o selecciona una imagen (PNG, JPG, SVG, WEBP)",
+            "Arrastra, pega o selecciona una imagen (PNG, SVG)",
           uploadButton: "Seleccionar archivo",
           colorLabel: "Color primario",
         },
@@ -890,6 +1103,18 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       clickToUpload: "Haz clic para subir",
       orDragAndDrop: "o arrastra y suelta",
       fileFormats: "SVG, PNG, JPG o GIF (máx., 800 X 800px)",
+    },
+    changePasswordRequired: {
+      title: "Cambia tu contraseña",
+      description: "Por seguridad, debes establecer una nueva contraseña para continuar.",
+      newPasswordLabel: "Nueva contraseña",
+      newPasswordPlaceholder: "Ingresa tu nueva contraseña",
+      confirmPasswordLabel: "Confirmar nueva contraseña",
+      confirmPasswordPlaceholder: "Repite la nueva contraseña",
+      submit: "Cambiar contraseña",
+      submitting: "Actualizando...",
+      errorMatch: "Las contraseñas no coinciden.",
+      errorMinLength: "La contraseña debe tener al menos 8 caracteres.",
     },
     tourModal: {
       selectProductsTitle: "Selecciona los productos",

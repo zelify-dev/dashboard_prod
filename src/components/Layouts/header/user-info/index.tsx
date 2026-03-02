@@ -8,37 +8,27 @@ import {
 } from "@/components/ui/dropdown";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { cn } from "@/lib/utils";
+import { logout, getStoredUser } from "@/lib/auth-api";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LogOutIcon, SettingsIcon } from "./icons";
 
 export function UserInfo() {
   const translations = useUiTranslations();
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
 
-  // Obtener email del usuario desde localStorage
-  const userEmail = typeof window !== "undefined" ? localStorage.getItem("userEmail") : null;
-  
+  const user = typeof window !== "undefined" ? getStoredUser() : null;
   const USER = {
-    name: "Carlos Mendoza",
-    email: userEmail || "carlos.mendoza@zelify.com",
+    name: user?.full_name ?? "Usuario",
+    email: user?.email ?? "",
     img: "/images/user/user-03.png",
   };
 
-  const handleLogout = () => {
-    // Limpiar localStorage
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("isAuthenticated");
-      localStorage.removeItem("userEmail");
-    }
-    // Cerrar dropdown
+  const handleLogout = async () => {
     setIsOpen(false);
-    // Redirigir a login
-    router.push("/login");
-    router.refresh();
+    await logout();
+    window.location.href = "/login";
   };
 
   return (

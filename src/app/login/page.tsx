@@ -3,16 +3,10 @@
 import { EmailIcon, PasswordIcon } from "@/assets/icons";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
-import RequestCredentialsModal from "@/components/Auth/RequestCredentialsModal";
-
-// ============================================================================
-// CONSTANTS - Demo Credentials
-// ============================================================================
-const DEMO_EMAIL = "demo@zwippe.com";
-const DEMO_PASSWORD = "Zwipp32026$";
+import { login, persistAuthSession, AuthError, syncMe } from "@/lib/auth-api";
+import { getAuthErrorMessage } from "@/lib/auth-error-messages";
 
 // ============================================================================
 // TRANSLATIONS
@@ -20,41 +14,39 @@ const DEMO_PASSWORD = "Zwipp32026$";
 const TRANSLATIONS = {
   en: {
     welcome: "Welcome back",
-    subWelcome: "Sign in to your account to access the dashboard",
+    subWelcome: "Sign in to your account to access the dashboard.",
     email: "Email",
     password: "Password",
     signIn: "Sign In",
     signingIn: "Signing in...",
     back: "Back",
-    rightPanelTitle: "Sign in to your account",
-    rightPanelSubtitle: "Demo Dashboard Zelify",
-    rightPanelDesc:
-      "Access all the tools and settings of your dashboard by completing the required fields",
-    requestCreds: "Request Credentials",
+    backToHome: "Back to home",
     incCreds: "Incorrect credentials.",
-    // Errors
     invalidEmail: "Email must contain '@' and a valid format.",
     reqEmail: "Email is required.",
     reqPassword: "Password is required.",
+    placeholderEmail: "admin@company.com",
+    placeholderPassword: "Enter your password",
+    noAccount: "Don't have an account? ",
+    createAccount: "Create your account",
   },
   es: {
     welcome: "Bienvenido de nuevo",
-    subWelcome: "Inicia sesión en tu cuenta para acceder al panel",
+    subWelcome: "Inicia sesión en tu cuenta para acceder al panel.",
     email: "Correo electrónico",
     password: "Contraseña",
     signIn: "Iniciar sesión",
     signingIn: "Iniciando sesión...",
     back: "Volver",
-    rightPanelTitle: "Inicia sesión en tu cuenta",
-    rightPanelSubtitle: "Demo Dashboard Zelify",
-    rightPanelDesc:
-      "Accede a todas las herramientas y configuraciones de tu panel completando los campos requeridos",
-    requestCreds: "Solicitar credenciales",
+    backToHome: "Volver al inicio",
     incCreds: "Credenciales incorrectas.",
-    // Errors
     invalidEmail: "El correo debe contener '@' y un formato válido.",
     reqEmail: "El correo es obligatorio.",
     reqPassword: "La contraseña es obligatoria.",
+    placeholderEmail: "admin@tuempresa.com",
+    placeholderPassword: "Ingresa tu contraseña",
+    noAccount: "¿No tienes cuenta? ",
+    createAccount: "Crear cuenta",
   },
 };
 
@@ -202,7 +194,6 @@ function EdgeFadeOverlay({ isDarkMode }: { isDarkMode: boolean }) {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -210,12 +201,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [showRequestModal, setShowRequestModal] = useState(false);
   const [language, setLanguage] = useState<"en" | "es">("en");
 
-  // Load language preference
+  // Load language preference (same key as dashboard: zelify-language)
   useEffect(() => {
-    const storedLang = localStorage.getItem("preferredLanguage");
+    const storedLang = localStorage.getItem("zelify-language");
     if (storedLang === "en" || storedLang === "es") {
       setLanguage(storedLang);
     }
@@ -224,7 +214,7 @@ export default function LoginPage() {
   const toggleLanguage = () => {
     const newLang = language === "en" ? "es" : "en";
     setLanguage(newLang);
-    localStorage.setItem("preferredLanguage", newLang);
+    localStorage.setItem("zelify-language", newLang);
   };
 
   // Validation State
@@ -236,6 +226,19 @@ export default function LoginPage() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const t = TRANSLATIONS[language];
+
+  /** Devuelve el mensaje de error para un campo (validación en tiempo real). */
+  const getFieldError = (name: "email" | "password", d: { email: string; password: string }): string => {
+    if (name === "email") {
+      if (!d.email) return t.reqEmail;
+      if (!d.email.includes("@") || !emailRegex.test(d.email)) return t.invalidEmail;
+      return "";
+    }
+    if (name === "password") {
+      return !d.password ? t.reqPassword : "";
+    }
+    return "";
+  };
 
   // Detectar modo dark/light
   useEffect(() => {
@@ -296,18 +299,12 @@ export default function LoginPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setData({
-      ...data,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target as { name: "email" | "password"; value: string };
+    const nextData = { ...data, [name]: value };
+    setData(nextData);
     setError("");
-    // Clear field specific error when typing
-    if (formErrors[e.target.name as keyof typeof formErrors]) {
-      setFormErrors({
-        ...formErrors,
-        [e.target.name]: "",
-      });
-    }
+    const fieldError = getFieldError(name, nextData);
+    setFormErrors((prev) => ({ ...prev, [name]: fieldError }));
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -317,79 +314,51 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    // Opción 1: Verificar si son credenciales demo
-    if (data.email === DEMO_EMAIL && data.password === DEMO_PASSWORD) {
-      // Autenticación demo sin backend
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", data.email);
-
-      // Dispatch a custom event to notify AuthGuard of the authentication change
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("storage"));
-        window.dispatchEvent(
-          new CustomEvent("authchange", { detail: { authenticated: true } }),
-        );
-      }
-
-      // Simulate authentication delay
-      setTimeout(() => {
-        setLoading(false);
-        window.location.href = "/";
-      }, 500);
-      return; // Salir para no ejecutar la petición al backend
-    }
-
-    // Opción 2: Autenticación con backend
-    try {
-      // Enviar petición al backend para autenticación
-      const response = await fetch("http://localhost:3001/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // IMPORTANTE: Permite que el navegador guarde y envíe cookies automáticamente
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
-      });
-
-      const result = await response.json();
-
-      // El backend envía status 201 con { message: "Login successful", email: "..." }
-      // Verificar si el status es exitoso (200-299) en lugar de verificar result.success
-      if (response.ok) {
-        // El backend ya estableció la cookie session_token automáticamente mediante Set-Cookie
-        // El navegador la guardó automáticamente en su almacén de cookies
-
-        // Guardamos información adicional en localStorage para el AuthGuard
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userEmail", result.email || data.email);
-
-        // Dispatch a custom event to notify AuthGuard of the authentication change
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new Event("storage"));
-          window.dispatchEvent(
-            new CustomEvent("authchange", { detail: { authenticated: true } }),
-          );
-        }
-
-        setLoading(false);
-        // Redirigir al dashboard
-        window.location.href = "/";
-      } else {
-        // Error de autenticación
-        setLoading(false);
-        setError(result.message || t.incCreds);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
+    const authBaseUrl = process.env.NEXT_PUBLIC_AUTH_API_URL;
+    if (!authBaseUrl) {
       setLoading(false);
       setError(
         language === "en"
-          ? "Connection error. Please try again."
-          : "Error de conexión. Por favor intenta de nuevo.",
+          ? "Auth API URL is not configured. Set NEXT_PUBLIC_AUTH_API_URL in .env"
+          : "La URL de la API de auth no está configurada. Configura NEXT_PUBLIC_AUTH_API_URL en .env",
       );
+      return;
+    }
+
+    try {
+      const result = await login({
+        email: data.email,
+        password: data.password,
+      });
+
+      if ("access_token" in result) {
+        persistAuthSession(result);
+        try {
+          await syncMe();
+        } catch {
+          /* mantener datos del response */
+        }
+        setLoading(false);
+        window.location.href = "/";
+        return;
+      }
+
+      setLoading(false);
+      setError((result as { message?: string }).message || t.incCreds);
+    } catch (err) {
+      console.error("Login error:", err);
+      setLoading(false);
+      if (err instanceof AuthError) {
+        setError(getAuthErrorMessage(err.statusCode, "login", language) || err.message);
+      } else {
+        setError(
+          err instanceof Error
+            ? err.message
+            : language === "en"
+              ? "Connection error. Please try again."
+              : "Error de conexión. Por favor intenta de nuevo.",
+        );
+      }
     }
   };
 
@@ -406,7 +375,7 @@ export default function LoginPage() {
         <Link
           href="https://www.zelify.com"
           className="flex items-center justify-center rounded-lg border-2 border-dark px-3 py-1.5 font-bold text-dark dark:border-white dark:text-white bg-white/10 backdrop-blur-sm"
-          aria-label="Back to home"
+          aria-label={t.backToHome}
         >
           {t.back}
         </Link>
@@ -454,22 +423,15 @@ export default function LoginPage() {
         ></div>
       </div>
 
-      {/* ======================================================================
-          CONTENEDOR PRINCIPAL
-          ====================================================================== */}
-      <div className="relative z-10 w-full max-w-[1200px]">
+      {/* CONTENEDOR PRINCIPAL - solo formulario */}
+      <div className="relative z-10 w-full max-w-[440px]">
         <div
           className="rounded-[10px] shadow-1 dark:shadow-card"
           style={{
             backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight,
           }}
         >
-          <div className="flex flex-wrap items-center">
-            {/* ==================================================================
-                SECCIÓN IZQUIERDA - Formulario de Login
-                ================================================================== */}
-            <div className="w-full xl:w-1/2">
-              <div className="w-full p-4 sm:p-12.5 xl:p-15">
+          <div className="w-full p-4 sm:p-10">
                 {/* LOGO #1 - Logo en la sección del formulario (izquierda) */}
                 <div className="mb-10">
                   <Link href="/" className="inline-block">
@@ -509,7 +471,7 @@ export default function LoginPage() {
                         color: isDarkMode ? COLORS.errorBorder : undefined,
                       }}
                     >
-                      {t.incCreds}
+                      {error}
                     </div>
                   )}
 
@@ -521,11 +483,12 @@ export default function LoginPage() {
                         ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
                         : ""
                     }`}
-                    placeholder="demo@zwippe.com"
+                    placeholder={t.placeholderEmail}
                     name="email"
                     handleChange={handleChange}
                     value={data.email}
                     icon={<EmailIcon />}
+                    required
                   />
                   {formErrors.email && (
                     <p className="mb-4 mt-[-10px] text-sm text-red-500">
@@ -541,15 +504,12 @@ export default function LoginPage() {
                         ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
                         : ""
                     }`}
-                    placeholder={
-                      language === "en"
-                        ? "Enter your password"
-                        : "Ingresa tu contraseña"
-                    }
+                    placeholder={t.placeholderPassword}
                     name="password"
                     handleChange={handleChange}
                     value={data.password}
                     icon={<PasswordIcon />}
+                    required
                   />
                   {formErrors.password && (
                     <p className="mb-5 mt-[-15px] text-sm text-red-500">
@@ -593,84 +553,16 @@ export default function LoginPage() {
                     </button>
                   </div>
 
-                  {/* <div className="rounded-lg border border-stroke bg-gray-50 p-4 dark:border-dark-3 dark:bg-dark-3">
-                    <p className="mb-2 text-xs font-semibold text-dark-6 dark:text-dark-6">
-                      Demo credentials:
-                    </p>
-                    <p className="text-xs text-dark-6 dark:text-dark-6">
-                      <strong>Email:</strong> demo@gmail.com
-                    </p>
-                    <p className="text-xs text-dark-6 dark:text-dark-6">
-                      <strong>Password:</strong> demodashboard
-                    </p>
-                  </div> */}
+                  <p className="text-center text-sm text-dark-6 dark:text-dark-6">
+                    {t.noAccount}
+                    <Link href="/register" className="font-medium text-primary hover:underline">
+                      {t.createAccount}
+                    </Link>
+                  </p>
                 </form>
-              </div>
-            </div>
-
-            {/* ==================================================================
-                SECCIÓN DERECHA - Panel Informativo (Color Verde)
-                ================================================================== */}
-            <div className="hidden w-full p-7.5 xl:block xl:w-1/2">
-              <div
-                className="relative overflow-hidden rounded-2xl px-12.5 pt-12.5 border"
-                style={{
-                  backgroundColor: COLORS.rightPanelBg,
-                  borderColor: isDarkMode
-                    ? COLORS.rightPanelBorderDark
-                    : "transparent",
-                }}
-              >
-                <div className="relative z-10">
-                  <p className="mb-3 text-xl font-medium text-dark dark:text-white">
-                    {t.rightPanelTitle}
-                  </p>
-
-                  <h2 className="mb-4 text-2xl font-bold text-dark dark:text-white sm:text-heading-3">
-                    {t.rightPanelSubtitle}
-                  </h2>
-
-                  <p className="mb-8 w-full max-w-[375px] font-medium text-dark-4 dark:text-dark-6">
-                    {t.rightPanelDesc}
-                  </p>
-
-                  <button
-                    onClick={() => setShowRequestModal(true)}
-                    className="mb-6 inline-flex items-center justify-center rounded-lg bg-white px-8 py-3 text-center font-bold text-black hover:bg-opacity-90 shadow-lg transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105"
-                    style={{
-                      color: COLORS.rightPanelBg,
-                      backgroundColor: isDarkMode ? "#ffffff" : "#004195", // Using the blue from left side if light? Use contrasting color.
-                      // Actually, background is green (rightPanelBg). Button should probably be white text or dark text depending on bg.
-                      // The green is bright: rgb(170, 255, 59). Black text is good.
-                      // Let's stick to simple styling first.
-                    }}
-                  >
-                    {t.requestCreds}
-                  </button>
-
-                  <div className="mt-12">
-                    <Image
-                      src={"/images/grids/grid-02.svg"}
-                      alt="Grid"
-                      width={405}
-                      height={325}
-                      className="mx-auto dark:opacity-30"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
-      {/* ======================================================================
-          MODAL
-          ====================================================================== */}
-      <RequestCredentialsModal
-        isOpen={showRequestModal}
-        onClose={() => setShowRequestModal(false)}
-        language={language}
-      />
     </div>
   );
 }

@@ -27,6 +27,13 @@ type ZelifyKeysTranslations = {
     copyToClipboard: string;
     issuedOn: string;
     compromisedQuestion: string;
+    noKeys: string;
+    generateKey: string;
+    loading: string;
+    errorLoading: string;
+    revealToCopy: string;
+    rotateWarning: string;
+    retry: string;
   };
   production: {
     title: string;
@@ -72,6 +79,13 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
       copyToClipboard: "Copy to clipboard",
       issuedOn: "Issued on",
       compromisedQuestion: "Has my API KEY been compromised?",
+      noKeys: "No API keys yet",
+      generateKey: "Generate API key",
+      loading: "Loading...",
+      errorLoading: "Error loading API keys",
+      revealToCopy: "Reveal the secret to copy it",
+      rotateWarning: "Current keys will be revoked. Save the new secret when shown.",
+      retry: "Retry",
     },
     production: {
       title: "Production Secret",
@@ -84,7 +98,7 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
     },
     data: {
       title: "Copy all your access data",
-      description: "Need to save or share your credentials? Click the button below to copy all access data (Client ID, Key Name and Secret Key) in JSON format to your clipboard.",
+      description: "Need to save or share your credentials? Click the button below to copy all access data (Key Name and Secret Key) in JSON format to your clipboard.",
       clientId: "Client ID",
       keyName: "Key Name",
       secretKey: "Secret Key",
@@ -115,6 +129,13 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
       copyToClipboard: "Copiar al portapapeles",
       issuedOn: "Emitido el",
       compromisedQuestion: "¿Ha sido comprometida mi API KEY?",
+      noKeys: "Aún no hay API keys",
+      generateKey: "Generar API key",
+      loading: "Cargando...",
+      errorLoading: "Error al cargar API keys",
+      revealToCopy: "Revela el secret para copiarlo",
+      rotateWarning: "Las claves actuales se revocarán. Guarda el nuevo secret cuando se muestre.",
+      retry: "Reintentar",
     },
     production: {
       title: "Secreto de Producción",
@@ -127,7 +148,7 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
     },
     data: {
       title: "Copiar todos tus datos de acceso",
-      description: "¿Necesitas guardar o compartir tus credenciales? Haz clic en el botón de abajo para copiar todos los datos de acceso (ID de Cliente, Nombre de Clave y Clave Secreta) en formato JSON a tu portapapeles.",
+      description: "¿Necesitas guardar o compartir tus credenciales? Haz clic en el botón de abajo para copiar todos los datos de acceso (Key Name y Secret Key) en formato JSON a tu portapapeles.",
       clientId: "Client ID",
       keyName: "Key Name",
       secretKey: "Secret Key",

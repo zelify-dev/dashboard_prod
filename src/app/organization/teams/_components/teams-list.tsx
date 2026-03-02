@@ -94,11 +94,6 @@ export function TeamsList({ teams, onAddMember }: TeamsListProps) {
                       <p className="text-body-sm text-dark-6 dark:text-dark-6">
                         {member.email}
                       </p>
-                      {member.phone && (
-                        <p className="text-body-sm text-dark-6 dark:text-dark-6">
-                          {member.phone}
-                        </p>
-                      )}
                     </div>
                   </div>
                 ))}

@@ -15,12 +15,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  // Verificar si estamos en la página de login
-  const isLoginPage = pathname === "/login" ||
-    (typeof window !== "undefined" && window.location.pathname === "/login");
+  // Rutas públicas: solo contenido, sin sidebar ni header
+  const isPublicRoute = pathname === "/login" || pathname === "/register";
 
-  // No mostrar sidebar y header en la página de login
-  if (isLoginPage) {
+  if (isPublicRoute) {
     return <>{children}</>;
   }
 
