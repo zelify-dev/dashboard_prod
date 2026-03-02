@@ -1,7 +1,7 @@
 /**
  * Cliente para la API de autenticación (registro, login, refresh, logout, me, sesiones).
- * Base URL: NEXT_PUBLIC_AUTH_API_URL (ej: http://localhost:8080). Prefijo: /api.
- * Endpoints protegidos: header Authorization: Bearer <access_token>.
+ * Base URL: exclusivamente NEXT_PUBLIC_AUTH_API_URL (variable de entorno). No hay URLs base quemadas.
+ * Prefijo de rutas: /api (ej. /api/auth/login, /api/me, /api/organizations/:id/users).
  *
  * Seguridad:
  * - Tokens y datos de sesión en sessionStorage (se borran al cerrar la pestaña).
@@ -381,7 +381,10 @@ export async function syncMe(): Promise<void> {
   if (me.organization) sessionStorage.setItem(k.ORGANIZATION, JSON.stringify(me.organization));
   const topRoles = (me as { roles?: unknown }).roles;
   const userRoles = (me.user as { roles?: unknown })?.roles;
-  const rolesInput = [].concat(topRoles ?? [], userRoles ?? []).filter(Boolean);
+  const rolesInput: unknown[] = [
+    ...(Array.isArray(topRoles) ? topRoles : []),
+    ...(Array.isArray(userRoles) ? userRoles : []),
+  ];
   sessionStorage.setItem(k.ROLES, JSON.stringify(normalizeRoleCodes(rolesInput)));
 }
 

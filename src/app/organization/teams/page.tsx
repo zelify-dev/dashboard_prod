@@ -301,7 +301,7 @@ export default function TeamsPage() {
             </button>
           </div>
 
-          <ShowcaseSection className="!p-6">
+          <ShowcaseSection title={m.tableTitle} className="!p-6">
             <MembersTable
               items={members}
               total={membersTotal}

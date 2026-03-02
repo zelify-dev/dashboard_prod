@@ -52,6 +52,7 @@ export function EditMemberModal({ user, onClose, onSave }: EditMemberModalProps)
             label={t.organizationTeams.addMemberModal.fullNameLabel}
             type="text"
             name="fullName"
+            placeholder={t.organizationTeams.addMemberModal.fullNamePlaceholder}
             value={fullName}
             handleChange={(e) => setFullName(e.target.value)}
             icon={<UserIcon />}
