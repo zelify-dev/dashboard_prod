@@ -9,7 +9,6 @@ import {
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { cn } from "@/lib/utils";
 import { logout, getStoredUser } from "@/lib/auth-api";
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { LogOutIcon, SettingsIcon } from "./icons";
@@ -22,7 +21,6 @@ export function UserInfo() {
   const USER = {
     name: user?.full_name ?? "Usuario",
     email: user?.email ?? "",
-    img: "/images/user/user-03.png",
   };
 
   const handleLogout = async () => {
@@ -36,28 +34,19 @@ export function UserInfo() {
       <DropdownTrigger className="rounded align-middle outline-none ring-primary ring-offset-2 focus-visible:ring-1 dark:ring-offset-gray-dark">
         <span className="sr-only">{translations.userInfo.myAccount}</span>
 
-        <figure className="flex items-center gap-3">
-          <Image
-            src={USER.img}
-            className="size-12"
-            alt={`Avatar of ${USER.name}`}
-            role="presentation"
-            width={200}
-            height={200}
+        <div className="flex items-center gap-3">
+          <span className="font-medium text-dark dark:text-dark-6 max-[1024px]:sr-only">
+            {USER.name}
+          </span>
+          <ChevronUpIcon
+            aria-hidden
+            className={cn(
+              "rotate-180 transition-transform",
+              isOpen && "rotate-0",
+            )}
+            strokeWidth={1.5}
           />
-          <figcaption className="flex items-center gap-1 font-medium text-dark dark:text-dark-6 max-[1024px]:sr-only">
-            <span>{USER.name}</span>
-
-            <ChevronUpIcon
-              aria-hidden
-              className={cn(
-                "rotate-180 transition-transform",
-                isOpen && "rotate-0",
-              )}
-              strokeWidth={1.5}
-            />
-          </figcaption>
-        </figure>
+        </div>
       </DropdownTrigger>
 
       <DropdownContent
@@ -66,24 +55,14 @@ export function UserInfo() {
       >
         <h2 className="sr-only">{translations.userInfo.userInformation}</h2>
 
-        <figure className="flex items-center gap-2.5 px-5 py-3.5">
-          <Image
-            src={USER.img}
-            className="size-12"
-            alt={`Avatar for ${USER.name}`}
-            role="presentation"
-            width={200}
-            height={200}
-          />
-
-          <figcaption className="space-y-1 text-base font-medium">
+        <div className="flex items-center gap-2.5 px-5 py-3.5">
+          <div className="space-y-1 text-base font-medium">
             <div className="mb-2 leading-none text-dark dark:text-white">
               {USER.name}
             </div>
-
             <div className="leading-none text-gray-6">{USER.email}</div>
-          </figcaption>
-        </figure>
+          </div>
+        </div>
 
         <hr className="border-[#E8E8E8] dark:border-dark-3" />
 
