@@ -12,7 +12,7 @@ import { useSidebarContext } from "./sidebar-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { useTour } from "@/contexts/tour-context";
 import { getStoredRoles } from "@/lib/auth-api";
-import { isOwner } from "@/app/organization/teams/_constants/team-roles";
+import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -34,7 +34,11 @@ export function Sidebar() {
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const roles = getStoredRoles();
   const isOwnerUser = isOwner(roles);
-  const NAV_DATA = getNavData(translations, isOwnerUser);
+  const canSeeBranding =
+    isOwnerUser ||
+    userHasRole(roles, TEAM_ROLE.ORG_ADMIN) ||
+    userHasRole(roles, TEAM_ROLE.ZELIFY_TEAM);
+  const NAV_DATA = getNavData(translations, { isOwner: isOwnerUser, canSeeBranding });
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
 
   const toggleExpanded = (key: string) => {

@@ -48,6 +48,7 @@ export type UiTranslations = {
         profile: string;
         teams: string;
         organizationAdmin: string;
+        branding: string;
         authentication: string;
         geolocalization: string;
         deviceInformation: string;
@@ -427,6 +428,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           profile: "Company Profile",
           teams: "Teams",
           organizationAdmin: "Organization Admin",
+          branding: "Branding",
           authentication: "Authentication",
           geolocalization: "Geolocalization",
           deviceInformation: "Device information",
@@ -807,6 +809,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           profile: "Perfil de la empresa",
           teams: "Equipos",
           organizationAdmin: "Administración de organizaciones",
+          branding: "Branding",
           authentication: "Autenticación",
           geolocalization: "Geolocalización",
           deviceInformation: "Información del dispositivo",

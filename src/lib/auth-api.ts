@@ -371,6 +371,49 @@ export async function getOrganization(id: string): Promise<OrganizationDetails> 
   return data as OrganizationDetails;
 }
 
+/** POST /api/organizations/:id/branding/logo — subir logo (multipart/form-data). Devuelve { url_log }. */
+export async function uploadOrganizationLogo(orgId: string, file: File): Promise<{ url_log: string }> {
+  const form = new FormData();
+  form.append("logo", file);
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/branding/logo`,
+    { method: "POST", body: form }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al subir el logo",
+      res.status,
+      data
+    );
+  }
+  return data as { url_log: string };
+}
+
+/** PATCH /api/organizations/:id/branding — actualizar color_a, color_b, url_log. */
+export async function updateOrganizationBranding(
+  orgId: string,
+  payload: { color_a?: string; color_b?: string; url_log?: string }
+): Promise<OrganizationDetails> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/branding`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al actualizar branding",
+      res.status,
+      data
+    );
+  }
+  return data as OrganizationDetails;
+}
+
 /** GET /api/me — perfil del usuario logueado. */
 export async function getMe(): Promise<MeResponse> {
   const res = await fetchWithAuth("/api/me");
