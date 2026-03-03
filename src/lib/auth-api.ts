@@ -12,8 +12,17 @@
 
 const getBaseUrl = (): string => {
   const url = process.env.NEXT_PUBLIC_AUTH_API_URL;
-  if (!url) return "";
-  return url.replace(/\/$/, "");
+  if (!url || typeof url !== "string") return "";
+  const base = url.replace(/\/$/, "");
+  // Obligatorio: base debe ser URL absoluta del backend (ej. http://localhost:8080).
+  // Si es relativa o vacía, las peticiones irían al servidor Next.js y darían 404 "Cannot PATCH/GET...".
+  if (!base.startsWith("http://") && !base.startsWith("https://")) {
+    if (typeof window !== "undefined") {
+      console.error("NEXT_PUBLIC_AUTH_API_URL debe ser una URL absoluta (ej. http://localhost:8080). Actual:", url);
+    }
+    return "";
+  }
+  return base;
 };
 
 /**
@@ -164,6 +173,10 @@ export async function fetchWithAuth(
   const base = getBaseUrl();
   if (!base) throw new Error("NEXT_PUBLIC_AUTH_API_URL no está configurado");
   const url = path.startsWith("http") ? path : `${base}${path.startsWith("/") ? "" : "/"}${path}`;
+  // Asegurar que la petición va al backend, no al mismo origen (Next.js)
+  if (!url.startsWith("http://") && !url.startsWith("https://")) {
+    throw new Error("La URL del API debe ser absoluta. Configura NEXT_PUBLIC_AUTH_API_URL (ej. http://localhost:8080)");
+  }
   const token = getAccessToken();
   const headers = new Headers(options.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);

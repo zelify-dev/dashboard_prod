@@ -3,6 +3,8 @@
 Base: `API_URL` = `http://localhost:8080` (o tu `NEXT_PUBLIC_AUTH_API_URL`).  
 Sustituir `ORG_ID_AQUI` y `ACCESS_TOKEN_AQUI` por valores reales.
 
+**Importante (frontend):** Las peticiones deben ir al backend Nest, no al servidor Next.js. En el dashboard, `NEXT_PUBLIC_AUTH_API_URL` debe ser una **URL absoluta** (ej. `http://localhost:8080`). Si está vacía o es relativa, el front llamaría a la misma origen (Next) y obtendrías 404 "Cannot PATCH /api/organizations/.../branding".
+
 ## 1) Obtener organización (branding actual)
 
 ```bash
