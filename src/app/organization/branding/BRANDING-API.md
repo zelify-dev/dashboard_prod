@@ -1,20 +1,27 @@
 # Branding API — Pruebas con curl
 
-Base: `API_URL` = `http://localhost:8080` (o tu `NEXT_PUBLIC_AUTH_API_URL`).  
+Base: `NEXT_PUBLIC_AUTH_API_URL` (ej. `http://localhost:8080`).  
 Sustituir `ORG_ID_AQUI` y `ACCESS_TOKEN_AQUI` por valores reales.
 
-**Importante (frontend):** Las peticiones deben ir al backend Nest, no al servidor Next.js. En el dashboard, `NEXT_PUBLIC_AUTH_API_URL` debe ser una **URL absoluta** (ej. `http://localhost:8080`). Si está vacía o es relativa, el front llamaría a la misma origen (Next) y obtendrías 404 "Cannot PATCH /api/organizations/.../branding".
+**Importante (frontend):** Las peticiones deben ir al backend. `NEXT_PUBLIC_AUTH_API_URL` debe ser una URL absoluta (ej. `http://localhost:8080`).
 
-## 1) Obtener organización (branding actual)
+## 1) Obtener branding (cargar pantalla) — **público, sin auth**
+
+```bash
+curl -X GET "http://localhost:8080/api/organizations/ORG_ID_AQUI/branding"
+```
+
+Respuesta 200: `{ "id": "...", "url_log": "https://..." | null, "color_a": "#RRGGBB" | null, "color_b": "#RRGGBB" | null }`  
+Errores: 404 — Organización no encontrada.
+
+## 2) Obtener organización completa (alternativa con auth)
 
 ```bash
 curl -X GET "http://localhost:8080/api/organizations/ORG_ID_AQUI" \
   -H "Authorization: Bearer ACCESS_TOKEN_AQUI"
 ```
 
-## 2) Subir logo (multipart/form-data)
-
-Requiere Bearer (ORG_ADMIN / OWNER / ZELIFY_TEAM).
+## 3) Subir logo (multipart/form-data) — **auth obligatoria** (OWNER, ORG_ADMIN, ZELIFY_TEAM)
 
 ```bash
 curl -X POST "http://localhost:8080/api/organizations/ORG_ID_AQUI/branding/logo" \
@@ -22,11 +29,10 @@ curl -X POST "http://localhost:8080/api/organizations/ORG_ID_AQUI/branding/logo"
   -F "logo=@/ruta/a/tu/logo.png"
 ```
 
-Respuesta 201: `{ "url_log": "https://..." }`
+Respuesta 201: `{ "url_log": "https://..." }`  
+Errores: 400 (falta logo o inválido), 401, 403, 404.
 
-## 3) Actualizar colores (y opcionalmente url_log)
-
-Requiere Bearer (ORG_ADMIN / OWNER / ZELIFY_TEAM).
+## 4) Actualizar colores y/o url_log — **auth obligatoria** (OWNER, ORG_ADMIN, ZELIFY_TEAM)
 
 ```bash
 curl -X PATCH "http://localhost:8080/api/organizations/ORG_ID_AQUI/branding" \
@@ -38,6 +44,6 @@ curl -X PATCH "http://localhost:8080/api/organizations/ORG_ID_AQUI/branding" \
   }'
 ```
 
-Opcional: incluir `"url_log": "https://.../logo.png"` en el body.
-
-Respuesta: objeto organización actualizado.
+Respuesta 200: objeto organización actualizado.  
+Errores: 400 (validación, ej. color no #RRGGBB), 401, 403, 404.  
+Colores: formato `#RRGGBB` (regex `/^#[0-9A-Fa-f]{6}$/`).

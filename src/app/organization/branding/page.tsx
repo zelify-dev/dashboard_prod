@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
-import { getOrganization, uploadOrganizationLogo, updateOrganizationBranding, AuthError } from "@/lib/auth-api";
-import type { OrganizationDetails } from "@/lib/auth-api";
+import { getOrganizationBranding, uploadOrganizationLogo, updateOrganizationBranding, AuthError } from "@/lib/auth-api";
+import type { OrganizationBranding } from "@/lib/auth-api";
 import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 
@@ -26,7 +26,7 @@ export default function OrganizationBrandingPage() {
     userHasRole(roles, TEAM_ROLE.ZELIFY_TEAM);
 
   const org = getStoredOrganization();
-  const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
+  const [branding, setBranding] = useState<OrganizationBranding | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -38,36 +38,35 @@ export default function OrganizationBrandingPage() {
   const [brandingError, setBrandingError] = useState("");
   const [toast, setToast] = useState("");
 
-  const fetchOrg = useCallback(async () => {
+  const fetchBranding = useCallback(async () => {
     if (!org?.id) return;
     setLoading(true);
     setError("");
     try {
-      const data = await getOrganization(org.id);
-      setOrgDetails(data);
+      const data = await getOrganizationBranding(org.id);
+      setBranding(data);
       if (data.color_a) setColorA(data.color_a);
       if (data.color_b) setColorB(data.color_b);
     } catch (err) {
       if (err instanceof AuthError) {
-        if (err.statusCode === 401) router.push("/login");
-        else if (err.statusCode === 403) setError("No tienes permisos para ver el branding.");
+        if (err.statusCode === 404) setError("Organización no encontrada.");
         else setError(err.message);
       } else {
-        setError("Error al cargar la organización.");
+        setError("Error al cargar el branding.");
       }
-      setOrgDetails(null);
+      setBranding(null);
     } finally {
       setLoading(false);
     }
-  }, [org?.id, router]);
+  }, [org?.id]);
 
   useEffect(() => {
     if (!canSeeBranding) {
       router.replace("/organization/teams");
       return;
     }
-    fetchOrg();
-  }, [canSeeBranding, fetchOrg, router]);
+    fetchBranding();
+  }, [canSeeBranding, fetchBranding, router]);
 
   useEffect(() => {
     if (toast) {
@@ -84,12 +83,13 @@ export default function OrganizationBrandingPage() {
     setLogoUploading(true);
     try {
       const { url_log } = await uploadOrganizationLogo(org.id, file);
-      setOrgDetails((prev) => (prev ? { ...prev, url_log } : null));
+      setBranding((prev) => (prev ? { ...prev, url_log } : { id: org.id, url_log, color_a: null, color_b: null }));
       setToast("Logo actualizado.");
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.statusCode === 401) router.push("/login");
         else if (err.statusCode === 403) setLogoError("No tienes permisos.");
+        else if (err.statusCode === 404) setLogoError("Organización no encontrada.");
         else if (err.statusCode === 500) setLogoError("Error subiendo logo, intenta de nuevo.");
         else setLogoError(err.message);
       } else {
@@ -113,12 +113,18 @@ export default function OrganizationBrandingPage() {
     setBrandingSaving(true);
     try {
       const updated = await updateOrganizationBranding(org.id, { color_a: a, color_b: b });
-      setOrgDetails(updated);
+      setBranding((prev) =>
+        prev
+          ? { ...prev, url_log: updated.url_log ?? prev.url_log, color_a: a, color_b: b }
+          : { id: org.id, url_log: updated.url_log ?? null, color_a: a, color_b: b }
+      );
       setToast("Branding actualizado.");
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.statusCode === 401) router.push("/login");
         else if (err.statusCode === 403) setBrandingError("No tienes permisos.");
+        else if (err.statusCode === 400) setBrandingError(err.message);
+        else if (err.statusCode === 404) setBrandingError("Organización no encontrada.");
         else setBrandingError(err.message);
       } else {
         setBrandingError("Error al guardar.");
@@ -157,14 +163,14 @@ export default function OrganizationBrandingPage() {
 
           <ShowcaseSection title="Logo" className="!p-6">
             <div className="space-y-4">
-              {orgDetails?.url_log ? (
+              {branding?.url_log ? (
                 <div className="flex items-center gap-4">
                   <img
-                    src={orgDetails.url_log}
+                    src={branding.url_log}
                     alt="Logo"
                     className="h-20 w-auto max-w-[200px] object-contain"
                   />
-                  <p className="text-xs text-dark-6 dark:text-dark-6 break-all">{orgDetails.url_log}</p>
+                  <p className="text-xs text-dark-6 dark:text-dark-6 break-all">{branding.url_log}</p>
                 </div>
               ) : (
                 <p className="text-sm text-dark-6 dark:text-dark-6">No hay logo cargado.</p>

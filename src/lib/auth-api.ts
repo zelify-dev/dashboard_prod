@@ -80,6 +80,14 @@ export type AuthOrganization = {
   status: string;
 };
 
+/** Respuesta de GET /api/organizations/:id/branding (público). Solo campos de branding. */
+export type OrganizationBranding = {
+  id: string;
+  url_log: string | null;
+  color_a: string | null;
+  color_b: string | null;
+};
+
 /** Detalles completos de la organización (GET /api/organizations/:id). Incluye zcoins y branding si el backend los devuelve. */
 export type OrganizationDetails = {
   id: string;
@@ -384,6 +392,29 @@ export async function getOrganization(id: string): Promise<OrganizationDetails> 
   return data as OrganizationDetails;
 }
 
+/**
+ * GET /api/organizations/:id/branding — obtener solo branding (público, sin auth).
+ * Especificación backend: carga de pantalla/formulario.
+ * Errores: 404 — Organización no encontrada.
+ */
+export async function getOrganizationBranding(id: string): Promise<OrganizationBranding> {
+  const base = getBaseUrl();
+  if (!base) throw new Error("NEXT_PUBLIC_AUTH_API_URL no está configurado");
+  const url = `${base}/api/organizations/${encodeURIComponent(id)}/branding`;
+  const res = await fetch(url, { method: "GET" });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      res.status === 404
+        ? "Organización no encontrada"
+        : (data as { message?: string }).message ?? "Error al obtener el branding",
+      res.status,
+      data
+    );
+  }
+  return data as OrganizationBranding;
+}
+
 /** POST /api/organizations/:id/branding/logo — subir logo (multipart/form-data). Devuelve { url_log }. */
 export async function uploadOrganizationLogo(orgId: string, file: File): Promise<{ url_log: string }> {
   const form = new FormData();
@@ -403,10 +434,10 @@ export async function uploadOrganizationLogo(orgId: string, file: File): Promise
   return data as { url_log: string };
 }
 
-/** PATCH /api/organizations/:id/branding — actualizar color_a, color_b, url_log. */
+/** PATCH /api/organizations/:id/branding — actualizar color_a, color_b, url_log (Bearer). Campos opcionales; pueden ser string o null. */
 export async function updateOrganizationBranding(
   orgId: string,
-  payload: { color_a?: string; color_b?: string; url_log?: string }
+  payload: { color_a?: string | null; color_b?: string | null; url_log?: string | null }
 ): Promise<OrganizationDetails> {
   const res = await fetchWithAuth(
     `/api/organizations/${encodeURIComponent(orgId)}/branding`,
@@ -418,11 +449,11 @@ export async function updateOrganizationBranding(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError(
-      (data as { message?: string }).message ?? "Error al actualizar branding",
-      res.status,
-      data
-    );
+    const msg =
+      res.status === 400
+        ? "Colores deben ser #RRGGBB (6 hex)."
+        : (data as { message?: string }).message ?? "Error al actualizar branding";
+    throw new AuthError(msg, res.status, data);
   }
   return data as OrganizationDetails;
 }
