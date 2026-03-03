@@ -71,15 +71,22 @@ export type AuthOrganization = {
   status: string;
 };
 
-/** Detalles completos de la organización (GET /api/organizations/:id). */
+/** Detalles completos de la organización (GET /api/organizations/:id). Incluye zcoins y branding si el backend los devuelve. */
 export type OrganizationDetails = {
   id: string;
   name: string;
   status: string;
   country?: string;
+  currency?: string;
   company_legal_name?: string;
   website?: string;
   industry?: string;
+  fiscal_id?: string;
+  zcoins?: string;
+  url_log?: string | null;
+  color_a?: string | null;
+  color_b?: string | null;
+  scopes?: string[];
   created_at?: string;
   updated_at?: string;
 };

@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useLanguageTranslations } from "@/hooks/use-language-translations";
 import { type Language } from "@/contexts/language-context";
+import { getStoredOrganization } from "@/lib/auth-api";
+import { getOrganization, type OrganizationDetails } from "@/lib/auth-api";
 
 type PanelTranslations = {
     title: string;
@@ -268,6 +270,7 @@ function trendColorClass(positiveIsGood: boolean, value: number): string {
 export function PanelDashboard() {
     const t = useLanguageTranslations(translations);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
 
     useEffect(() => {
         const checkDarkMode = () => setIsDarkMode(document.documentElement.classList.contains("dark"));
@@ -277,11 +280,22 @@ export function PanelDashboard() {
         return () => observer.disconnect();
     }, []);
 
-    const usagePercentage = initialTokenData.total > 0 ? (initialTokenData.used / initialTokenData.total) * 100 : 0;
+    // Cargar detalles de la organización (zcoins, etc.) para el dashboard actual
+    useEffect(() => {
+        const org = getStoredOrganization();
+        if (!org?.id) return;
+        getOrganization(org.id)
+            .then(setOrgDetails)
+            .catch(() => setOrgDetails(null));
+    }, []);
+
+    const zcoinsBalance = orgDetails?.zcoins ?? "0";
+
     const monthlyGrowthZcoins =
         initialTokenData.zcoins_used_previous_month > 0
             ? ((initialTokenData.zcoins_used_current_month - initialTokenData.zcoins_used_previous_month) / initialTokenData.zcoins_used_previous_month) * 100
             : 0;
+    const usagePercentage = initialTokenData.total > 0 ? (initialTokenData.used / initialTokenData.total) * 100 : 0;
     const projectedDepletionDays =
         initialTokenData.projected_daily_usage > 0 ? Math.floor(initialTokenData.remaining / initialTokenData.projected_daily_usage) : 0;
 
@@ -334,21 +348,21 @@ export function PanelDashboard() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div className={cardClass}>
                         <div className={labelClass}>{t.totalTokens}</div>
-                        <div className={valueClass}>{initialTokenData.total.toLocaleString()}</div>
+                        <div className={valueClass}>{zcoinsBalance}</div>
                         <div className={`${subClass} ${trendColorClass(false, monthlyGrowthZcoins)}`}>
                             {t.vsPreviousMonth}: {monthlyGrowthZcoins >= 0 ? "+" : ""}{monthlyGrowthZcoins.toFixed(1)}%
                         </div>
                     </div>
                     <div className={cardClass}>
                         <div className={labelClass}>{t.tokensUsed}</div>
-                        <div className={valueClass}>{initialTokenData.used.toLocaleString()}</div>
+                        <div className={valueClass}>0</div>
                         <div className={subClass}>
                             {usagePercentage.toFixed(1)}% used · <span className={trendColorClass(false, monthlyGrowthZcoins)}>{t.vsPreviousMonth}: {monthlyGrowthZcoins >= 0 ? "+" : ""}{monthlyGrowthZcoins.toFixed(1)}%</span>
                         </div>
                     </div>
                     <div className={cardClass}>
                         <div className={labelClass}>{t.tokensRemaining}</div>
-                        <div className={valueClass}>{initialTokenData.remaining.toLocaleString()}</div>
+                        <div className={valueClass}>{zcoinsBalance}</div>
                         <div className={subClass}>
                             {t.projectedDepletion}: {projectedDepletionDays} {t.days}
                         </div>
