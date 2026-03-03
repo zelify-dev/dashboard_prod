@@ -183,86 +183,67 @@ const translations: Record<Language, PanelTranslations> = {
     },
 };
 
-const generateRecentTime = (minutesAgo: number) => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - minutesAgo);
-    return now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+// ─── Datos iniciales (ceros); en producción vendrían de API ─────────────────
+const initialTokenData = {
+    total: 0,
+    used: 0,
+    remaining: 0,
+    zcoins_used_current_month: 0,
+    zcoins_used_previous_month: 0,
+    projected_daily_usage: 0,
+    byService: [] as { service: string; tokens: number; percentage: number; previousMonthPct: number; costEstimation: number }[],
 };
 
-// ─── Mock data (en producción vendría de API) ─────────────────────────────
-const mockTokenData = {
-    total: 480000,
-    used: 312000,
-    remaining: 168000,
-    zcoins_used_current_month: 312000,
-    zcoins_used_previous_month: 285000,
-    projected_daily_usage: 4200,
-    byService: [
-        { service: "Auth", tokens: 119808, percentage: 38.4, previousMonthPct: 36.2, costEstimation: 4200 },
-        { service: "Identity", tokens: 94848, percentage: 30.4, previousMonthPct: 31.1, costEstimation: 3300 },
-        { service: "AML", tokens: 43992, percentage: 14.1, previousMonthPct: 14.8, costEstimation: 1550 },
-        { service: "Connect", tokens: 31200, percentage: 10.0, previousMonthPct: 9.5, costEstimation: 1100 },
-        { service: "Cards", tokens: 20280, percentage: 6.5, previousMonthPct: 6.8, costEstimation: 720 },
-        { service: "Transfers", tokens: 1872, percentage: 0.6, previousMonthPct: 1.6, costEstimation: 66 },
-    ],
-};
-
-const mockKpis = {
+const initialKpis = {
     transactionalVolume: {
-        total_volume_current_month: 2847500,
-        total_volume_previous_month: 2512000,
+        total_volume_current_month: 0,
+        total_volume_previous_month: 0,
         currency_code: "USD",
     },
     costPerActiveUser: {
-        total_operational_cost: 28250,
-        monthly_active_users: 12500,
-        previous_month_cost_per_user: 2.1,
+        total_operational_cost: 0,
+        monthly_active_users: 0,
+        previous_month_cost_per_user: 0,
     },
     activeUsers: {
-        monthly_active_users: 12500,
-        total_registered_users: 18500,
+        monthly_active_users: 0,
+        total_registered_users: 0,
     },
     retention: {
-        retention_30_days: 68,
-        retention_90_days: 52,
+        retention_30_days: 0,
+        retention_90_days: 0,
     },
     cardsIssued: {
-        cards_issued_total: 42000,
-        cards_active_total: 35800,
-        new_cards_current_month: 2100,
-        new_cards_previous_month: 1850,
+        cards_issued_total: 0,
+        cards_active_total: 0,
+        new_cards_current_month: 0,
+        new_cards_previous_month: 0,
     },
     cardTransactions: {
-        average_tpn_per_card: 6.2,
-        average_tpv_per_card: 285,
+        average_tpn_per_card: 0,
+        average_tpv_per_card: 0,
     },
     fraud: {
-        fraud_volume: 1850,
-        total_transaction_volume: 2847500,
+        fraud_volume: 0,
+        total_transaction_volume: 0,
     },
     aml: {
-        aml_alerts_total: 342,
-        total_users: 18500,
+        aml_alerts_total: 0,
+        total_users: 0,
     },
     kyc: {
-        kyc_approved: 892,
-        kyc_total_requests: 950,
-        average_kyc_time_hours: 32,
+        kyc_approved: 0,
+        kyc_total_requests: 0,
+        average_kyc_time_hours: 0,
     },
     platformHealth: {
-        platform_uptime_percentage: 99.94,
-        api_error_rate_last_24h: 0.12,
-        average_api_response_time: 145,
+        platform_uptime_percentage: 0,
+        api_error_rate_last_24h: 0,
+        average_api_response_time: 0,
     },
 };
 
-const mockLogs = [
-    { id: 1, time: generateRecentTime(2), user: "maria.gonzalez@empresa.com", service: "Auth", tokens: 2450, status: "success" },
-    { id: 2, time: generateRecentTime(5), user: "carlos.rodriguez@empresa.com", service: "Identity", tokens: 1890, status: "success" },
-    { id: 3, time: generateRecentTime(8), user: "ana.martinez@empresa.com", service: "AML", tokens: 3200, status: "success" },
-    { id: 4, time: generateRecentTime(12), user: "juan.perez@empresa.com", service: "Connect", tokens: 1250, status: "error" },
-    { id: 5, time: generateRecentTime(15), user: "laura.sanchez@empresa.com", service: "Cards", tokens: 980, status: "success" },
-];
+const initialLogs: { id: number; time: string; user: string; service: string; tokens: number; status: string }[] = [];
 
 function formatCurrency(value: number, code: string) {
     return new Intl.NumberFormat("en-US", { style: "currency", currency: code, minimumFractionDigits: 0 }).format(value);
@@ -296,49 +277,49 @@ export function PanelDashboard() {
         return () => observer.disconnect();
     }, []);
 
-    const usagePercentage = (mockTokenData.used / mockTokenData.total) * 100;
+    const usagePercentage = initialTokenData.total > 0 ? (initialTokenData.used / initialTokenData.total) * 100 : 0;
     const monthlyGrowthZcoins =
-        mockTokenData.zcoins_used_previous_month > 0
-            ? ((mockTokenData.zcoins_used_current_month - mockTokenData.zcoins_used_previous_month) / mockTokenData.zcoins_used_previous_month) * 100
+        initialTokenData.zcoins_used_previous_month > 0
+            ? ((initialTokenData.zcoins_used_current_month - initialTokenData.zcoins_used_previous_month) / initialTokenData.zcoins_used_previous_month) * 100
             : 0;
     const projectedDepletionDays =
-        mockTokenData.projected_daily_usage > 0 ? Math.floor(mockTokenData.remaining / mockTokenData.projected_daily_usage) : 0;
+        initialTokenData.projected_daily_usage > 0 ? Math.floor(initialTokenData.remaining / initialTokenData.projected_daily_usage) : 0;
 
-    const txVol = mockKpis.transactionalVolume;
+    const txVol = initialKpis.transactionalVolume;
     const txGrowth =
         txVol.total_volume_previous_month > 0
             ? ((txVol.total_volume_current_month - txVol.total_volume_previous_month) / txVol.total_volume_previous_month) * 100
             : 0;
 
-    const costUser = mockKpis.costPerActiveUser;
+    const costUser = initialKpis.costPerActiveUser;
     const costPerUser = costUser.monthly_active_users > 0 ? costUser.total_operational_cost / costUser.monthly_active_users : 0;
     const costTrend = costPerUser >= costUser.previous_month_cost_per_user ? "up" : "down";
 
-    const mau = mockKpis.activeUsers;
+    const mau = initialKpis.activeUsers;
     const activePercentage = mau.total_registered_users > 0 ? (mau.monthly_active_users / mau.total_registered_users) * 100 : 0;
     const mauHealthy = activePercentage >= 50;
 
-    const ret = mockKpis.retention;
+    const ret = initialKpis.retention;
     const ret30Ok = ret.retention_30_days >= 60;
     const ret90Ok = ret.retention_90_days >= 60;
 
-    const cards = mockKpis.cardsIssued;
+    const cards = initialKpis.cardsIssued;
 
-    const fraud = mockKpis.fraud;
+    const fraud = initialKpis.fraud;
     const fraudRate = fraud.total_transaction_volume > 0 ? (fraud.fraud_volume / fraud.total_transaction_volume) * 100 : 0;
     const fraudOk = fraudRate < 0.1;
 
-    const aml = mockKpis.aml;
+    const aml = initialKpis.aml;
     const alertsPerUserRatio = aml.total_users > 0 ? (aml.aml_alerts_total / aml.total_users) * 100 : 0;
     const amlOk = alertsPerUserRatio < 3;
 
-    const kyc = mockKpis.kyc;
+    const kyc = initialKpis.kyc;
     const approvalRate = kyc.kyc_total_requests > 0 ? (kyc.kyc_approved / kyc.kyc_total_requests) * 100 : 0;
     const kycTimeOk = kyc.average_kyc_time_hours >= 24 && kyc.average_kyc_time_hours <= 48;
     const kycApprovalOk = approvalRate >= 80;
     const kycHealthy = kycApprovalOk && kycTimeOk;
 
-    const platform = mockKpis.platformHealth;
+    const platform = initialKpis.platformHealth;
     const platformOk = platform.platform_uptime_percentage >= 99.9;
 
     const cardClass = "rounded-lg border border-stroke bg-white p-5 shadow-sm dark:border-stroke-dark dark:bg-gray-dark";
@@ -353,21 +334,21 @@ export function PanelDashboard() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <div className={cardClass}>
                         <div className={labelClass}>{t.totalTokens}</div>
-                        <div className={valueClass}>{mockTokenData.total.toLocaleString()}</div>
+                        <div className={valueClass}>{initialTokenData.total.toLocaleString()}</div>
                         <div className={`${subClass} ${trendColorClass(false, monthlyGrowthZcoins)}`}>
                             {t.vsPreviousMonth}: {monthlyGrowthZcoins >= 0 ? "+" : ""}{monthlyGrowthZcoins.toFixed(1)}%
                         </div>
                     </div>
                     <div className={cardClass}>
                         <div className={labelClass}>{t.tokensUsed}</div>
-                        <div className={valueClass}>{mockTokenData.used.toLocaleString()}</div>
+                        <div className={valueClass}>{initialTokenData.used.toLocaleString()}</div>
                         <div className={subClass}>
                             {usagePercentage.toFixed(1)}% used · <span className={trendColorClass(false, monthlyGrowthZcoins)}>{t.vsPreviousMonth}: {monthlyGrowthZcoins >= 0 ? "+" : ""}{monthlyGrowthZcoins.toFixed(1)}%</span>
                         </div>
                     </div>
                     <div className={cardClass}>
                         <div className={labelClass}>{t.tokensRemaining}</div>
-                        <div className={valueClass}>{mockTokenData.remaining.toLocaleString()}</div>
+                        <div className={valueClass}>{initialTokenData.remaining.toLocaleString()}</div>
                         <div className={subClass}>
                             {t.projectedDepletion}: {projectedDepletionDays} {t.days}
                         </div>
@@ -389,7 +370,10 @@ export function PanelDashboard() {
                         {t.tokenConsumption} — {t.byService}
                     </h2>
                     <div className="space-y-5 md:space-y-6">
-                        {mockTokenData.byService.map((item, index) => {
+                        {initialTokenData.byService.length === 0 ? (
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{t.noLogs}</p>
+                        ) : (
+                        initialTokenData.byService.map((item, index) => {
                             const trend = item.percentage - item.previousMonthPct;
                             return (
                                 <div key={index} className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
@@ -417,7 +401,8 @@ export function PanelDashboard() {
                                     </div>
                                 </div>
                             );
-                        })}
+                        })
+                        )}
                     </div>
                 </div>
             </section>
@@ -529,7 +514,7 @@ export function PanelDashboard() {
                     </button>
                 </div>
                 <div className="overflow-x-auto">
-                    {mockLogs.length > 0 ? (
+                    {initialLogs.length > 0 ? (
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-stroke dark:border-stroke-dark">
@@ -541,7 +526,7 @@ export function PanelDashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {mockLogs.map((log) => (
+                                {initialLogs.map((log) => (
                                     <tr key={log.id} className="border-b border-stroke dark:border-stroke-dark">
                                         <td className="px-3 py-2 text-xs text-gray-900 dark:text-white">{log.time}</td>
                                         <td className="px-3 py-2 text-xs text-gray-900 dark:text-white">{log.user}</td>

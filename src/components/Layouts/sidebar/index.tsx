@@ -11,6 +11,8 @@ import { MenuItem } from "./menu-item";
 import { useSidebarContext } from "./sidebar-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { useTour } from "@/contexts/tour-context";
+import { getStoredRoles } from "@/lib/auth-api";
+import { isOwner } from "@/app/organization/teams/_constants/team-roles";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -30,7 +32,9 @@ export function Sidebar() {
       steps[currentStep]?.target === "tour-auth-authentication" ||
       steps[currentStep]?.target === "tour-geolocalization");
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const NAV_DATA = getNavData(translations);
+  const roles = getStoredRoles();
+  const isOwnerUser = isOwner(roles);
+  const NAV_DATA = getNavData(translations, isOwnerUser);
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
 
   const toggleExpanded = (key: string) => {

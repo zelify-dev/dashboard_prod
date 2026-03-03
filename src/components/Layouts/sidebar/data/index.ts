@@ -1,7 +1,7 @@
 import * as Icons from "../icons";
 import type { UiTranslations } from "@/hooks/use-ui-translations";
 
-export function getNavData(translations: UiTranslations) {
+export function getNavData(translations: UiTranslations, isOwner?: boolean) {
   return [
     {
       label: translations.sidebar.products,
@@ -188,6 +188,14 @@ export function getNavData(translations: UiTranslations) {
               title: translations.sidebar.menuItems.subItems.teams,
               url: "/organization/teams",
             },
+            ...(isOwner
+              ? [
+                  {
+                    title: translations.sidebar.menuItems.subItems.organizationAdmin,
+                    url: "/organization/admin",
+                  },
+                ]
+              : []),
           ],
         },
         {
