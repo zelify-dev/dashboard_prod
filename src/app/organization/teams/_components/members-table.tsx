@@ -48,7 +48,12 @@ export function MembersTable({
   const getRoleDisplay = (user: OrgUserListItem) => {
     if (user.roles?.length) {
       const roleNames = m.roleNames as Record<string, string> | undefined;
-      return user.roles.map((r) => roleNames?.[r.code] ?? r.code).join(", ");
+      return user.roles
+        .map((r) => {
+          const code = typeof r === "string" ? r : r.code;
+          return roleNames?.[code] ?? code;
+        })
+        .join(", ");
     }
     return "—";
   };

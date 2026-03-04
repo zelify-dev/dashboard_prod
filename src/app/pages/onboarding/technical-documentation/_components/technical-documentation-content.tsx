@@ -277,16 +277,16 @@ export function TechnicalDocumentationPageContent() {
         <div className="my-8 border-t border-stroke dark:border-strokedark"></div>
 
         <h3 className="mb-4 text-base font-medium text-black dark:text-white">
-          Ambientes Sandbox
+          Ambientes de desarrollo
         </h3>
 
         <div className="mb-4">
           <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
-            URLs de Sandbox
+            URLs de desarrollo
           </label>
           <textarea
             rows={3}
-            placeholder="Ingrese las URLs de los ambientes sandbox..."
+            placeholder="Ingrese las URLs de los ambientes de desarrollo..."
             value={sandboxUrls}
             onChange={(e) => setSandboxUrls(e.target.value)}
             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -299,7 +299,7 @@ export function TechnicalDocumentationPageContent() {
           </label>
           <textarea
             rows={3}
-            placeholder="Ingrese las API Keys de sandbox..."
+            placeholder="Ingrese las API Keys de desarrollo..."
             value={apiKeys}
             onChange={(e) => setApiKeys(e.target.value)}
             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
@@ -308,7 +308,7 @@ export function TechnicalDocumentationPageContent() {
 
         <div className="mb-8">
           <Button
-            label="Guardar información de sandbox"
+            label="Guardar información de desarrollo"
             variant="primary"
             onClick={handleSaveSandbox}
             className="w-full sm:w-auto !bg-[#004196] hover:!bg-[#004196]/90"

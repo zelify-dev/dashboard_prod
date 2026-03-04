@@ -64,7 +64,7 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
     },
     zelifySecrets: {
       title: "Zelify Secrets",
-      sandbox: "Sandbox",
+      sandbox: "Development",
       rotate: "Rotate",
       rotateConfirm: {
         title: "Are you sure you want to rotate?",
@@ -114,7 +114,7 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
     },
     zelifySecrets: {
       title: "Secretos de Zelify",
-      sandbox: "Sandbox",
+      sandbox: "Desarrollo",
       rotate: "Rotar",
       rotateConfirm: {
         title: "¿Estás seguro de que quieres rotar?",

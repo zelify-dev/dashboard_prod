@@ -19,7 +19,7 @@ export function DataSection() {
 
   // Siempre enmascarado en pantalla
   const maskedAccessData = {
-    [translations.data.keyName]: apiKey ? maskApiKey(apiKey) : "Sandbox - *******",
+    [translations.data.keyName]: apiKey ? maskApiKey(apiKey) : "*******",
     [translations.data.secretKey]: "**********",
   };
 
