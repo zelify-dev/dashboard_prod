@@ -26,6 +26,7 @@ import {
   type ActiveTemplateMap,
 } from "./notifications-storage";
 import { SyntaxHighlightTextarea } from "./syntax-highlight-textarea";
+import { formatLocalDateTime } from "@/lib/date-utils";
 
 type DerivedStatus = "active" | "inactive" | "draft";
 type RemoteTemplateStatus = {
@@ -588,7 +589,7 @@ export function NotificationsPageContent() {
                     {card.info.description}
                   </p>
                 </div>
-                <div className={cn("text-right", card.isSelected ? "text-black" : "text-white")}> 
+                <div className={cn("text-right", card.isSelected ? "text-black" : "text-white")}>
                   <p className="text-3xl font-bold">{card.items.length}</p>
                   <p className="text-xs uppercase tracking-widest">{translations.summaryCards.total}</p>
                   {card.active && (
@@ -621,13 +622,13 @@ export function NotificationsPageContent() {
                 value={newGroupName}
                 placeholder={translations.categories.newNamePlaceholder}
                 onChange={(event) => setNewGroupName(event.target.value)}
-                className="flex-1 rounded-full border border-stroke px-4 py-2 text-sm text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"              />
+                className="flex-1 rounded-full border border-stroke px-4 py-2 text-sm text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white" />
               <input
                 type="text"
                 value={newGroupDescription}
                 placeholder={translations.categories.newDescriptionPlaceholder}
                 onChange={(event) => setNewGroupDescription(event.target.value)}
-               className="flex-1 rounded-full border border-stroke px-4 py-2 text-sm text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                className="flex-1 rounded-full border border-stroke px-4 py-2 text-sm text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
               />
               <button
                 onClick={handleCreateGroup}
@@ -712,89 +713,89 @@ export function NotificationsPageContent() {
               )}
             </div>
           </div>
-        <div className="grid gap-4 lg:grid-cols-2 lg:items-start lg:-mt-[10rem]">
-          <div className="flex flex-col space-y-2">
-            <label className="text-xs font-semibold text-dark-6 dark:text-dark-6">{translations.createTemplate.htmlLabel}</label>
-            <div className="flex-1 rounded-2xl border border-stroke bg-slate-50/60 shadow-inner dark:border-dark-3 dark:bg-dark-2">
-              <div className="flex items-center justify-between border-b border-white/10 bg-dark/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 dark:border-white/10">
-                <span className="text-white/80">template.html</span>
-                <span className="text-white/50">HTML</span>
-              </div>
-              <SyntaxHighlightTextarea
-                value={newTemplateHtml}
-                onChange={(value) => {
-                  setNewTemplateHtml(value);
-                  if (selectedGroup?.name?.toLowerCase() === "otp") {
-                    const hasRequired = htmlContainsOtpVariables(value);
-                    const variables = findTemplateVariables(value);
-                    const disallowed = variables.filter((variable) => !OTP_ALLOWED_VARIABLES.has(variable));
-                    if (!hasRequired) {
-                      setNewTemplateHtmlError(translations.validation.otpMissingRequiredVarsField);
-                    } else if (disallowed.length > 0) {
-                      setNewTemplateHtmlError(translations.validation.otpRemoveDisallowedVars(disallowed.join(", ")));
+          <div className="grid gap-4 lg:grid-cols-2 lg:items-start lg:-mt-[10rem]">
+            <div className="flex flex-col space-y-2">
+              <label className="text-xs font-semibold text-dark-6 dark:text-dark-6">{translations.createTemplate.htmlLabel}</label>
+              <div className="flex-1 rounded-2xl border border-stroke bg-slate-50/60 shadow-inner dark:border-dark-3 dark:bg-dark-2">
+                <div className="flex items-center justify-between border-b border-white/10 bg-dark/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 dark:border-white/10">
+                  <span className="text-white/80">template.html</span>
+                  <span className="text-white/50">HTML</span>
+                </div>
+                <SyntaxHighlightTextarea
+                  value={newTemplateHtml}
+                  onChange={(value) => {
+                    setNewTemplateHtml(value);
+                    if (selectedGroup?.name?.toLowerCase() === "otp") {
+                      const hasRequired = htmlContainsOtpVariables(value);
+                      const variables = findTemplateVariables(value);
+                      const disallowed = variables.filter((variable) => !OTP_ALLOWED_VARIABLES.has(variable));
+                      if (!hasRequired) {
+                        setNewTemplateHtmlError(translations.validation.otpMissingRequiredVarsField);
+                      } else if (disallowed.length > 0) {
+                        setNewTemplateHtmlError(translations.validation.otpRemoveDisallowedVars(disallowed.join(", ")));
+                      } else {
+                        setNewTemplateHtmlError(null);
+                      }
                     } else {
-                      setNewTemplateHtmlError(null);
+                      setNewTemplateHtmlError(value.trim().length === 0 ? translations.validation.templateHtmlRequired : null);
                     }
-                  } else {
-                    setNewTemplateHtmlError(value.trim().length === 0 ? translations.validation.templateHtmlRequired : null);
-                  }
-                }}
-                variant="light"
-                className="min-h-[360px]"
-                placeholder="<h1>Hola {{name}}</h1>"
-              />
-            </div>
-            {newTemplateHtmlError && (
-              <p className="text-xs text-rose-500 dark:text-rose-300">{newTemplateHtmlError}</p>
-            )}
-          </div>
-          <div className="space-y-1 lg:-mt-[6rem]">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wide text-white/80">{translations.createTemplate.fromLabel}</label>
-                <input
-                  value={previewFrom}
-                  onChange={(event) => setPreviewFrom(event.target.value)}
-                className="w-full rounded-full border border-white/20 bg-transparent px-4 py-3 text-sm text-white outline-none focus:border-primary"
-                  placeholder="notifications@zelify.com"
+                  }}
+                  variant="light"
+                  className="min-h-[360px]"
+                  placeholder="<h1>Hola {{name}}</h1>"
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wide text-white/80">{translations.createTemplate.subjectLabel}</label>
-                <input
-                  value={previewSubject}
-                  onChange={(event) => setPreviewSubject(event.target.value)}
-                className="w-full rounded-full border border-white/20 bg-transparent px-4 py-3 text-sm text-white outline-none focus:border-primary"
-                  placeholder={translations.createTemplate.subjectPlaceholder}
-                />
-              </div>
+              {newTemplateHtmlError && (
+                <p className="text-xs text-rose-500 dark:text-rose-300">{newTemplateHtmlError}</p>
+              )}
             </div>
-            <div className="rounded-[32px] bg-slate-900/90 px-6 py-10 text-sm text-white shadow-2xl dark:bg-slate-950">
-              <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4">
-                <div className="rounded-3xl border border-white/10 bg-slate-800/80 px-6 py-4">
-                  <div className="flex items-center gap-3 text-sm text-white/90">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-base font-semibold">
-                      {(previewFrom?.charAt(0) ?? "U").toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{previewFrom}</p>
-                      <p className="text-xs text-white/70">{previewSubject}</p>
+            <div className="space-y-1 lg:-mt-[6rem]">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-white/80">{translations.createTemplate.fromLabel}</label>
+                  <input
+                    value={previewFrom}
+                    onChange={(event) => setPreviewFrom(event.target.value)}
+                    className="w-full rounded-full border border-white/20 bg-transparent px-4 py-3 text-sm text-white outline-none focus:border-primary"
+                    placeholder="notifications@zelify.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase tracking-wide text-white/80">{translations.createTemplate.subjectLabel}</label>
+                  <input
+                    value={previewSubject}
+                    onChange={(event) => setPreviewSubject(event.target.value)}
+                    className="w-full rounded-full border border-white/20 bg-transparent px-4 py-3 text-sm text-white outline-none focus:border-primary"
+                    placeholder={translations.createTemplate.subjectPlaceholder}
+                  />
+                </div>
+              </div>
+              <div className="rounded-[32px] bg-slate-900/90 px-6 py-10 text-sm text-white shadow-2xl dark:bg-slate-950">
+                <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4">
+                  <div className="rounded-3xl border border-white/10 bg-slate-800/80 px-6 py-4">
+                    <div className="flex items-center gap-3 text-sm text-white/90">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-base font-semibold">
+                        {(previewFrom?.charAt(0) ?? "U").toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">{previewFrom}</p>
+                        <p className="text-xs text-white/70">{previewSubject}</p>
+                      </div>
                     </div>
                   </div>
+                  <iframe
+                    key={previewFrameKey}
+                    ref={previewFrameRef}
+                    srcDoc={renderedTemplateHtml}
+                    onLoad={handlePreviewLoad}
+                    className="w-full rounded-[32px] border border-slate-200 bg-white text-dark shadow-xl dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                    style={{ minHeight: "600px", width: "100%" }}
+                    sandbox="allow-same-origin allow-popups allow-forms"
+                  />
                 </div>
-                <iframe
-                  key={previewFrameKey}
-                  ref={previewFrameRef}
-                  srcDoc={renderedTemplateHtml}
-                  onLoad={handlePreviewLoad}
-                  className="w-full rounded-[32px] border border-slate-200 bg-white text-dark shadow-xl dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                  style={{ minHeight: "600px", width: "100%" }}
-                  sandbox="allow-same-origin allow-popups allow-forms"
-                />
               </div>
             </div>
           </div>
-        </div>
           <div className="flex items-center gap-3">
             <button
               onClick={handleCreateTemplate}
@@ -876,7 +877,7 @@ export function NotificationsPageContent() {
                       {statusLabel(derivedStatus)}
                     </span>
                     <p className="text-xs text-dark-6 dark:text-dark-6">
-                      {translations.templateList.lastUsed}: {formatDate(template.lastUsed, locale)}
+                      {translations.templateList.lastUsed}: {formatLocalDateTime(template.lastUsed)}
                     </p>
                   </div>
                   <h3 className="mt-4 text-xl font-semibold text-dark dark:text-white">{copy.name}</h3>
@@ -909,14 +910,7 @@ export function NotificationsPageContent() {
   );
 }
 
-function formatDate(value: string, locale: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
+
 
 function slugify(value: string) {
   return value

@@ -12,6 +12,7 @@ import {
 import { SimpleSelect } from "@/components/FormElements/simple-select";
 import { useLanguage } from "@/contexts/language-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
+import { formatLocalDateTime } from "@/lib/date-utils";
 
 interface Webhook {
   id: string;
@@ -85,23 +86,7 @@ export function WebhooksPageContent() {
     }
   };
 
-  const formatDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      const options: Intl.DateTimeFormatOptions = {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-        timeZoneName: "short",
-      };
-      return date.toLocaleString(locale, options);
-    } catch {
-      return dateString;
-    }
-  };
+
 
   const handleNewWebhook = () => {
     setShowNewWebhook(true);
@@ -216,7 +201,7 @@ export function WebhooksPageContent() {
                     label: eventLabel(event),
                   })),
                 ]}
-                  value={formData.event}
+                value={formData.event}
                 onChange={(value) => handleInputChange("event", value)}
                 isSearchable={true}
                 className={errors.event ? "react-select-error" : ""}
@@ -241,11 +226,10 @@ export function WebhooksPageContent() {
                   placeholder={t.sections.webhook.endpointPlaceholder}
                   value={formData.endpoint}
                   onChange={(e) => handleInputChange("endpoint", e.target.value)}
-                  className={`w-full rounded-lg border px-4 py-2.5 text-sm font-medium text-dark shadow-sm outline-none transition-all placeholder:text-dark-6 focus:border-primary focus:ring-2 focus:ring-primary/20 dark:bg-dark dark:text-white dark:placeholder:text-dark-6 dark:focus:border-primary ${
-                    errors.endpoint
+                  className={`w-full rounded-lg border px-4 py-2.5 text-sm font-medium text-dark shadow-sm outline-none transition-all placeholder:text-dark-6 focus:border-primary focus:ring-2 focus:ring-primary/20 dark:bg-dark dark:text-white dark:placeholder:text-dark-6 dark:focus:border-primary ${errors.endpoint
                       ? "border-red-500 bg-red-50 dark:border-red-500 dark:bg-red-900/20"
                       : "border-stroke bg-white dark:border-dark-3"
-                  }`}
+                    }`}
                 />
                 {errors.endpoint && (
                   <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
@@ -285,7 +269,7 @@ export function WebhooksPageContent() {
                   <TableCell className="font-medium">{webhook.endpoint}</TableCell>
                   <TableCell>{eventLabel(webhook.event)}</TableCell>
                   <TableCell className="text-dark-6 dark:text-dark-6">
-                    {formatDate(webhook.createdAt)}
+                    {formatLocalDateTime(webhook.createdAt)}
                   </TableCell>
                   <TableCell className="text-right">
                     <button

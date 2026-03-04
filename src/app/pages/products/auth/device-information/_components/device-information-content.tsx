@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import { formatLocalDateTime } from "@/lib/date-utils";
 import dynamic from "next/dynamic";
 import { createPortal } from "react-dom";
 import { useDeviceInfoTranslations } from "./use-device-info-translations";
@@ -398,7 +399,7 @@ function DeviceDetailsModal({
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm text-dark dark:text-white">{event.requestId}</span>
                   <span className="text-sm text-dark-6 dark:text-dark-6">
-                    {dayjs(event.timestamp).format("DD MMM YYYY HH:mm")}
+                    {formatLocalDateTime(event.timestamp)}
                   </span>
                 </div>
                 <div className="mt-1 flex items-center gap-2">
@@ -784,7 +785,7 @@ export function DeviceInformationContent() {
         country: locationInfo.country,
         city: locationInfo.city,
         requestId: generateRequestId(),
-        date: dayjs().format("MM/DD/YYYY HH:mm:ss"),
+        date: formatLocalDateTime(Date.now()),
         timestamp: Date.now(),
         details: deviceDetails,
       };

@@ -5,15 +5,7 @@ import { getAuthErrorMessage } from "@/lib/auth-error-messages";
 import { getSessions, revokeSession, AuthError, type SessionItem } from "@/lib/auth-api";
 import { useEffect, useState } from "react";
 
-function formatDate(value?: string | null) {
-  if (!value) return "—";
-  try {
-    const d = new Date(value);
-    return d.toLocaleString();
-  } catch {
-    return value;
-  }
-}
+import { formatLocalDateTime } from "@/lib/date-utils";
 
 export function SessionsList() {
   const [sessions, setSessions] = useState<SessionItem[]>([]);
@@ -89,7 +81,7 @@ export function SessionsList() {
                   <div className="text-dark-6 dark:text-dark-6">IP: {s.ip}</div>
                 )}
                 <div className="mt-1 text-xs text-dark-6 dark:text-dark-6">
-                  Última actividad: {formatDate(s.last_seen_at ?? s.created_at)}
+                  Última actividad: {formatLocalDateTime(s.last_seen_at ?? s.created_at)}
                 </div>
               </div>
               <button

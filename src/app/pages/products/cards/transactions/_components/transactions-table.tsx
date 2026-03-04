@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import dayjs from "dayjs";
+import { formatLocalDateOnly, formatLocalTimeOnly } from "@/lib/date-utils";
 import { useLanguage } from "@/contexts/language-context";
 import { cardsTranslations } from "../../_components/cards-translations";
 
@@ -36,7 +36,7 @@ const mockTransactions: Transaction[] = [
     merchant: "Amazon",
     category: "shopping",
     status: "completed",
-    date: "2024-01-15T10:30:00Z",
+    date: "2026-03-09T10:30:00Z",
     type: "purchase",
   },
   {
@@ -48,7 +48,7 @@ const mockTransactions: Transaction[] = [
     merchant: "Starbucks",
     category: "foodAndBeverage",
     status: "completed",
-    date: "2024-01-15T08:15:00Z",
+    date: "2026-03-09T08:15:00Z",
     type: "purchase",
   },
   {
@@ -60,7 +60,7 @@ const mockTransactions: Transaction[] = [
     merchant: "Shell Gas Station",
     category: "transportation",
     status: "pending",
-    date: "2024-01-15T14:20:00Z",
+    date: "2026-03-10T14:20:00Z",
     type: "purchase",
   },
   {
@@ -72,7 +72,7 @@ const mockTransactions: Transaction[] = [
     merchant: "Best Buy",
     category: "electronics",
     status: "declined",
-    date: "2024-01-14T16:45:00Z",
+    date: "2026-03-11T16:45:00Z",
     type: "purchase",
   },
   {
@@ -84,7 +84,7 @@ const mockTransactions: Transaction[] = [
     merchant: "Amazon",
     category: "shopping",
     status: "refunded",
-    date: "2024-01-13T11:00:00Z",
+    date: "2026-03-12T11:00:00Z",
     type: "refund",
   },
   {
@@ -96,7 +96,7 @@ const mockTransactions: Transaction[] = [
     merchant: "ATM Withdrawal",
     category: "cash",
     status: "completed",
-    date: "2024-01-12T09:30:00Z",
+    date: "2026-03-12T09:30:00Z",
     type: "withdrawal",
   },
 ];
@@ -133,7 +133,7 @@ export function TransactionsTable({ onTransactionClick }: TransactionsTableProps
   return (
     <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
       <Table>
-          <TableHeader>
+        <TableHeader>
           <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
             <TableHead className="min-w-[120px] xl:pl-7.5">{t.table.card}</TableHead>
             <TableHead className="min-w-[150px]">{t.table.merchant}</TableHead>
@@ -177,10 +177,10 @@ export function TransactionsTable({ onTransactionClick }: TransactionsTableProps
 
               <TableCell>
                 <p className="text-dark dark:text-white">
-                  {dayjs(transaction.date).format("MMM DD, YYYY")}
+                  {formatLocalDateOnly(transaction.date)}
                 </p>
                 <p className="mt-[3px] text-body-sm text-dark-6 dark:text-dark-6">
-                  {dayjs(transaction.date).format("HH:mm")}
+                  {formatLocalTimeOnly(transaction.date)}
                 </p>
               </TableCell>
 

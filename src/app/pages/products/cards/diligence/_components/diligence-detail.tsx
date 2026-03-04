@@ -4,6 +4,7 @@ import { Diligence } from "./diligence-list";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 import { cardsTranslations } from "../../_components/cards-translations";
+import { formatLocalDateTime } from "@/lib/date-utils";
 
 interface DiligenceDetailProps {
   diligence: Diligence;
@@ -15,12 +16,7 @@ export function DiligenceDetail({ diligence, onClose }: DiligenceDetailProps) {
   const t = cardsTranslations[language].diligence;
   const locale = language === "es" ? "es-ES" : "en-US";
 
-  const formatDateTime = (date: string) =>
-    new Intl.DateTimeFormat(locale, {
-      dateStyle: "medium",
-      timeStyle: "short",
-      hourCycle: "h23",
-    }).format(new Date(date));
+
 
   const getStatusColor = (status: Diligence["status"]) => {
     switch (status) {
@@ -121,14 +117,14 @@ export function DiligenceDetail({ diligence, onClose }: DiligenceDetailProps) {
                 <div>
                   <p className="text-xs text-dark-6 dark:text-dark-6">{t.submittedDate}</p>
                   <p className="mt-1 text-dark dark:text-white">
-                    {formatDateTime(diligence.submittedDate)}
+                    {formatLocalDateTime(diligence.submittedDate)}
                   </p>
                 </div>
                 {diligence.reviewedDate && (
                   <div>
                     <p className="text-xs text-dark-6 dark:text-dark-6">{t.reviewedDate}</p>
                     <p className="mt-1 text-dark dark:text-white">
-                      {formatDateTime(diligence.reviewedDate)}
+                      {formatLocalDateTime(diligence.reviewedDate)}
                     </p>
                   </div>
                 )}

@@ -8,20 +8,7 @@ import { getStoredOrganization, getStoredUser, getOrganization } from "@/lib/aut
 import type { OrganizationDetails, AuthUser } from "@/lib/auth-api";
 import { useLanguage } from "@/contexts/language-context";
 
-function formatDate(iso: string | undefined, locale: string): string {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString(locale, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
+
 
 const COUNTRY_LABELS: Record<string, string> = {
   US: "United States", EC: "Ecuador", MX: "Mexico", CO: "Colombia", CL: "Chile",
@@ -137,21 +124,21 @@ export default function Page() {
               )}
             </div>
 
-              {/* Cuenta — solo lectura */}
-              <div>
-                <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-dark dark:text-white">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </span>
-                  {profilePage.form.accountSection}
-                </h3>
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  <FieldReadOnly label={profilePage.form.fullName} value={user?.full_name ?? undefined} />
-                  <FieldReadOnly label={profilePage.form.email} value={user?.email ?? undefined} />
-                </div>
+            {/* Cuenta — solo lectura */}
+            <div>
+              <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-dark dark:text-white">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </span>
+                {profilePage.form.accountSection}
+              </h3>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <FieldReadOnly label={profilePage.form.fullName} value={user?.full_name ?? undefined} />
+                <FieldReadOnly label={profilePage.form.email} value={user?.email ?? undefined} />
               </div>
+            </div>
 
             </form>
         </div>

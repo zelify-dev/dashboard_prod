@@ -4,6 +4,7 @@ import { Coupon } from "./coupons-list";
 import { cn } from "@/lib/utils";
 import { useDiscountsCouponsTranslations } from "./use-discounts-coupons-translations";
 import { useLanguage } from "@/contexts/language-context";
+import { formatLocalDateTime } from "@/lib/date-utils";
 
 interface CouponDetailProps {
   coupon: Coupon;
@@ -14,7 +15,7 @@ export function CouponDetail({ coupon, onClose }: CouponDetailProps) {
   const translations = useDiscountsCouponsTranslations();
   const { language } = useLanguage();
   const locale = language === "es" ? "es-ES" : "en-US";
-  
+
   const getStatusColor = (status: Coupon["status"]) => {
     switch (status) {
       case "active":
@@ -41,15 +42,7 @@ export function CouponDetail({ coupon, onClose }: CouponDetailProps) {
     return `$${coupon.discountValue}`;
   };
 
-  const formatDateTime = (value: string) =>
-    new Intl.DateTimeFormat(locale, {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(new Date(value));
+
 
   const dayNames: Record<string, string> = {
     monday: translations.detail.daysOfWeek.monday,
@@ -153,13 +146,13 @@ export function CouponDetail({ coupon, onClose }: CouponDetailProps) {
                 <div>
                   <p className="text-xs text-dark-6 dark:text-dark-6">{translations.detail.validFrom}</p>
                   <p className="mt-1 text-dark dark:text-white">
-                    {formatDateTime(coupon.validFrom)}
+                    {formatLocalDateTime(coupon.validFrom)}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-dark-6 dark:text-dark-6">{translations.detail.validUntil}</p>
                   <p className="mt-1 text-dark dark:text-white">
-                    {formatDateTime(coupon.validUntil)}
+                    {formatLocalDateTime(coupon.validUntil)}
                   </p>
                 </div>
               </div>

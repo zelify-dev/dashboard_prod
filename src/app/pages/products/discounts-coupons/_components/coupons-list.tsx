@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useDiscountsCouponsTranslations } from "./use-discounts-coupons-translations";
 import { useLanguage, type Language } from "@/contexts/language-context";
+import { formatLocalDateOnly } from "@/lib/date-utils";
 
 export type Coupon = {
   id: string;
@@ -37,8 +38,8 @@ const mockCoupons: Coupon[] = [
     status: "active",
     usageLimit: 100,
     usedCount: 45,
-    validFrom: "2024-01-01T00:00:00Z",
-    validUntil: "2024-12-31T23:59:59Z",
+    validFrom: "2026-03-09T00:00:00Z",
+    validUntil: "2026-04-30T23:59:59Z",
     availability: {
       days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
       hours: {
@@ -46,7 +47,7 @@ const mockCoupons: Coupon[] = [
         end: "18:00",
       },
     },
-    createdAt: "2024-01-01T10:00:00Z",
+    createdAt: "2026-03-09T10:00:00Z",
   },
   {
     id: "cpn_002",
@@ -58,13 +59,13 @@ const mockCoupons: Coupon[] = [
     status: "active",
     usageLimit: 50,
     usedCount: 12,
-    validFrom: "2024-01-01T00:00:00Z",
-    validUntil: "2024-06-30T23:59:59Z",
+    validFrom: "2026-03-10T00:00:00Z",
+    validUntil: "2026-05-30T23:59:59Z",
     availability: {
       days: ["saturday", "sunday"],
       hours: null,
     },
-    createdAt: "2024-01-05T14:30:00Z",
+    createdAt: "2026-03-11T14:30:00Z",
   },
   {
     id: "cpn_003",
@@ -76,8 +77,8 @@ const mockCoupons: Coupon[] = [
     status: "limit_reached",
     usageLimit: 25,
     usedCount: 25,
-    validFrom: "2024-01-10T00:00:00Z",
-    validUntil: "2024-01-20T23:59:59Z",
+    validFrom: "2026-03-12T00:00:00Z",
+    validUntil: "2026-03-15T23:59:59Z",
     availability: {
       days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       hours: {
@@ -85,7 +86,7 @@ const mockCoupons: Coupon[] = [
         end: "22:00",
       },
     },
-    createdAt: "2024-01-10T08:00:00Z",
+    createdAt: "2026-03-12T08:00:00Z",
   },
 ];
 
@@ -100,8 +101,8 @@ const mockCouponsEs: Coupon[] = [
     status: "active",
     usageLimit: 100,
     usedCount: 45,
-    validFrom: "2024-01-01T00:00:00Z",
-    validUntil: "2024-12-31T23:59:59Z",
+    validFrom: "2026-03-09T00:00:00Z",
+    validUntil: "2026-04-30T23:59:59Z",
     availability: {
       days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
       hours: {
@@ -109,7 +110,7 @@ const mockCouponsEs: Coupon[] = [
         end: "18:00",
       },
     },
-    createdAt: "2024-01-01T10:00:00Z",
+    createdAt: "2026-03-09T10:00:00Z",
   },
   {
     id: "cpn_002",
@@ -121,13 +122,13 @@ const mockCouponsEs: Coupon[] = [
     status: "active",
     usageLimit: 50,
     usedCount: 12,
-    validFrom: "2024-01-01T00:00:00Z",
-    validUntil: "2024-06-30T23:59:59Z",
+    validFrom: "2026-03-10T00:00:00Z",
+    validUntil: "2026-05-30T23:59:59Z",
     availability: {
       days: ["saturday", "sunday"],
       hours: null,
     },
-    createdAt: "2024-01-05T14:30:00Z",
+    createdAt: "2026-03-11T14:30:00Z",
   },
   {
     id: "cpn_003",
@@ -139,8 +140,8 @@ const mockCouponsEs: Coupon[] = [
     status: "limit_reached",
     usageLimit: 25,
     usedCount: 25,
-    validFrom: "2024-01-10T00:00:00Z",
-    validUntil: "2024-01-20T23:59:59Z",
+    validFrom: "2026-03-12T00:00:00Z",
+    validUntil: "2026-03-15T23:59:59Z",
     availability: {
       days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
       hours: {
@@ -148,7 +149,7 @@ const mockCouponsEs: Coupon[] = [
         end: "22:00",
       },
     },
-    createdAt: "2024-01-10T08:00:00Z",
+    createdAt: "2026-03-12T08:00:00Z",
   },
 ];
 
@@ -192,12 +193,7 @@ export function CouponsList({ coupons, onCouponClick }: CouponsListProps) {
     return `$${coupon.discountValue}`;
   };
 
-  const formatDate = (value: string) =>
-    new Intl.DateTimeFormat(locale, {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-    }).format(new Date(value));
+
 
   return (
     <div className="space-y-4">
@@ -247,7 +243,7 @@ export function CouponsList({ coupons, onCouponClick }: CouponsListProps) {
                 <div>
                   <p className="text-xs text-dark-6 dark:text-dark-6">{translations.coupons.validUntil}</p>
                   <p className="mt-1 text-sm font-medium text-dark dark:text-white">
-                    {formatDate(coupon.validUntil)}
+                    {formatLocalDateOnly(coupon.validUntil)}
                   </p>
                 </div>
               </div>

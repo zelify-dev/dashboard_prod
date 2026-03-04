@@ -6,19 +6,12 @@ import { getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
 import { listOrgUsers } from "@/lib/organization-users-api";
 import type { OrgUserListItem } from "@/lib/organization-users-api";
 import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
+import { formatLocalDateOnly } from "@/lib/date-utils";
 
 const SEARCH_DEBOUNCE_MS = 400;
 const PAGE_SIZE = 20;
 
-function formatDate(iso: string | null | undefined): string {
-  if (!iso) return "—";
-  try {
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, { dateStyle: "short" });
-  } catch {
-    return "—";
-  }
-}
+
 
 export function IdentityUsersAndStats() {
   const { appUsersTable: usersT } = useIdentityWorkflowTranslations();
@@ -155,7 +148,7 @@ export function IdentityUsersAndStats() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-sm text-dark-6 dark:text-dark-6">
-                        {u.identity_verified_at ? formatDate(u.identity_verified_at) : "—"}
+                        {u.identity_verified_at ? formatLocalDateOnly(u.identity_verified_at) : "—"}
                       </td>
                     </tr>
                   ))

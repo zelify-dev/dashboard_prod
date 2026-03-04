@@ -2,7 +2,7 @@
 
 import { Transaction } from "./transactions-table";
 import { cn } from "@/lib/utils";
-import dayjs from "dayjs";
+import { formatLocalDateTime } from "@/lib/date-utils";
 import { useLanguage } from "@/contexts/language-context";
 import { cardsTranslations } from "../../_components/cards-translations";
 
@@ -73,7 +73,7 @@ export function TransactionDetail({ transaction, onClose }: TransactionDetailPro
                 {formatAmount(transaction.amount, transaction.currency)}
               </span>
               <span className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {dayjs(transaction.date).format("MMM DD, HH:mm")}
+                {formatLocalDateTime(transaction.date)}
               </span>
             </div>
 

@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import dayjs from "dayjs";
+import { formatLocalDateOnly } from "@/lib/date-utils";
 import { getInvoiceTableData } from "./fetch";
 import { DownloadIcon, PreviewIcon } from "./icons";
 
@@ -39,7 +39,7 @@ export async function InvoiceTable() {
 
               <TableCell>
                 <p className="text-dark dark:text-white">
-                  {dayjs(item.date).format("MMM DD, YYYY")}
+                  {formatLocalDateOnly(item.date)}
                 </p>
               </TableCell>
 

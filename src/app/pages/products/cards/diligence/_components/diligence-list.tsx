@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 import { cardsTranslations } from "../../_components/cards-translations";
+import { formatLocalDateOnly, formatLocalTimeOnly } from "@/lib/date-utils";
 import {
   Table,
   TableBody,
@@ -30,8 +31,8 @@ const mockDiligences: Diligence[] = [
     cardholderName: "John Doe",
     cardNumber: "**** 4532",
     status: "approved",
-    submittedDate: "2024-01-10T09:00:00Z",
-    reviewedDate: "2024-01-12T14:30:00Z",
+    submittedDate: "2026-03-09T09:00:00Z",
+    reviewedDate: "2026-03-11T14:30:00Z",
     reviewer: "Sarah Johnson",
     riskLevel: "low",
     documents: 5,
@@ -41,7 +42,7 @@ const mockDiligences: Diligence[] = [
     cardholderName: "Jane Smith",
     cardNumber: "**** 7890",
     status: "in_review",
-    submittedDate: "2024-01-14T11:20:00Z",
+    submittedDate: "2026-03-10T11:20:00Z",
     riskLevel: "medium",
     documents: 7,
   },
@@ -50,8 +51,8 @@ const mockDiligences: Diligence[] = [
     cardholderName: "Robert Johnson",
     cardNumber: "**** 1234",
     status: "rejected",
-    submittedDate: "2024-01-08T15:45:00Z",
-    reviewedDate: "2024-01-09T10:15:00Z",
+    submittedDate: "2026-03-12T15:45:00Z",
+    reviewedDate: "2026-03-13T10:15:00Z",
     reviewer: "Michael Brown",
     riskLevel: "high",
     documents: 3,
@@ -61,7 +62,7 @@ const mockDiligences: Diligence[] = [
     cardholderName: "Emily Davis",
     cardNumber: "**** 5678",
     status: "pending",
-    submittedDate: "2024-01-15T08:30:00Z",
+    submittedDate: "2026-03-14T08:30:00Z",
     riskLevel: "low",
     documents: 6,
   },
@@ -77,19 +78,7 @@ export function DiligenceList({ diligences, onDiligenceClick }: DiligenceListPro
   const t = cardsTranslations[language].diligence;
   const locale = language === "es" ? "es-ES" : "en-US";
 
-  const formatDate = (date: string) =>
-    new Intl.DateTimeFormat(locale, {
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    }).format(new Date(date));
 
-  const formatTime = (date: string) =>
-    new Intl.DateTimeFormat(locale, {
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    }).format(new Date(date));
 
   const getStatusColor = (status: Diligence["status"]) => {
     switch (status) {
@@ -176,10 +165,10 @@ export function DiligenceList({ diligences, onDiligenceClick }: DiligenceListPro
 
               <TableCell>
                 <p className="text-dark dark:text-white">
-                  {formatDate(diligence.submittedDate)}
+                  {formatLocalDateOnly(diligence.submittedDate)}
                 </p>
                 <p className="mt-[3px] text-body-sm text-dark-6 dark:text-dark-6">
-                  {formatTime(diligence.submittedDate)}
+                  {formatLocalTimeOnly(diligence.submittedDate)}
                 </p>
               </TableCell>
 
@@ -187,10 +176,10 @@ export function DiligenceList({ diligences, onDiligenceClick }: DiligenceListPro
                 {diligence.reviewedDate ? (
                   <>
                     <p className="text-dark dark:text-white">
-                      {formatDate(diligence.reviewedDate)}
+                      {formatLocalDateOnly(diligence.reviewedDate)}
                     </p>
                     <p className="mt-[3px] text-body-sm text-dark-6 dark:text-dark-6">
-                      {formatTime(diligence.reviewedDate)}
+                      {formatLocalTimeOnly(diligence.reviewedDate)}
                     </p>
                   </>
                 ) : (
