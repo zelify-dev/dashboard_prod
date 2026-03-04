@@ -32,6 +32,34 @@ type IdentityWorkflowTranslations = {
     emptyState: string;
     statusLabels: Record<"active" | "inactive" | "draft", string>;
   };
+  verificationStatsTable: {
+    title: string;
+    subtitle: string;
+    country: string;
+    status: string;
+    verification: string;
+    verified: string;
+    pending: string;
+    failed: string;
+    emptyState: string;
+  };
+  appUsersTable: {
+    title: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    email: string;
+    fullName: string;
+    status: string;
+    verificationStatus: string;
+    verifiedAt: string;
+    verified: string;
+    pending: string;
+    emptyState: string;
+    previous: string;
+    next: string;
+    showing: string;
+    pageOf: string;
+  };
   preview: {
     toggles: {
       mobilePreview: string;
@@ -209,6 +237,34 @@ const IDENTITY_TRANSLATIONS: Record<Language, IdentityWorkflowTranslations> = {
         inactive: "Inactive",
         draft: "Draft",
       },
+    },
+    verificationStatsTable: {
+      title: "Verification by country",
+      subtitle: "Verified, pending and failed counts per country",
+      country: "Country",
+      status: "Status",
+      verification: "Verification",
+      verified: "Verified",
+      pending: "Pending",
+      failed: "Failed",
+      emptyState: "No verification data yet.",
+    },
+    appUsersTable: {
+      title: "App users",
+      subtitle: "Registered users and identity verification status",
+      searchPlaceholder: "Search by email or name…",
+      email: "Email",
+      fullName: "Full name",
+      status: "Status",
+      verificationStatus: "Verification",
+      verifiedAt: "Verified at",
+      verified: "Verified",
+      pending: "Pending",
+      emptyState: "No app users found.",
+      previous: "Previous",
+      next: "Next",
+      showing: "Showing",
+      pageOf: "of",
     },
     preview: {
       toggles: {
@@ -415,6 +471,34 @@ const IDENTITY_TRANSLATIONS: Record<Language, IdentityWorkflowTranslations> = {
         inactive: "Inactivo",
         draft: "Borrador",
       },
+    },
+    verificationStatsTable: {
+      title: "Verificación por país",
+      subtitle: "Verificados, pendientes y fallidos por país",
+      country: "País",
+      status: "Estado",
+      verification: "Verificación",
+      verified: "Verificados",
+      pending: "Pendientes",
+      failed: "Fallidos",
+      emptyState: "Aún no hay datos de verificación.",
+    },
+    appUsersTable: {
+      title: "Usuarios de la app",
+      subtitle: "Usuarios registrados y estado de verificación de identidad",
+      searchPlaceholder: "Buscar por email o nombre…",
+      email: "Email",
+      fullName: "Nombre completo",
+      status: "Estado",
+      verificationStatus: "Verificación",
+      verifiedAt: "Verificado el",
+      verified: "Verificado",
+      pending: "Pendiente",
+      emptyState: "No hay usuarios de la app.",
+      previous: "Anterior",
+      next: "Siguiente",
+      showing: "Mostrando",
+      pageOf: "de",
     },
     preview: {
       toggles: {

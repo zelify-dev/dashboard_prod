@@ -80,6 +80,12 @@ export default function OrganizationBrandingPage() {
     if (!file || !org?.id) return;
     e.target.value = "";
     setLogoError("");
+    const allowedTypes = ["image/png", "image/svg+xml"];
+    const allowedExt = /\.(png|svg)$/i;
+    if (!allowedTypes.includes(file.type) || !allowedExt.test(file.name)) {
+      setLogoError("Solo se permiten archivos PNG o SVG.");
+      return;
+    }
     setLogoUploading(true);
     try {
       const { url_log } = await uploadOrganizationLogo(org.id, file);
@@ -90,6 +96,7 @@ export default function OrganizationBrandingPage() {
         if (err.statusCode === 401) router.push("/login");
         else if (err.statusCode === 403) setLogoError("No tienes permisos.");
         else if (err.statusCode === 404) setLogoError("Organización no encontrada.");
+        else if (err.statusCode === 400) setLogoError("Falta el archivo o el formato no es válido.");
         else if (err.statusCode === 500) setLogoError("Error subiendo logo, intenta de nuevo.");
         else setLogoError(err.message);
       } else {
@@ -170,18 +177,17 @@ export default function OrganizationBrandingPage() {
                     alt="Logo"
                     className="h-20 w-auto max-w-[200px] object-contain"
                   />
-                  <p className="text-xs text-dark-6 dark:text-dark-6 break-all">{branding.url_log}</p>
                 </div>
               ) : (
                 <p className="text-sm text-dark-6 dark:text-dark-6">No hay logo cargado.</p>
               )}
               <div>
                 <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
-                  Subir logo (PNG, JPG, SVG)
+                  Subir logo (PNG o SVG)
                 </label>
                 <input
                   type="file"
-                  accept="image/png,image/jpeg,image/jpg,image/svg+xml"
+                  accept="image/png,image/svg+xml"
                   onChange={handleLogoChange}
                   disabled={logoUploading}
                   className="block w-full text-sm text-dark-6 file:mr-4 file:rounded file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:text-white file:hover:bg-opacity-90"

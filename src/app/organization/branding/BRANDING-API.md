@@ -1,9 +1,8 @@
 # Branding API — Pruebas con curl
 
-Base: `NEXT_PUBLIC_AUTH_API_URL` (ej. `http://localhost:8080`).  
-Sustituir `ORG_ID_AQUI` y `ACCESS_TOKEN_AQUI` por valores reales.
-
-**Importante (frontend):** Las peticiones deben ir al backend. `NEXT_PUBLIC_AUTH_API_URL` debe ser una URL absoluta (ej. `http://localhost:8080`).
+Base: `NEXT_PUBLIC_AUTH_API_URL` **sin** `/api` (ej. `http://localhost:8080` o `https://rhdt3ppx7f.us-east-1.awsapprunner.com`).  
+El front construye `{base}/api/organizations/:id/branding`, etc.  
+En los curl, sustituir `ORG_ID_AQUI` y `ACCESS_TOKEN_AQUI` por valores reales.
 
 ## 1) Obtener branding (cargar pantalla) — **público, sin auth**
 

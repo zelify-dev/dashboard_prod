@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { WorkflowsList } from "./_components/workflows-list";
 import { WorkflowConfig } from "./_components/workflow-config";
+import { IdentityUsersAndStats } from "./_components/identity-users-and-stats";
 import { useIdentityWorkflowTranslations } from "./_components/use-identity-translations";
 import { useTour } from "@/contexts/tour-context";
 
@@ -62,7 +63,10 @@ export default function WorkflowPage() {
           <WorkflowConfig workflowId={selectedWorkflowId} isNew={isCreatingNew} />
         </div>
       ) : (
-        <WorkflowsList onSelectWorkflow={handleSelectWorkflow} onCreateNew={handleCreateNew} />
+        <>
+          <WorkflowsList onSelectWorkflow={handleSelectWorkflow} onCreateNew={handleCreateNew} />
+          <IdentityUsersAndStats />
+        </>
       )}
     </div>
   );

@@ -22,14 +22,18 @@ export type OrgUser = {
 export type OrgUserListItem = {
   id: string;
   organization_id: string;
+  organization_name?: string;
   email: string;
   full_name: string;
   status: OrgUserStatus;
   must_change_password: boolean;
+  balance?: string;
   created_at?: string;
   updated_at?: string;
+  identity_verified?: boolean;
+  identity_verified_at?: string | null;
   /** Incluir en el listado para mostrar la columna Team/Role sin llamar a detalle por usuario */
-  roles?: { id: string; code: string; name: string }[];
+  roles?: { id: string; code: string; name: string }[] | string[];
 };
 
 export type ListOrgUsersParams = {
@@ -37,6 +41,8 @@ export type ListOrgUsersParams = {
   limit?: number;
   search?: string;
   status?: OrgUserStatus;
+  /** USER_APP para listar solo usuarios de la app (registrados) */
+  role_code?: string;
 };
 
 export type ListOrgUsersResponse = {
@@ -72,12 +78,13 @@ export async function listOrgUsers(
   orgId: string,
   params: ListOrgUsersParams = {}
 ): Promise<ListOrgUsersResponse> {
-  const { page = 1, limit = 20, search, status } = params;
+  const { page = 1, limit = 20, search, status, role_code } = params;
   const searchParams = new URLSearchParams();
   searchParams.set("page", String(page));
-  searchParams.set("limit", String(limit));
+  searchParams.set("limit", String(Math.min(limit, 100)));
   if (search) searchParams.set("search", search);
   if (status) searchParams.set("status", status);
+  if (role_code) searchParams.set("role_code", role_code);
   const res = await fetchWithAuth(
     `/api/organizations/${encodeURIComponent(orgId)}/users?${searchParams}`
   );

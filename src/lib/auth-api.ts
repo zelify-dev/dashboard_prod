@@ -394,7 +394,8 @@ export async function getOrganization(id: string): Promise<OrganizationDetails> 
 
 /**
  * GET /api/organizations/:id/branding — obtener solo branding (público, sin auth).
- * Especificación backend: carga de pantalla/formulario.
+ * URL final: {NEXT_PUBLIC_AUTH_API_URL}/api/organizations/:id/branding
+ * (ej. https://rhdt3ppx7f.us-east-1.awsapprunner.com/api/organizations/:id/branding)
  * Errores: 404 — Organización no encontrada.
  */
 export async function getOrganizationBranding(id: string): Promise<OrganizationBranding> {
@@ -415,7 +416,7 @@ export async function getOrganizationBranding(id: string): Promise<OrganizationB
   return data as OrganizationBranding;
 }
 
-/** POST /api/organizations/:id/branding/logo — subir logo (multipart/form-data). Devuelve { url_log }. */
+/** POST /api/organizations/:id/branding/logo — subir logo (multipart, campo "logo"). Auth: Bearer. Respuesta 201 { url_log }. Errores: 400, 401, 403, 404. */
 export async function uploadOrganizationLogo(orgId: string, file: File): Promise<{ url_log: string }> {
   const form = new FormData();
   form.append("logo", file);
@@ -434,7 +435,7 @@ export async function uploadOrganizationLogo(orgId: string, file: File): Promise
   return data as { url_log: string };
 }
 
-/** PATCH /api/organizations/:id/branding — actualizar color_a, color_b, url_log (Bearer). Campos opcionales; pueden ser string o null. */
+/** PATCH /api/organizations/:id/branding — actualizar url_log, color_a, color_b (Bearer, JSON). Respuesta 200 = org actualizada. Errores: 400 validación, 401, 403, 404. */
 export async function updateOrganizationBranding(
   orgId: string,
   payload: { color_a?: string | null; color_b?: string | null; url_log?: string | null }
