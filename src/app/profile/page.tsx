@@ -97,6 +97,7 @@ export default function Page() {
       color: "#004492", // Default brand color
     }
   });
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const [isDragging, setIsDragging] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -179,9 +180,10 @@ export default function Page() {
 
   const handleFileUpload = async (file: File) => {
     if (!file) return;
+    setUploadError(null);
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("File too large. Max 5MB.");
+      setUploadError("File too large. Max 5MB.");
       return;
     }
 
@@ -302,7 +304,11 @@ export default function Page() {
               <h3 className="mb-6 text-lg font-semibold text-primary dark:text-white">
                 {profilePage.form.branding.title}
               </h3>
-
+              {uploadError && (
+                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                  {uploadError}
+                </div>
+              )}
               <div className="space-y-6">
                 {/* Logo Upload */}
                 <div>

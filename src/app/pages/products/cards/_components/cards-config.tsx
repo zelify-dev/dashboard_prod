@@ -40,6 +40,15 @@ export function CardsConfig() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState("");
+
+  useEffect(() => {
+    if (saveSuccess) {
+      const t = setTimeout(() => setSaveSuccess(""), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [saveSuccess]);
 
   // Cargar configuración al iniciar
   useEffect(() => {
@@ -87,6 +96,8 @@ export function CardsConfig() {
   const saveConfiguration = async () => {
     try {
       setIsSaving(true);
+      setSaveError("");
+      setSaveSuccess("");
       
       const configToSave = {
         idOrg: DEFAULT_ORG_ID,
@@ -119,7 +130,7 @@ export function CardsConfig() {
           setConfigId(data.id);
         }
         setHasChanges(false);
-        alert(t.alerts.saveSuccess);
+        setSaveSuccess(t.alerts.saveSuccess);
       } else {
         let errorMessage = t.alerts.saveErrorDefault;
         try {
@@ -129,12 +140,12 @@ export function CardsConfig() {
           const errorText = await response.text().catch(() => "");
           errorMessage = `${t.alerts.httpErrorPrefix} ${response.status}: ${errorText || t.alerts.unknownError}`;
         }
-        alert(errorMessage);
+        setSaveError(errorMessage);
       }
     } catch (error: any) {
       console.error("Error saving configuration:", error);
       const errorMessage = error.message || t.alerts.connectionError;
-      alert(errorMessage);
+      setSaveError(errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -153,6 +164,16 @@ export function CardsConfig() {
 
   return (
     <div className="mt-6 space-y-6">
+      {saveSuccess && (
+        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200">
+          {saveSuccess}
+        </div>
+      )}
+      {saveError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+          {saveError}
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <PreviewPanel config={config} updateConfig={updateConfig} />
         <ConfigPanel 

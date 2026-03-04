@@ -70,6 +70,7 @@ export function TransfersCustomizationPanel({
   const currentTheme: "light" = "light";
   const [openColorPicker, setOpenColorPicker] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const colorPickerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const currency = currencyByRegion[selectedRegion] || "MXN";
@@ -141,6 +142,7 @@ export function TransfersCustomizationPanel({
       console.warn("No file provided");
       return;
     }
+    setUploadError(null);
 
     const validImageTypes = [
       "image/png",
@@ -166,18 +168,14 @@ export function TransfersCustomizationPanel({
       console.error(
         "Invalid file type. Accepted formats: PNG, JPG, GIF, WEBP, SVG",
       );
-      alert(
-        translations.customization.branding.invalidFileType,
-      );
+      setUploadError(translations.customization.branding.invalidFileType);
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       console.error("File too large. Maximum size: 5MB");
-      alert(
-        translations.customization.branding.fileTooLarge,
-      );
+      setUploadError(translations.customization.branding.fileTooLarge);
       return;
     }
 
@@ -187,12 +185,11 @@ export function TransfersCustomizationPanel({
       const base64Size = optimizedBase64.length;
       const maxBase64Size = 2 * 1024 * 1024;
       if (base64Size > maxBase64Size) {
-        alert(
-          translations.customization.branding.optimizedFileTooLarge,
-        );
+        setUploadError(translations.customization.branding.optimizedFileTooLarge);
         return;
       }
 
+      setUploadError(null);
       onBrandingChange((prev) => ({
         ...prev,
         [currentTheme]: {
@@ -202,7 +199,7 @@ export function TransfersCustomizationPanel({
       }));
     } catch (error) {
       console.error("Error processing image:", error);
-      alert(translations.customization.branding.imageProcessError);
+      setUploadError(translations.customization.branding.imageProcessError);
     }
   };
 
@@ -306,6 +303,11 @@ export function TransfersCustomizationPanel({
         </button>
         {openSection === "branding" && (
           <div className="border-t border-stroke px-6 py-4 dark:border-dark-3">
+            {uploadError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {uploadError}
+              </div>
+            )}
             <div className="space-y-6">
               {/* Theme Selector */}
               <div>

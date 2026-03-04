@@ -150,12 +150,14 @@ export function DocumentExtractionContent() {
   const [backData, setBackData] = useState<BackData | null>(null);
   const [processingStep, setProcessingStep] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const handleFileSelect = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      alert("Por favor, selecciona una imagen válida");
+      setFileError("Por favor, selecciona una imagen válida");
       return;
     }
+    setFileError(null);
 
     // Simular procesamiento OCR
     setIsProcessing(true);
@@ -262,7 +264,11 @@ export function DocumentExtractionContent() {
             ? "Arrastra la imagen de la parte posterior de tu cédula o haz clic para seleccionar"
             : "Procesamiento completado"}
         </p>
-
+        {fileError && (
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+            {fileError}
+          </div>
+        )}
         {currentStep !== "complete" && !isProcessing && (
           <div
             onDragOver={handleDragOver}

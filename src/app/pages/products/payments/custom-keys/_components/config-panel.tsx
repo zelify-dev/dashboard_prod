@@ -57,6 +57,7 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
   const currentTheme: "light" = "light";
   const [openColorPicker, setOpenColorPicker] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const colorPickerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Optimized image handler matching auth
@@ -123,6 +124,7 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
       console.warn("No file provided");
       return;
     }
+    setUploadError(null);
 
     const validImageTypes = [
       'image/png', 'image/jpeg', 'image/jpg', 'image/gif',
@@ -138,14 +140,14 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
     
     if (!isValidType) {
       console.error("Invalid file type. Accepted formats: PNG, JPG, GIF, WEBP, SVG");
-      alert(translations.config.invalidFileTypeMessage);
+      setUploadError(translations.config.invalidFileTypeMessage);
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       console.error("File too large. Maximum size: 5MB");
-      alert(translations.config.fileTooLargeMessage);
+      setUploadError(translations.config.fileTooLargeMessage);
       return;
     }
 
@@ -155,10 +157,11 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
       const base64Size = optimizedBase64.length;
       const maxBase64Size = 2 * 1024 * 1024;
       if (base64Size > maxBase64Size) {
-        alert(translations.config.optimizedFileTooLargeMessage);
+        setUploadError(translations.config.optimizedFileTooLargeMessage);
         return;
       }
 
+      setUploadError(null);
       updateConfig({
         branding: {
           ...config.branding,
@@ -170,7 +173,7 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
       });
     } catch (error) {
       console.error("Error processing image:", error);
-      alert(translations.config.imageProcessErrorMessage);
+      setUploadError(translations.config.imageProcessErrorMessage);
     }
   };
 
@@ -315,6 +318,11 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
         </button>
         {openSection === "branding" && (
           <div className="border-t border-stroke px-6 py-4 dark:border-dark-3">
+            {uploadError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {uploadError}
+              </div>
+            )}
             <div className="space-y-6">
               {/* Theme Selector */}
               <div>

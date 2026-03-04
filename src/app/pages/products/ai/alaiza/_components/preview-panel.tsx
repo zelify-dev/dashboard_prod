@@ -168,6 +168,7 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
   // Detectar si el preview está en modo dark
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showFileWarning, setShowFileWarning] = useState(false);
+  const [fileError, setFileError] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -246,9 +247,10 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
 
     // Verificar cantidad de archivos
     if (selectedFiles.length + files.length > config.maxFiles) {
-      alert(`${translations.preview.input.maxFilesAlert} ${config.maxFiles} ${config.maxFiles === 1 ? translations.config.fileUpload.file : translations.config.fileUpload.files} ${translations.preview.input.allowed}`);
+      setFileError(`${translations.preview.input.maxFilesAlert} ${config.maxFiles} ${config.maxFiles === 1 ? translations.config.fileUpload.file : translations.config.fileUpload.files} ${translations.preview.input.allowed}`);
       return;
     }
+    setFileError("");
 
     // Verificar tamaño de archivos
     const oversizedFiles = files.filter(
@@ -676,6 +678,11 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
         </div>
 
         <div className="relative mx-auto max-w-[340px] z-10">
+          {fileError && (
+            <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200">
+              {fileError}
+            </div>
+          )}
           {/* iPhone Frame */}
           <div className="relative mx-auto">
             {/* Outer frame with iPhone-like design */}

@@ -44,6 +44,7 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
     const currentTheme: "light" = "light";
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
     const colorPickerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
     const currentBranding = branding[currentTheme];
@@ -133,6 +134,7 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
     };
 
     const handleFileUpload = async (file: File) => {
+        setUploadError(null);
         try {
             const optimizedBase64 = await optimizeImage(file);
             updateConfig({
@@ -146,7 +148,7 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
             });
         } catch (error) {
             console.error("Error processing image:", error);
-            alert("Error al procesar la imagen. Por favor, intenta de nuevo.");
+            setUploadError("Error al procesar la imagen. Por favor, intenta de nuevo.");
         }
     };
 
@@ -202,6 +204,11 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
 
                 {openSection === "personalization" && (
                     <div className="border-t border-stroke px-6 py-4 dark:border-dark-3">
+                        {uploadError && (
+                            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                                {uploadError}
+                            </div>
+                        )}
                         <div className="space-y-6">
                             {/* Theme Selector */}
                             <div>

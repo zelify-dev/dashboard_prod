@@ -45,6 +45,14 @@ export function ZelifySecretsSandbox() {
   const [showRotateConfirm, setShowRotateConfirm] = useState(false);
   const [rotating, setRotating] = useState(false);
   const [revealingSecret, setRevealingSecret] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (successMessage) {
+      const t = setTimeout(() => setSuccessMessage(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [successMessage]);
 
   useEffect(() => {
     setKeysData(currentKey?.api_key ?? null, revealedSecret);
@@ -115,7 +123,7 @@ export function ZelifySecretsSandbox() {
       setRevealedSecret(api_secret);
       setShowSecret(true);
       setShowRotateConfirm(false);
-      alert(translations.zelifySecrets.rotateConfirm.successMessage);
+      setSuccessMessage(translations.zelifySecrets.rotateConfirm.successMessage);
     } catch (e) {
       setError(e instanceof Error ? e.message : translations.zelifySecrets.errorLoading);
     } finally {
@@ -219,6 +227,12 @@ export function ZelifySecretsSandbox() {
       {error && (
         <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
           {error}
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200">
+          {successMessage}
         </div>
       )}
 

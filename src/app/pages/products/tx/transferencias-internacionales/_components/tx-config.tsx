@@ -38,6 +38,15 @@ export function TxConfig() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState("");
+
+  useEffect(() => {
+    if (saveSuccess) {
+      const t = setTimeout(() => setSaveSuccess(""), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [saveSuccess]);
 
   // Cargar configuración al iniciar
   useEffect(() => {
@@ -86,6 +95,8 @@ export function TxConfig() {
   const saveConfiguration = async () => {
     try {
       setIsSaving(true);
+      setSaveError("");
+      setSaveSuccess("");
       
       const configToSave = {
         idOrg: DEFAULT_ORG_ID,
@@ -119,7 +130,7 @@ export function TxConfig() {
           setConfigId(data.id);
         }
         setHasChanges(false);
-        alert("Configuración guardada exitosamente");
+        setSaveSuccess("Configuración guardada exitosamente");
       } else {
         let errorMessage = "Error al guardar la configuración";
         try {
@@ -129,12 +140,12 @@ export function TxConfig() {
           const errorText = await response.text().catch(() => "");
           errorMessage = `Error ${response.status}: ${errorText || "Error desconocido"}`;
         }
-        alert(errorMessage);
+        setSaveError(errorMessage);
       }
     } catch (error: any) {
       console.error("Error saving configuration:", error);
       const errorMessage = error.message || "Error de conexión. Por favor, verifica tu conexión e intenta de nuevo.";
-      alert(errorMessage);
+      setSaveError(errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -153,6 +164,16 @@ export function TxConfig() {
 
   return (
     <div className="mt-6 space-y-6">
+      {saveSuccess && (
+        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200">
+          {saveSuccess}
+        </div>
+      )}
+      {saveError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+          {saveError}
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div data-tour-id="tour-tx-preview">
           <PreviewPanel config={config} updateConfig={updateConfig} />

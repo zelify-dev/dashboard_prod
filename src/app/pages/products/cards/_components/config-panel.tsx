@@ -44,6 +44,7 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
     const currentTheme: "light" = "light";
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [uploadError, setUploadError] = useState<string | null>(null);
     const colorPickerTriggerRef = useRef<HTMLButtonElement | null>(null);
     const colorPickerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -171,7 +172,7 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
             });
         } catch (error) {
             console.error("Error processing image:", error);
-            alert(t.alerts.imageProcessError);
+            setUploadError(t.alerts.imageProcessError);
         }
     };
 
@@ -208,6 +209,11 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
 
     return (
         <div className="space-y-6">
+            {uploadError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                    {uploadError}
+                </div>
+            )}
             {/* Personalización de Marca */}
             <div className="rounded-lg bg-white shadow-sm dark:bg-dark-2">
                 <button

@@ -89,6 +89,7 @@ export default function TeamsPage() {
   const [membersSearch, setMembersSearch] = useState("");
   const [membersStatus, setMembersStatus] = useState<OrgUserStatus | "">("");
   const [membersLoading, setMembersLoading] = useState(false);
+  const [membersError, setMembersError] = useState("");
 
   // Roles: preferir los que devuelve la API de miembros (misma fuente que la tabla); si no, sesión
   const currentUserInList = members.find((m) => m.id === currentUser?.id);
@@ -234,12 +235,15 @@ export default function TeamsPage() {
 
   const handleDisable = async (user: OrgUserListItem) => {
     if (!orgId) return;
+    setMembersError("");
     try {
       await updateOrgUser(orgId, user.id, { status: "DISABLED" });
       fetchMembers();
     } catch (err) {
       if (err instanceof AuthError && err.statusCode === 409) {
-        alert(translations.membersManagement.errors.lastAdmin);
+        setMembersError(translations.membersManagement.errors.lastAdmin);
+      } else {
+        setMembersError(err instanceof Error ? err.message : "Error al deshabilitar.");
       }
     }
   };
@@ -302,6 +306,11 @@ export default function TeamsPage() {
           </div>
 
           <ShowcaseSection title={m.tableTitle} className="!p-6">
+            {membersError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {membersError}
+              </div>
+            )}
             <MembersTable
               items={members}
               total={membersTotal}

@@ -83,6 +83,7 @@ export function CustomBrandingPanel({
 }: CustomBrandingPanelProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const colorPickerRef = useRef<HTMLDivElement | null>(null);
 
@@ -165,6 +166,7 @@ export function CustomBrandingPanel({
 
   const handleFileUpload = async (file: File) => {
     if (!file) return;
+    setUploadError(null);
 
     const validImageTypes = [
       "image/png",
@@ -183,13 +185,13 @@ export function CustomBrandingPanel({
       validExtensions.includes(fileExtension);
 
     if (!isValidType) {
-      alert(invalidFileTypeMessage);
+      setUploadError(invalidFileTypeMessage);
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert(fileTooLargeMessage);
+      setUploadError(fileTooLargeMessage);
       return;
     }
 
@@ -197,13 +199,13 @@ export function CustomBrandingPanel({
       const optimizedBase64 = await optimizeImage(file);
       const maxBase64Size = 2 * 1024 * 1024;
       if (optimizedBase64.length > maxBase64Size) {
-        alert(fileStillTooLargeMessage);
+        setUploadError(fileStillTooLargeMessage);
         return;
       }
 
       onBrandingChange({ logo: optimizedBase64 });
     } catch {
-      alert(imageProcessingErrorMessage);
+      setUploadError(imageProcessingErrorMessage);
     }
   };
 
@@ -252,6 +254,11 @@ export function CustomBrandingPanel({
 
       {isOpen && (
         <div className="border-t border-stroke px-6 py-4 dark:border-dark-3" data-tour-id={dataTourContentId}>
+          {uploadError && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+              {uploadError}
+            </div>
+          )}
           <div className="space-y-6">
             <div>
               <label className="mb-2 block text-sm font-medium text-dark dark:text-white">{themeLabel}</label>

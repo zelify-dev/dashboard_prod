@@ -327,6 +327,7 @@ function DeviceDetailsModal({
 }) {
   const [activeTab, setActiveTab] = useState<"details" | "history">("details");
   const [showJSON, setShowJSON] = useState(false);
+  const [copiedMessage, setCopiedMessage] = useState("");
   const translations = useDeviceInfoTranslations();
   const formatUnknown = (value?: string | number | null) => {
     if (value === undefined || value === null || value === "" || value === "Unknown") {
@@ -348,11 +349,17 @@ function DeviceDetailsModal({
   const copyJSON = async () => {
     try {
       await navigator.clipboard.writeText(JSON.stringify(event, null, 2));
-      alert(translations.modal.jsonCopied);
+      setCopiedMessage(translations.modal.jsonCopied);
     } catch (err) {
       console.error("Failed to copy:", err);
     }
   };
+
+  useEffect(() => {
+    if (!copiedMessage) return;
+    const t = setTimeout(() => setCopiedMessage(""), 2000);
+    return () => clearTimeout(t);
+  }, [copiedMessage]);
 
   const { isTourActive, currentStep, steps } = useTour();
   const currentStepData = steps[currentStep];
@@ -701,6 +708,9 @@ function DeviceDetailsModal({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </button>
+              {copiedMessage && (
+                <p className="mb-2 text-xs text-green-600 dark:text-green-400">{copiedMessage}</p>
+              )}
               <pre className="overflow-auto text-xs" style={{ maxHeight: "400px" }}>
                 <code>{JSON.stringify(event, null, 2)}</code>
               </pre>

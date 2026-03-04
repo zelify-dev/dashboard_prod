@@ -43,6 +43,7 @@ export function DiscountsConfigPanel({
   const currentTheme: "light" = "light";
   const [openColorPicker, setOpenColorPicker] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
 
@@ -152,13 +153,13 @@ export function DiscountsConfigPanel({
       validImageTypes.some((type) => type.endsWith(fileExtension));
 
     if (!isValidType) {
-      alert(t.configPanel.errors.invalidFileType);
+      setUploadError(t.configPanel.errors.invalidFileType);
       return;
     }
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      alert(t.configPanel.errors.fileTooLarge);
+      setUploadError(t.configPanel.errors.fileTooLarge);
       return;
     }
 
@@ -166,10 +167,11 @@ export function DiscountsConfigPanel({
       const optimizedBase64 = await optimizeImage(file);
       const maxBase64Size = 2 * 1024 * 1024;
       if (optimizedBase64.length > maxBase64Size) {
-        alert(t.configPanel.errors.imageTooLarge);
+        setUploadError(t.configPanel.errors.imageTooLarge);
         return;
       }
 
+      setUploadError(null);
       updateConfig({
         branding: {
           ...branding,
@@ -181,7 +183,7 @@ export function DiscountsConfigPanel({
       });
     } catch (error) {
       console.error("Error processing image:", error);
-      alert(t.configPanel.errors.imageProcessError);
+      setUploadError(t.configPanel.errors.imageProcessError);
     }
   };
 
@@ -230,6 +232,11 @@ export function DiscountsConfigPanel({
 
         {isConfigOpen && (
           <div className="border-t border-stroke px-6 py-4 dark:border-dark-3 space-y-6">
+            {uploadError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {uploadError}
+              </div>
+            )}
             {/* Plans Verification */}
             <div>
               <h4 className="text-sm font-medium mb-3 text-dark dark:text-white">

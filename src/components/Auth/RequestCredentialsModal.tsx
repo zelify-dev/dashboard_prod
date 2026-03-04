@@ -113,6 +113,7 @@ export default function RequestCredentialsModal({
   });
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const [emailError, setEmailError] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -220,7 +221,7 @@ export default function RequestCredentialsModal({
     }
 
     setLoading(true);
-
+    setFormError("");
     try {
       const subject = "Nueva Solicitud de Credenciales - Zelify";
 
@@ -350,7 +351,7 @@ export default function RequestCredentialsModal({
       });
     } catch (error) {
       console.error("Error sending email:", error);
-      alert("Error sending request. Please try again.");
+      setFormError("Error sending request. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -414,6 +415,11 @@ export default function RequestCredentialsModal({
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
+            {formError && (
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                {formError}
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="w-full">
                 <InputGroup
