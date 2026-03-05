@@ -6,7 +6,11 @@ import { useLanguageTranslations } from "@/hooks/use-language-translations";
 type DeviceInfoTranslations = {
   pageTitle: string;
   breadcrumb: string;
+  pageDescription: string;
   subtitle: (count: number) => string;
+  subtitleUserDevices: (count: number, userName: string) => string;
+  viewDevicesFor: string;
+  myDevices: string;
   reloadButton: {
     default: string;
     loading: string;
@@ -87,7 +91,11 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
   en: {
     pageTitle: "Device information",
     breadcrumb: "Device information",
+    pageDescription: "View device and geolocation data for users of your application.",
     subtitle: (count) => `${count} events matching`,
+    subtitleUserDevices: (count, userName) => `${count} device snapshot(s) — ${userName}`,
+    viewDevicesFor: "View devices for",
+    myDevices: "My devices",
     reloadButton: {
       default: "Reload data",
       loading: "Loading...",
@@ -166,7 +174,11 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
   es: {
     pageTitle: "Información del dispositivo",
     breadcrumb: "Información del dispositivo",
+    pageDescription: "Consulta dispositivos y geolocalización de los usuarios de tu aplicación.",
     subtitle: (count) => `${count} eventos coinciden`,
+    subtitleUserDevices: (count, userName) => `${count} registro(s) de dispositivo — ${userName}`,
+    viewDevicesFor: "Ver dispositivos de",
+    myDevices: "Mis dispositivos",
     reloadButton: {
       default: "Recargar datos",
       loading: "Cargando...",

@@ -17,6 +17,11 @@ import { createPortal } from "react-dom";
 import { useDeviceInfoTranslations } from "./use-device-info-translations";
 import { useTour } from "@/contexts/tour-context";
 import { cn } from "@/lib/utils";
+import { getStoredOrganization, getStoredUser, getStoredRoles } from "@/lib/auth-api";
+import { getOrganizationUser, getDeviceInfoNow, type DeviceSnapshot } from "@/lib/device-info-api";
+import { listOrgUsers, type OrgUserListItem } from "@/lib/organization-users-api";
+import { TEAM_ROLE, userHasRole, isOwner } from "@/app/organization/teams/_constants/team-roles";
+import { AuthError } from "@/lib/auth-api";
 
 dayjs.extend(relativeTime);
 
@@ -62,6 +67,32 @@ interface IdentificationEvent {
 }
 
 const STORAGE_KEY = "device_info_events";
+
+/** Convierte un DeviceSnapshot del API en IdentificationEvent para reutilizar tabla y modal. */
+function snapshotToEvent(s: DeviceSnapshot): IdentificationEvent {
+  const timestamp = new Date(s.created_at).getTime();
+  return {
+    id: s.id,
+    visitorId: s.id,
+    ipAddress: s.client_ip,
+    requestId: s.id,
+    date: formatLocalDateTime(timestamp),
+    timestamp,
+    details: {
+      browserName: "—",
+      browserVersion: "—",
+      os: "—",
+      osVersion: "—",
+      device: s.device_type,
+      userAgent: "—",
+      confidence: 0,
+      incognito: false,
+      latitude: s.lat ?? undefined,
+      longitude: s.lng ?? undefined,
+      vpn: s.vpn_detected,
+    },
+  };
+}
 
 // Función para obtener bandera del país (emoji)
 function getCountryFlag(countryCode?: string): string {
@@ -732,6 +763,32 @@ export function DeviceInformationContent() {
   const hasLoadedRef = useRef(false);
   const translations = useDeviceInfoTranslations();
 
+  // API: dispositivos y geolocalización del backend
+  const [apiSnapshots, setApiSnapshots] = useState<DeviceSnapshot[] | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [orgUsers, setOrgUsers] = useState<OrgUserListItem[]>([]);
+  const [loadingUser, setLoadingUser] = useState(false);
+  const [errorApi, setErrorApi] = useState<string | null>(null);
+
+  const org = typeof window !== "undefined" ? getStoredOrganization() : null;
+  const currentUser = typeof window !== "undefined" ? getStoredUser() : null;
+  const roles = typeof window !== "undefined" ? getStoredRoles() : [];
+  const canViewOtherUsers =
+    isOwner(roles) ||
+    userHasRole(roles, TEAM_ROLE.ORG_ADMIN) ||
+    userHasRole(roles, TEAM_ROLE.ZELIFY_TEAM);
+
+  const orgId = org?.id ?? null;
+  const currentUserId = currentUser?.id ?? null;
+  const targetUserId = selectedUserId ?? currentUserId;
+
+  // Eventos a mostrar: desde API (device_snapshots) o desde localStorage
+  const displayEvents: IdentificationEvent[] =
+    apiSnapshots !== null
+      ? apiSnapshots.map(snapshotToEvent)
+      : events;
+  const isApiMode = apiSnapshots !== null;
+
   // Tour integration
   const { isTourActive, currentStep, steps } = useTour();
 
@@ -744,13 +801,77 @@ export function DeviceInformationContent() {
     }
   }, [selectedEvent]);
 
-  // Función para generar un nuevo evento mockeado
+  // Cargar lista de usuarios de la org para el selector (solo admin)
+  useEffect(() => {
+    if (!canViewOtherUsers || !orgId) return;
+    listOrgUsers(orgId, { limit: 100 })
+      .then((res) => setOrgUsers(res.items))
+      .catch(() => setOrgUsers([]));
+  }, [canViewOtherUsers, orgId]);
+
+  // Cargar device_snapshots del usuario seleccionado (o actual) cuando hay org + usuario
+  useEffect(() => {
+    if (!orgId || !targetUserId) return;
+    setLoadingUser(true);
+    setErrorApi(null);
+    getOrganizationUser(orgId, targetUserId)
+      .then((data) => {
+        setApiSnapshots(data.device_snapshots ?? []);
+      })
+      .catch((err: unknown) => {
+        setApiSnapshots([]);
+        setErrorApi(err instanceof AuthError ? err.message : "Error al cargar dispositivos");
+      })
+      .finally(() => setLoadingUser(false));
+  }, [orgId, targetUserId]);
+
+  // Función para generar un nuevo evento mockeado (modo local) o registrar dispositivo actual (modo API)
   const handleReloadData = async () => {
     setIsLoading(true);
     setError(null);
+    setErrorApi(null);
 
+    const orgIdNow = getStoredOrganization()?.id ?? null;
+    const currentUserIdNow = getStoredUser()?.id ?? null;
+
+    // Modo API: registrar dispositivo/geolocalización ahora y refrescar lista
+    if (orgIdNow && currentUserIdNow) {
+      try {
+        if (!navigator.geolocation) {
+          throw new Error(translations.errors.geolocationUnsupported);
+        }
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+          });
+        });
+        const { latitude, longitude } = position.coords;
+        const realIP = await getRealIPAddress();
+        const coordinates = `${latitude},${longitude}`;
+        await getDeviceInfoNow(realIP, coordinates, orgIdNow);
+        const data = await getOrganizationUser(orgIdNow, currentUserIdNow);
+        setApiSnapshots(data.device_snapshots ?? []);
+        setSelectedUserId(null);
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "code" in err) {
+          const code = (err as { code: number }).code;
+          if (code === 1) setError(translations.errors.permissionDenied);
+          else if (code === 2) setError(translations.errors.positionUnavailable);
+          else if (code === 3) setError(translations.errors.timeout);
+          else setErrorApi(err instanceof AuthError ? err.message : translations.errors.default);
+        } else {
+          setErrorApi(err instanceof AuthError ? err.message : translations.errors.default);
+        }
+      } finally {
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Modo local: flujo original con geolocalización e IP y evento mock
     try {
-      // Pedir permisos de geolocalización
       if (!navigator.geolocation) {
         throw new Error(translations.errors.geolocationUnsupported);
       }
@@ -823,17 +944,21 @@ export function DeviceInformationContent() {
     }
   };
 
-  // Cargar eventos y solicitar geolocalización automáticamente al montar el componente
+  // Cargar eventos locales o solicitar geolocalización al montar (solo modo local, sin org/usuario)
   useEffect(() => {
-    // Prevenir doble ejecución (React Strict Mode en desarrollo)
     if (hasLoadedRef.current) return;
     hasLoadedRef.current = true;
 
-    // Cargar eventos guardados primero
+    const orgIdNow = getStoredOrganization()?.id;
+    const currentUserIdNow = getStoredUser()?.id;
+
+    if (orgIdNow && currentUserIdNow) {
+      // Modo API: los device_snapshots se cargan en el useEffect de orgId/targetUserId
+      return;
+    }
+
     const savedEvents = loadEvents();
     setEvents(savedEvents);
-
-    // Luego solicitar geolocalización automáticamente
     handleReloadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -845,15 +970,15 @@ export function DeviceInformationContent() {
       isTourActive,
       currentStep,
       stepsLength: steps.length,
-      eventsLength: events.length,
+      eventsLength: displayEvents.length,
       currentStepData: steps[currentStep]
     });
 
-    if (!isTourActive || steps.length === 0 || events.length === 0) {
+    if (!isTourActive || steps.length === 0 || displayEvents.length === 0) {
       console.log("❌ Condiciones no cumplidas:", {
         isTourActive,
         stepsLength: steps.length,
-        eventsLength: events.length
+        eventsLength: displayEvents.length
       });
       return;
     }
@@ -885,8 +1010,8 @@ export function DeviceInformationContent() {
 
     // Paso 15 (device-information-modal): Abrir el modal cuando llegue a este paso
     if (currentStepData.id === "device-information-modal") {
-      console.log("📝 Paso 15 (índice", currentStep, "): Abriendo modal...", events[0]);
-      console.log("🔧 Llamando a setSelectedEvent con:", events[0]?.visitorId);
+      console.log("📝 Paso 15 (índice", currentStep, "): Abriendo modal...", displayEvents[0]);
+      console.log("🔧 Llamando a setSelectedEvent con:", displayEvents[0]?.visitorId);
 
       // Primero hacer clic en el registro para que se seleccione
       setTimeout(() => {
@@ -898,16 +1023,16 @@ export function DeviceInformationContent() {
       }, 100);
 
       // Luego forzar la apertura del modal inmediatamente
-      setSelectedEvent(events[0]);
+      setSelectedEvent(displayEvents[0]);
       console.log("✅ setSelectedEvent llamado en paso 15");
 
       // Verificar múltiples veces que el modal esté abierto
       const checkModal = () => {
         const modal = document.querySelector('[data-tour-id="tour-device-information-modal"]');
         console.log("🔍 Verificando modal en DOM:", modal ? "✅ encontrado" : "❌ no encontrado");
-        if (!modal && events.length > 0) {
+        if (!modal && displayEvents.length > 0) {
           console.log("⚠️ Modal no encontrado, abriendo...");
-          setSelectedEvent(events[0]);
+          setSelectedEvent(displayEvents[0]);
         } else if (modal) {
           console.log("✅ Modal encontrado en el DOM");
         }
@@ -920,7 +1045,7 @@ export function DeviceInformationContent() {
       // Verificar una vez más
       setTimeout(checkModal, 1200);
     }
-  }, [isTourActive, currentStep, steps, events]);
+  }, [isTourActive, currentStep, steps, displayEvents]);
 
   return (
     <div className="mt-6 space-y-6">
@@ -931,22 +1056,58 @@ export function DeviceInformationContent() {
               {translations.pageTitle}
             </h2>
             <p className="mt-1 text-sm text-dark-6 dark:text-dark-6">
-              {translations.subtitle(events.length)}
+              {translations.pageDescription}
+            </p>
+            <p className="mt-0.5 text-sm font-medium text-dark dark:text-white">
+              {isApiMode
+                ? translations.subtitleUserDevices(
+                    displayEvents.length,
+                    selectedUserId
+                      ? orgUsers.find((u) => u.id === selectedUserId)?.full_name ||
+                        orgUsers.find((u) => u.id === selectedUserId)?.email ||
+                        selectedUserId
+                      : translations.myDevices
+                  )
+                : translations.subtitle(displayEvents.length)}
             </p>
           </div>
-          <button
-            onClick={handleReloadData}
-            disabled={isLoading}
-            className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? translations.reloadButton.loading : translations.reloadButton.default}
-          </button>
+          <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
+            {canViewOtherUsers && orgId && currentUserId && (
+              <div className="flex w-full flex-col gap-1 sm:w-auto sm:flex-row sm:items-center">
+                <label htmlFor="device-info-user-select" className="text-xs font-medium text-dark-6 dark:text-dark-6 sm:text-sm">
+                  {translations.viewDevicesFor}:
+                </label>
+                <select
+                  id="device-info-user-select"
+                  value={selectedUserId ?? ""}
+                  onChange={(e) => setSelectedUserId(e.target.value || null)}
+                  className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white sm:w-[220px]"
+                >
+                  <option value="">{translations.myDevices}</option>
+                  {orgUsers
+                    .filter((u) => u.id !== currentUserId)
+                    .map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.full_name || u.email}
+                      </option>
+                    ))}
+                </select>
+              </div>
+            )}
+            <button
+              onClick={handleReloadData}
+              disabled={isLoading || loadingUser}
+              className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isLoading ? translations.reloadButton.loading : translations.reloadButton.default}
+            </button>
+          </div>
         </div>
 
         {/* Error Message */}
-        {error && (
+        {(error || errorApi) && (
           <div className="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
-            <p className="text-xs">{error}</p>
+            <p className="text-xs">{error || errorApi}</p>
           </div>
         )}
 
@@ -960,22 +1121,29 @@ export function DeviceInformationContent() {
               >
                 <TableHead className="min-w-[200px]">{translations.table.visitorId}</TableHead>
                 <TableHead className="min-w-[180px]">{translations.table.ipAddress}</TableHead>
+                {isApiMode && (
+                  <TableHead className="min-w-[100px]">{translations.modal.device}</TableHead>
+                )}
                 <TableHead className="min-w-[200px]">{translations.table.requestId}</TableHead>
                 <TableHead className="min-w-[180px]">{translations.table.date}</TableHead>
+                {isApiMode && (
+                  <TableHead className="min-w-[80px]">VPN</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.length === 0 ? (
+              {displayEvents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-8 text-center text-dark-6 dark:text-dark-6">
-                    {translations.table.empty}
+                  <TableCell colSpan={isApiMode ? 6 : 4} className="py-8 text-center text-dark-6 dark:text-dark-6">
+                    {loadingUser ? translations.reloadButton.loading : translations.table.empty}
                   </TableCell>
                 </TableRow>
               ) : (
-                events.map((event, index) => {
+                displayEvents.map((event, index) => {
                   const isFirstRow = index === 0;
                   const currentStepData = steps[currentStep];
                   const isStep14 = isTourActive && currentStepData?.id === "device-information-first-row";
+                  const snapshot = isApiMode && apiSnapshots ? apiSnapshots[index] : null;
 
                   return (
                     <TableRow
@@ -1002,12 +1170,28 @@ export function DeviceInformationContent() {
                           <span className="font-mono text-sm text-dark dark:text-white">{event.ipAddress}</span>
                         </div>
                       </TableCell>
+                      {isApiMode && (
+                        <TableCell className="text-dark dark:text-white">
+                          {snapshot?.device_type ?? event.details?.device ?? "—"}
+                        </TableCell>
+                      )}
                       <TableCell className="text-dark dark:text-white">
                         {event.requestId}
                       </TableCell>
                       <TableCell className="text-dark dark:text-white">
                         {event.date}
                       </TableCell>
+                      {isApiMode && (
+                        <TableCell>
+                          {snapshot?.vpn_detected ? (
+                            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                              {translations.modal.vpn}
+                            </span>
+                          ) : (
+                            "—"
+                          )}
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })
@@ -1022,7 +1206,7 @@ export function DeviceInformationContent() {
         <DeviceDetailsModal
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
-          allEvents={events}
+          allEvents={displayEvents}
         />
       )}
     </div>
