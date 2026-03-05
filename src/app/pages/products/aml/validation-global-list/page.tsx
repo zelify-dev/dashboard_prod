@@ -10,6 +10,7 @@ import { AMLListConfig, AMLList, AMLListGroup } from "./_components/aml-list-con
 import { getAMLists } from "./_components/aml-lists-data";
 import { useAMLTranslations } from "./_components/use-aml-translations";
 import { useLanguage } from "@/contexts/language-context";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 import { AMLPreviewPanel } from "./_components/aml-preview-panel";
 import { AMLPersonalizationConfig } from "./_components/aml-personalization-config";
@@ -52,11 +53,20 @@ function applyEnabledMap(lists: AMLList[], enabledMap: Record<string, boolean>):
 export default function ValidationGlobalListPage() {
   const translations = useAMLTranslations();
   const { language } = useLanguage();
+  const { countryName } = useOrganizationCountry();
   const { isTourActive, currentStep, steps } = useTour();
   const [viewMode, setViewMode] = useState<ViewMode>("validations");
   const [selectedValidationId, setSelectedValidationId] = useState<string | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
-  const [validations, setValidations] = useState<AMLValidation[]>(mockValidations);
+  const [validations, setValidations] = useState<AMLValidation[]>([]);
+
+  useEffect(() => {
+    if (countryName) {
+      setValidations(mockValidations.filter((v) => v.country === countryName));
+    } else {
+      setValidations([]);
+    }
+  }, [countryName]);
   const [lists, setLists] = useState<AMLList[]>(() => {
     const baseLists = getAMLists(language);
     const storedEnabledMap = readEnabledMapFromStorage();

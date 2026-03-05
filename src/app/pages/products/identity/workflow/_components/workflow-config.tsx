@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { PreviewPanel } from "./preview-panel";
 import { ConfigPanel } from "./config-panel";
 import { useTour } from "@/contexts/tour-context";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 export type ViewMode = "mobile" | "web";
 export type Country = "ecuador" | "mexico" | "colombia";
@@ -56,9 +57,10 @@ interface WorkflowConfigProps {
 
 export function WorkflowConfig({ workflowId, isNew }: WorkflowConfigProps) {
   const { isTourActive, currentStep, steps } = useTour();
+  const { workflowCountry: orgCountry } = useOrganizationCountry();
   const [config, setConfig] = useState<WorkflowConfig>({
     viewMode: "mobile",
-    country: "ecuador",
+    country: orgCountry ?? "ecuador",
     currentScreen: "welcome",
     enabledScreens: {
       welcome: true,
@@ -92,6 +94,13 @@ export function WorkflowConfig({ workflowId, isNew }: WorkflowConfigProps) {
   const updateConfig = (updates: Partial<WorkflowConfig>) => {
     setConfig((prev) => ({ ...prev, ...updates }));
   };
+
+  // Sincronizar país con el de la organización cuando esté disponible
+  useEffect(() => {
+    if (orgCountry && config.country !== orgCountry) {
+      setConfig((prev) => ({ ...prev, country: orgCountry }));
+    }
+  }, [orgCountry]);
 
   // Asegurar que el viewMode esté en "mobile" y la pantalla correcta cuando el tour busque la vista previa
   useEffect(() => {

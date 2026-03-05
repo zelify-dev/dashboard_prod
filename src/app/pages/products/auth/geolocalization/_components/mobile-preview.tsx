@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useTour } from "@/contexts/tour-context";
 
 import { useGeolocalizationTranslations } from "./use-geolocalization-translations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 function AnimatedHalftoneBackdrop({ isDarkMode }: { isDarkMode: boolean }) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -162,11 +163,14 @@ export function MobilePreview({ locationInfo }: MobilePreviewProps) {
     }, []);
 
     // Obtener información de ubicación para la notificación
+    const { countryName: orgCountryName } = useOrganizationCountry();
     const notificationLocation = locationInfo?.city && locationInfo?.country
         ? `${locationInfo.city}, ${locationInfo.country}`
         : locationInfo?.formatted
             ? locationInfo.formatted.split(",").slice(0, 2).join(",")
-            : "Quito, Ecuador";
+            : orgCountryName
+                ? `—, ${orgCountryName}`
+                : "—";
 
     const { isTourActive, currentStep, steps } = useTour();
     const currentStepData = steps[currentStep];

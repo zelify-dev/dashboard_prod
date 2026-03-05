@@ -6,6 +6,7 @@ import { HexColorPicker } from "react-colorful";
 import { WorkflowConfig, Country, DocumentType, LivenessType, ScreenStep } from "./workflow-config";
 import { useIdentityWorkflowTranslations } from "./use-identity-translations";
 import { useTour } from "@/contexts/tour-context";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 interface ConfigPanelProps {
   config: WorkflowConfig;
@@ -89,6 +90,7 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
   const translations = useIdentityWorkflowTranslations();
   const configTexts = translations.config;
   const countryNames = translations.countries;
+  const { workflowCountry: orgCountry } = useOrganizationCountry();
   const documentTypeNames = translations.documentTypeLabels;
   const livenessTypeNames = translations.livenessTypeNames;
   const screenNames = configTexts.screenNames;
@@ -212,36 +214,44 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
         </button>
         {openSection === "country" && (
           <div className="border-t border-stroke px-6 py-4 dark:border-dark-3">
-            <div className="flex items-center gap-3">
-              {(Object.keys(countryNames) as Country[]).map((countryOption) => (
-                <label
-                  key={countryOption}
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border p-3 transition ${country === countryOption
-                      ? "border-primary bg-primary/10 dark:bg-primary/20"
-                      : "border-stroke hover:border-primary/50 dark:border-dark-3"
-                    }`}
-                >
-                  {(() => {
-                    const FlagIcon = countryFlagIcons[countryOption];
-                    return <FlagIcon className="h-4 w-5 flex-shrink-0" />;
-                  })()}
-                  <span className="text-sm font-medium text-dark dark:text-white">
-                    {countryNames[countryOption]}
-                  </span>
-                  <div className="relative flex h-4 w-4 items-center justify-center">
-                    <input
-                      type="radio"
-                      name="country"
-                      value={countryOption}
-                      checked={country === countryOption}
-                      onChange={() => updateConfig({ country: countryOption })}
-                      className="peer h-4 w-4 cursor-pointer appearance-none rounded-full border-2 border-stroke checked:border-primary dark:border-dark-3 dark:checked:border-primary"
-                    />
-                    <div className="absolute hidden h-2 w-2 rounded-full bg-primary peer-checked:block"></div>
-                  </div>
-                </label>
-              ))}
-            </div>
+            {orgCountry ? (
+              <div className="flex items-center gap-3">
+                {(Object.keys(countryNames) as Country[])
+                  .filter((c) => c === orgCountry)
+                  .map((countryOption) => (
+                    <label
+                      key={countryOption}
+                      className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border p-3 transition ${country === countryOption
+                          ? "border-primary bg-primary/10 dark:bg-primary/20"
+                          : "border-stroke hover:border-primary/50 dark:border-dark-3"
+                        }`}
+                    >
+                      {(() => {
+                        const FlagIcon = countryFlagIcons[countryOption];
+                        return FlagIcon ? <FlagIcon className="h-4 w-5 flex-shrink-0" /> : null;
+                      })()}
+                      <span className="text-sm font-medium text-dark dark:text-white">
+                        {countryNames[countryOption]}
+                      </span>
+                      <div className="relative flex h-4 w-4 items-center justify-center">
+                        <input
+                          type="radio"
+                          name="country"
+                          value={countryOption}
+                          checked={country === countryOption}
+                          onChange={() => updateConfig({ country: countryOption })}
+                          className="peer h-4 w-4 cursor-pointer appearance-none rounded-full border-2 border-stroke checked:border-primary dark:border-dark-3 dark:checked:border-primary"
+                        />
+                        <div className="absolute hidden h-2 w-2 rounded-full bg-primary peer-checked:block"></div>
+                      </div>
+                    </label>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-sm text-dark-6 dark:text-dark-6">
+                Configure your organization country in Company Profile to use this workflow.
+              </p>
+            )}
           </div>
         )}
       </div>

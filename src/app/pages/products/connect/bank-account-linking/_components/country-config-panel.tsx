@@ -6,6 +6,7 @@ import { HexColorPicker } from "react-colorful";
 import { useLanguage } from "@/contexts/language-context";
 import { connectTranslations } from "./connect-translations";
 import { BankAccountCountry } from "./bank-account-config";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 export interface BrandingConfig {
   logo?: string;
@@ -172,7 +173,8 @@ export function CountryConfigPanel({
   branding,
   onBrandingChange
 }: CountryConfigPanelProps) {
-  const countries: BankAccountCountry[] = ["mexico", "brasil", "colombia", "estados_unidos", "ecuador"];
+  const { extendedRegion } = useOrganizationCountry();
+  const countriesToShow: BankAccountCountry[] = extendedRegion ? [extendedRegion] : ["mexico", "brasil", "colombia", "estados_unidos", "ecuador"];
   const { language } = useLanguage();
   const t = connectTranslations[language];
 
@@ -311,7 +313,7 @@ export function CountryConfigPanel({
         <div>
           <label className="mb-3 block text-sm font-semibold text-dark dark:text-white">{t.countryLabel}</label>
           <div className="space-y-2">
-            {countries.map((country) => {
+            {countriesToShow.map((country) => {
               const FlagIcon = countryFlagIcons[country];
               const isSelected = selectedCountry === country;
               const isEcuadorSelected = country === "ecuador" && isSelected;

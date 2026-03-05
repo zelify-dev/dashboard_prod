@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { ServiceRegion } from "./basic-services-config";
 import { useBasicServicesTranslations } from "./use-basic-services-translations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 import type { ServiceProvider } from "./basic-services-preview-panel";
 
 interface RegionConfigPanelProps {
@@ -122,14 +123,15 @@ export function RegionConfigPanel({
 }: RegionConfigPanelProps) {
   const translations = useBasicServicesTranslations();
   const countryNames = translations.config.regionNames;
-  const regions: ServiceRegion[] = ["mexico", "brasil", "colombia", "estados_unidos", "ecuador"];
+  const { extendedRegion } = useOrganizationCountry();
+  const regionsToShow: ServiceRegion[] = extendedRegion ? [extendedRegion] : ["mexico", "brasil", "colombia", "estados_unidos", "ecuador"];
   return (
     <div className="space-y-4">
         {/* Region Selection */}
         <div>
           <label className="mb-3 block text-sm font-semibold text-dark dark:text-white">{translations.config.countryLabel}</label>
           <div className="space-y-2">
-            {regions.map((region) => {
+            {regionsToShow.map((region) => {
               const FlagIcon = countryFlagIcons[region];
               const isSelected = selectedRegion === region;
 

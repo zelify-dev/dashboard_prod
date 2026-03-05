@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import { useCTAButtonAnimations } from "@/hooks/use-cta-button-animations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 interface FrontData {
   documentType: string;
@@ -51,7 +52,16 @@ const MOCK_BACK_DATA: BackData = {
 };
 
 // Componente para generar la cédula mockeada
-function MockCedulaCard({ data }: { data: ExtractedData }) {
+function MockCedulaCard({
+  data,
+  republicLabel = "REPÚBLICA DEL ECUADOR",
+  issuingAuthorityLabel,
+}: {
+  data: ExtractedData;
+  republicLabel?: string;
+  issuingAuthorityLabel?: string;
+}) {
+  const authority = issuingAuthorityLabel ?? data.issuingAuthority;
   return (
     <div className="mx-auto max-w-md rounded-lg border-2 border-gray-300 bg-gradient-to-br from-blue-50 to-white p-6 shadow-lg dark:border-gray-600 dark:from-gray-800 dark:to-gray-900">
       {/* Header */}
@@ -59,7 +69,7 @@ function MockCedulaCard({ data }: { data: ExtractedData }) {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
-              REPÚBLICA DEL ECUADOR
+              {republicLabel}
             </h3>
             <p className="text-xs text-blue-700 dark:text-blue-300">
               REGISTRO CIVIL
@@ -130,7 +140,7 @@ function MockCedulaCard({ data }: { data: ExtractedData }) {
       {/* Footer */}
       <div className="mt-4 border-t-2 border-blue-600 pt-2 text-center">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          {data.issuingAuthority}
+          {authority}
         </p>
       </div>
     </div>
@@ -143,6 +153,7 @@ export function DocumentExtractionContent() {
   // Inicializar animaciones CTA con color primario
   const themeColor = "#3b82f6"; // Color primario por defecto
   useCTAButtonAnimations(themeColor);
+  const { countryName } = useOrganizationCountry();
   const [isDragging, setIsDragging] = useState(false);
   const [currentStep, setCurrentStep] = useState<ProcessStep>("front");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -185,13 +196,19 @@ export function DocumentExtractionContent() {
         setIsProcessing(false);
         setProcessingStep("");
       } else if (currentStep === "back") {
-        setBackData(MOCK_BACK_DATA);
+        const issuingAuthority =
+          countryName === "Ecuador"
+            ? "Registro Civil del Ecuador"
+            : countryName
+              ? `Registro Civil de ${countryName}`
+              : MOCK_BACK_DATA.issuingAuthority;
+        setBackData({ ...MOCK_BACK_DATA, issuingAuthority });
         setCurrentStep("complete");
         setIsProcessing(false);
         setProcessingStep("");
       }
     }, 500);
-  }, [currentStep]);
+  }, [currentStep, countryName]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();

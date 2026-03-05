@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { useIdentityWorkflowTranslations } from "./use-identity-translations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
+import { listOrgUsers } from "@/lib/organization-users-api";
+import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
 
 interface Workflow {
   id: string;
   name: string;
   country: string;
+  countryCode: string;
   createdAt: string;
   updatedAt: string;
   status: "active" | "inactive" | "draft";
@@ -17,46 +22,69 @@ interface Workflow {
   };
 }
 
-// Mock data - in production this would come from an API
-const mockWorkflows: Workflow[] = [
+// Normalizar país de la API (nombre o código) a código para filtrar — reexportamos lógica del hook
+function toCountryCode(country: string | undefined): string | null {
+  if (!country || typeof country !== "string") return null;
+  const n = country.trim().toLowerCase();
+  if (n === "ec" || n === "ecuador") return "EC";
+  if (n === "mx" || n === "mexico" || n === "méxico") return "MX";
+  if (n === "co" || n === "colombia") return "CO";
+  if (n === "cl" || n === "chile") return "CL";
+  if (n === "pe" || n === "peru" || n === "perú") return "PE";
+  return null;
+}
+
+// Un solo workflow de ejemplo por país
+const COUNTRY_WORKFLOWS: Workflow[] = [
   {
-    id: "1",
+    id: "ec-1",
     name: "Ecuador Identity Verification",
     country: "Ecuador",
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-20",
+    countryCode: "EC",
+    createdAt: "2025-01-15",
+    updatedAt: "2025-03-01",
     status: "active",
-    verification: {
-      approved: 245,
-      rejected: 12,
-      pending: 8,
-    },
+    verification: { approved: 0, rejected: 0, pending: 0 },
   },
   {
-    id: "2",
+    id: "mx-1",
     name: "Mexico KYC Workflow",
     country: "Mexico",
-    createdAt: "2024-01-10",
-    updatedAt: "2024-01-18",
+    countryCode: "MX",
+    createdAt: "2025-01-15",
+    updatedAt: "2025-03-01",
     status: "active",
-    verification: {
-      approved: 189,
-      rejected: 5,
-      pending: 15,
-    },
+    verification: { approved: 0, rejected: 0, pending: 0 },
   },
   {
-    id: "3",
+    id: "co-1",
     name: "Colombia Onboarding",
     country: "Colombia",
-    createdAt: "2024-01-05",
-    updatedAt: "2024-01-12",
+    countryCode: "CO",
+    createdAt: "2025-01-15",
+    updatedAt: "2025-03-01",
     status: "draft",
-    verification: {
-      approved: 0,
-      rejected: 0,
-      pending: 0,
-    },
+    verification: { approved: 0, rejected: 0, pending: 0 },
+  },
+  {
+    id: "cl-1",
+    name: "Chile Identity Verification",
+    country: "Chile",
+    countryCode: "CL",
+    createdAt: "2025-01-15",
+    updatedAt: "2025-03-01",
+    status: "active",
+    verification: { approved: 0, rejected: 0, pending: 0 },
+  },
+  {
+    id: "pe-1",
+    name: "Peru Onboarding",
+    country: "Peru",
+    countryCode: "PE",
+    createdAt: "2025-01-15",
+    updatedAt: "2025-03-01",
+    status: "draft",
+    verification: { approved: 0, rejected: 0, pending: 0 },
   },
 ];
 
@@ -102,8 +130,51 @@ function VerificationIcons({ verification }: { verification: Workflow["verificat
 }
 
 export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListProps) {
-  const [workflows] = useState<Workflow[]>(mockWorkflows);
   const { workflowsList: listTexts } = useIdentityWorkflowTranslations();
+  const { countryCode: orgCountryCode, loading: orgLoading } = useOrganizationCountry();
+  const org = getStoredOrganization();
+  const roles = getStoredRoles();
+  const canSeeUsers = isOwner(roles) || userHasRole(roles, TEAM_ROLE.ORG_ADMIN) || userHasRole(roles, TEAM_ROLE.ZELIFY_TEAM);
+
+  const [verificationCounts, setVerificationCounts] = useState({ approved: 0, pending: 0, rejected: 0 });
+
+  const fetchVerificationCounts = useCallback(async () => {
+    if (!org?.id || !canSeeUsers) return;
+    try {
+      let approved = 0;
+      let pending = 0;
+      let page = 1;
+      const limit = 100;
+      let total = 0;
+      do {
+        const res = await listOrgUsers(org.id, { role_code: "USER_APP", page, limit });
+        const items = res.items ?? [];
+        total = res.total ?? 0;
+        approved += items.filter((u) => u.identity_verified === true).length;
+        pending += items.filter((u) => !u.identity_verified).length;
+        page++;
+      } while (page * limit < total);
+      setVerificationCounts({ approved, pending, rejected: 0 });
+    } catch {
+      setVerificationCounts({ approved: 0, pending: 0, rejected: 0 });
+    }
+  }, [org?.id, canSeeUsers]);
+
+  useEffect(() => {
+    fetchVerificationCounts();
+  }, [fetchVerificationCounts]);
+
+  const workflows = useMemo(() => {
+    if (!orgCountryCode) return [];
+    return COUNTRY_WORKFLOWS.filter((w) => w.countryCode === orgCountryCode).map((w) => ({
+      ...w,
+      verification: {
+        approved: verificationCounts.approved,
+        pending: verificationCounts.pending,
+        rejected: verificationCounts.rejected,
+      },
+    }));
+  }, [orgCountryCode, verificationCounts]);
 
   const getStatusBadge = (status: Workflow["status"]) => {
     const styles = {
@@ -142,6 +213,11 @@ export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListPr
         </div>
 
         <div className="overflow-x-auto">
+          {orgLoading ? (
+            <p className="px-4 py-8 text-center text-sm text-dark-6 dark:text-dark-6">
+              Loading…
+            </p>
+          ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-stroke dark:border-dark-3">
@@ -214,6 +290,7 @@ export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListPr
               )}
             </tbody>
           </table>
+          )}
         </div>
       </div>
     </div>

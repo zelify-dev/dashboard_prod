@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { BankAccountPreviewPanel } from "./bank-account-preview-panel";
 import { CountryConfigPanel, ThemeBranding } from "./country-config-panel";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 export type BankAccountCountry = "ecuador" | "mexico" | "brasil" | "colombia" | "estados_unidos";
 
@@ -11,7 +12,12 @@ interface BankAccountConfigProps {
 }
 
 export function BankAccountConfig({ country: initialCountry = "mexico" }: BankAccountConfigProps) {
+  const { extendedRegion } = useOrganizationCountry();
   const [selectedCountry, setSelectedCountry] = useState<BankAccountCountry>(initialCountry);
+
+  useEffect(() => {
+    if (extendedRegion) setSelectedCountry(extendedRegion);
+  }, [extendedRegion]);
   const [viewMode, setViewMode] = useState<"mobile" | "web">("mobile");
   const [branding, setBranding] = useState<ThemeBranding>({
     light: {

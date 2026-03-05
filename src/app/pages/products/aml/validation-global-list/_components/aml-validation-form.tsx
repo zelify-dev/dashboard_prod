@@ -9,6 +9,7 @@ import { getAMLists } from "./aml-lists-data";
 import { SimpleSelect } from "@/components/FormElements/simple-select";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 function formatTranslation(template: string, values: Record<string, string | number>): string {
   return Object.entries(values).reduce((result, [key, value]) => {
@@ -98,7 +99,8 @@ export function AMLValidationForm({
 }: AMLValidationFormProps) {
   const translations = useAMLTranslations();
   const { language } = useLanguage();
-  const [country, setCountry] = useState<string>("");
+  const { countryName: orgCountryName } = useOrganizationCountry();
+  const [country, setCountry] = useState<string>(orgCountryName || "");
   const [documentNumber, setDocumentNumber] = useState("");
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(defaultSelectedGroupId);
   const [includePEPs, setIncludePEPs] = useState(false);
@@ -107,13 +109,17 @@ export function AMLValidationForm({
   const [currentStep, setCurrentStep] = useState(0);
   const [errors, setErrors] = useState<{ country?: string; documentNumber?: string }>({});
   
+  useEffect(() => {
+    if (orgCountryName) setCountry(orgCountryName);
+  }, [orgCountryName]);
+  
   // Obtener listas dinámicas basadas en el idioma
   const amlLists = useMemo(() => getAMLists(language), [language]);
   
-  // Preparar opciones para los selects
+  // Solo mostrar el país de la organización
   const countryOptions = useMemo(() => 
-    countries.map(c => ({ value: c, label: c })),
-    []
+    orgCountryName ? [{ value: orgCountryName, label: orgCountryName }] : [],
+    [orgCountryName]
   );
 
   const groupOptions = useMemo(() => [

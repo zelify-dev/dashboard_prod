@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { BasicServicesPreviewPanel, PROVIDERS_BY_REGION, ServiceProvider } from "./basic-services-preview-panel";
 import { RegionConfigPanel } from "./region-config-panel";
 import { cn } from "@/lib/utils";
 import { CustomBrandingPanel } from "@/components/custom-branding/custom-branding-panel";
 import { useBasicServicesTranslations } from "./use-basic-services-translations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
 
 export type ServiceRegion = "ecuador" | "mexico" | "brasil" | "colombia" | "estados_unidos";
 
@@ -38,7 +39,12 @@ function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function BasicServicesConfig({ region: initialRegion = "mexico" }: BasicServicesConfigProps) {
   const translations = useBasicServicesTranslations();
+  const { extendedRegion } = useOrganizationCountry();
   const [selectedRegion, setSelectedRegion] = useState<ServiceRegion>(initialRegion);
+
+  useEffect(() => {
+    if (extendedRegion) setSelectedRegion(extendedRegion);
+  }, [extendedRegion]);
   const [visibleProvidersByRegion, setVisibleProvidersByRegion] = useState<Record<ServiceRegion, string[]>>(() => {
     const map = {} as Record<ServiceRegion, string[]>;
     (Object.keys(PROVIDERS_BY_REGION) as ServiceRegion[]).forEach((region) => {

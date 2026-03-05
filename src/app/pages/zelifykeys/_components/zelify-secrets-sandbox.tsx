@@ -8,6 +8,7 @@ import {
   maskApiKey,
   type ApiKeyItem,
 } from "@/lib/organization-api-keys";
+import { getStoredOrganization } from "@/lib/auth-api";
 import { useZelifyKeysTranslations } from "./use-zelifykeys-translations";
 import { useZelifyKeysData } from "./zelify-keys-data-context";
 import { useLanguage } from "@/contexts/language-context";
@@ -61,8 +62,9 @@ export function ZelifySecretsSandbox() {
   const fetchKeys = useCallback(async () => {
     setError(null);
     setLoading(true);
+    const orgId = getStoredOrganization()?.id ?? null;
     try {
-      const list = await listApiKeys();
+      const list = await listApiKeys(orgId);
       setKeys(list);
       const active = list.find((k) => k.status === "ACTIVE") ?? list[0] ?? null;
       setCurrentKey(active);
@@ -103,8 +105,9 @@ export function ZelifySecretsSandbox() {
       return;
     }
     setRevealingSecret(true);
+    const orgId = getStoredOrganization()?.id ?? null;
     try {
-      const { api_secret } = await getApiKeySecret(currentKey.id);
+      const { api_secret } = await getApiKeySecret(currentKey.id, orgId);
       setRevealedSecret(api_secret);
       setShowSecret(true);
     } catch {
@@ -117,8 +120,9 @@ export function ZelifySecretsSandbox() {
   const confirmRotate = async () => {
     setRotating(true);
     setError(null);
+    const orgId = getStoredOrganization()?.id ?? null;
     try {
-      const { api_secret } = await rotateApiKeys();
+      const { api_secret } = await rotateApiKeys(orgId);
       await fetchKeys();
       setRevealedSecret(api_secret);
       setShowSecret(true);
