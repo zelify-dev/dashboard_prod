@@ -245,6 +245,7 @@ export type UiTranslations = {
       confirmPasswordLabel: string;
       confirmPasswordPlaceholder: string;
       passwordHelper: string;
+      sendInviteLabel?: string;
       submit: string;
     };
   };
@@ -274,6 +275,10 @@ export type UiTranslations = {
     tempPasswordCopied: string;
     tempPasswordWarning: string;
     tempPasswordDone: string;
+    inviteTokenLabel?: string;
+    sendEmailButton?: string;
+    sendEmailSuccess?: string;
+    sendEmailError?: string;
     editMemberTitle: string;
     editRolesTitle: string;
     resetPasswordTitle: string;
@@ -285,6 +290,7 @@ export type UiTranslations = {
       ORG_ADMIN: string;
       BUSINESS: string;
       DEVELOPER: string;
+      USER_APP: string;
       ZELIFY_TEAM: string;
     };
     errors: {
@@ -348,6 +354,8 @@ export type UiTranslations = {
   changePasswordRequired: {
     title: string;
     description: string;
+    currentPasswordLabel: string;
+    currentPasswordPlaceholder: string;
     newPasswordLabel: string;
     newPasswordPlaceholder: string;
     confirmPasswordLabel: string;
@@ -627,6 +635,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         confirmPasswordLabel: "Confirm password",
         confirmPasswordPlaceholder: "Repeat the password",
         passwordHelper: "User will be marked as pending and must change this password on first login.",
+        sendInviteLabel: "Include invite link (invite_token)",
         submit: "Add Member",
       },
     },
@@ -656,6 +665,10 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       tempPasswordCopied: "Copied!",
       tempPasswordWarning: "The user must change this password on first login.",
       tempPasswordDone: "Done",
+      inviteTokenLabel: "Invite token (if send_invite was used)",
+      sendEmailButton: "Send credentials by email",
+      sendEmailSuccess: "Email sent successfully.",
+      sendEmailError: "Failed to send email.",
       editMemberTitle: "Edit member",
       editRolesTitle: "Edit roles",
       resetPasswordTitle: "Reset password",
@@ -667,6 +680,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         ORG_ADMIN: "Administrators",
         BUSINESS: "Business Team",
         DEVELOPER: "Developers Team",
+        USER_APP: "App User",
         ZELIFY_TEAM: "Zelify Team",
       },
       errors: {
@@ -730,6 +744,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
     changePasswordRequired: {
       title: "Change your password",
       description: "For security, you must set a new password before continuing.",
+      currentPasswordLabel: "Current password (temporary)",
+      currentPasswordPlaceholder: "Enter your current temporary password",
       newPasswordLabel: "New password",
       newPasswordPlaceholder: "Enter your new password",
       confirmPasswordLabel: "Confirm new password",
@@ -1008,6 +1024,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         confirmPasswordLabel: "Confirmar contraseña",
         confirmPasswordPlaceholder: "Repite la contraseña",
         passwordHelper: "El usuario quedará pendiente y deberá cambiar esta contraseña en su primer inicio de sesión.",
+        sendInviteLabel: "Incluir link de invitación (invite_token)",
         submit: "Añadir Miembro",
       },
     },
@@ -1037,6 +1054,10 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       tempPasswordCopied: "¡Copiado!",
       tempPasswordWarning: "El usuario deberá cambiar esta contraseña en su primer inicio de sesión.",
       tempPasswordDone: "Listo",
+      inviteTokenLabel: "Token de invitación (si usaste send_invite)",
+      sendEmailButton: "Enviar credenciales por correo",
+      sendEmailSuccess: "Correo enviado correctamente.",
+      sendEmailError: "Error al enviar el correo.",
       editMemberTitle: "Editar miembro",
       editRolesTitle: "Editar roles",
       resetPasswordTitle: "Restablecer contraseña",
@@ -1048,6 +1069,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         ORG_ADMIN: "Administradores",
         BUSINESS: "Equipo de Negocios",
         DEVELOPER: "Equipo de Desarrollo",
+        USER_APP: "Usuario App",
         ZELIFY_TEAM: "Equipo Zelify",
       },
       errors: {
@@ -1113,6 +1135,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
     changePasswordRequired: {
       title: "Cambia tu contraseña",
       description: "Por seguridad, debes establecer una nueva contraseña para continuar.",
+      currentPasswordLabel: "Contraseña actual (temporal)",
+      currentPasswordPlaceholder: "Ingresa tu contraseña temporal actual",
       newPasswordLabel: "Nueva contraseña",
       newPasswordPlaceholder: "Ingresa tu nueva contraseña",
       confirmPasswordLabel: "Confirmar nueva contraseña",

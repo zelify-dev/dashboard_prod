@@ -1,6 +1,7 @@
 /**
  * Mapeo entre equipos de la UI (Teams) y roles del backend.
- * OWNER puede asignar todos los roles; ORG_ADMIN solo ORG_ADMIN, BUSINESS, DEVELOPER.
+ * Valores válidos en API: ORG_ADMIN, BUSINESS, DEVELOPER, USER_APP (y OWNER, ZELIFY_TEAM para asignación).
+ * OWNER puede asignar todos los roles; ORG_ADMIN solo ORG_ADMIN, BUSINESS y DEVELOPER (no USER_APP).
  */
 
 export const TEAM_ROLE = {
@@ -8,6 +9,7 @@ export const TEAM_ROLE = {
   ORG_ADMIN: "ORG_ADMIN",
   BUSINESS: "BUSINESS",
   DEVELOPER: "DEVELOPER",
+  USER_APP: "USER_APP",
   ZELIFY_TEAM: "ZELIFY_TEAM",
 } as const;
 
@@ -19,7 +21,7 @@ export const OWNER_ONLY_ROLES: TeamRoleCode[] = [
   TEAM_ROLE.ZELIFY_TEAM,
 ];
 
-/** Roles que puede asignar un ORG_ADMIN (sin OWNER ni ZELIFY_TEAM) */
+/** Roles que puede asignar un ORG_ADMIN (solo ORG_ADMIN, BUSINESS, DEVELOPER; no USER_APP) */
 export const ORG_ADMIN_ASSIGNABLE: TeamRoleCode[] = [
   TEAM_ROLE.ORG_ADMIN,
   TEAM_ROLE.BUSINESS,
@@ -32,19 +34,38 @@ export const OWNER_ASSIGNABLE: TeamRoleCode[] = [
   TEAM_ROLE.ORG_ADMIN,
   TEAM_ROLE.BUSINESS,
   TEAM_ROLE.DEVELOPER,
+  TEAM_ROLE.USER_APP,
   TEAM_ROLE.ZELIFY_TEAM,
 ];
 
-/** Devuelve los roles que el usuario actual puede asignar (según si es OWNER o ORG_ADMIN) */
+/** Indica si los roles normalizados corresponden a ORG_ADMIN (código "ORG_ADMIN" o nombre "Administrators"/"Administradores" del backend) */
+export function isOrgAdminRole(codes: string[]): boolean {
+  return (
+    codes.includes(TEAM_ROLE.ORG_ADMIN) ||
+    codes.includes("ADMINISTRATORS") ||
+    codes.includes("ADMINISTRADORES")
+  );
+}
+
+/** Devuelve los roles que el usuario actual puede asignar. ORG_ADMIN nunca puede asignar USER_APP. */
 export function getAssignableRoles(currentUserRoles: string[] | Array<{ code: string }>): TeamRoleCode[] {
   const codes = toRoleCodes(currentUserRoles);
-  if (codes.includes(TEAM_ROLE.OWNER)) {
-    return OWNER_ASSIGNABLE;
+  const hasOrgAdmin = isOrgAdminRole(codes);
+  let result: TeamRoleCode[];
+  if (codes.includes(TEAM_ROLE.OWNER) && !hasOrgAdmin) {
+    result = OWNER_ASSIGNABLE;
+    if (typeof window !== "undefined") console.log("[Teams getAssignableRoles] OWNER sin ORG_ADMIN → todos los roles", { codes, result });
+  } else if (codes.includes(TEAM_ROLE.OWNER) && hasOrgAdmin) {
+    result = OWNER_ASSIGNABLE.filter((c) => c !== TEAM_ROLE.USER_APP);
+    if (typeof window !== "undefined") console.log("[Teams getAssignableRoles] OWNER + ORG_ADMIN → sin USER_APP", { codes, result });
+  } else if (hasOrgAdmin) {
+    result = ORG_ADMIN_ASSIGNABLE;
+    if (typeof window !== "undefined") console.log("[Teams getAssignableRoles] solo ORG_ADMIN → ORG_ADMIN_ASSIGNABLE", { codes, result });
+  } else {
+    result = [];
+    if (typeof window !== "undefined") console.log("[Teams getAssignableRoles] sin OWNER ni ORG_ADMIN → []", { codes });
   }
-  if (codes.includes(TEAM_ROLE.ORG_ADMIN)) {
-    return ORG_ADMIN_ASSIGNABLE;
-  }
-  return [];
+  return result;
 }
 
 /** Normaliza roles del backend (string[] o Array<{ code: string }>) a códigos string[] en mayúsculas. */

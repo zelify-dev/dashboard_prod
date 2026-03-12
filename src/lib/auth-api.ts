@@ -669,6 +669,59 @@ export async function changePassword(newPassword: string): Promise<MeResponse> {
   return me;
 }
 
+/**
+ * Cambio de contraseña obligatorio (primer login) — endpoint recomendado con org en la URL.
+ * POST /api/auth/organizations/{orgId}/members/password/reset
+ * Body: { current_password, new_password }. Requiere Bearer del nuevo usuario.
+ * Tras 201 el backend pone must_change_password = false; conviene llamar syncMe() después para actualizar sesión.
+ */
+export async function memberPasswordReset(
+  orgId: string,
+  body: { current_password: string; new_password: string }
+): Promise<{ ok: boolean }> {
+  const res = await fetchWithAuth(
+    `/api/auth/organizations/${encodeURIComponent(orgId)}/members/password/reset`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al restablecer contraseña",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean };
+}
+
+/**
+ * Alternativa para cambio de contraseña (primer login).
+ * POST /api/auth/password/change con { current_password, new_password }.
+ */
+export async function authPasswordChange(body: {
+  current_password: string;
+  new_password: string;
+}): Promise<{ ok: boolean }> {
+  const res = await fetchWithAuth("/api/auth/password/change", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al cambiar contraseña",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean };
+}
+
 /** DELETE /api/me/sessions/:sessionId — revocar una sesión. */
 export async function revokeSession(sessionId: string): Promise<void> {
   const res = await fetchWithAuth(`/api/me/sessions/${sessionId}`, {
@@ -676,4 +729,26 @@ export async function revokeSession(sessionId: string): Promise<void> {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new AuthError(data.message || "Error al revocar sesión", res.status, data);
+}
+
+/** POST /api/send-email — enviar correo (ej. credenciales al nuevo miembro). Requiere Bearer. */
+export async function sendEmail(payload: {
+  recipient: string;
+  purpose: string;
+  message: string;
+}): Promise<{ message: string }> {
+  const res = await fetchWithAuth("/api/send-email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al enviar correo",
+      res.status,
+      data
+    );
+  }
+  return data as { message: string };
 }

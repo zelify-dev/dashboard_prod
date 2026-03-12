@@ -2,13 +2,20 @@
 
 /**
  * Modal obligatorio tras el login cuando el usuario tiene must_change_password.
- * No se puede cerrar; el usuario debe establecer una nueva contraseña para continuar.
+ * Usa POST /api/auth/organizations/{orgId}/members/password/reset (current_password + new_password)
+ * o POST /api/auth/password/change como alternativa. Tras 201 llama syncMe() para actualizar la sesión.
  */
 import { useState } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { PasswordIcon } from "@/assets/icons";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
-import { changePassword, AuthError } from "@/lib/auth-api";
+import {
+  memberPasswordReset,
+  authPasswordChange,
+  syncMe,
+  getStoredOrganization,
+  AuthError,
+} from "@/lib/auth-api";
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -18,6 +25,7 @@ type ChangePasswordModalProps = {
 
 export function ChangePasswordModal({ onSuccess }: ChangePasswordModalProps) {
   const t = useUiTranslations();
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -38,7 +46,19 @@ export function ChangePasswordModal({ onSuccess }: ChangePasswordModalProps) {
     }
     setSubmitting(true);
     try {
-      await changePassword(newPassword);
+      const orgId = getStoredOrganization()?.id;
+      if (orgId) {
+        await memberPasswordReset(orgId, {
+          current_password: currentPassword,
+          new_password: newPassword,
+        });
+      } else {
+        await authPasswordChange({
+          current_password: currentPassword,
+          new_password: newPassword,
+        });
+      }
+      await syncMe();
       onSuccess();
     } catch (err) {
       setError(err instanceof AuthError ? err.message : strings.errorMatch);
@@ -58,6 +78,18 @@ export function ChangePasswordModal({ onSuccess }: ChangePasswordModalProps) {
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <InputGroup
+            label={strings.currentPasswordLabel}
+            type="password"
+            name="currentPassword"
+            placeholder={strings.currentPasswordPlaceholder}
+            value={currentPassword}
+            handleChange={(e) => setCurrentPassword(e.target.value)}
+            icon={<PasswordIcon />}
+            iconPosition="left"
+            required
+            autoComplete="current-password"
+          />
           <InputGroup
             label={strings.newPasswordLabel}
             type="password"

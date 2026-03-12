@@ -3,7 +3,7 @@
  * Requiere Authorization: Bearer <access_token>.
  * Solo ORG_ADMIN puede crear/editar/deshabilitar/resetear.
  */
-import { fetchWithAuth, AuthError } from "@/lib/auth-api";
+import { fetchWithAuth, getAccessToken, AuthError } from "@/lib/auth-api";
 
 export type OrgUserStatus = "ACTIVE" | "DISABLED";
 
@@ -63,6 +63,56 @@ export type CreateOrgUserResponse = {
   temporary_password: string;
   invite_token: string | null;
 };
+
+/** Body para POST /api/organizations/{id}/dashboard/members (crear miembro desde dashboard). */
+export type CreateDashboardMemberBody = {
+  email: string;
+  full_name: string;
+  roles?: string[];
+  send_invite?: boolean;
+};
+
+/** Respuesta 201 de POST /api/organizations/{id}/dashboard/members */
+export type CreateDashboardMemberResponse = {
+  user: OrgUser;
+  temporary_password: string;
+  invite_token: string | null;
+};
+
+/**
+ * POST /api/organizations/{id}/dashboard/members — crear miembro (ORG_ADMIN).
+ * Envía siempre Authorization: Bearer <access_token> con el token del usuario logueado (vía fetchWithAuth).
+ * Sin ese header el backend responde 403. Devuelve contraseña temporal e invite_token si send_invite.
+ */
+export async function createDashboardMember(
+  orgId: string,
+  body: CreateDashboardMemberBody
+): Promise<CreateDashboardMemberResponse> {
+  const token = getAccessToken();
+  if (!token) {
+    throw new AuthError("Sesión expirada. Inicia sesión de nuevo.", 401, {});
+  }
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/dashboard/members`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al crear miembro",
+      res.status,
+      data
+    );
+  }
+  return data as CreateDashboardMemberResponse;
+}
 
 export type UpdateOrgUserBody = {
   full_name?: string;

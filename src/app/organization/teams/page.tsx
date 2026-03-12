@@ -4,10 +4,10 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { useEffect, useState, useCallback } from "react";
 import { getStoredUser, getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
-import { userHasRole, TEAM_ROLE, getRoleByTeamId, getAssignableRoles, isOwner, toRoleCodes } from "./_constants/team-roles";
+import { userHasRole, TEAM_ROLE, getRoleByTeamId, getAssignableRoles, isOwner, isOrgAdminRole, toRoleCodes } from "./_constants/team-roles";
 import {
   listOrgUsers,
-  createOrgUser,
+  createDashboardMember,
   getOrgUser,
   updateOrgUser,
   assignOrgUserRoles,
@@ -101,16 +101,34 @@ export default function TeamsPage() {
   const rolesToUse =
     rolesFromMembersApi.length > 0 ? rolesFromMembersApi : roles;
 
-  const isOrgAdmin = userHasRole(rolesToUse, TEAM_ROLE.ORG_ADMIN);
+  const isOrgAdmin = isOrgAdminRole(rolesToUse);
   const isOwnerUser = isOwner(rolesToUse);
   const canManageMembers = isOwnerUser || isOrgAdmin;
   const orgId = org?.id ?? "";
 
   const assignableRoleCodes = getAssignableRoles(rolesToUse);
-  const roleOptions: { value: string; label: string }[] = assignableRoleCodes.map((code) => ({
+  // ORG_ADMIN no puede asignar USER_APP. Solo mostramos USER_APP cuando el usuario es OWNER y NO tiene ORG_ADMIN.
+  const roleCodesForUi =
+    isOwnerUser && !isOrgAdmin
+      ? assignableRoleCodes
+      : assignableRoleCodes.filter((code) => code !== TEAM_ROLE.USER_APP);
+  const roleOptions: { value: string; label: string }[] = roleCodesForUi.map((code) => ({
     value: code,
     label: translations.membersManagement.roleNames?.[code as keyof typeof translations.membersManagement.roleNames] ?? code,
   }));
+
+  if (typeof window !== "undefined" && canManageMembers) {
+    console.log("[Teams] Roles para opciones del dropdown", {
+      rolesFromMembersApi,
+      rolesFromSession: roles,
+      rolesToUse,
+      isOrgAdmin,
+      isOwnerUser,
+      assignableRoleCodes,
+      roleCodesForUi,
+      roleOptionsLabels: roleOptions.map((o) => o.label),
+    });
+  }
 
   const setSearchAndPage = (v: string) => { setMembersSearch(v); setMembersPage(1); };
   const setStatusAndPage = (v: OrgUserStatus | "") => { setMembersStatus(v); setMembersPage(1); };
@@ -119,7 +137,11 @@ export default function TeamsPage() {
   const [addInitialRole, setAddInitialRole] = useState<string | undefined>();
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState("");
-  const [tempPasswordModal, setTempPasswordModal] = useState<string | null>(null);
+  const [tempPasswordModal, setTempPasswordModal] = useState<{
+    temporary_password: string;
+    invite_token: string | null;
+    recipientEmail?: string;
+  } | null>(null);
 
   const [editUser, setEditUser] = useState<OrgUser | null>(null);
   const [editRolesUser, setEditRolesUser] = useState<OrgUser | null>(null);
@@ -190,28 +212,39 @@ export default function TeamsPage() {
 
   const openAddForTeam = (teamId: string) => {
     const role = getRoleByTeamId(teamId);
-    setAddInitialRole(role && assignableRoleCodes.includes(role) ? role : undefined);
+    setAddInitialRole(role && roleCodesForUi.includes(role) ? role : undefined);
     setAddError("");
     setAddModalOpen(true);
   };
 
-  const handleAddMember = async (data: { fullName: string; email: string; role: string }) => {
+  const handleAddMember = async (data: {
+    fullName: string;
+    email: string;
+    role: string;
+    sendInvite?: boolean;
+  }) => {
     if (!orgId) return;
     setAddError("");
     setAddLoading(true);
     try {
-      const res = await createOrgUser(orgId, {
+      const res = await createDashboardMember(orgId, {
         email: data.email,
         full_name: data.fullName,
-        roles: [data.role],
+        roles: data.role ? [data.role] : undefined,
+        send_invite: data.sendInvite ?? false,
       });
       setAddModalOpen(false);
-      setTempPasswordModal(res.temporary_password);
+      setTempPasswordModal({
+        temporary_password: res.temporary_password,
+        invite_token: res.invite_token ?? null,
+        recipientEmail: res.user?.email,
+      });
       fetchMembers();
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.statusCode === 403) setAddError(translations.membersManagement.errors.noPermission);
         else if (err.statusCode === 409) setAddError(translations.membersManagement.errors.emailExists);
+        else if (err.statusCode === 400) setAddError(err.message);
         else setAddError(err.message);
       } else setAddError(translations.membersManagement.errors.noPermission);
     } finally {
@@ -355,7 +388,9 @@ export default function TeamsPage() {
 
       {tempPasswordModal && (
         <TemporaryPasswordModal
-          temporaryPassword={tempPasswordModal}
+          temporaryPassword={tempPasswordModal.temporary_password}
+          inviteToken={tempPasswordModal.invite_token}
+          recipientEmail={tempPasswordModal.recipientEmail}
           onClose={() => setTempPasswordModal(null)}
         />
       )}
