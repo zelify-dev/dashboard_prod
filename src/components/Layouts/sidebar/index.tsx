@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -19,6 +20,13 @@ import {
   setStoredOrganizationScopes,
 } from "@/lib/auth-api";
 import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
+
+/** Tipo mínimo para ítems del menú (getNavData devuelve items: unknown[]). */
+interface NavSubItem {
+  title?: string;
+  url?: string;
+  items?: NavSubItem[];
+}
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -99,11 +107,13 @@ export function Sidebar() {
     NAV_DATA.some((section) => {
       return section.items.some((item) => {
         const itemKey = `${section.label}-${item.title}`;
-        return item.items.some((subItem) => {
+        return item.items.some((sub: unknown) => {
+          const subItem = sub as NavSubItem;
           // Check if subItem has nested items
-          if ("items" in subItem && subItem.items && subItem.items.length > 0) {
+          if (subItem.items && subItem.items.length > 0) {
             const subItemKey = `${itemKey}-${subItem.title}`;
-            return subItem.items.some((nestedItem) => {
+            return subItem.items.some((nested: unknown) => {
+              const nestedItem = nested as NavSubItem;
               if (nestedItem.url && nestedItem.url === pathname) {
                 if (!expandedItems.includes(itemKey)) {
                   setExpandedItems((prev) => [...prev, itemKey]);
@@ -115,7 +125,8 @@ export function Sidebar() {
               }
               return false;
             });
-          } else if (subItem.url && subItem.url === pathname) {
+          }
+          if (subItem.url && subItem.url === pathname) {
             if (!expandedItems.includes(itemKey)) {
               setExpandedItems((prev) => [...prev, itemKey]);
             }
@@ -492,15 +503,20 @@ export function Sidebar() {
                   <ul className="space-y-2">
                     {section.items.map((item) => {
                       const itemKey = `${section.label}-${item.title}`;
+                      const IconComponent = item.icon as React.ComponentType<{
+                        className?: string;
+                        "aria-hidden"?: boolean | string;
+                      }>;
                       const isItemExpanded = expandedItems.includes(itemKey);
                       const isItemActive =
                         ("url" in item && item.url === pathname) ||
-                        item.items.some((subItem) => {
+                        item.items.some((sub: unknown) => {
+                          const subItem = sub as NavSubItem;
                           if (subItem.url && subItem.url === pathname)
                             return true;
-                          if ("items" in subItem && subItem.items) {
+                          if (subItem.items) {
                             return subItem.items.some(
-                              (nestedItem) => nestedItem.url === pathname,
+                              (nested: unknown) => (nested as NavSubItem).url === pathname,
                             );
                           }
                           return false;
@@ -558,7 +574,7 @@ export function Sidebar() {
                                     className="size-6 shrink-0 rounded-full"
                                   />
                                 ) : (
-                                  <item.icon
+                                  <IconComponent
                                     className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
                                     aria-hidden="true"
                                   />
@@ -582,18 +598,18 @@ export function Sidebar() {
                                   className="ml-9 mr-0 space-y-1.5 pb-[15px] pr-0 pt-2"
                                   role="menu"
                                 >
-                                  {item.items.map((subItem) => {
+                                  {item.items.map((sub: unknown) => {
+                                    const subItem = sub as NavSubItem;
                                     const subItemKey = `${itemKey}-${subItem.title}`;
                                     const isSubItemExpanded =
                                       expandedItems.includes(subItemKey);
                                     const hasNestedItems =
-                                      "items" in subItem &&
                                       subItem.items &&
                                       subItem.items.length > 0;
                                     const isSubItemActive = hasNestedItems
-                                      ? subItem.items!.some(
-                                          (nestedItem) =>
-                                            nestedItem.url === pathname,
+                                      ? (subItem.items ?? []).some(
+                                          (nested: unknown) =>
+                                            (nested as NavSubItem).url === pathname,
                                         )
                                       : subItem.url === pathname;
 
@@ -743,34 +759,37 @@ export function Sidebar() {
                                                 className="ml-6 mr-0 space-y-1.5 pb-[10px] pr-0 pt-2"
                                                 role="menu"
                                               >
-                                                {subItem.items.map(
-                                                  (nestedItem) => (
-                                                    <li
-                                                      key={nestedItem.title}
-                                                      role="none"
-                                                    >
-                                                      {nestedItem.url ? (
-                                                        <MenuItem
-                                                          as="link"
-                                                          href={nestedItem.url}
-                                                          isActive={
-                                                            pathname ===
-                                                            nestedItem.url
-                                                          }
-                                                        >
-                                                          <span>
-                                                            {nestedItem.title}
-                                                          </span>
-                                                        </MenuItem>
-                                                      ) : (
-                                                        <div className="rounded-lg px-3.5 py-2 font-medium text-dark-4 opacity-50 dark:text-dark-6">
-                                                          <span>
-                                                            {nestedItem.title}
-                                                          </span>
-                                                        </div>
-                                                      )}
-                                                    </li>
-                                                  ),
+                                                {(subItem.items ?? []).map(
+                                                  (nested: unknown) => {
+                                                    const nestedItem = nested as NavSubItem;
+                                                    return (
+                                                      <li
+                                                        key={nestedItem.title}
+                                                        role="none"
+                                                      >
+                                                        {nestedItem.url ? (
+                                                          <MenuItem
+                                                            as="link"
+                                                            href={nestedItem.url}
+                                                            isActive={
+                                                              pathname ===
+                                                              nestedItem.url
+                                                            }
+                                                          >
+                                                            <span>
+                                                              {nestedItem.title}
+                                                            </span>
+                                                          </MenuItem>
+                                                        ) : (
+                                                          <div className="rounded-lg px-3.5 py-2 font-medium text-dark-4 opacity-50 dark:text-dark-6">
+                                                            <span>
+                                                              {nestedItem.title}
+                                                            </span>
+                                                          </div>
+                                                        )}
+                                                      </li>
+                                                    );
+                                                  },
                                                 )}
                                               </ul>
                                             )}
@@ -831,7 +850,7 @@ export function Sidebar() {
                               if (isDisabled) {
                                 return (
                                   <div className="flex w-full items-center gap-3 rounded-lg px-3.5 py-3 font-medium text-dark-4 opacity-60 transition-all duration-200 hover:cursor-not-allowed dark:text-dark-6">
-                                    <item.icon
+                                    <IconComponent
                                       className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
                                       aria-hidden="true"
                                     />
@@ -867,7 +886,7 @@ export function Sidebar() {
                                   href={href}
                                   isActive={pathname === href}
                                 >
-                                  <item.icon
+                                  <IconComponent
                                     className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
                                     aria-hidden="true"
                                   />
