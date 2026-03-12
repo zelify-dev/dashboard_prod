@@ -162,16 +162,18 @@ export default function OrganizationBrandingPage() {
           )}
 
           <ShowcaseSection title="Logos e ícono" className="!p-6">
-            <p className="mb-4 text-sm text-dark-6 dark:text-dark-6">
+            <p className="mb-6 text-sm text-dark-6 dark:text-dark-6">
               Solo archivos PNG. Cada subida reemplaza el archivo anterior.
             </p>
-            <div className="grid gap-6 sm:grid-cols-2">
+
+            {/* Logo principal — solo arriba */}
+            <div className="mb-8">
+              <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo principal</p>
               <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo principal</p>
                 {branding?.url_log ? (
-                  <img src={branding.url_log} alt="Logo" className="mb-2 h-16 w-auto max-w-[160px] object-contain" />
+                  <img src={branding.url_log} alt="Logo principal" className="mb-3 h-20 w-auto max-w-[200px] object-contain" />
                 ) : (
-                  <p className="mb-2 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                  <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
                 )}
                 <input
                   type="file"
@@ -181,27 +183,19 @@ export default function OrganizationBrandingPage() {
                   className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
                 />
               </div>
-              <div className="rounded-lg border border-stroke bg-gray-2/40 p-4 dark:border-dark-3 dark:bg-dark-3/40">
-                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo oscuro</p>
-                {branding?.url_log_dark ? (
-                  <img src={branding.url_log_dark} alt="Logo dark" className="mb-2 h-16 w-auto max-w-[160px] object-contain" />
-                ) : (
-                  <p className="mb-2 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
-                )}
-                <input
-                  type="file"
-                  accept=".png,image/png"
-                  onChange={(e) => handleLogoChange(e, "logoDark")}
-                  disabled={logoUploading}
-                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
-                />
-              </div>
+            </div>
+
+            {/* Logos fondo claro y oscuro — dos columnas, formato cuadrado pequeño */}
+            <p className="mb-2 text-xs font-medium text-dark-6 dark:text-dark-6">
+              Logos para fondos claro y oscuro (recomendado formato cuadrado y pequeño)
+            </p>
+            <div className="mb-8 grid gap-6 sm:grid-cols-2">
               <div className="rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
                 <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo claro</p>
                 {branding?.url_log_light ? (
-                  <img src={branding.url_log_light} alt="Logo light" className="mb-2 h-16 w-auto max-w-[160px] object-contain" />
+                  <img src={branding.url_log_light} alt="Logo light" className="mb-3 h-20 w-20 object-contain" />
                 ) : (
-                  <p className="mb-2 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                  <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
                 )}
                 <input
                   type="file"
@@ -211,12 +205,34 @@ export default function OrganizationBrandingPage() {
                   className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
                 />
               </div>
-              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Ícono</p>
-                {branding?.url_icon ? (
-                  <img src={branding.url_icon} alt="Icon" className="mb-2 h-12 w-12 object-contain" />
+              <div className="rounded-lg border border-stroke bg-gray-2/40 p-4 dark:border-dark-3 dark:bg-dark-3/40">
+                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo oscuro</p>
+                {branding?.url_log_dark ? (
+                  <img src={branding.url_log_dark} alt="Logo dark" className="mb-3 h-20 w-20 object-contain" />
                 ) : (
-                  <p className="mb-2 text-sm text-dark-6 dark:text-dark-6">Sin ícono</p>
+                  <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                )}
+                <input
+                  type="file"
+                  accept=".png,image/png"
+                  onChange={(e) => handleLogoChange(e, "logoDark")}
+                  disabled={logoUploading}
+                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
+                />
+              </div>
+            </div>
+
+            {/* Ícono — solo, con descripción */}
+            <div>
+              <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Ícono</p>
+              <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">
+                Se usa para las notificaciones push y representación de la app en dispositivos.
+              </p>
+              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
+                {branding?.url_icon ? (
+                  <img src={branding.url_icon} alt="Icono" className="mb-3 h-14 w-14 object-contain" />
+                ) : (
+                  <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin ícono</p>
                 )}
                 <input
                   type="file"
@@ -227,8 +243,9 @@ export default function OrganizationBrandingPage() {
                 />
               </div>
             </div>
-            {logoUploading && <p className="mt-2 text-sm text-dark-6">Subiendo…</p>}
-            {logoError && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{logoError}</p>}
+
+            {logoUploading && <p className="mt-4 text-sm text-dark-6">Subiendo…</p>}
+            {logoError && <p className="mt-4 text-sm text-red-600 dark:text-red-400">{logoError}</p>}
           </ShowcaseSection>
 
           <ShowcaseSection title="Colores" className="mt-6 !p-6">
@@ -236,7 +253,7 @@ export default function OrganizationBrandingPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
-                    Color A
+                    Color primario
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -256,7 +273,7 @@ export default function OrganizationBrandingPage() {
                 </div>
                 <div>
                   <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
-                    Color B
+                    Color secundario
                   </label>
                   <div className="flex items-center gap-3">
                     <input
