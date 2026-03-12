@@ -311,7 +311,7 @@ export type UiTranslations = {
       addressPlaceholder: string;
       saveButton: string;
       organizationSection: string;
-      organizationId: string;
+      fiscalId: string;
       accountSection: string;
       fullName: string;
       email: string;
@@ -700,7 +700,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         addressPlaceholder: "Enter the full address of the headquarters",
         saveButton: "Save custom branding",
         organizationSection: "Organization",
-        organizationId: "Organization ID",
+        fiscalId: "Fiscal ID",
         accountSection: "Account",
         fullName: "Full name",
         email: "Email",
@@ -1089,7 +1089,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           "Ingrese la dirección completa de la sede principal",
         saveButton: "Guardar personalización de marca",
         organizationSection: "Organización",
-        organizationId: "ID de organización",
+        fiscalId: "Identificador fiscal",
         accountSection: "Cuenta",
         fullName: "Nombre completo",
         email: "Correo electrónico",

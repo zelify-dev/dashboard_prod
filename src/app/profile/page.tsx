@@ -107,7 +107,7 @@ export default function Page() {
               ) : organization ? (
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <FieldReadOnly label={profilePage.form.businessName} value={organization.name} />
-                  <FieldReadOnly label={profilePage.form.organizationId} value={organization.id} mono />
+                  <FieldReadOnly label={profilePage.form.fiscalId} value={organization.fiscal_id} mono />
                   <FieldReadOnly label={profilePage.form.companyLegalName} value={organization.company_legal_name} />
                   <FieldReadOnly
                     label={profilePage.form.country}
@@ -140,7 +140,7 @@ export default function Page() {
               </div>
             </div>
 
-            </form>
+          </form>
         </div>
       </div>
     </div>
