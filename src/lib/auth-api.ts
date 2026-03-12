@@ -129,6 +129,11 @@ export type AuthSuccessResponse = {
   api_keys_created?: boolean;
 };
 
+export type LoginStep1Response = {
+  session_id: string;
+  message: string;
+};
+
 export type RefreshResponse = {
   access_token: string;
   refresh_token: string;
@@ -248,10 +253,10 @@ export async function register(
   return data as AuthSuccessResponse;
 }
 
-/** POST /api/auth/login */
+/** POST /api/auth/dashboard/login */
 export async function login(
   payload: LoginPayload
-): Promise<AuthSuccessResponse | Login409Response> {
+): Promise<LoginStep1Response | Login409Response> {
   const base = getBaseUrl();
   if (!base) {
     throw new Error("NEXT_PUBLIC_AUTH_API_URL no está configurado en .env");
@@ -261,7 +266,7 @@ export async function login(
     password: payload.password,
   };
   if (payload.organization_id) body.organization_id = payload.organization_id;
-  const res = await fetch(`${base}/api/auth/login`, {
+  const res = await fetch(`${base}/api/auth/dashboard/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -270,6 +275,26 @@ export async function login(
   if (res.status === 409) return data as Login409Response;
   if (!res.ok) {
     const msg = data.message || (res.status === 401 ? "Email o contraseña incorrectos." : res.status === 403 ? "Usuario u organización deshabilitados." : res.status === 423 ? "Usuario bloqueado temporalmente." : res.status >= 500 ? "Algo falló. Intenta de nuevo." : "Error en el inicio de sesión");
+    throw new AuthError(msg, res.status, data);
+  }
+  return data as LoginStep1Response;
+}
+
+/** POST /api/auth/dashboard/login/verify-otp */
+export async function verifyDashboardOtp(payload: {
+  session_id: string;
+  otp_code: string;
+}): Promise<AuthSuccessResponse> {
+  const base = getBaseUrl();
+  if (!base) throw new Error("NEXT_PUBLIC_AUTH_API_URL no está configurado en .env");
+  const res = await fetch(`${base}/api/auth/dashboard/login/verify-otp`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = data.message || "Código OTP inválido o expirado.";
     throw new AuthError(msg, res.status, data);
   }
   return data as AuthSuccessResponse;

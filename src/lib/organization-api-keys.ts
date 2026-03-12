@@ -6,7 +6,7 @@
  *
  * Base URL: NEXT_PUBLIC_AUTH_API_URL
  * Cabecera obligatoria: Authorization: Bearer <access_token>
- * (El mismo access_token que devuelve POST /api/auth/login. Si no se envía o está expirado,
+ * (El mismo access_token que devuelve POST /api/auth/dashboard/login. Si no se envía o está expirado,
  *  el backend responde "Se requiere organization_id en query o usuario autenticado".)
  *
  * Query opcional en todas las rutas: ?organization_id=<uuid>

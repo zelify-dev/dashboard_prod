@@ -12,11 +12,11 @@
  * | (cualquiera)                      | 500    | "Algo falló. Intenta de nuevo." |
  * | POST /api/auth/register           | 201    | OK         |
  * | POST /api/auth/register           | 409    | "Este correo ya tiene cuenta. Inicia sesión." |
- * | POST /api/auth/login              | 201    | OK         |
- * | POST /api/auth/login              | 401    | "Email o contraseña incorrectos" |
- * | POST /api/auth/login              | 403    | "Usuario u organización deshabilitados" |
- * | POST /api/auth/login              | 409    | Email en múltiples orgs (elegir organización) |
- * | POST /api/auth/login              | 423    | "Usuario bloqueado temporalmente" |
+ * | POST /api/auth/dashboard/login   | 201    | OK         |
+ * | POST /api/auth/dashboard/login   | 401    | "Email o contraseña incorrectos" |
+ * | POST /api/auth/dashboard/login   | 403    | "Usuario u organización deshabilitados" |
+ * | POST /api/auth/dashboard/login   | 409    | Email en múltiples orgs (elegir organización) |
+ * | POST /api/auth/dashboard/login   | 423    | "Usuario bloqueado temporalmente" |
  * | POST /api/auth/refresh            | 201    | OK         |
  * | POST /api/auth/refresh            | 401    | Refresh inválido/sesión revocada → cerrar sesión, "Sesión expirada" |
  * | POST /api/auth/logout             | 201    | OK         |
@@ -26,7 +26,7 @@
  * | GET /api/me, etc.                 | 403    | Cuenta deshabilitada |
  */
 
-export type AuthErrorContext = "login" | "register" | "protected" | "generic";
+export type AuthErrorContext = "login" | "register" | "protected" | "generic" | "verify-otp";
 
 const MESSAGES_ES: Record<number, string> = {
   400: "Revisa los datos enviados.",
@@ -45,6 +45,10 @@ const MESSAGES_LOGIN_ES: Record<number, string> = {
 
 const MESSAGES_REGISTER_ES: Record<number, string> = {
   409: "Este correo ya tiene cuenta. Inicia sesión.",
+};
+
+const MESSAGES_OTP_ES: Record<number, string> = {
+  401: "Código OTP inválido o expirado.",
 };
 
 const MESSAGES_EN: Record<number, string> = {
@@ -66,6 +70,10 @@ const MESSAGES_REGISTER_EN: Record<number, string> = {
   409: "This email is already registered. Sign in.",
 };
 
+const MESSAGES_OTP_EN: Record<number, string> = {
+  401: "Invalid or expired OTP code.",
+};
+
 /**
  * Devuelve el mensaje UX recomendado para un código HTTP del API de auth.
  * @param statusCode Código HTTP (400, 401, 403, 404, 423, 500)
@@ -82,8 +90,10 @@ export function getAuthErrorMessage(
   if (apiMessage && (statusCode === 400 || statusCode === 500)) return apiMessage;
   const loginMap = lang === "es" ? MESSAGES_LOGIN_ES : MESSAGES_LOGIN_EN;
   const registerMap = lang === "es" ? MESSAGES_REGISTER_ES : MESSAGES_REGISTER_EN;
+  const otpMap = lang === "es" ? MESSAGES_OTP_ES : MESSAGES_OTP_EN;
   const genericMap = lang === "es" ? MESSAGES_ES : MESSAGES_EN;
   if (context === "login" && loginMap[statusCode]) return loginMap[statusCode];
   if (context === "register" && registerMap[statusCode]) return registerMap[statusCode];
+  if (context === "verify-otp" && otpMap[statusCode]) return otpMap[statusCode];
   return genericMap[statusCode] ?? genericMap[500];
 }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
-import { login, persistAuthSession, AuthError, syncMe } from "@/lib/auth-api";
+import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe } from "@/lib/auth-api";
 import { getAuthErrorMessage } from "@/lib/auth-error-messages";
 
 // ============================================================================
@@ -29,6 +29,13 @@ const TRANSLATIONS = {
     placeholderPassword: "Enter your password",
     noAccount: "Don't have an account? ",
     createAccount: "Create your account",
+    otpTitle: "Verify your identity",
+    otpSub: "We've sent a 6-digit code to your email.",
+    otpPlaceholder: "123456",
+    verify: "Verify OTP",
+    verifying: "Verifying...",
+    otpLabel: "Verification Code",
+    reqOtp: "Verification code is required.",
   },
   es: {
     welcome: "Bienvenido de nuevo",
@@ -47,6 +54,13 @@ const TRANSLATIONS = {
     placeholderPassword: "Ingresa tu contraseña",
     noAccount: "¿No tienes cuenta? ",
     createAccount: "Crear cuenta",
+    otpTitle: "Verifica tu identidad",
+    otpSub: "Hemos enviado un código de 6 dígitos a su correo electrónico.",
+    otpPlaceholder: "123456",
+    verify: "Verificar código",
+    verifying: "Verificando...",
+    otpLabel: "Código de verificación",
+    reqOtp: "El código de verificación es obligatorio.",
   },
 };
 
@@ -198,6 +212,9 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<1 | 2>(1);
+  const [sessionId, setSessionId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -309,8 +326,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
     setError("");
     setLoading(true);
 
@@ -325,40 +340,77 @@ export default function LoginPage() {
       return;
     }
 
-    try {
-      const result = await login({
-        email: data.email,
-        password: data.password,
-      });
-
-      if ("access_token" in result) {
-        persistAuthSession(result);
-        try {
-          await syncMe();
-        } catch {
-          /* mantener datos del response */
-        }
+    if (step === 1) {
+      if (!validateForm()) {
         setLoading(false);
-        window.location.href = "/";
         return;
       }
 
-      setLoading(false);
-      setError((result as { message?: string }).message || t.incCreds);
-    } catch (err) {
-      console.error("Login error:", err);
-      setLoading(false);
-      if (err instanceof AuthError) {
-        setError(getAuthErrorMessage(err.statusCode, "login", language) || err.message);
-      } else {
-        setError(
-          err instanceof Error
-            ? err.message
-            : language === "en"
-              ? "Connection error. Please try again."
-              : "Error de conexión. Por favor intenta de nuevo.",
-        );
+      try {
+        const result = await login({
+          email: data.email,
+          password: data.password,
+        });
+
+        if ("session_id" in result) {
+          setSessionId(result.session_id);
+          setStep(2);
+          setLoading(false);
+          return;
+        }
+
+        setLoading(false);
+        setError((result as { message?: string }).message || t.incCreds);
+      } catch (err) {
+        handleAuthError(err);
       }
+    } else {
+      // Step 2: Verify OTP
+      if (!otp) {
+        setError(t.reqOtp);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const result = await verifyDashboardOtp({
+          session_id: sessionId,
+          otp_code: otp,
+        });
+
+        if ("access_token" in result) {
+          persistAuthSession(result);
+          try {
+            await syncMe();
+          } catch {
+            /* mantener datos del response */
+          }
+          setLoading(false);
+          window.location.href = "/";
+          return;
+        }
+
+        setLoading(false);
+        setError(t.incCreds);
+      } catch (err) {
+        handleAuthError(err);
+      }
+    }
+  };
+
+  const handleAuthError = (err: unknown) => {
+    console.error("Auth error:", err);
+    setLoading(false);
+    if (err instanceof AuthError) {
+      setError(getAuthErrorMessage(err.statusCode, step === 1 ? "login" : "verify-otp", language) || err.message);
+    } else {
+      setError(
+        err instanceof Error
+          ? err.message
+          : language === "en"
+            ? "Connection error. Please try again."
+            : "Error de conexión. Por favor intenta de nuevo.",
+      );
     }
   };
 
@@ -453,10 +505,10 @@ export default function LoginPage() {
                 </div>
 
                 <h1 className="mb-2 text-2xl font-bold text-dark dark:text-white sm:text-heading-3">
-                  {t.welcome}
+                  {step === 1 ? t.welcome : t.otpTitle}
                 </h1>
                 <p className="mb-8 text-sm text-dark-6 dark:text-dark-6">
-                  {t.subWelcome}
+                  {step === 1 ? t.subWelcome : t.otpSub}
                 </p>
 
                 <form onSubmit={handleSubmit}>
@@ -475,46 +527,71 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <InputGroup
-                    type="email"
-                    label={t.email}
-                    className={`mb-4 [&_input]:py-[15px] ${
-                      formErrors.email
-                        ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
-                        : ""
-                    }`}
-                    placeholder={t.placeholderEmail}
-                    name="email"
-                    handleChange={handleChange}
-                    value={data.email}
-                    icon={<EmailIcon />}
-                    required
-                  />
-                  {formErrors.email && (
-                    <p className="mb-4 mt-[-10px] text-sm text-red-500">
-                      {formErrors.email}
-                    </p>
-                  )}
+                  {step === 1 ? (
+                    <>
+                      <InputGroup
+                        type="email"
+                        label={t.email}
+                        className={`mb-4 [&_input]:py-[15px] ${
+                          formErrors.email
+                            ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
+                            : ""
+                        }`}
+                        placeholder={t.placeholderEmail}
+                        name="email"
+                        handleChange={handleChange}
+                        value={data.email}
+                        icon={<EmailIcon />}
+                        required
+                      />
+                      {formErrors.email && (
+                        <p className="mb-4 mt-[-10px] text-sm text-red-500">
+                          {formErrors.email}
+                        </p>
+                      )}
 
-                  <InputGroup
-                    type="password"
-                    label={t.password}
-                    className={`mb-5 [&_input]:py-[15px] ${
-                      formErrors.password
-                        ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
-                        : ""
-                    }`}
-                    placeholder={t.placeholderPassword}
-                    name="password"
-                    handleChange={handleChange}
-                    value={data.password}
-                    icon={<PasswordIcon />}
-                    required
-                  />
-                  {formErrors.password && (
-                    <p className="mb-5 mt-[-15px] text-sm text-red-500">
-                      {formErrors.password}
-                    </p>
+                      <InputGroup
+                        type="password"
+                        label={t.password}
+                        className={`mb-5 [&_input]:py-[15px] ${
+                          formErrors.password
+                            ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
+                            : ""
+                        }`}
+                        placeholder={t.placeholderPassword}
+                        name="password"
+                        handleChange={handleChange}
+                        value={data.password}
+                        icon={<PasswordIcon />}
+                        required
+                      />
+                      {formErrors.password && (
+                        <p className="mb-5 mt-[-15px] text-sm text-red-500">
+                          {formErrors.password}
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <InputGroup
+                        type="text"
+                        label={t.otpLabel}
+                        className={`mb-5 [&_input]:py-[15px]`}
+                        placeholder={t.otpPlaceholder}
+                        name="otp"
+                        handleChange={(e) => setOtp(e.target.value)}
+                        value={otp}
+                        icon={<PasswordIcon />}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setStep(1)}
+                        className="mb-4 text-sm font-medium text-primary hover:underline"
+                      >
+                        {language === "en" ? "Change email/password" : "Cambiar correo/contraseña"}
+                      </button>
+                    </>
                   )}
 
                   {/* Botón de login */}
@@ -544,11 +621,11 @@ export default function LoginPage() {
                     >
                       {loading ? (
                         <>
-                          {t.signingIn}
+                          {step === 1 ? t.signingIn : t.verifying}
                           <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-t-transparent" />
                         </>
                       ) : (
-                        t.signIn
+                        step === 1 ? t.signIn : t.verify
                       )}
                     </button>
                   </div>

@@ -129,7 +129,7 @@ Authorization: Bearer <access_token>
 El flujo de login existente debe seguir devolviendo el usuario con el campo **`must_change_password`**:
 
 - Usuario creado por ORG_ADMIN con contraseña temporal → en BD `must_change_password = true`.
-- En la respuesta de **POST /api/auth/login** (y en **GET /api/me**), incluir en el objeto `user`:
+- En la respuesta de **POST /api/auth/dashboard/login** (y en **GET /api/me**), incluir en el objeto `user`:
 
 ```json
 {
@@ -208,7 +208,7 @@ Si el backend devuelve también `organization` y `roles`, el frontend puede segu
 |---------------------------|--------------------|----------------------------------------|----------------|
 | Añadir miembro            | Solo ORG_ADMIN     | POST /api/organizations/members        | Body: email, full_name, password, role. Crear usuario con `must_change_password: true`. |
 | Eliminar miembro          | Solo ORG_ADMIN     | DELETE /api/organizations/members/:userId | Solo usuarios de la misma org. 204 o 200. |
-| Login                     | Cualquiera         | POST /api/auth/login                  | Incluir en `user` el campo `must_change_password`. |
+| Login                     | Cualquiera         | POST /api/auth/dashboard/login        | Incluir en `user` el campo `must_change_password`. |
 | Perfil                    | Cualquiera         | GET /api/me                           | Incluir en `user` el campo `must_change_password`. |
 | Cambio de contraseña      | Usuario logueado   | POST /api/me/change-password           | Body: new_password. Actualizar hash y poner `must_change_password: false`. Devolver usuario actualizado. |
 
