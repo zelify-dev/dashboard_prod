@@ -3,8 +3,13 @@
 import { useState, useEffect } from "react";
 import { useLanguageTranslations } from "@/hooks/use-language-translations";
 import { type Language } from "@/contexts/language-context";
-import { getStoredOrganization } from "@/lib/auth-api";
-import { getOrganization, type OrganizationDetails } from "@/lib/auth-api";
+import {
+  getStoredOrganization,
+  getOrganization,
+  getOrganizationScopes,
+  setStoredOrganizationScopes,
+  type OrganizationDetails,
+} from "@/lib/auth-api";
 
 type PanelTranslations = {
     title: string;
@@ -280,13 +285,29 @@ export function PanelDashboard() {
         return () => observer.disconnect();
     }, []);
 
-    // Cargar detalles de la organización (zcoins, etc.) para el dashboard actual
+    // Cargar detalles de la organización (zcoins, etc.) y scopes para el dashboard
     useEffect(() => {
         const org = getStoredOrganization();
         if (!org?.id) return;
         getOrganization(org.id)
             .then(setOrgDetails)
             .catch(() => setOrgDetails(null));
+        getOrganizationScopes(org.id)
+            .then((items) => {
+                const scopeStrings = items.map((s) => s.scope);
+                setStoredOrganizationScopes(scopeStrings);
+                if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("organizationScopesUpdated", { detail: scopeStrings }));
+                    console.log("[panel-dashboard] GET /api/organizations/" + org.id + "/scopes OK:", scopeStrings.length, "scopes");
+                }
+            })
+            .catch((err) => {
+                if (typeof window !== "undefined") {
+                    console.warn("[panel-dashboard] GET scopes error:", err);
+                }
+                setStoredOrganizationScopes([]);
+                window.dispatchEvent(new CustomEvent("organizationScopesUpdated", { detail: [] }));
+            });
     }, []);
 
     const zcoinsBalance = orgDetails?.zcoins ?? "0";

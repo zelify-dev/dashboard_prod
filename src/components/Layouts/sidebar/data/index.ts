@@ -1,17 +1,35 @@
 import * as Icons from "../icons";
 import type { UiTranslations } from "@/hooks/use-ui-translations";
 
-export function getNavData(translations: UiTranslations, options?: { isOwner?: boolean; canSeeBranding?: boolean }) {
+/** Verifica si al menos un scope de la org coincide con el prefijo (o con alguno de los prefijos). */
+function hasScope(scopePrefix: string | string[], scopeStrings: string[]): boolean {
+  const prefixes = Array.isArray(scopePrefix) ? scopePrefix : [scopePrefix];
+  return prefixes.some((p) => scopeStrings.some((s) => s.startsWith(p)));
+}
+
+export function getNavData(
+  translations: UiTranslations,
+  options?: { isOwner?: boolean; canSeeBranding?: boolean; organizationScopes?: string[] | null }
+) {
   const isOwner = options?.isOwner ?? false;
   const canSeeBranding = options?.canSeeBranding ?? false;
-  return [
+  const organizationScopes = options?.organizationScopes;
+
+  if (typeof window !== "undefined") {
+    console.log("[getNavData] organizationScopes recibido:", organizationScopes == null ? "null" : `array(${organizationScopes?.length})`, organizationScopes ?? "(no aplica filtro, se muestran todos)");
+  }
+
+  const productItems: Array<{
+    scopePrefix: string | string[];
+    title: string;
+    icon: unknown;
+    items: unknown[];
+  }> = [
     {
-      label: translations.sidebar.products,
+      scopePrefix: "auth.",
+      title: translations.sidebar.menuItems.auth,
+      icon: Icons.Authentication,
       items: [
-        {
-          title: translations.sidebar.menuItems.auth,
-          icon: Icons.Authentication,
-          items: [
             {
               title: translations.sidebar.menuItems.subItems.authentication,
               url: "/pages/products/auth/authentication",
@@ -25,10 +43,11 @@ export function getNavData(translations: UiTranslations, options?: { isOwner?: b
               url: "/pages/products/auth/device-information",
             },
           ],
-        },
-        {
-          title: translations.sidebar.menuItems.aml,
-          icon: Icons.AMLIcon,
+    },
+    {
+      scopePrefix: "aml.",
+      title: translations.sidebar.menuItems.aml,
+      icon: Icons.AMLIcon,
           items: [
             {
               title:
@@ -36,30 +55,33 @@ export function getNavData(translations: UiTranslations, options?: { isOwner?: b
               url: "/pages/products/aml/validation-global-list",
             },
           ],
-        },
-        {
-          title: translations.sidebar.menuItems.identity,
-          icon: Icons.IdentityIcon,
+    },
+    {
+      scopePrefix: "identity.",
+      title: translations.sidebar.menuItems.identity,
+      icon: Icons.IdentityIcon,
           items: [
             {
               title: translations.sidebar.menuItems.subItems.workflow,
               url: "/pages/products/identity/workflow",
             },
           ],
-        },
-        {
-          title: translations.sidebar.menuItems.connect,
-          icon: Icons.ConnectIcon,
+    },
+    {
+      scopePrefix: "connect.",
+      title: translations.sidebar.menuItems.connect,
+      icon: Icons.ConnectIcon,
           items: [
             {
               title: translations.sidebar.menuItems.subItems.bankAccountLinking,
               url: "/pages/products/connect/bank-account-linking",
             },
           ],
-        },
-        {
-          title: translations.sidebar.menuItems.cards,
-          icon: Icons.CardsIcon,
+    },
+    {
+      scopePrefix: "cards.",
+      title: translations.sidebar.menuItems.cards,
+      icon: Icons.CardsIcon,
           items: [
             {
               title: translations.sidebar.menuItems.cards,
@@ -83,43 +105,46 @@ export function getNavData(translations: UiTranslations, options?: { isOwner?: b
               url: "/pages/products/cards/diligence",
             },
           ],
+    },
+    {
+      scopePrefix: ["payments.", "transfers."],
+      title: translations.sidebar.menuItems.payments,
+      icon: Icons.TransfersIcon,
+      items: [
+        {
+          title: translations.sidebar.menuItems.subItems.basicService,
+          url: "/pages/products/payments/servicios-basicos",
         },
         {
-          title: translations.sidebar.menuItems.payments,
-          icon: Icons.TransfersIcon,
-          items: [
-            {
-              title: translations.sidebar.menuItems.subItems.basicService,
-              url: "/pages/products/payments/servicios-basicos",
-            },
-            {
-              title: translations.sidebar.menuItems.subItems.transfers,
-              url: "/pages/products/payments/transfers",
-            },
-            {
-              title: translations.sidebar.menuItems.subItems.customKeys,
-              url: "/pages/products/payments/custom-keys",
-            },
-            {
-              title: translations.sidebar.menuItems.subItems.qr,
-              url: "/pages/products/payments/qr",
-            },
-          ],
+          title: translations.sidebar.menuItems.subItems.transfers,
+          url: "/pages/products/payments/transfers",
         },
         {
-          title: translations.sidebar.menuItems.tx,
-          icon: Icons.TxIcon,
-          items: [
-            {
-              title:
-                translations.sidebar.menuItems.subItems.internationalTransfers,
-              url: "/pages/products/tx/transferencias-internacionales",
-            },
-          ],
+          title: translations.sidebar.menuItems.subItems.customKeys,
+          url: "/pages/products/payments/custom-keys",
         },
         {
-          title: translations.sidebar.menuItems.ai,
-          icon: Icons.AIIcon,
+          title: translations.sidebar.menuItems.subItems.qr,
+          url: "/pages/products/payments/qr",
+        },
+      ],
+    },
+    {
+      scopePrefix: "tx.",
+      title: translations.sidebar.menuItems.tx,
+      icon: Icons.TxIcon,
+      items: [
+        {
+          title:
+            translations.sidebar.menuItems.subItems.internationalTransfers,
+          url: "/pages/products/tx/transferencias-internacionales",
+        },
+      ],
+    },
+    {
+      scopePrefix: "alaiza_ai.",
+      title: translations.sidebar.menuItems.ai,
+      icon: Icons.AIIcon,
           items: [
             {
               title: translations.sidebar.menuItems.subItems.alaiza,
@@ -134,10 +159,11 @@ export function getNavData(translations: UiTranslations, options?: { isOwner?: b
               url: "/pages/products/ai/financial-education",
             },
           ],
-        },
-        {
-          title: translations.sidebar.menuItems.discountsCoupons,
-          icon: Icons.DiscountsIcon,
+    },
+    {
+      scopePrefix: "discounts_coupons.",
+      title: translations.sidebar.menuItems.discountsCoupons,
+      icon: Icons.DiscountsIcon,
           items: [
             {
               title: translations.sidebar.menuItems.subItems.discounts,
@@ -156,8 +182,30 @@ export function getNavData(translations: UiTranslations, options?: { isOwner?: b
               url: "/pages/products/discounts-coupons/analytics",
             },
           ],
-        },
-      ],
+    },
+  ];
+
+  const filteredProductItems =
+    organizationScopes != null && Array.isArray(organizationScopes)
+      ? productItems.filter((item) => hasScope(item.scopePrefix, organizationScopes))
+      : productItems;
+  const productsSectionItems = filteredProductItems.map(({ scopePrefix: _p, ...item }) => item);
+
+  if (typeof window !== "undefined") {
+    console.log(
+      "[getNavData] PRODUCTS filtrados:",
+      filteredProductItems.length,
+      "de",
+      productItems.length,
+      "— títulos:",
+      productsSectionItems.map((i) => (i as { title: string }).title)
+    );
+  }
+
+  return [
+    {
+      label: translations.sidebar.products,
+      items: productsSectionItems,
     },
     {
       label: translations.sidebar.mainMenu,

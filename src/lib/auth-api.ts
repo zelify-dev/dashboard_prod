@@ -1,7 +1,9 @@
 /**
  * Cliente para la API de autenticación (registro, login, refresh, logout, me, sesiones).
- * Base URL: exclusivamente NEXT_PUBLIC_AUTH_API_URL (variable de entorno). No hay URLs base quemadas.
+ * Base URL: exclusivamente NEXT_PUBLIC_AUTH_API_URL del .env. No hay URLs base quemadas.
  * Prefijo de rutas: /api (ej. /api/auth/login, /api/me, /api/organizations/:id/users).
+ * Nota: en Next.js las variables NEXT_PUBLIC_* se inyectan en build time; si cambias .env
+ * debes reiniciar el servidor de desarrollo (npm run dev) para que tome el nuevo valor.
  *
  * Seguridad:
  * - Tokens y datos de sesión en sessionStorage (se borran al cerrar la pestaña).
@@ -12,10 +14,16 @@
 
 const getBaseUrl = (): string => {
   const url = process.env.NEXT_PUBLIC_AUTH_API_URL;
-  if (!url || typeof url !== "string") return "";
-  const base = url.replace(/\/$/, "");
+  if (!url || typeof url !== "string" || url.trim() === "") {
+    if (typeof window !== "undefined") {
+      console.warn(
+        "[auth-api] NEXT_PUBLIC_AUTH_API_URL está vacío o no definido. Configura la variable en .env (ej. NEXT_PUBLIC_AUTH_API_URL=http://localhost:8080) y reinicia el servidor."
+      );
+    }
+    return "";
+  }
+  const base = url.replace(/\/$/, "").trim();
   // Obligatorio: base debe ser URL absoluta del backend (ej. http://localhost:8080).
-  // Si es relativa o vacía, las peticiones irían al servidor Next.js y darían 404 "Cannot PATCH/GET...".
   if (!base.startsWith("http://") && !base.startsWith("https://")) {
     if (typeof window !== "undefined") {
       console.error("NEXT_PUBLIC_AUTH_API_URL debe ser una URL absoluta (ej. http://localhost:8080). Actual:", url);
@@ -62,6 +70,7 @@ export const AUTH_STORAGE_KEYS = {
   USER: "user",
   ORGANIZATION: "organization",
   ROLES: "roles",
+  ORGANIZATION_SCOPES: "organization_scopes",
   IS_AUTHENTICATED: "isAuthenticated",
   USER_EMAIL: "userEmail",
 } as const;
@@ -501,7 +510,60 @@ export async function getMe(): Promise<MeResponse> {
   return data as MeResponse;
 }
 
-/** Llama GET /api/me y actualiza user/org/roles en sessionStorage. Útil tras login/register. */
+/** Scopes de la organización (GET /api/organizations/:id/scopes). Se guardan tras login/syncMe. */
+export type OrganizationScopeItem = {
+  id: string;
+  scope: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+/** GET /api/organizations/:id/scopes — listar scopes de la organización (para filtrar módulos en el dashboard). */
+export async function getOrganizationScopes(orgId: string): Promise<OrganizationScopeItem[]> {
+  const path = `/api/organizations/${encodeURIComponent(orgId)}/scopes`;
+  if (typeof window !== "undefined") {
+    console.log("[getOrganizationScopes] GET", path);
+  }
+  const res = await fetchWithAuth(path);
+  const data = await res.json().catch(() => ({}));
+  if (typeof window !== "undefined") {
+    console.log("[getOrganizationScopes] Respuesta", res.status, res.ok ? "OK" : "ERROR", data);
+  }
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al obtener scopes",
+      res.status,
+      data
+    );
+  }
+  const list = (data as { scopes?: OrganizationScopeItem[] }).scopes;
+  return Array.isArray(list) ? list : [];
+}
+
+/** Devuelve los scope strings guardados (ej. ["auth.authentication.*", "aml.*"]) o null si no hay. */
+export function getStoredOrganizationScopes(): string[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(AUTH_STORAGE_KEYS.ORGANIZATION_SCOPES);
+    if (!raw) return null;
+    const arr = JSON.parse(raw) as unknown;
+    return Array.isArray(arr) ? arr : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Guarda la lista de scope strings en sessionStorage (usado tras GET scopes). */
+export function setStoredOrganizationScopes(scopes: string[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.ORGANIZATION_SCOPES, JSON.stringify(scopes));
+  } catch {
+    // ignore
+  }
+}
+
+/** Llama GET /api/me y actualiza user/org/roles en sessionStorage. Tras eso obtiene y guarda scopes de la org. */
 export async function syncMe(): Promise<void> {
   if (typeof window === "undefined") return;
   const me = await getMe();
@@ -515,6 +577,24 @@ export async function syncMe(): Promise<void> {
     ...(Array.isArray(userRoles) ? userRoles : []),
   ];
   sessionStorage.setItem(k.ROLES, JSON.stringify(normalizeRoleCodes(rolesInput)));
+
+  if (me.organization?.id) {
+    try {
+      const items = await getOrganizationScopes(me.organization.id);
+      const scopeStrings = items.map((s) => s.scope);
+      setStoredOrganizationScopes(scopeStrings);
+      if (typeof window !== "undefined") {
+        console.log("[syncMe] Scopes cargados para org", me.organization.id, ":", scopeStrings.length, "scopes", scopeStrings);
+      }
+    } catch (err) {
+      if (typeof window !== "undefined") {
+        console.warn("[syncMe] Error al cargar scopes de la org:", err);
+      }
+      setStoredOrganizationScopes([]);
+    }
+  } else if (typeof window !== "undefined") {
+    console.log("[syncMe] No hay organization.id en /api/me, no se cargan scopes");
+  }
 }
 
 /** PATCH /api/me — actualizar perfil (ej: full_name). */

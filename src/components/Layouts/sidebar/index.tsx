@@ -11,7 +11,13 @@ import { MenuItem } from "./menu-item";
 import { useSidebarContext } from "./sidebar-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { useTour } from "@/contexts/tour-context";
-import { getStoredRoles } from "@/lib/auth-api";
+import {
+  getStoredRoles,
+  getStoredOrganizationScopes,
+  getStoredOrganization,
+  getOrganizationScopes,
+  setStoredOrganizationScopes,
+} from "@/lib/auth-api";
 import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
 
 export function Sidebar() {
@@ -20,6 +26,43 @@ export function Sidebar() {
   const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
   const translations = useUiTranslations();
   const { isTourActive, currentStep, steps } = useTour();
+
+  const [organizationScopes, setOrganizationScopes] = useState<string[] | null>(() =>
+    getStoredOrganizationScopes()
+  );
+
+  // Escuchar cuando otro componente (ej. panel-dashboard) carga scopes
+  useEffect(() => {
+    const handler = (e: CustomEvent<string[]>) => {
+      setOrganizationScopes(e.detail ?? []);
+    };
+    window.addEventListener("organizationScopesUpdated", handler as EventListener);
+    return () => window.removeEventListener("organizationScopesUpdated", handler as EventListener);
+  }, []);
+
+  // Cargar scopes al montar (por si no estamos en la home y panel-dashboard no corre)
+  useEffect(() => {
+    const org = getStoredOrganization();
+    console.log("[Sidebar] useEffect scopes — org en storage:", org ? { id: org.id, name: org.name } : null);
+    if (!org?.id) {
+      console.log("[Sidebar] No hay organización (org?.id). No se llama a GET /api/organizations/:id/scopes.");
+      return;
+    }
+    const url = `/api/organizations/${org.id}/scopes`;
+    console.log("[Sidebar] Llamando a GET", url, "…");
+    getOrganizationScopes(org.id)
+      .then((items) => {
+        const scopeStrings = items.map((s) => s.scope);
+        setStoredOrganizationScopes(scopeStrings);
+        setOrganizationScopes(scopeStrings);
+        console.log("[Sidebar] GET scopes OK:", scopeStrings.length, "scopes", scopeStrings);
+      })
+      .catch((err) => {
+        console.warn("[Sidebar] Error al cargar scopes:", err);
+        setStoredOrganizationScopes([]);
+        setOrganizationScopes([]);
+      });
+  }, []);
 
   // Determinar si el sidebar es el target del paso actual
   const isSidebarTarget =
@@ -38,7 +81,11 @@ export function Sidebar() {
     isOwnerUser ||
     userHasRole(roles, TEAM_ROLE.ORG_ADMIN) ||
     userHasRole(roles, TEAM_ROLE.ZELIFY_TEAM);
-  const NAV_DATA = getNavData(translations, { isOwner: isOwnerUser, canSeeBranding });
+  const NAV_DATA = getNavData(translations, {
+    isOwner: isOwnerUser,
+    canSeeBranding,
+    organizationScopes,
+  });
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
 
   const toggleExpanded = (key: string) => {

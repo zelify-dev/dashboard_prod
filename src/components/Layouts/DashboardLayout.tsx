@@ -6,6 +6,7 @@ import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { TourModal } from "@/components/Tour/TourModal";
 import { TourOverlay } from "@/components/Tour/TourOverlay";
+import { ScopesLoader } from "@/components/ScopesLoader";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -27,6 +28,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <div className="flex min-h-screen">
+        <ScopesLoader />
         <Sidebar />
         <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
           <Header />
@@ -40,6 +42,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
+      <ScopesLoader />
       <Sidebar />
       <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
         <Header />
