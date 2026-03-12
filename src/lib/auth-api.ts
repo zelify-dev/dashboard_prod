@@ -80,10 +80,13 @@ export type AuthOrganization = {
   status: string;
 };
 
-/** Respuesta de GET /api/organizations/:id/branding (público). Solo campos de branding. */
+/** Respuesta de GET /api/organizations/:id/branding (público). Campos de branding; cualquiera puede ser null. */
 export type OrganizationBranding = {
   id: string;
   url_log: string | null;
+  url_log_dark: string | null;
+  url_log_light: string | null;
+  url_icon: string | null;
   color_a: string | null;
   color_b: string | null;
 };
@@ -416,13 +419,31 @@ export async function getOrganizationBranding(id: string): Promise<OrganizationB
   return data as OrganizationBranding;
 }
 
-/** POST /api/organizations/:id/branding/logo — subir logo (multipart, campo "logo"). Auth: Bearer. Respuesta 201 { url_log }. Errores: 400, 401, 403, 404. */
-export async function uploadOrganizationLogo(orgId: string, file: File): Promise<{ url_log: string }> {
+/** Tipo de logo para POST /api/organizations/:id/branding/logo. Solo PNG. */
+export type BrandingLogoType = "logo" | "logoDark" | "logoLight" | "icon";
+
+/**
+ * POST /api/organizations/:id/branding/logo — subir logo/ícono (multipart). Solo PNG.
+ * Campos form-data: logo, logoDark, logoLight, icon. Requiere Bearer y x-org-id.
+ * Respuesta 201: objeto branding completo. 400 si no es PNG.
+ */
+export async function uploadOrganizationLogo(
+  orgId: string,
+  file: File,
+  type: BrandingLogoType
+): Promise<OrganizationBranding> {
+  if (file.type !== "image/png") {
+    throw new AuthError("Solo se permiten archivos PNG para los logos de branding.", 400, {});
+  }
   const form = new FormData();
-  form.append("logo", file);
+  form.append(type, file);
   const res = await fetchWithAuth(
     `/api/organizations/${encodeURIComponent(orgId)}/branding/logo`,
-    { method: "POST", body: form }
+    {
+      method: "POST",
+      body: form,
+      headers: { "x-org-id": orgId },
+    }
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -432,19 +453,32 @@ export async function uploadOrganizationLogo(orgId: string, file: File): Promise
       data
     );
   }
-  return data as { url_log: string };
+  return data as OrganizationBranding;
 }
 
-/** PATCH /api/organizations/:id/branding — actualizar url_log, color_a, color_b (Bearer, JSON). Respuesta 200 = org actualizada. Errores: 400 validación, 401, 403, 404. */
+/** Payload para PATCH /api/organizations/:id/branding. Todos los campos opcionales. */
+export type UpdateOrganizationBrandingPayload = {
+  url_log?: string | null;
+  url_log_dark?: string | null;
+  url_log_light?: string | null;
+  url_icon?: string | null;
+  color_a?: string | null;
+  color_b?: string | null;
+};
+
+/**
+ * PATCH /api/organizations/:id/branding — actualizar URLs y/o colores (Bearer, x-org-id, JSON).
+ * Respuesta 200: objeto branding completo (mismo formato que GET).
+ */
 export async function updateOrganizationBranding(
   orgId: string,
-  payload: { color_a?: string | null; color_b?: string | null; url_log?: string | null }
-): Promise<OrganizationDetails> {
+  payload: UpdateOrganizationBrandingPayload
+): Promise<OrganizationBranding> {
   const res = await fetchWithAuth(
     `/api/organizations/${encodeURIComponent(orgId)}/branding`,
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-org-id": orgId },
       body: JSON.stringify(payload),
     }
   );
@@ -456,7 +490,7 @@ export async function updateOrganizationBranding(
         : (data as { message?: string }).message ?? "Error al actualizar branding";
     throw new AuthError(msg, res.status, data);
   }
-  return data as OrganizationDetails;
+  return data as OrganizationBranding;
 }
 
 /** GET /api/me — perfil del usuario logueado. */

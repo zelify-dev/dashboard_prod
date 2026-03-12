@@ -6,7 +6,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
 import { getOrganizationBranding, uploadOrganizationLogo, updateOrganizationBranding, AuthError } from "@/lib/auth-api";
-import type { OrganizationBranding } from "@/lib/auth-api";
+import type { OrganizationBranding, BrandingLogoType } from "@/lib/auth-api";
 import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 
@@ -75,28 +75,26 @@ export default function OrganizationBrandingPage() {
     }
   }, [toast]);
 
-  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>, type: BrandingLogoType) => {
     const file = e.target.files?.[0];
     if (!file || !org?.id) return;
     e.target.value = "";
     setLogoError("");
-    const allowedTypes = ["image/png", "image/svg+xml"];
-    const allowedExt = /\.(png|svg)$/i;
-    if (!allowedTypes.includes(file.type) || !allowedExt.test(file.name)) {
-      setLogoError("Solo se permiten archivos PNG o SVG.");
+    if (file.type !== "image/png") {
+      setLogoError("Solo se permiten archivos PNG para los logos de branding.");
       return;
     }
     setLogoUploading(true);
     try {
-      const { url_log } = await uploadOrganizationLogo(org.id, file);
-      setBranding((prev) => (prev ? { ...prev, url_log } : { id: org.id, url_log, color_a: null, color_b: null }));
+      const updated = await uploadOrganizationLogo(org.id, file, type);
+      setBranding(updated);
       setToast("Logo actualizado.");
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.statusCode === 401) router.push("/login");
         else if (err.statusCode === 403) setLogoError("No tienes permisos.");
         else if (err.statusCode === 404) setLogoError("Organización no encontrada.");
-        else if (err.statusCode === 400) setLogoError("Falta el archivo o el formato no es válido.");
+        else if (err.statusCode === 400) setLogoError(err.message);
         else if (err.statusCode === 500) setLogoError("Error subiendo logo, intenta de nuevo.");
         else setLogoError(err.message);
       } else {
@@ -120,11 +118,7 @@ export default function OrganizationBrandingPage() {
     setBrandingSaving(true);
     try {
       const updated = await updateOrganizationBranding(org.id, { color_a: a, color_b: b });
-      setBranding((prev) =>
-        prev
-          ? { ...prev, url_log: updated.url_log ?? prev.url_log, color_a: a, color_b: b }
-          : { id: org.id, url_log: updated.url_log ?? null, color_a: a, color_b: b }
-      );
+      setBranding(updated);
       setToast("Branding actualizado.");
     } catch (err) {
       if (err instanceof AuthError) {
@@ -168,34 +162,74 @@ export default function OrganizationBrandingPage() {
             </div>
           )}
 
-          <ShowcaseSection title="Logo" className="!p-6">
-            <div className="space-y-4">
-              {branding?.url_log ? (
-                <div className="flex items-center gap-4">
-                  <img
-                    src={branding.url_log}
-                    alt="Logo"
-                    className="h-20 w-auto max-w-[200px] object-contain"
-                  />
-                </div>
-              ) : (
-                <p className="text-sm text-dark-6 dark:text-dark-6">No hay logo cargado.</p>
-              )}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
-                  Subir logo (PNG o SVG)
-                </label>
+          <ShowcaseSection title="Logos e ícono" className="!p-6">
+            <p className="mb-4 text-sm text-dark-6 dark:text-dark-6">
+              Solo archivos PNG. Cada subida reemplaza el archivo anterior.
+            </p>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
+                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo principal</p>
+                {branding?.url_log ? (
+                  <img src={branding.url_log} alt="Logo" className="mb-2 h-16 w-auto max-w-[160px] object-contain" />
+                ) : (
+                  <p className="mb-2 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                )}
                 <input
                   type="file"
-                  accept="image/png,image/svg+xml"
-                  onChange={handleLogoChange}
+                  accept=".png,image/png"
+                  onChange={(e) => handleLogoChange(e, "logo")}
                   disabled={logoUploading}
-                  className="block w-full text-sm text-dark-6 file:mr-4 file:rounded file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:text-white file:hover:bg-opacity-90"
+                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
                 />
-                {logoUploading && <p className="mt-1 text-sm text-dark-6">Subiendo…</p>}
-                {logoError && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{logoError}</p>}
+              </div>
+              <div className="rounded-lg border border-stroke bg-gray-2/40 p-4 dark:border-dark-3 dark:bg-dark-3/40">
+                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo oscuro</p>
+                {branding?.url_log_dark ? (
+                  <img src={branding.url_log_dark} alt="Logo dark" className="mb-2 h-16 w-auto max-w-[160px] object-contain" />
+                ) : (
+                  <p className="mb-2 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                )}
+                <input
+                  type="file"
+                  accept=".png,image/png"
+                  onChange={(e) => handleLogoChange(e, "logoDark")}
+                  disabled={logoUploading}
+                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
+                />
+              </div>
+              <div className="rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
+                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo claro</p>
+                {branding?.url_log_light ? (
+                  <img src={branding.url_log_light} alt="Logo light" className="mb-2 h-16 w-auto max-w-[160px] object-contain" />
+                ) : (
+                  <p className="mb-2 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                )}
+                <input
+                  type="file"
+                  accept=".png,image/png"
+                  onChange={(e) => handleLogoChange(e, "logoLight")}
+                  disabled={logoUploading}
+                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
+                />
+              </div>
+              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
+                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Ícono</p>
+                {branding?.url_icon ? (
+                  <img src={branding.url_icon} alt="Icon" className="mb-2 h-12 w-12 object-contain" />
+                ) : (
+                  <p className="mb-2 text-sm text-dark-6 dark:text-dark-6">Sin ícono</p>
+                )}
+                <input
+                  type="file"
+                  accept=".png,image/png"
+                  onChange={(e) => handleLogoChange(e, "icon")}
+                  disabled={logoUploading}
+                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
+                />
               </div>
             </div>
+            {logoUploading && <p className="mt-2 text-sm text-dark-6">Subiendo…</p>}
+            {logoError && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{logoError}</p>}
           </ShowcaseSection>
 
           <ShowcaseSection title="Colores" className="mt-6 !p-6">
