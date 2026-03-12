@@ -12,12 +12,7 @@ export type RoleOption = { value: string; label: string };
 
 type AddMemberModalProps = {
   onClose: () => void;
-  onAdd: (data: {
-    fullName: string;
-    email: string;
-    role: string;
-    sendInvite?: boolean;
-  }) => void;
+  onAdd: (data: { fullName: string; email: string; role: string }) => void;
   roleOptions: RoleOption[];
   initialRole?: string;
   loading?: boolean;
@@ -37,12 +32,11 @@ export function AddMemberModal({
   const [email, setEmail] = useState("");
   const defaultRole = initialRole ?? roleOptions[0]?.value ?? "";
   const [role, setRole] = useState(defaultRole);
-  const [sendInvite, setSendInvite] = useState(false);
   const modalRef = useClickOutside<HTMLDivElement>(() => !loading && onClose());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAdd({ fullName, email, role, sendInvite });
+    onAdd({ fullName, email, role });
   };
 
   return (
@@ -99,18 +93,6 @@ export function AddMemberModal({
               <p className="mt-1.5 text-xs text-dark-6 dark:text-dark-6">
                 {t.organizationTeams.addMemberModal.passwordHelper}
               </p>
-            </div>
-            <div className="sm:col-span-2 flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="send-invite"
-                checked={sendInvite}
-                onChange={(e) => setSendInvite(e.target.checked)}
-                className="h-4 w-4 rounded border-stroke text-primary focus:ring-primary dark:border-dark-3"
-              />
-              <label htmlFor="send-invite" className="text-sm text-dark dark:text-white">
-                {t.organizationTeams.addMemberModal.sendInviteLabel ?? "Incluir link de invitación (invite_token)"}
-              </label>
             </div>
           </div>
 

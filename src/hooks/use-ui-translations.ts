@@ -245,7 +245,6 @@ export type UiTranslations = {
       confirmPasswordLabel: string;
       confirmPasswordPlaceholder: string;
       passwordHelper: string;
-      sendInviteLabel?: string;
       submit: string;
     };
   };
@@ -635,7 +634,6 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         confirmPasswordLabel: "Confirm password",
         confirmPasswordPlaceholder: "Repeat the password",
         passwordHelper: "User will be marked as pending and must change this password on first login.",
-        sendInviteLabel: "Include invite link (invite_token)",
         submit: "Add Member",
       },
     },
@@ -1024,7 +1022,6 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         confirmPasswordLabel: "Confirmar contraseña",
         confirmPasswordPlaceholder: "Repite la contraseña",
         passwordHelper: "El usuario quedará pendiente y deberá cambiar esta contraseña en su primer inicio de sesión.",
-        sendInviteLabel: "Incluir link de invitación (invite_token)",
         submit: "Añadir Miembro",
       },
     },

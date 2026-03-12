@@ -183,10 +183,11 @@ export function getAuthBaseUrl(): string {
   return getBaseUrl();
 }
 
-/** Devuelve el access_token guardado o null. */
+/** Devuelve el access_token guardado o null. No enviar Bearer si no hay token (el backend respondería 403). */
 export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
-  return sessionStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+  const token = sessionStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
+  return token && token.trim() ? token.trim() : null;
 }
 
 /** Request genérico al API con Authorization Bearer. Si recibe 401, intenta refresh y reintenta una vez.
@@ -350,12 +351,24 @@ function normalizeRoleCodes(roles: unknown): string[] {
     .filter(Boolean);
 }
 
-/** Guarda la sesión en sessionStorage. Se pierde al cerrar la pestaña. */
+/** Guarda la sesión en sessionStorage. Se pierde al cerrar la pestaña.
+ * El access_token es obligatorio para que peticiones como POST .../dashboard/members lleven Authorization: Bearer.
+ * Acepta access_token (snake_case) o accessToken (camelCase) por si el backend devuelve uno u otro.
+ */
 export function persistAuthSession(response: AuthSuccessResponse): void {
   if (typeof window === "undefined") return;
   const k = AUTH_STORAGE_KEYS;
-  sessionStorage.setItem(k.ACCESS_TOKEN, response.access_token);
-  sessionStorage.setItem(k.REFRESH_TOKEN, response.refresh_token);
+  const raw = response as AuthSuccessResponse & { accessToken?: string };
+  const accessToken = (raw.access_token ?? raw.accessToken ?? "").trim();
+  const refreshToken = (raw.refresh_token ?? (raw as { refreshToken?: string }).refreshToken ?? "").trim();
+  if (accessToken) {
+    sessionStorage.setItem(k.ACCESS_TOKEN, accessToken);
+  } else {
+    if (typeof window !== "undefined") {
+      console.warn("[auth-api] persistAuthSession: no access_token en la respuesta; las peticiones autenticadas fallarán (403).", { keys: Object.keys(response) });
+    }
+  }
+  if (refreshToken) sessionStorage.setItem(k.REFRESH_TOKEN, refreshToken);
   sessionStorage.setItem(k.USER, JSON.stringify(response.user));
   sessionStorage.setItem(k.ORGANIZATION, JSON.stringify(response.organization));
   sessionStorage.setItem(k.ROLES, JSON.stringify(normalizeRoleCodes(response.roles ?? [])));

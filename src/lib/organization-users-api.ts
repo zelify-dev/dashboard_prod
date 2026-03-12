@@ -81,8 +81,9 @@ export type CreateDashboardMemberResponse = {
 
 /**
  * POST /api/organizations/{id}/dashboard/members — crear miembro (ORG_ADMIN).
- * Envía siempre Authorization: Bearer <access_token> con el token del usuario logueado (vía fetchWithAuth).
- * Sin ese header el backend responde 403. Devuelve contraseña temporal e invite_token si send_invite.
+ * Headers: Authorization: Bearer <access_token>, x-org-id: orgId.
+ * Body puede incluir send_invite: true para que la respuesta traiga invite_token (el backend no envía correo;
+ * si quieres que llegue por correo, después llama a POST /api/send-email desde el dashboard).
  */
 export async function createDashboardMember(
   orgId: string,
@@ -99,17 +100,15 @@ export async function createDashboardMember(
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
+        "x-org-id": orgId,
       },
       body: JSON.stringify(body),
     }
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError(
-      (data as { message?: string }).message ?? "Error al crear miembro",
-      res.status,
-      data
-    );
+    const message = (data as { message?: string }).message ?? "Error al crear miembro";
+    throw new AuthError(message, res.status, data);
   }
   return data as CreateDashboardMemberResponse;
 }

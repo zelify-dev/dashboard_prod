@@ -217,12 +217,7 @@ export default function TeamsPage() {
     setAddModalOpen(true);
   };
 
-  const handleAddMember = async (data: {
-    fullName: string;
-    email: string;
-    role: string;
-    sendInvite?: boolean;
-  }) => {
+  const handleAddMember = async (data: { fullName: string; email: string; role: string }) => {
     if (!orgId) return;
     setAddError("");
     setAddLoading(true);
@@ -231,7 +226,6 @@ export default function TeamsPage() {
         email: data.email,
         full_name: data.fullName,
         roles: data.role ? [data.role] : undefined,
-        send_invite: data.sendInvite ?? false,
       });
       setAddModalOpen(false);
       setTempPasswordModal({
@@ -242,11 +236,17 @@ export default function TeamsPage() {
       fetchMembers();
     } catch (err) {
       if (err instanceof AuthError) {
-        if (err.statusCode === 403) setAddError(translations.membersManagement.errors.noPermission);
-        else if (err.statusCode === 409) setAddError(translations.membersManagement.errors.emailExists);
-        else if (err.statusCode === 400) setAddError(err.message);
-        else setAddError(err.message);
-      } else setAddError(translations.membersManagement.errors.noPermission);
+        const backendMessage = err.message;
+        if (err.statusCode === 403) {
+          setAddError(backendMessage || translations.membersManagement.errors.noPermission);
+        } else if (err.statusCode === 409) {
+          setAddError(translations.membersManagement.errors.emailExists);
+        } else {
+          setAddError(backendMessage || translations.membersManagement.errors.noPermission);
+        }
+      } else {
+        setAddError(translations.membersManagement.errors.noPermission);
+      }
     } finally {
       setAddLoading(false);
     }

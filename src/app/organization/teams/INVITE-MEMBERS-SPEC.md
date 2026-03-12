@@ -4,10 +4,23 @@ Referencia para el equipo del dashboard. Implementación alineada con el backend
 
 ---
 
+## Para el backend: flujo que usa el dashboard (sin `send_invite`)
+
+**El dashboard ya no utiliza "Include invite link (invite_token)" ni el parámetro `send_invite`.**
+
+- El dashboard **solo** usa este flujo:
+  1. Llama a `POST /api/organizations/{orgId}/dashboard/members` con `email`, `full_name` y `roles` (**sin enviar `send_invite`**).
+  2. Recibe `user` y `temporary_password` en la respuesta.
+  3. Muestra la contraseña temporal en pantalla y ofrece un botón para enviar las credenciales por correo vía `POST /api/send-email` (opcional, lo hace el front).
+
+- Por tanto, el dashboard **nunca** enviará `send_invite: true` ni consumirá `invite_token`. Pueden considerar ese flujo fuera de uso para el dashboard. La respuesta que esperamos es siempre la estándar: `user` + `temporary_password`.
+
+---
+
 ## 1. Endpoint para crear el miembro
 
 - **Método y URL:** `POST /api/organizations/{orgId}/dashboard/members`
-- **Headers obligatorios:** `Authorization: Bearer <access_token>` (token del usuario logueado, ej. ORG_ADMIN). Sin token la API puede devolver 403.
+- **Headers obligatorios:** `Authorization: Bearer <access_token>`, `x-org-id: {orgId}` (token del usuario logueado, ej. ORG_ADMIN). Sin ellos la API puede devolver 403.
 
 **Body (JSON):**
 
@@ -16,19 +29,9 @@ Referencia para el equipo del dashboard. Implementación alineada con el backend
 | email      | string   | Sí          | Email del nuevo miembro (se guarda en minúsculas). |
 | full_name  | string   | Sí          | Nombre completo. |
 | roles      | string[] | No          | Roles a asignar. Valores válidos: `ORG_ADMIN`, `BUSINESS`, `DEVELOPER`, `USER_APP`. En el dashboard, **ORG_ADMIN** solo puede asignar `ORG_ADMIN`, `BUSINESS` y `DEVELOPER`; **USER_APP** solo lo asigna el OWNER. |
-| send_invite| boolean  | No          | Si es `true`, la respuesta incluye además `invite_token`. El backend no envía correo; solo cambia la respuesta. |
+| send_invite| boolean  | No          | **El dashboard no lo usa.** Si fuera `true`, la respuesta incluiría `invite_token`. El dashboard siempre omite este campo. |
 
-**Ejemplo con envío por correo (dashboard enviará el email después):**
-```json
-{
-  "email": "nuevo@empresa.com",
-  "full_name": "María López",
-  "roles": ["BUSINESS"],
-  "send_invite": true
-}
-```
-
-**Ejemplo sin envío por correo:**
+**Ejemplo (lo que envía el dashboard):**
 ```json
 {
   "email": "nuevo@empresa.com",
@@ -41,27 +44,21 @@ Referencia para el equipo del dashboard. Implementación alineada con el backend
 
 ## 2. Respuesta del backend (201)
 
-- `user`: objeto con `id`, `email`, `full_name`, `status`, `must_change_password`.
-- `temporary_password`: contraseña temporal (primer login).
-- Si en el body se envió `send_invite: true`, además: `invite_token` (contraseña temporal que queda activa; para “enviar por correo” usar esta o `temporary_password` de forma consistente).
+El dashboard solo espera (y usa) esta respuesta:
 
-Si no enviaste `send_invite`, el usuario debe usar `temporary_password` para el primer login.
+- `user`: objeto con `id`, `email`, `full_name`, `status`, `must_change_password`.
+- `temporary_password`: contraseña temporal para el primer login.
+
+El dashboard no usa `invite_token`; si el backend lo incluye o no en la respuesta es indiferente para el front.
 
 ---
 
-## 3. Dos flujos: con envío por correo y sin envío
+## 3. Flujo actual del dashboard
 
-### Caso A: Sí se envía la invitación por correo
-
-1. Dashboard llama a `POST /api/organizations/{orgId}/dashboard/members` con `email`, `full_name`, `roles` y `send_invite: true`.
-2. Guardar de la respuesta: `user.id`, `user.email`, `user.full_name`. Para el correo, usar `invite_token` como contraseña temporal (es la que queda activa si enviaste `send_invite: true`).
-3. Dashboard llama a `POST /api/send-email` con `recipient`, `purpose` (ej. "Invitación al equipo"), `message` (incluir que fue añadido, email, contraseña temporal, y que debe cambiarla en el primer acceso).
-
-### Caso B: No se envía por correo
-
-1. Dashboard llama a `POST /api/organizations/{orgId}/dashboard/members` con `email`, `full_name`, `roles` (sin `send_invite` o `send_invite: false`).
-2. Respuesta solo trae `user` y `temporary_password` (no `invite_token`).
-3. Mostrar en pantalla: email del nuevo usuario, contraseña temporal, mensaje de que debe cambiarla en el primer inicio de sesión. No se llama a `POST /api/send-email`.
+1. Dashboard llama a `POST /api/organizations/{orgId}/dashboard/members` con `email`, `full_name`, `roles` (sin `send_invite`).
+2. Respuesta: `user` y `temporary_password`.
+3. El dashboard muestra en pantalla la contraseña temporal y un botón **"Enviar credenciales por correo"**.
+4. Si el admin pulsa ese botón, el dashboard llama a `POST /api/send-email` con el email del nuevo usuario y un mensaje que incluye `temporary_password`. Si no pulsa, no se envía correo.
 
 ---
 
@@ -91,7 +88,7 @@ Tras 201, el usuario puede usar el dashboard con normalidad (`must_change_passwo
 
 ---
 
-## 6. Resumen para el dashboard
+## 7. Resumen para el dashboard
 
 | Acción                         | Endpoint                                                                 | Quién        | Cuándo |
 |--------------------------------|-------------------------------------------------------------------------|--------------|--------|

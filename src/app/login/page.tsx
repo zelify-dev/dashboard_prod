@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
-import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe } from "@/lib/auth-api";
+import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe, type AuthSuccessResponse } from "@/lib/auth-api";
 import { getAuthErrorMessage } from "@/lib/auth-error-messages";
 
 // ============================================================================
@@ -378,8 +378,9 @@ export default function LoginPage() {
           otp_code: otp,
         });
 
-        if ("access_token" in result) {
-          persistAuthSession(result);
+        const hasToken = "access_token" in result || "accessToken" in result;
+        if (hasToken && result.user && result.organization) {
+          persistAuthSession(result as AuthSuccessResponse);
           try {
             await syncMe();
           } catch {
