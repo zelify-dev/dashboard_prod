@@ -148,7 +148,6 @@ export default function OrganizationBrandingPage() {
   return (
     <div className="mx-auto w-full max-w-[800px]">
       <Breadcrumb pageName={title} />
-      <h1 className="mb-6 text-heading-4 font-semibold text-dark dark:text-white">{title}</h1>
 
       {loading ? (
         <p className="text-dark-6 dark:text-dark-6">Cargando…</p>
