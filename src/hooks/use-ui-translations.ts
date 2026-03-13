@@ -52,6 +52,7 @@ export type UiTranslations = {
         authentication: string;
         geolocalization: string;
         deviceInformation: string;
+        registeredUsers: string;
         validationGlobalList: string;
         workflow: string;
         bankAccountLinking: string;
@@ -259,6 +260,10 @@ export type UiTranslations = {
     colFullName: string;
     colTeamRole: string;
     colStatus: string;
+    colCreatedAt: string;
+    colUpdatedAt: string;
+    colMustChangePassword: string;
+    colIdentityVerified: string;
     colActions: string;
     pendingBadge: string;
     noMembers: string;
@@ -440,6 +445,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           authentication: "Authentication",
           geolocalization: "Geolocalization",
           deviceInformation: "Device information",
+          registeredUsers: "Registered users",
           validationGlobalList: "Global list validation",
           workflow: "Workflow",
           bankAccountLinking: "Bank account linking",
@@ -649,6 +655,10 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       colFullName: "Full name",
       colTeamRole: "Team / Role",
       colStatus: "Status",
+      colCreatedAt: "Created",
+      colUpdatedAt: "Updated",
+      colMustChangePassword: "Must change password",
+      colIdentityVerified: "Identity verified",
       colActions: "Actions",
       pendingBadge: "Pending",
       noMembers: "No members found.",
@@ -829,6 +839,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           authentication: "Autenticación",
           geolocalization: "Geolocalización",
           deviceInformation: "Información del dispositivo",
+          registeredUsers: "Usuarios registrados",
           validationGlobalList: "Validación de listas globales",
           workflow: "Flujo de trabajo",
           bankAccountLinking: "Vinculación de cuenta bancaria",
@@ -1038,6 +1049,10 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       colFullName: "Nombre completo",
       colTeamRole: "Equipo / Rol",
       colStatus: "Estado",
+      colCreatedAt: "Creado",
+      colUpdatedAt: "Actualizado",
+      colMustChangePassword: "Debe cambiar contraseña",
+      colIdentityVerified: "Identidad verificada",
       colActions: "Acciones",
       pendingBadge: "Pendiente",
       noMembers: "No hay miembros.",

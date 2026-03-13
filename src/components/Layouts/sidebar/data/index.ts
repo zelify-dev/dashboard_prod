@@ -42,6 +42,10 @@ export function getNavData(
               title: translations.sidebar.menuItems.subItems.deviceInformation,
               url: "/pages/products/auth/device-information",
             },
+            {
+              title: translations.sidebar.menuItems.subItems.registeredUsers,
+              url: "/pages/products/auth/registered-users",
+            },
           ],
     },
     {

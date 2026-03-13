@@ -147,6 +147,12 @@ export default function TeamsPage() {
   const [editRolesUser, setEditRolesUser] = useState<OrgUser | null>(null);
   const [resetUser, setResetUser] = useState<OrgUserListItem | null>(null);
 
+  /** Excluir USER_APP: en esta tabla solo mostramos miembros del dashboard. Los App Users se listan en otra tabla (Auth). */
+  const hasAppUserRole = (user: OrgUserListItem) => {
+    const codes = (user.roles ?? []).map((r) => (typeof r === "string" ? r : (r as { code?: string }).code ?? "").toUpperCase());
+    return codes.includes(TEAM_ROLE.USER_APP);
+  };
+
   const fetchMembers = useCallback(async () => {
     if (!orgId) return;
     setMembersLoading(true);
@@ -157,7 +163,8 @@ export default function TeamsPage() {
         search: membersSearch || undefined,
         status: membersStatus || undefined,
       });
-      setMembers(res.items);
+      const withoutAppUsers = res.items.filter((u) => !hasAppUserRole(u));
+      setMembers(withoutAppUsers);
       setMembersTotal(res.total);
     } catch {
       setMembers([]);
