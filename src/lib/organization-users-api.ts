@@ -5,7 +5,7 @@
  */
 import { fetchWithAuth, getAccessToken, AuthError } from "@/lib/auth-api";
 
-export type OrgUserStatus = "ACTIVE" | "DISABLED";
+export type OrgUserStatus = "ACTIVE" | "PENDING" | "DISABLED";
 
 export type OrgUser = {
   id: string;
@@ -122,7 +122,51 @@ export type AssignRolesBody = {
   role_codes: string[];
 };
 
-/** GET /api/organizations/{orgId}/users */
+/** Respuesta 200 de GET /api/organizations/{id}/dashboard/members (back devuelve "members"). */
+export type ListDashboardMembersResponse = {
+  members: OrgUserListItem[];
+  page: number;
+  limit: number;
+  total: number;
+};
+
+/**
+ * GET /api/organizations/{id}/dashboard/members — listar miembros del equipo (dashboard).
+ * Query: search (email, full_name), status (ACTIVE | PENDING | DISABLED), role_code, page, limit.
+ * Headers: Authorization: Bearer <access_token>.
+ * Respuesta 200: { members, page, limit, total }. Se normaliza a { items, page, limit, total } para la UI.
+ */
+export async function listDashboardMembers(
+  orgId: string,
+  params: ListOrgUsersParams = {}
+): Promise<ListOrgUsersResponse> {
+  const { page = 1, limit = 20, search, status, role_code } = params;
+  const searchParams = new URLSearchParams();
+  searchParams.set("page", String(page));
+  searchParams.set("limit", String(Math.min(limit, 100)));
+  if (search) searchParams.set("search", search);
+  if (status) searchParams.set("status", status);
+  if (role_code) searchParams.set("role_code", role_code);
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/dashboard/members?${searchParams}`
+  );
+  const data = await res.json().catch(() => ({})) as ListDashboardMembersResponse & { message?: string };
+  if (!res.ok) {
+    throw new AuthError(
+      data.message ?? "Error al listar miembros",
+      res.status,
+      data
+    );
+  }
+  return {
+    items: data.members ?? [],
+    page: data.page ?? page,
+    limit: data.limit ?? limit,
+    total: data.total ?? 0,
+  };
+}
+
+/** GET /api/organizations/{orgId}/users — listado genérico de usuarios de la org (legacy). */
 export async function listOrgUsers(
   orgId: string,
   params: ListOrgUsersParams = {}

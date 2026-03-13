@@ -6,7 +6,7 @@ import { useEffect, useState, useCallback } from "react";
 import { getStoredUser, getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
 import { userHasRole, TEAM_ROLE, getRoleByTeamId, getAssignableRoles, isOwner, isOrgAdminRole, toRoleCodes } from "./_constants/team-roles";
 import {
-  listOrgUsers,
+  listDashboardMembers,
   createDashboardMember,
   getOrgUser,
   updateOrgUser,
@@ -151,7 +151,7 @@ export default function TeamsPage() {
     if (!orgId) return;
     setMembersLoading(true);
     try {
-      const res = await listOrgUsers(orgId, {
+      const res = await listDashboardMembers(orgId, {
         page: membersPage,
         limit: membersLimit,
         search: membersSearch || undefined,

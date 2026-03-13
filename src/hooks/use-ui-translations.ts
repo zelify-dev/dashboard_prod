@@ -253,6 +253,7 @@ export type UiTranslations = {
     searchPlaceholder: string;
     filterStatus: string;
     statusActive: string;
+    statusPending: string;
     statusDisabled: string;
     colEmail: string;
     colFullName: string;
@@ -642,6 +643,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       searchPlaceholder: "Search by name or email...",
       filterStatus: "Status",
       statusActive: "Active",
+      statusPending: "Pending",
       statusDisabled: "Disabled",
       colEmail: "Email",
       colFullName: "Full name",
@@ -1030,6 +1032,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       searchPlaceholder: "Buscar por nombre o email...",
       filterStatus: "Estado",
       statusActive: "Activo",
+      statusPending: "Pendiente",
       statusDisabled: "Deshabilitado",
       colEmail: "Email",
       colFullName: "Nombre completo",

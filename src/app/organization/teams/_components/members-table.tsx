@@ -75,6 +75,7 @@ export function MembersTable({
         >
           <option value="">{m.filterStatus}</option>
           <option value="ACTIVE">{m.statusActive}</option>
+          <option value="PENDING">{m.statusPending}</option>
           <option value="DISABLED">{m.statusDisabled}</option>
         </select>
       </div>
@@ -124,10 +125,16 @@ export function MembersTable({
                       className={
                         user.status === "ACTIVE"
                           ? "text-green-600 dark:text-green-400"
-                          : "text-dark-6 dark:text-dark-6"
+                          : user.status === "PENDING"
+                            ? "text-amber-600 dark:text-amber-400"
+                            : "text-dark-6 dark:text-dark-6"
                       }
                     >
-                      {user.status === "ACTIVE" ? m.statusActive : m.statusDisabled}
+                      {user.status === "ACTIVE"
+                        ? m.statusActive
+                        : user.status === "PENDING"
+                          ? m.statusPending
+                          : m.statusDisabled}
                     </span>
                   </td>
                   <td className="relative px-4 py-3">
