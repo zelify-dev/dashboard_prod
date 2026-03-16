@@ -352,6 +352,22 @@ export default function LoginPage() {
           password: data.password,
         });
 
+        // Caso bypass de OTP ( tokens directos )
+        if ("access_token" in result || "accessToken" in result) {
+          const authResult = result as AuthSuccessResponse;
+          if (authResult.user && authResult.organization) {
+            persistAuthSession(authResult);
+            try {
+              await syncMe();
+            } catch {
+              /* mantener datos del response */
+            }
+            setLoading(false);
+            window.location.href = "/";
+            return;
+          }
+        }
+
         if ("session_id" in result) {
           setSessionId(result.session_id);
           setStep(2);

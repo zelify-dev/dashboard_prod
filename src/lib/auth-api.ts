@@ -257,7 +257,7 @@ export async function register(
 /** POST /api/auth/dashboard/login */
 export async function login(
   payload: LoginPayload
-): Promise<LoginStep1Response | Login409Response> {
+): Promise<LoginStep1Response | Login409Response | AuthSuccessResponse> {
   const base = getBaseUrl();
   if (!base) {
     throw new Error("NEXT_PUBLIC_AUTH_API_URL no está configurado en .env");
@@ -274,6 +274,13 @@ export async function login(
   });
   const data = await res.json().catch(() => ({}));
   if (res.status === 409) return data as Login409Response;
+  
+  // Si devuelve 200/201 y tiene tokens, es un bypass de OTP
+  const hasToken = "access_token" in data || "accessToken" in data;
+  if (res.ok && hasToken) {
+    return data as AuthSuccessResponse;
+  }
+
   if (!res.ok) {
     const msg = data.message || (res.status === 401 ? "Email o contraseña incorrectos." : res.status === 403 ? "Usuario u organización deshabilitados." : res.status === 423 ? "Usuario bloqueado temporalmente." : res.status >= 500 ? "Algo falló. Intenta de nuevo." : "Error en el inicio de sesión");
     throw new AuthError(msg, res.status, data);
