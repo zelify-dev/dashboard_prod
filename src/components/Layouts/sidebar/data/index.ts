@@ -35,10 +35,6 @@ export function getNavData(
               url: "/pages/products/auth/authentication",
             },
             {
-              title: translations.sidebar.menuItems.subItems.geolocalization,
-              url: "/pages/products/auth/geolocalization",
-            },
-            {
               title: translations.sidebar.menuItems.subItems.deviceInformation,
               url: "/pages/products/auth/device-information",
             },

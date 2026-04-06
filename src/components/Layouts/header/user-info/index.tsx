@@ -35,16 +35,16 @@ export function UserInfo() {
         <span className="sr-only">{translations.userInfo.myAccount}</span>
 
         <div className="flex items-center gap-3">
-          <span className="font-medium text-dark dark:text-dark-6 max-[1024px]:sr-only">
+          <span className="text-xs font-bold text-dark dark:text-dark-6 max-[1024px]:sr-only">
             {USER.name}
           </span>
           <ChevronUpIcon
             aria-hidden
             className={cn(
-              "rotate-180 transition-transform",
+              "rotate-180 transition-transform size-4",
               isOpen && "rotate-0",
             )}
-            strokeWidth={1.5}
+            strokeWidth={2}
           />
         </div>
       </DropdownTrigger>
@@ -56,11 +56,11 @@ export function UserInfo() {
         <h2 className="sr-only">{translations.userInfo.userInformation}</h2>
 
         <div className="flex items-center gap-2.5 px-5 py-3.5">
-          <div className="space-y-1 text-base font-medium">
-            <div className="mb-2 leading-none text-dark dark:text-white">
+          <div className="space-y-0.5 text-sm font-medium">
+            <div className="mb-1 leading-tight font-bold text-dark dark:text-white">
               {USER.name}
             </div>
-            <div className="leading-none text-gray-6">{USER.email}</div>
+            <div className="leading-tight text-xs text-gray-6">{USER.email}</div>
           </div>
         </div>
 
@@ -70,11 +70,11 @@ export function UserInfo() {
           <Link
             href={"/pages/settings"}
             onClick={() => setIsOpen(false)}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
+            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white transition-all"
           >
-            <SettingsIcon />
+            <SettingsIcon className="size-4" />
 
-            <span className="mr-auto text-base font-medium">
+            <span className="mr-auto text-xs font-bold">
               {translations.userInfo.accountSettings}
             </span>
           </Link>
@@ -84,12 +84,12 @@ export function UserInfo() {
 
         <div className="p-2 text-base text-[#4B5563] dark:text-dark-6">
           <button
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-[9px] hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white"
+            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-gray-2 hover:text-dark dark:hover:bg-dark-3 dark:hover:text-white transition-all"
             onClick={handleLogout}
           >
-            <LogOutIcon />
+            <LogOutIcon className="size-4" />
 
-            <span className="text-base font-medium">{translations.userInfo.logOut}</span>
+            <span className="text-xs font-bold">{translations.userInfo.logOut}</span>
           </button>
         </div>
       </DropdownContent>

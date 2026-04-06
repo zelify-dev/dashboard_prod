@@ -56,39 +56,6 @@ export const TOUR_TRANSLATIONS: Record<Language, Record<ProductKey, TourStep[]>>
         position: "right" as const,
       },
       {
-        id: "auth-geolocalization",
-        target: "tour-geolocalization",
-        title: "Geolocalización",
-        content:
-          "Permite rastrear y validar la ubicación exacta de coordenadas de un dispositivo.",
-        position: "right" as const,
-        url: "/pages/products/auth/geolocalization",
-      },
-      {
-        id: "geolocalization-device",
-        target: "tour-geolocalization-device",
-        title: "Vista Previa Móvil",
-        content:
-          "Zelify pedirá el permiso de ubicación del usuario mediante un modal nativo del sistema operativo para obtener su latitud y longitud.",
-        position: "right" as const,
-      },
-      {
-        id: "geolocalization-search",
-        target: "tour-geolocalization-search",
-        title: "Búsqueda de Ubicación",
-        content:
-          "Puedes buscar información detallada de cualquier ubicación ingresando estas coordenadas.",
-        position: "left" as const,
-      },
-      {
-        id: "geolocalization-results",
-        target: "tour-geolocalization-results",
-        title: "Resultados de Búsqueda",
-        content:
-          "Incluyendo dirección formateada, país, ciudad, calles, código postal y datos técnicos adicionales.",
-        position: "bottom" as const,
-      },
-      {
         id: "device-information",
         target: "tour-device-information",
         title: "Información del Dispositivo",
@@ -656,39 +623,6 @@ export const TOUR_TRANSLATIONS: Record<Language, Record<ProductKey, TourStep[]>>
         content:
           "Zelify provides a verification system using temporary codes that can be sent via email, SMS, or WhatsApp, ensuring security and authenticity of users during the registration process.",
         position: "right" as const,
-      },
-      {
-        id: "auth-geolocalization",
-        target: "tour-geolocalization",
-        title: "Geolocation",
-        content:
-          "Geolocation allows tracking and validating user locations, providing additional security and location-based features for your application.",
-        position: "right" as const,
-        url: "/pages/products/auth/geolocalization",
-      },
-      {
-        id: "geolocalization-device",
-        target: "tour-geolocalization-device",
-        title: "Mobile Preview",
-        content:
-          "Zelify will request the user's location permission through the native operating system modal, ensuring a familiar and secure experience.",
-        position: "right" as const,
-      },
-      {
-        id: "geolocalization-search",
-        target: "tour-geolocalization-search",
-        title: "Location Search",
-        content:
-          "You can search for detailed information about any location by entering its coordinates. The system will provide complete data about the specified location.",
-        position: "left" as const,
-      },
-      {
-        id: "geolocalization-results",
-        target: "tour-geolocalization-results",
-        title: "Search Results",
-        content:
-          "Zelify provides detailed and structured information about the location, including formatted address, country, city, streets, postal code, and additional technical data.",
-        position: "bottom" as const,
       },
       {
         id: "device-information",

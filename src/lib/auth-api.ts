@@ -11,6 +11,7 @@
  * - No se exponen tokens en logs.
  * - Logout: POST /api/auth/logout y luego clearAuthSession.
  */
+import { deduplicateFetch, clearApiCache } from "@/lib/api-cache";
 
 const getBaseUrl = (): string => {
   const url = process.env.NEXT_PUBLIC_AUTH_API_URL;
@@ -209,21 +210,34 @@ export async function fetchWithAuth(
   if (!headers.has("Content-Type") && (options.body && typeof options.body === "string")) {
     headers.set("Content-Type", "application/json");
   }
-  let res = await fetch(url, { ...options, headers });
-  if (res.status === 401) {
-    const refreshed = await refresh();
-    if (refreshed) {
-      const newToken = getAccessToken();
-      if (newToken) {
-        headers.set("Authorization", `Bearer ${newToken}`);
-        res = await fetch(url, { ...options, headers });
+  const fetcher = async () => {
+    let res = await fetch(url, { ...options, headers });
+    if (res.status === 401) {
+      const refreshed = await refresh();
+      if (refreshed) {
+        const newToken = getAccessToken();
+        if (newToken) {
+          headers.set("Authorization", `Bearer ${newToken}`);
+          res = await fetch(url, { ...options, headers });
+        }
+      } else {
+        clearAuthSession();
+        throw new AuthError("Sesión expirada. Inicia sesión de nuevo.", 401);
       }
-    } else {
-      clearAuthSession();
-      throw new AuthError("Sesión expirada. Inicia sesión de nuevo.", 401);
     }
+    return res;
+  };
+
+  // Solo deduplicamos peticiones GET; POST/PATCH/DELETE deben ir directas
+  if (options.method && options.method !== "GET") {
+    return fetcher();
   }
-  return res;
+
+  // Clave para el caché: "METHOD:URL"
+  const method = options.method || "GET";
+  const key = `${method}:${url}`;
+
+  return deduplicateFetch(key, fetcher);
 }
 
 /** POST /api/auth/register */
@@ -348,6 +362,7 @@ export async function logout(): Promise<void> {
     }
   }
   clearAuthSession();
+  clearApiCache();
 }
 
 /** Roles del usuario actual (ej: ["ORG_ADMIN"], ["OWNER"]). Acepta string[] o Array<{ code: string }> del API y normaliza a códigos en mayúsculas. */

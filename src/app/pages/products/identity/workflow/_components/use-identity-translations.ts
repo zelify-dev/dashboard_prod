@@ -60,6 +60,31 @@ type IdentityWorkflowTranslations = {
     showing: string;
     pageOf: string;
   };
+  userDetailDrawer: {
+    title: string;
+    personalInfo: string;
+    ocrData: string;
+    images: string;
+    rejectionReason: string;
+    verifiedAt: string;
+    labels: {
+      fullName: string;
+      documentName: string;
+      email: string;
+      status: string;
+      documentNumber: string;
+      dateOfBirth: string;
+      dateOfExpiry: string;
+      sex: string;
+      nationality: string;
+      country: string;
+      documentType: string;
+    };
+    statusLabels: Record<"APPROVED" | "REJECTED" | "PENDING", string>;
+    documentTypeLabels: Record<string, string>;
+    close: string;
+    noData: string;
+  };
   preview: {
     toggles: {
       mobilePreview: string;
@@ -265,6 +290,39 @@ const IDENTITY_TRANSLATIONS: Record<Language, IdentityWorkflowTranslations> = {
       next: "Next",
       showing: "Showing",
       pageOf: "of",
+    },
+    userDetailDrawer: {
+      title: "Verification Detail",
+      personalInfo: "Personal Information",
+      ocrData: "OCR Extracted Data",
+      images: "Captured Images",
+      rejectionReason: "Rejection Reason",
+      verifiedAt: "Verified at",
+      labels: {
+        fullName: "Registered Name",
+        documentName: "Document Name",
+        email: "Email",
+        status: "Status",
+        documentNumber: "Document ID",
+        dateOfBirth: "Date of Birth",
+        dateOfExpiry: "Date of Expiry",
+        sex: "Sex",
+        nationality: "Nationality",
+        country: "Country",
+        documentType: "Document Type",
+      },
+      statusLabels: {
+        APPROVED: "Approved",
+        REJECTED: "Rejected",
+        PENDING: "Pending",
+      },
+      documentTypeLabels: {
+        national_id: "National ID / INE",
+        passport: "Passport",
+        drivers_license: "Driver's License",
+      },
+      close: "Close",
+      noData: "No data available",
     },
     preview: {
       toggles: {
@@ -499,6 +557,39 @@ const IDENTITY_TRANSLATIONS: Record<Language, IdentityWorkflowTranslations> = {
       next: "Siguiente",
       showing: "Mostrando",
       pageOf: "de",
+    },
+    userDetailDrawer: {
+      title: "Detalle de Verificación",
+      personalInfo: "Información Personal",
+      ocrData: "Datos Extraídos (OCR)",
+      images: "Imágenes Capturadas",
+      rejectionReason: "Motivo de Rechazo",
+      verifiedAt: "Verificado el",
+      labels: {
+        fullName: "Nombre de registro",
+        documentName: "Nombre en documento",
+        email: "Email",
+        status: "Estado",
+        documentNumber: "Nro. Documento",
+        dateOfBirth: "Fecha de Nacimiento",
+        dateOfExpiry: "Fecha de Expiración",
+        sex: "Sexo",
+        nationality: "Nacionalidad",
+        country: "País",
+        documentType: "Tipo de Documento",
+      },
+      statusLabels: {
+        APPROVED: "Aprobada",
+        REJECTED: "Rechazada",
+        PENDING: "Pendiente",
+      },
+      documentTypeLabels: {
+        national_id: "Cédula / INE",
+        passport: "Pasaporte",
+        drivers_license: "Licencia de Conducir",
+      },
+      close: "Cerrar",
+      noData: "Sin datos disponibles",
     },
     preview: {
       toggles: {
