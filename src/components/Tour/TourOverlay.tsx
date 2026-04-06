@@ -577,7 +577,6 @@ export function TourOverlay() {
 
     // Esperar un poco para que el DOM se actualice después de la navegación
     // Para branding, esperar más tiempo para que la sección se abra
-    // Para geolocalization-results, esperar menos tiempo ya que establecemos posición inicial inmediatamente
     // Para device-information-modal, esperar más tiempo para que el modal se abra después del clic
     // Para identity-workflow-liveness-preview, esperar más tiempo para que se cambie la pantalla y se renderice
     // Para identity-workflow-config-liveness, esperar más tiempo para que la sección se abra

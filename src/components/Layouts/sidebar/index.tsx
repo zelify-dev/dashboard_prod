@@ -80,8 +80,7 @@ export function Sidebar() {
     (steps[currentStep]?.target === "tour-sidebar" ||
       steps[currentStep]?.target === "tour-products-section" ||
       steps[currentStep]?.target === "tour-product-auth" ||
-      steps[currentStep]?.target === "tour-auth-authentication" ||
-      steps[currentStep]?.target === "tour-geolocalization");
+      steps[currentStep]?.target === "tour-auth-authentication");
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const roles = getStoredRoles();
   const isOwnerUser = isOwner(roles);
@@ -146,7 +145,6 @@ export function Sidebar() {
         const target = currentStepData.target;
         const productTargets = [
           "tour-product-auth",
-          "tour-geolocalization",
           "tour-device-information",
           "tour-product-aml",
           "tour-aml-validation-global-list",
@@ -202,7 +200,6 @@ export function Sidebar() {
 
               if (
                 target === "tour-product-auth" ||
-                target === "tour-geolocalization" ||
                 target === "tour-device-information"
               ) {
                 shouldExpand =
@@ -314,7 +311,6 @@ export function Sidebar() {
           "tour-product-discounts",
           // Sub-items de Auth
           "tour-auth-authentication",
-          "tour-geolocalization",
           "tour-device-information",
           // Sub-items de AML
           "tour-aml-validation-global-list",
@@ -659,10 +655,6 @@ export function Sidebar() {
                                             .subItems.authentication
                                             ? "tour-auth-authentication"
                                             : subItem.title ===
-                                                translations.sidebar.menuItems
-                                                  .subItems.geolocalization
-                                              ? "tour-geolocalization"
-                                              : subItem.title ===
                                                   translations.sidebar.menuItems
                                                     .subItems.deviceInformation
                                                 ? "tour-device-information"
@@ -843,11 +835,6 @@ export function Sidebar() {
                                                 .subItems.authentication
                                                 ? "tour-auth-authentication"
                                                 : subItem.title ===
-                                                    translations.sidebar
-                                                      .menuItems.subItems
-                                                      .geolocalization
-                                                  ? "tour-geolocalization"
-                                                  : subItem.title ===
                                                       translations.sidebar
                                                         .menuItems.subItems
                                                         .deviceInformation
