@@ -50,6 +50,8 @@ function applyEnabledMap(lists: AMLList[], enabledMap: Record<string, boolean>):
   );
 }
 
+import { getAMLScreenings, getAMLScreeningDetail, getAMLListsCatalog, AMLScreeningItem, AMLCatalogItem } from "@/lib/aml-api";
+
 export default function ValidationGlobalListPage() {
   const translations = useAMLTranslations();
   const { language } = useLanguage();
@@ -59,21 +61,23 @@ export default function ValidationGlobalListPage() {
   const [selectedValidationId, setSelectedValidationId] = useState<string | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [validations, setValidations] = useState<AMLValidation[]>([]);
-
-  useEffect(() => {
-    if (countryName) {
-      setValidations(mockValidations.filter((v) => v.country === countryName));
-    } else {
-      setValidations([]);
-    }
-  }, [countryName]);
-  const [lists, setLists] = useState<AMLList[]>(() => {
-    const baseLists = getAMLists(language);
-    const storedEnabledMap = readEnabledMapFromStorage();
-    return applyEnabledMap(baseLists, storedEnabledMap);
+  const [displayedValidation, setDisplayedValidation] = useState<AMLValidation | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [catalog, setCatalog] = useState<AMLCatalogItem[]>([]);
+  const [catalogPagination, setCatalogPagination] = useState<{
+    page: number;
+    hasMore: boolean;
+    nextPage: number | null;
+    previousPage: number | null;
+    total: number;
+  }>({
+    page: 1,
+    hasMore: false,
+    nextPage: null,
+    previousPage: null,
+    total: 0,
   });
-  const [groups, setGroups] = useState<AMLListGroup[]>([]);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
   const [amlConfig, setAmlConfig] = useState<AMLConfig>({
     branding: {
@@ -88,58 +92,114 @@ export default function ValidationGlobalListPage() {
     },
   });
 
-  // Actualizar listas cuando cambie el idioma conservando estado enabled
-  useEffect(() => {
-    setLists((prevLists) => {
-      const baseLists = getAMLists(language);
-      const previousEnabledMap = prevLists.reduce<Record<string, boolean>>((acc, list) => {
-        acc[list.id] = list.enabled;
-        return acc;
-      }, {});
-      const storedEnabledMap = readEnabledMapFromStorage();
-      const mergedEnabledMap = { ...previousEnabledMap, ...storedEnabledMap };
-      return applyEnabledMap(baseLists, mergedEnabledMap);
-    });
-  }, [language]);
+  // Mapeador de item de lista de screening a nuestra interfaz de validación
+  const mapScreeningToValidation = (item: AMLScreeningItem): AMLValidation => ({
+    id: item.screening_id,
+    name: item.name,
+    verification: item.match_count > 0 ? "Hit" : "success",
+    matchCount: item.match_count,
+    hasMatches: item.has_matches,
+    createdAt: new Date(item.created_at).toLocaleDateString(),
+    foundIn: item.has_matches ? item.data_source : undefined,
+  });
 
-  // Persistir toggles de listas AML en localStorage
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const enabledMap = lists.reduce<Record<string, boolean>>((acc, list) => {
-      acc[list.id] = list.enabled;
-      return acc;
-    }, {});
-
-    window.localStorage.setItem(AML_LISTS_STORAGE_KEY, JSON.stringify(enabledMap));
-  }, [lists]);
-
-  // Cambiar a la pestaña correcta cuando el tour busque targets específicos
-  useEffect(() => {
-    if (isTourActive && steps.length > 0 && currentStep < steps.length) {
-      const currentStepData = steps[currentStep];
-      if (currentStepData?.target === "tour-aml-preview") {
-        setViewMode("personalization");
-        // Asegurar que no haya validación seleccionada
-        setSelectedValidationId(null);
-        setIsCreatingNew(false);
-      } else if (currentStepData?.target === "tour-aml-validations-list") {
-        setViewMode("validations");
-        // Asegurar que no haya validación seleccionada para mostrar la tabla completa
-        setSelectedValidationId(null);
-        setIsCreatingNew(false);
-      } else if (currentStepData?.target === "tour-aml-list-config") {
-        setViewMode("config");
-        // Asegurar que no haya validación seleccionada
-        setSelectedValidationId(null);
-        setIsCreatingNew(false);
-      }
+  const fetchValidations = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await getAMLScreenings();
+      setValidations(data.items.map(mapScreeningToValidation));
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Error al cargar validaciones");
+    } finally {
+      setIsLoading(false);
     }
-  }, [isTourActive, currentStep, steps]);
+  };
 
-  const handleSelectValidation = (validationId: string) => {
+  const fetchCatalog = async (page: number = 1) => {
+    setIsLoading(true);
+    try {
+      const data = await getAMLListsCatalog({ page });
+      setCatalog(data.results);
+      setCatalogPagination({
+        page: data.page,
+        hasMore: data.has_more,
+        nextPage: data.next_page,
+        previousPage: data.previous_page,
+        total: data.count,
+      });
+      
+      // Update the local lists structure to match the catalog
+      const mappedLists: AMLList[] = data.results.map((item: AMLCatalogItem) => ({
+        id: item.short_name,
+        title: item.name,
+        category: item.country === "INT" ? "Internacional" : item.country,
+        description: `${item.number_of_entries || 0} entradas registradas.`,
+        country: item.country,
+        icon: null, // Icons are handled by the component or defaults
+        enabled: true,
+        source: item.short_name
+      }));
+      setLists(mappedLists);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Error al cargar el catálogo de listas");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (viewMode === "validations" && !selectedValidationId && !isCreatingNew) {
+      fetchValidations();
+    }
+    if (viewMode === "config") {
+      fetchCatalog(catalogPagination.page);
+    }
+  }, [viewMode, selectedValidationId, isCreatingNew]);
+
+  const handleCatalogPageChange = (newPage: number) => {
+    fetchCatalog(newPage);
+  };
+
+  const [lists, setLists] = useState<AMLList[]>([]);
+  const [groups, setGroups] = useState<AMLListGroup[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+
+  // ... (existing personalization config state remains)
+
+  const handleSelectValidation = async (validationId: string) => {
     setSelectedValidationId(validationId);
     setIsCreatingNew(false);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const detail = await getAMLScreeningDetail(validationId);
+      // Mapear el detalle "Radiografía"
+      const mapped: AMLValidation = {
+        id: detail.screening_id,
+        name: detail.request.name,
+        country: detail.request.country || "ND",
+        createdAt: new Date(detail.created_at).toLocaleDateString(),
+        verification: detail.response.count > 0 ? "Hit" : "success",
+        foundIn: detail.response.count > 0 ? detail.response.results[0]?.data_source?.name : undefined,
+        rawDetail: detail, // Save the full response for deep radiography
+        details: detail.response.count > 0 ? {
+          listName: detail.response.results[0]?.data_source?.name || detail.response.results[0]?.data_source?.short_name,
+          matchScore: detail.response.results[0]?.confidence_score * 100,
+          source: detail.response.results[0]?.data_source?.name,
+          dateFound: new Date(detail.created_at).toLocaleDateString(),
+        } : undefined
+      };
+      setDisplayedValidation(mapped);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Error al cargar el detalle");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCreateNew = () => {
@@ -150,78 +210,15 @@ export default function ValidationGlobalListPage() {
   const handleBackToList = () => {
     setSelectedValidationId(null);
     setIsCreatingNew(false);
+    setDisplayedValidation(null);
   };
 
-  const handleStartVerification = (validation: AMLValidation) => {
-    // Agregar con estado "pending"
-    setValidations((prev) => [validation, ...prev]);
-    setSelectedValidationId(null);
+  const handleStartVerification = async (validation: AMLValidation) => {
+    // En una implementación real, aquí llamaríamos a POST /api/aml/screenings
+    // Por ahora, simulamos el inicio y recargamos la lista
     setIsCreatingNew(false);
-
-    // Después de 3-5 segundos, actualizar el estado aleatoriamente
-    const delay = 3000 + Math.random() * 2000; // 3-5 segundos
-
-    setTimeout(() => {
-      setValidations((prev) => {
-        const randomResult = Math.random();
-        let updatedValidation: AMLValidation;
-
-        // Obtener las listas verificadas
-        const verifiedListIds = validation.verifiedListIds || [];
-        const verifiedLists = lists.filter((l) => verifiedListIds.includes(l.id));
-
-        if (randomResult < 0.4 && (verifiedLists.length > 0 || validation.includePEPs?.enabled)) {
-          // 40% chance de encontrar un match
-          // Si hay PEPs habilitado, considerar también esa opción
-          const shouldCheckPEPs = validation.includePEPs?.enabled && Math.random() < 0.3;
-
-          if (shouldCheckPEPs && validation.includePEPs?.country) {
-            // Match en PEPs
-            updatedValidation = {
-              ...validation,
-              verification: "PEP",
-              foundIn: "PEP",
-              foundInListId: "peps",
-              details: {
-                listName: `PEPs - Personas Expuestas Políticamente de ${validation.includePEPs.country}`,
-                matchScore: Math.floor(Math.random() * 20) + 80,
-                source: "World-Check",
-                dateFound: new Date().toISOString().split("T")[0],
-              },
-            };
-          } else if (verifiedLists.length > 0) {
-            // Match en una de las listas AML verificadas
-            const randomList = verifiedLists[Math.floor(Math.random() * verifiedLists.length)];
-            updatedValidation = {
-              ...validation,
-              verification: randomList.category,
-              foundIn: randomList.category,
-              foundInListId: randomList.id,
-              details: {
-                listName: `${randomList.title} - ${randomList.category}`,
-                matchScore: Math.floor(Math.random() * 20) + 80,
-                source: randomList.source,
-                dateFound: new Date().toISOString().split("T")[0],
-              },
-            };
-          } else {
-            // Si solo hay PEPs pero no se encontró match, success
-            updatedValidation = {
-              ...validation,
-              verification: "success",
-            };
-          }
-        } else {
-          // 60% chance de success
-          updatedValidation = {
-            ...validation,
-            verification: "success",
-          };
-        }
-
-        return prev.map((v) => (v.id === validation.id ? updatedValidation : v));
-      });
-    }, delay);
+    setSelectedValidationId(null);
+    fetchValidations();
   };
 
   const handleToggleList = (listId: string, enabled: boolean) => {
@@ -266,7 +263,7 @@ export default function ValidationGlobalListPage() {
     );
   };
 
-  const selectedValidation = validations.find((v) => v.id === selectedValidationId);
+  const selectedValidation = displayedValidation || validations.find((v) => v.id === selectedValidationId);
 
   return (
     <div className="mx-auto w-full max-w-[1400px]">
@@ -326,6 +323,8 @@ export default function ValidationGlobalListPage() {
           selectedGroupId={selectedGroupId}
           onSelectGroup={setSelectedGroupId}
           onToggleListInGroup={handleToggleListInGroup}
+          pagination={catalogPagination}
+          onPageChange={handleCatalogPageChange}
         />
       ) : viewMode === "personalization" ? (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">

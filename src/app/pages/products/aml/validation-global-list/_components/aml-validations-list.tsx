@@ -6,23 +6,26 @@ import { useAMLTranslations } from "./use-aml-translations";
 export interface AMLValidation {
   id: string;
   name: string;
-  documentNumber: string;
-  country: string;
-  verification: "success" | "pending" | "PEP" | "OFAC" | "Sanctions" | "Watchlist" | "Adverse Media" | string;
-  foundIn?: string; // Lista AML donde se encontró (nombre legible)
-  foundInListId?: string; // ID de la lista AML donde se encontró
-  verifiedListIds?: string[]; // IDs de las listas que se verificaron
-  groupId?: string; // ID del grupo de listas usado
+  documentNumber?: string;
+  country?: string;
+  verification: "success" | "pending" | "Hit" | string;
+  matchCount?: number;
+  hasMatches?: boolean;
+  foundIn?: string;
+  foundInListId?: string;
+  verifiedListIds?: string[];
+  groupId?: string;
   includePEPs?: {
     country: string;
     enabled: boolean;
-  }; // Información sobre verificación PEPs
+  };
   details?: {
     listName: string;
     matchScore?: number;
     source?: string;
     dateFound?: string;
   };
+  rawDetail?: any; // To store the full API response for the Radiography view
   createdAt: string;
 }
 
@@ -125,7 +128,7 @@ function VerificationStatus({
     );
   }
 
-  // Para cualquier lista AML encontrada (PEP, OFAC, etc.)
+  // Para cualquier coincidencia encontrada (Hit, PEP, OFAC, etc.)
   return (
     <div className="flex items-center gap-2">
       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
@@ -133,7 +136,9 @@ function VerificationStatus({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </div>
-      <span className="text-sm font-medium text-red-600 dark:text-red-400">{foundIn || status}</span>
+      <span className="text-sm font-medium text-red-600 dark:text-red-400">
+        {status === "Hit" ? "Hit Detectado" : (foundIn || status)}
+      </span>
     </div>
   );
 }

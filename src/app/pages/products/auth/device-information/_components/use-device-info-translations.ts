@@ -8,8 +8,10 @@ type DeviceInfoTranslations = {
   breadcrumb: string;
   pageDescription: string;
   subtitle: (count: number) => string;
-  subtitleUserDevices: (count: number, userName: string) => string;
+  subtitleGlobal: (count: number) => string;
   viewDevicesFor: string;
+  filterByUser: string;
+  globalView: string;
   myDevices: string;
   reloadButton: {
     default: string;
@@ -27,14 +29,22 @@ type DeviceInfoTranslations = {
     ipAddress: string;
     requestId: string;
     date: string;
+    user: string;
+    device: string;
+    risk: string;
+    location: string;
+    actions: string;
     empty: string;
     noEvents: string;
+    searchPlaceholder: string;
   };
   modal: {
     close: string;
     detailsTab: string;
     historyTab: (count: number) => string;
     identification: string;
+    technicalRadiography: string;
+    securityAnalysis: string;
     visitorId: string;
     lastSeen: string;
     firstSeen: string;
@@ -71,6 +81,14 @@ type DeviceInfoTranslations = {
     jsonCopied: string;
     visitorHistoryTitle: string;
     historyEmpty: string;
+    impossibleTravel: string;
+    impossibleTravelDesc: string;
+    riskDetected: string;
+    safe: string;
+    isp: string;
+    fingerprint: string;
+    userProfile: string;
+    revokeSession: string;
   };
   map: {
     loading: string;
@@ -84,6 +102,8 @@ type DeviceInfoTranslations = {
   };
   common: {
     unknown: string;
+    copy: string;
+    copied: string;
   };
 };
 
@@ -93,8 +113,10 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
     breadcrumb: "Device information",
     pageDescription: "View device and geolocation data for users of your application.",
     subtitle: (count) => `${count} events matching`,
-    subtitleUserDevices: (count, userName) => `${count} device snapshot(s) — ${userName}`,
+    subtitleGlobal: (count) => `${count} total organization snapshot(s)`,
     viewDevicesFor: "View devices for",
+    filterByUser: "Filter by user",
+    globalView: "Global Organization Access",
     myDevices: "My devices",
     reloadButton: {
       default: "Reload data",
@@ -112,14 +134,22 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
       ipAddress: "IP ADDRESS",
       requestId: "REQUEST ID",
       date: "DATE",
+      user: "USER",
+      device: "DEVICE",
+      risk: "RISK/VPN",
+      location: "LOCATION",
+      actions: "ACTIONS",
       empty: "No events found. Click \"Reload data\" to generate an identification event.",
       noEvents: "No history found for this visitor.",
+      searchPlaceholder: "Search by Name, Email or IP...",
     },
     modal: {
       close: "Close",
       detailsTab: "Details",
       historyTab: (count) => `Visitor history ${count}`,
       identification: "Identification",
+      technicalRadiography: "Technical Radiography",
+      securityAnalysis: "Security Analysis",
       visitorId: "Visitor ID",
       lastSeen: "Last seen",
       firstSeen: "First seen",
@@ -139,7 +169,7 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
       continent: "Continent",
       timezone: "Timezone",
       asn: "ASN",
-      vpn: "VPN",
+      vpn: "VPN detected",
       proxy: "Proxy",
       highActivity: "High activity",
       suspectScore: "Suspect Score",
@@ -156,6 +186,14 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
       jsonCopied: "JSON copied to clipboard!",
       visitorHistoryTitle: "Visitor History",
       historyEmpty: "No history found for this visitor.",
+      impossibleTravel: "Impossible Travel Detected",
+      impossibleTravelDesc: "Distance between snapshots is too large for the elapsed time.",
+      riskDetected: "Risk Detected",
+      safe: "Safe / No VPN",
+      isp: "ISP / Provider",
+      fingerprint: "Device Fingerprint",
+      userProfile: "User Profile",
+      revokeSession: "Revoke Session",
     },
     map: {
       loading: "Loading map...",
@@ -169,6 +207,8 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
     },
     common: {
       unknown: "Unknown",
+      copy: "Copy",
+      copied: "Copied!",
     },
   },
   es: {
@@ -176,8 +216,10 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
     breadcrumb: "Información del dispositivo",
     pageDescription: "Consulta dispositivos y geolocalización de los usuarios de tu aplicación.",
     subtitle: (count) => `${count} eventos coinciden`,
-    subtitleUserDevices: (count, userName) => `${count} registro(s) de dispositivo — ${userName}`,
+    subtitleGlobal: (count) => `${count} registro(s) totales de la organización`,
     viewDevicesFor: "Ver dispositivos de",
+    filterByUser: "Filtrar por usuario",
+    globalView: "Acceso Global de la Organización",
     myDevices: "Mis dispositivos",
     reloadButton: {
       default: "Recargar datos",
@@ -195,14 +237,22 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
       ipAddress: "DIRECCIÓN IP",
       requestId: "ID DE SOLICITUD",
       date: "FECHA",
+      user: "USUARIO",
+      device: "DISPOSITIVO",
+      risk: "RIESGO/VPN",
+      location: "UBICACIÓN",
+      actions: "ACCIONES",
       empty: "No se encontraron eventos. Haz clic en \"Recargar datos\" para generar un evento.",
       noEvents: "No se encontró historial para este visitante.",
+      searchPlaceholder: "Buscar por Nombre, Email o IP...",
     },
     modal: {
       close: "Cerrar",
       detailsTab: "Detalles",
       historyTab: (count) => `Historial del visitante ${count}`,
       identification: "Identificación",
+      technicalRadiography: "Radiografía Técnica",
+      securityAnalysis: "Análisis de Seguridad",
       visitorId: "ID del visitante",
       lastSeen: "Última vez visto",
       firstSeen: "Primera vez visto",
@@ -222,7 +272,7 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
       continent: "Continente",
       timezone: "Zona horaria",
       asn: "ASN",
-      vpn: "VPN",
+      vpn: "VPN detectada",
       proxy: "Proxy",
       highActivity: "Actividad alta",
       suspectScore: "Índice sospechoso",
@@ -239,6 +289,14 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
       jsonCopied: "¡JSON copiado al portapapeles!",
       visitorHistoryTitle: "Historial del visitante",
       historyEmpty: "No se encontró historial para este visitante.",
+      impossibleTravel: "Viaje Imposible Detectado",
+      impossibleTravelDesc: "La distancia entre registros es demasiado grande para el tiempo transcurrido.",
+      riskDetected: "Riesgo Detectado",
+      safe: "Seguro / Sin VPN",
+      isp: "ISP / Proveedor",
+      fingerprint: "Fingerprint del Dispositivo",
+      userProfile: "Perfil de Usuario",
+      revokeSession: "Revocar Sesión",
     },
     map: {
       loading: "Cargando mapa...",
@@ -252,6 +310,8 @@ const DEVICE_TRANSLATIONS: Record<Language, DeviceInfoTranslations> = {
     },
     common: {
       unknown: "Desconocido",
+      copy: "Copiar",
+      copied: "¡Copiado!",
     },
   },
 };

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui-elements/button";
-import { useLanguage } from "@/contexts/language-context";
 import { cn } from "@/lib/utils";
 import { useAMLTranslations } from "./use-aml-translations";
 
@@ -35,6 +34,14 @@ interface AMLListConfigProps {
   selectedGroupId?: string | null;
   onSelectGroup: (groupId: string | null) => void;
   onToggleListInGroup?: (groupId: string, listId: string, add: boolean) => void;
+  pagination?: {
+    page: number;
+    hasMore: boolean;
+    nextPage: number | null;
+    previousPage: number | null;
+    total: number;
+  };
+  onPageChange?: (page: number) => void;
 }
 
 function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (enabled: boolean) => void }) {
@@ -67,6 +74,8 @@ export function AMLListConfig({
   selectedGroupId,
   onSelectGroup,
   onToggleListInGroup,
+  pagination,
+  onPageChange,
 }: AMLListConfigProps) {
   const translations = useAMLTranslations();
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
@@ -74,15 +83,40 @@ export function AMLListConfig({
   const [newGroupDescription, setNewGroupDescription] = useState("");
   const [selectedListsForGroup, setSelectedListsForGroup] = useState<string[]>([]);
 
+  const getJurisdictionIcon = (countryCode: string) => {
+    if (countryCode === "INT" || countryCode === "GL") {
+      return (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      );
+    }
+    if (countryCode === "EU") {
+      return (
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L13.09 5.36H16.62L13.76 7.44L14.85 10.8L12 8.72L9.15 10.8L10.24 7.44L7.38 5.36H10.91L12 2Z" />
+          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" />
+        </svg>
+      );
+    }
+
+    // Convert ISO code to regional indicator symbols (Flag Emoji)
+    try {
+      return countryCode
+        .toUpperCase()
+        .replace(/./g, (char) => String.fromCodePoint(char.charCodeAt(0) + 127397));
+    } catch (e) {
+      return "📍";
+    }
+  };
+
   const handleCreateGroup = () => {
     if (!newGroupName.trim()) return;
-    
     onCreateGroup({
       name: newGroupName,
       description: newGroupDescription,
       listIds: selectedListsForGroup,
     });
-    
     setShowCreateGroupModal(false);
     setNewGroupName("");
     setNewGroupDescription("");
@@ -93,7 +127,6 @@ export function AMLListConfig({
 
   return (
     <div className="mt-6 space-y-6">
-      {/* Header con botón de crear grupo */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-dark dark:text-white">
@@ -109,76 +142,22 @@ export function AMLListConfig({
           variant="primary"
           shape="rounded"
           size="small"
-          icon={
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-          }
         />
       </div>
 
-      {/* Selector de grupo */}
-      {groups.length > 0 && (
-        <div className="rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
-          <label className="mb-2 block text-sm font-semibold text-dark dark:text-white">
-            {translations.config.selectGroup}
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {groups.map((group) => (
-              <button
-                key={group.id}
-                onClick={() => onSelectGroup(group.id === selectedGroupId ? null : group.id)}
-                className={cn(
-                  "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-                  selectedGroupId === group.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-stroke bg-white text-dark hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
-                )}
-              >
-                {group.name}
-              </button>
-            ))}
-            <button
-              onClick={() => onSelectGroup(null)}
-              className={cn(
-                "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-                selectedGroupId === null
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-stroke bg-white text-dark hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
-              )}
-            >
-              {translations.config.allLists}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Grid de listas */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {lists.map((list, index) => {
-          const isInSelectedGroup = selectedGroup
-            ? selectedGroup.listIds.includes(list.id)
-            : true;
-          
-          // Si hay un grupo seleccionado, mostrar si está en el grupo; si no, mostrar estado global
-          const toggleEnabled = selectedGroup ? isInSelectedGroup : list.enabled;
-          const isVisible = selectedGroup ? isInSelectedGroup : list.enabled;
-
+        {lists.map((list) => {
           const handleToggle = (enabled: boolean) => {
             if (selectedGroup && selectedGroupId) {
-              // Si hay un grupo seleccionado, agregar/quitar del grupo
               if (onToggleListInGroup) {
                 onToggleListInGroup(selectedGroupId, list.id, enabled);
               } else {
-                // Fallback: actualizar el grupo directamente
                 const currentListIds = selectedGroup.listIds;
-                const newListIds = enabled
-                  ? [...currentListIds, list.id]
-                  : currentListIds.filter((id) => id !== list.id);
-                onUpdateGroup(selectedGroupId, { listIds: newListIds });
+                onUpdateGroup(selectedGroupId, {
+                  listIds: enabled ? [...currentListIds, list.id] : currentListIds.filter((id) => id !== list.id)
+                });
               }
             } else {
-              // Si no hay grupo seleccionado, activar/desactivar globalmente
               onToggleList(list.id, enabled);
             }
           };
@@ -186,45 +165,36 @@ export function AMLListConfig({
           return (
             <div
               key={list.id}
-              data-tour-id={index === 0 ? "tour-aml-list-config" : undefined}
               className={cn(
                 "flex h-full flex-col rounded-lg border bg-white p-6 shadow-sm transition-shadow hover:shadow-md dark:bg-dark-2",
-                isVisible
-                  ? "border-stroke dark:border-dark-3"
-                  : "border-gray-200 opacity-60 dark:border-dark-4"
+                list.enabled ? "border-stroke dark:border-dark-3" : "border-gray-200 opacity-60 dark:border-dark-4"
               )}
             >
-              {/* Header con icono y toggle */}
               <div className="mb-4 flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20">
-                    {list.icon}
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-2xl dark:bg-primary/20">
+                    {getJurisdictionIcon(list.country)}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-dark dark:text-white">
+                    <h3 className="text-sm font-semibold text-dark dark:text-white line-clamp-2">
                       {list.title}
                     </h3>
-                    <p className="text-xs text-dark-6 dark:text-dark-6">{list.category}</p>
+                    <p className="text-xs text-dark-6 dark:text-dark-6 uppercase font-bold tracking-wider">
+                      {list.country}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              {/* Descripción */}
-              <p className="mb-4 text-sm text-dark-6 dark:text-dark-6 whitespace-normal break-words">
+              <p className="mb-4 text-sm text-dark-6 dark:text-dark-6 line-clamp-3">
                 {list.description}
               </p>
 
-              {/* Footer con toggle */}
               <div className="mt-auto flex items-center justify-between border-t border-stroke pt-4 dark:border-dark-3">
                 <div className="flex items-center gap-2">
-                  <Toggle
-                    enabled={toggleEnabled}
-                    onChange={handleToggle}
-                  />
+                  <Toggle enabled={list.enabled} onChange={handleToggle} />
                   <span className="text-xs text-dark-6 dark:text-dark-6">
-                    {toggleEnabled
-                      ? translations.config.listScreening
-                      : translations.config.listNotScreening}
+                    {list.enabled ? "Activa" : "Inactiva"}
                   </span>
                 </div>
               </div>
@@ -233,7 +203,32 @@ export function AMLListConfig({
         })}
       </div>
 
-      {/* Modal de crear grupo */}
+      {pagination && onPageChange && (
+        <div className="mt-8 flex items-center justify-between border-t border-stroke py-4 dark:border-dark-3">
+          <p className="text-sm text-dark-6">
+            Página <span className="font-bold text-dark dark:text-white">{pagination.page}</span> de <span className="font-bold text-dark dark:text-white">{Math.ceil(pagination.total / 25)}</span> ({pagination.total} listas totales)
+          </p>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => pagination.previousPage && onPageChange(pagination.previousPage)}
+              disabled={!pagination.previousPage}
+              label="Anterior"
+              variant="outlineDark"
+              size="small"
+              shape="rounded"
+            />
+            <Button
+              onClick={() => pagination.nextPage && onPageChange(pagination.nextPage)}
+              disabled={!pagination.hasMore}
+              label="Próxima"
+              variant="primary"
+              size="small"
+              shape="rounded"
+            />
+          </div>
+        </div>
+      )}
+
       {showCreateGroupModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-dark-2">
@@ -250,7 +245,7 @@ export function AMLListConfig({
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   placeholder={translations.config.groupNamePlaceholder}
-                  className="block w-full rounded-lg border border-stroke bg-white px-4 py-2 text-sm text-dark focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+                  className="block w-full rounded-lg border border-stroke bg-white px-4 py-2 text-sm text-dark dark:border-dark-3 dark:bg-dark-3 dark:text-white"
                 />
               </div>
               <div>
@@ -262,7 +257,7 @@ export function AMLListConfig({
                   onChange={(e) => setNewGroupDescription(e.target.value)}
                   placeholder={translations.config.groupDescriptionPlaceholder}
                   rows={3}
-                  className="block w-full rounded-lg border border-stroke bg-white px-4 py-2 text-sm text-dark focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+                  className="block w-full rounded-lg border border-stroke bg-white px-4 py-2 text-sm text-dark dark:border-dark-3 dark:bg-dark-3 dark:text-white"
                 />
               </div>
               <div>
@@ -271,51 +266,23 @@ export function AMLListConfig({
                 </label>
                 <div className="max-h-48 space-y-2 overflow-y-auto rounded-lg border border-stroke p-3 dark:border-dark-3">
                   {lists.map((list) => (
-                    <label
-                      key={list.id}
-                      className="flex items-center gap-2 text-sm text-dark dark:text-white"
-                    >
+                    <label key={list.id} className="flex items-center gap-2 text-sm text-dark dark:text-white">
                       <input
                         type="checkbox"
                         checked={selectedListsForGroup.includes(list.id)}
                         onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedListsForGroup([...selectedListsForGroup, list.id]);
-                          } else {
-                            setSelectedListsForGroup(
-                              selectedListsForGroup.filter((id) => id !== list.id)
-                            );
-                          }
+                          setSelectedListsForGroup(e.target.checked ? [...selectedListsForGroup, list.id] : selectedListsForGroup.filter((id) => id !== list.id));
                         }}
-                        className="h-4 w-4 rounded border-stroke text-primary focus:ring-primary dark:border-dark-3"
+                        className="h-4 w-4 rounded border-stroke text-primary"
                       />
-                      <span>{list.title} - {list.category}</span>
+                      <span>{list.title}</span>
                     </label>
                   ))}
                 </div>
               </div>
               <div className="flex gap-3">
-                <Button
-                  onClick={handleCreateGroup}
-                  label={translations.config.create}
-                  variant="primary"
-                  shape="rounded"
-                  size="small"
-                  className="flex-1"
-                />
-                <Button
-                  onClick={() => {
-                    setShowCreateGroupModal(false);
-                    setNewGroupName("");
-                    setNewGroupDescription("");
-                    setSelectedListsForGroup([]);
-                  }}
-                  label={translations.config.cancel}
-                  variant="outlineDark"
-                  shape="rounded"
-                  size="small"
-                  className="flex-1"
-                />
+                <Button onClick={handleCreateGroup} label={translations.config.create} variant="primary" size="small" shape="rounded" className="flex-1" />
+                <Button onClick={() => setShowCreateGroupModal(false)} label={translations.config.cancel} variant="outlineDark" size="small" shape="rounded" className="flex-1" />
               </div>
             </div>
           </div>

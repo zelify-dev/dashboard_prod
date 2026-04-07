@@ -221,45 +221,52 @@ export function IdentityUserDetailDrawer({ userId, isOpen, onClose }: IdentityUs
       {/* Modal Fullscreen Image */}
       {fullscreenImageUrl && (
         <div
-          className="fixed inset-0 z-[2000] flex flex-col items-center justify-center bg-[#020D1A]/95 p-4 md:p-8 animate-in fade-in duration-300"
+          className="fixed inset-0 z-[3000] flex flex-col items-center justify-center bg-[#020D1A]/95 p-4 md:p-8 animate-in fade-in duration-300"
           onClick={() => setFullscreenImageUrl(null)}
         >
-          {/* Close Area / Header */}
-          <div className="absolute right-6 top-6 z-[2001] flex flex-col items-center gap-2">
-            <button
-              className="group flex flex-col items-center gap-2 transition-transform active:scale-95"
-              onClick={() => setFullscreenImageUrl(null)}
-              aria-label={t.close}
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-dark shadow-xl ring-4 ring-white/10 transition-all group-hover:bg-gray-2 group-hover:ring-white/20">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-white/70 group-hover:text-white">
-                {t.close}
-              </span>
-            </button>
-          </div>
-
-          {/* Image Container with Delimitation */}
+          {/* Main Modal Container */}
           <div 
-            className="relative max-h-[85vh] max-w-full overflow-hidden rounded-xl border-4 border-white/10 bg-dark shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-500 animate-in zoom-in-95"
+            className="relative flex flex-col items-center max-h-[90vh] max-w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fullscreenImageUrl}
-              alt="Fullscreen Preview"
-              className="h-auto max-h-[85vh] w-auto max-w-full object-contain select-none"
-              onContextMenu={(e) => e.preventDefault()}
-              onDragStart={(e) => e.preventDefault()}
-            />
+            {/* Top Close Button (Premium Design) */}
+            <div className="absolute -top-12 right-0 sm:-right-12 z-[3001]">
+              <button
+                className="group flex flex-col items-center gap-1.5 transition-transform active:scale-95 hover:scale-105"
+                onClick={() => setFullscreenImageUrl(null)}
+                aria-label={t.close}
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-dark shadow-[0_0_20px_rgba(255,255,255,0.2)] ring-2 ring-white/10 transition-all group-hover:bg-gray-2 group-hover:ring-white/30">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 group-hover:text-white transition-colors">
+                  {t.close}
+                </span>
+              </button>
+            </div>
+
+            {/* Image Container with Delimitation */}
+            <div 
+              className="relative max-h-[85vh] max-w-full overflow-hidden rounded-2xl border-[6px] border-white/5 bg-dark shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8)] transition-all duration-700 animate-in zoom-in-95"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={fullscreenImageUrl}
+                alt="Fullscreen Preview"
+                className="h-auto max-h-[85vh] w-auto max-w-full object-contain select-none"
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
+              />
+            </div>
+            
+            <div className="mt-8 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-1000">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">
+                 Pulsa <kbd className="mx-1 rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-sans text-xs text-white/60">ESC</kbd> o haz clic fuera para salir
+              </p>
+            </div>
           </div>
-          
-          <p className="mt-6 text-xs font-medium text-white/40">
-             Pulsa <kbd className="rounded bg-white/10 px-1.5 py-0.5 font-sans text-[10px] text-white/60">ESC</kbd> o haz clic fuera para salir
-          </p>
         </div>
       )}
     </>
