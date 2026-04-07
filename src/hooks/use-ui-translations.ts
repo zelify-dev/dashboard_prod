@@ -61,7 +61,9 @@ export type UiTranslations = {
         diligence: string;
         basicService: string;
         transfers: string;
+        paymentsWorkflow: string;
         internationalTransfers: string;
+        internationalTransfersWorkflow: string;
         alaiza: string;
         behaviorAnalysis: string;
         financialEducation: string;
@@ -453,7 +455,9 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           diligence: "Diligence",
           basicService: "Basic Service",
           transfers: "Transfers",
+          paymentsWorkflow: "WorkFlow",
           internationalTransfers: "International transfers",
+          internationalTransfersWorkflow: "WorkFlow",
           alaiza: "Alaiza",
           behaviorAnalysis: "Behavior Analysis",
           financialEducation: "Financial Education",
@@ -846,7 +850,9 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           diligence: "Diligencia",
           basicService: "Servicios Básicos",
           transfers: "Transferencias",
+          paymentsWorkflow: "WorkFlow",
           internationalTransfers: "Transferencias internacionales",
+          internationalTransfersWorkflow: "WorkFlow",
           alaiza: "Alaiza",
           behaviorAnalysis: "Análisis de Comportamiento",
           financialEducation: "Educación Financiera",

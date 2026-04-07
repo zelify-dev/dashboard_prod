@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "20": "^3.1.9",
+    "22": "^0.0.0",
     "@fingerprintjs/fingerprintjs-pro-react": "^2.7.1",
     "@fingerprintjs/fingerprintjs-pro-server-api": "^6.10.0",
     "@react-three/drei": "^10.7.7",

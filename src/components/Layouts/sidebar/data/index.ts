@@ -120,6 +120,10 @@ export function getNavData(
           url: "/pages/products/payments/transfers",
         },
         {
+          title: translations.sidebar.menuItems.subItems.paymentsWorkflow,
+          url: "/pages/products/payments/workflow",
+        },
+        {
           title: translations.sidebar.menuItems.subItems.customKeys,
           url: "/pages/products/payments/custom-keys",
         },
@@ -138,6 +142,12 @@ export function getNavData(
           title:
             translations.sidebar.menuItems.subItems.internationalTransfers,
           url: "/pages/products/tx/transferencias-internacionales",
+        },
+        {
+          title:
+            translations.sidebar.menuItems.subItems
+              .internationalTransfersWorkflow,
+          url: "/pages/products/tx/transferencias-internacionales/workflow",
         },
       ],
     },
