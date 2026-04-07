@@ -53,7 +53,7 @@ export function Header() {
       )}
 
       <div className="max-xl:hidden flex items-center gap-3">
-        <h1 className="mb-0.5 text-lg font-black text-dark dark:text-white leading-none">
+        <h1 className="mb-0.5 text-lg font-bold text-dark dark:text-white leading-none tracking-tight">
           {translations.header.title}
         </h1>
       </div>

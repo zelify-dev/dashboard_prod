@@ -31,7 +31,8 @@ export const amlTranslations = {
     },
     status: {
       approved: "Aprobado",
-      pending: "Pendiente"
+      pending: "Pendiente",
+      hit: "Match Detectado"
     },
     detailTitle: "Detalle de Validación AML",
     detail: {
@@ -83,7 +84,8 @@ export const amlTranslations = {
     },
     status: {
       approved: "Approved",
-      pending: "Pending"
+      pending: "Pending",
+      hit: "Match Detected"
     },
     detailTitle: "AML Validation Detail",
     detail: {
