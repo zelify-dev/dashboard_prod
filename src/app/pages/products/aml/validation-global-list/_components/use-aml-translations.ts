@@ -47,6 +47,7 @@ type AMLTranslations = {
   status: {
     approved: string;
     pending: string;
+    hit: string;
   };
   faceScan: {
     scanning: string;
@@ -175,6 +176,7 @@ const AML_TRANSLATIONS: Record<Language, AMLTranslations> = {
     status: {
       approved: "Aprobado",
       pending: "Pendiente",
+      hit: "Match Detectado",
     },
     faceScan: {
       scanning: "Escaneando",
@@ -409,6 +411,7 @@ const AML_TRANSLATIONS: Record<Language, AMLTranslations> = {
     status: {
       approved: "Approved",
       pending: "Pending",
+      hit: "Match Detected",
     },
     faceScan: {
       scanning: "Scanning",
