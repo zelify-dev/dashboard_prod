@@ -17,6 +17,7 @@ type InputGroupProps = {
   iconPosition?: "left" | "right";
   height?: "sm" | "default";
   defaultValue?: string;
+  customInputClassName?: string;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
 const InputGroup: React.FC<InputGroupProps> = ({
@@ -32,7 +33,8 @@ const InputGroup: React.FC<InputGroupProps> = ({
   iconPosition,
   height,
   fileStyleVariant,
-  ...props
+  customInputClassName,
+  ...restProps
 }) => {
   const id = useId();
 
@@ -59,11 +61,12 @@ const InputGroup: React.FC<InputGroupProps> = ({
               : "px-5.5 py-3 text-dark placeholder:text-dark-6 dark:text-white",
             iconPosition === "left" ? "pl-12.5" : "pr-12.5",
             height === "sm" && "py-2.5",
+            customInputClassName
           )}
           required={required}
           disabled={disabled}
           data-active={active}
-          {...props}
+          {...restProps}
         />
 
         {icon && (

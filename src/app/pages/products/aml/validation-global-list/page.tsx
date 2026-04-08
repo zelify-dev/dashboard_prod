@@ -1,399 +1,312 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui-elements/button";
-import { AMLValidationsList, mockValidations, AMLValidation } from "./_components/aml-validations-list";
-import { AMLValidationForm } from "./_components/aml-validation-form";
-import { AMLValidationDetail } from "./_components/aml-validation-detail";
-import { AMLListConfig, AMLList, AMLListGroup } from "./_components/aml-list-config";
-import { getAMLists } from "./_components/aml-lists-data";
 import { useAMLTranslations } from "./_components/use-aml-translations";
-import { useLanguage } from "@/contexts/language-context";
-import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { AMLValidationsList, AMLValidation } from "./_components/aml-validations-list";
+import { AMLValidationDetail } from "./_components/aml-validation-detail";
+import { AMLValidationForm } from "./_components/aml-validation-form";
+import { AMLListConfig, AMLList, AMLListGroup } from "./_components/aml-list-config";
+import { 
+  getAMLScreenings, 
+  getAMLScreeningDetail, 
+  getAMLListsCatalog, 
+  getAMLGroups,
+  createAMLGroup,
+  updateAMLGroup,
+  deleteAMLGroup,
+  AMLScreeningItem, 
+  AMLCatalogItem,
+  AMLGroup
+} from "@/lib/aml-api";
 
-import { AMLPreviewPanel } from "./_components/aml-preview-panel";
-import { AMLPersonalizationConfig } from "./_components/aml-personalization-config";
-import { AMLConfig } from "./_components/aml-config-types";
-import { useTour } from "@/contexts/tour-context";
-
-type ViewMode = "validations" | "config" | "personalization";
-
-const AML_LISTS_STORAGE_KEY = "aml_validation_global_lists_enabled_v1";
-
-function readEnabledMapFromStorage(): Record<string, boolean> {
-  if (typeof window === "undefined") return {};
-
-  try {
-    const raw = window.localStorage.getItem(AML_LISTS_STORAGE_KEY);
-    if (!raw) return {};
-
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return {};
-
-    return Object.entries(parsed).reduce<Record<string, boolean>>((acc, [key, value]) => {
-      if (typeof value === "boolean") {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
-  } catch {
-    return {};
-  }
-}
-
-function applyEnabledMap(lists: AMLList[], enabledMap: Record<string, boolean>): AMLList[] {
-  return lists.map((list) =>
-    Object.prototype.hasOwnProperty.call(enabledMap, list.id)
-      ? { ...list, enabled: enabledMap[list.id] }
-      : list
-  );
-}
-
-import { getAMLScreenings, getAMLScreeningDetail, getAMLListsCatalog, AMLScreeningItem, AMLCatalogItem } from "@/lib/aml-api";
-
-export default function ValidationGlobalListPage() {
+export default function AMLValidationPage() {
   const translations = useAMLTranslations();
-  const { language } = useLanguage();
-  const { countryName } = useOrganizationCountry();
-  const { isTourActive, currentStep, steps } = useTour();
-  const [viewMode, setViewMode] = useState<ViewMode>("validations");
-  const [selectedValidationId, setSelectedValidationId] = useState<string | null>(null);
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [activeTab, setActiveTab] = useState<"auditoria" | "configuracion">("auditoria");
   const [validations, setValidations] = useState<AMLValidation[]>([]);
-  const [displayedValidation, setDisplayedValidation] = useState<AMLValidation | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [catalog, setCatalog] = useState<AMLCatalogItem[]>([]);
-  const [catalogPagination, setCatalogPagination] = useState<{
-    page: number;
-    hasMore: boolean;
-    nextPage: number | null;
-    previousPage: number | null;
-    total: number;
-  }>({
-    page: 1,
-    hasMore: false,
-    nextPage: null,
-    previousPage: null,
-    total: 0,
-  });
+  const [selectedValidation, setSelectedValidation] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [catalog, setCatalog] = useState<AMLList[]>([]);
+  const [groups, setGroups] = useState<AMLListGroup[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [catalogSearch, setCatalogSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [fullCatalog, setFullCatalog] = useState<AMLList[]>([]);
+  const [isCatalogLoading, setIsCatalogLoading] = useState(false);
 
-  const [amlConfig, setAmlConfig] = useState<AMLConfig>({
-    branding: {
-      light: {
-        logo: null,
-        customColorTheme: "#004492",
-      },
-      dark: {
-        logo: null,
-        customColorTheme: "#004492",
-      },
-    },
-  });
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Mapeador de item de lista de screening a nuestra interfaz de validación
-  const mapScreeningToValidation = (item: AMLScreeningItem): AMLValidation => ({
-    id: item.screening_id,
-    name: item.name,
-    verification: item.match_count > 0 ? "Hit" : "success",
-    matchCount: item.match_count,
-    hasMatches: item.has_matches,
-    createdAt: new Date(item.created_at).toLocaleDateString(),
-    foundIn: item.has_matches ? item.data_source : undefined,
-  });
+  // Memoized Search & Pagination (100% Client-Side)
+  const filteredCatalog = useMemo(() => {
+    if (!catalogSearch.trim()) return fullCatalog;
+    const term = catalogSearch.toLowerCase().trim();
+    return fullCatalog.filter(list => 
+      list.title.toLowerCase().includes(term) ||
+      list.country.toLowerCase().includes(term) ||
+      list.id.toLowerCase().includes(term)
+    );
+  }, [fullCatalog, catalogSearch]);
 
-  const fetchValidations = async () => {
-    setIsLoading(true);
-    setError(null);
+  const paginatedCatalog = useMemo(() => {
+    const itemsPerPage = 25;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredCatalog.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredCatalog, currentPage]);
+
+  const catalogPagination = useMemo(() => ({
+    page: currentPage,
+    total: filteredCatalog.length,
+    hasMore: currentPage * 25 < filteredCatalog.length,
+    nextPage: currentPage * 25 < filteredCatalog.length ? currentPage + 1 : null,
+    previousPage: currentPage > 1 ? currentPage - 1 : null
+  }), [currentPage, filteredCatalog.length]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchAuditoria();
+    fetchFullCatalog(); // One-shot load
+    fetchGroups();
+  }, []);
+
+  // Reset page to 1 on search
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [catalogSearch]);
+
+  const fetchAuditoria = async () => {
     try {
       const data = await getAMLScreenings();
       setValidations(data.items.map(mapScreeningToValidation));
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Error al cargar validaciones");
+    } catch (err) {
+      console.error("Error fetching screenings:", err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const fetchCatalog = async (page: number = 1) => {
-    setIsLoading(true);
+  const fetchFullCatalog = async () => {
     try {
-      const data = await getAMLListsCatalog({ page });
-      setCatalog(data.results);
-      setCatalogPagination({
-        page: data.page,
-        hasMore: data.has_more,
-        nextPage: data.next_page,
-        previousPage: data.previous_page,
-        total: data.count,
+      setIsCatalogLoading(true);
+      console.log("🚀 [Catalog] Starting full recursive load...");
+      let allMappedLists: AMLList[] = [];
+      let pageToFetch = 1;
+      let hasMore = true;
+      let safetyCounter = 0;
+
+      while (hasMore && safetyCounter < 15) { // Cap at 15 pages for safety
+        safetyCounter++;
+        const data = await getAMLListsCatalog({ page: pageToFetch });
+        
+        const mappedPage: AMLList[] = data.results.map((item: AMLCatalogItem) => ({
+          id: item.short_name,
+          title: item.name,
+          category: "Global List",
+          description: `Lista oficial de ${item.country}. Contiene registros de sanciones y personas expuestas.`,
+          country: item.country,
+          icon: null,
+          enabled: true,
+          source: item.short_name,
+          number_of_entries: item.number_of_entries,
+          last_update: item.last_update_info?.timestamp
+        }));
+
+        allMappedLists = [...allMappedLists, ...mappedPage];
+        hasMore = data.has_more && data.next_page !== null;
+        pageToFetch = data.next_page || (pageToFetch + 1);
+        
+        console.log(`📥 [Catalog] Loaded page ${safetyCounter}. Total collected: ${allMappedLists.length}`);
+        
+        if (!hasMore) break;
+      }
+      
+      setFullCatalog(allMappedLists);
+      console.log(`✅ [Catalog] Full load complete: ${allMappedLists.length} lists.`);
+    } catch (err) {
+      console.error("❌ [Catalog] Error in recursive full load:", err);
+    } finally {
+      setIsCatalogLoading(false);
+    }
+  };
+
+  const fetchGroups = async () => {
+    try {
+      const data = await getAMLGroups();
+      
+      // Deduplicate by name if the backend has duplicates, keeping only the latest/unique
+      const uniqueMap = new Map();
+      data.forEach((g: AMLGroup) => {
+        uniqueMap.set(g.name, g); // Using name as key to solve "porque sale asi"
       });
       
-      // Update the local lists structure to match the catalog
-      const mappedLists: AMLList[] = data.results.map((item: AMLCatalogItem) => ({
-        id: item.short_name,
-        title: item.name,
-        category: item.country === "INT" ? "Internacional" : item.country,
-        description: `${item.number_of_entries || 0} entradas registradas.`,
-        country: item.country,
-        icon: null, // Icons are handled by the component or defaults
-        enabled: true,
-        source: item.short_name
+      const mappedGroups: AMLListGroup[] = Array.from(uniqueMap.values()).map((g: AMLGroup) => ({
+        id: g.id,
+        name: g.name,
+        description: g.description,
+        sources: g.sources,
+        min_score: g.min_score
       }));
-      setLists(mappedLists);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Error al cargar el catálogo de listas");
-    } finally {
-      setIsLoading(false);
+      console.log("🔍 Organization AML Groups:", mappedGroups);
+      setGroups(mappedGroups);
+    } catch (err) {
+      console.error("❌ Error fetching groups:", err);
     }
   };
 
-  useEffect(() => {
-    if (viewMode === "validations" && !selectedValidationId && !isCreatingNew) {
-      fetchValidations();
-    }
-    if (viewMode === "config") {
-      fetchCatalog(catalogPagination.page);
-    }
-  }, [viewMode, selectedValidationId, isCreatingNew]);
-
-  const handleCatalogPageChange = (newPage: number) => {
-    fetchCatalog(newPage);
-  };
-
-  const [lists, setLists] = useState<AMLList[]>([]);
-  const [groups, setGroups] = useState<AMLListGroup[]>([]);
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-
-  // ... (existing personalization config state remains)
-
-  const handleSelectValidation = async (validationId: string) => {
-    setSelectedValidationId(validationId);
-    setIsCreatingNew(false);
-    setIsLoading(true);
-    setError(null);
-
+  const handleCreateGroup = async (groupData: Omit<AMLListGroup, "id">) => {
     try {
-      const detail = await getAMLScreeningDetail(validationId);
-      // Mapear el detalle "Radiografía"
-      const mapped: AMLValidation = {
-        id: detail.screening_id,
-        name: detail.request.name,
-        country: detail.request.country || "ND",
-        createdAt: new Date(detail.created_at).toLocaleDateString(),
-        verification: detail.response.count > 0 ? "Hit" : "success",
-        foundIn: detail.response.count > 0 ? detail.response.results[0]?.data_source?.name : undefined,
-        rawDetail: detail, // Save the full response for deep radiography
-        details: detail.response.count > 0 ? {
-          listName: detail.response.results[0]?.data_source?.name || detail.response.results[0]?.data_source?.short_name,
-          matchScore: detail.response.results[0]?.confidence_score * 100,
-          source: detail.response.results[0]?.data_source?.name,
-          dateFound: new Date(detail.created_at).toLocaleDateString(),
-        } : undefined
-      };
-      setDisplayedValidation(mapped);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || "Error al cargar el detalle");
-    } finally {
-      setIsLoading(false);
+      await createAMLGroup({
+        name: groupData.name,
+        description: groupData.description,
+        sources: groupData.sources,
+        min_score: groupData.min_score
+      });
+      fetchGroups();
+    } catch (err) {
+      console.error("Error creating group:", err);
     }
   };
 
-  const handleCreateNew = () => {
-    setSelectedValidationId("new");
-    setIsCreatingNew(true);
-  };
-
-  const handleBackToList = () => {
-    setSelectedValidationId(null);
-    setIsCreatingNew(false);
-    setDisplayedValidation(null);
-  };
-
-  const handleStartVerification = async (validation: AMLValidation) => {
-    // En una implementación real, aquí llamaríamos a POST /api/aml/screenings
-    // Por ahora, simulamos el inicio y recargamos la lista
-    setIsCreatingNew(false);
-    setSelectedValidationId(null);
-    fetchValidations();
-  };
-
-  const handleToggleList = (listId: string, enabled: boolean) => {
-    setLists((prev) =>
-      prev.map((list) => (list.id === listId ? { ...list, enabled } : list))
-    );
-  };
-
-  const handleCreateGroup = (group: Omit<AMLListGroup, "id">) => {
-    const newGroup: AMLListGroup = {
-      ...group,
-      id: Date.now().toString(),
-    };
-    setGroups((prev) => [...prev, newGroup]);
-  };
-
-  const handleUpdateGroup = (groupId: string, updates: Partial<AMLListGroup>) => {
-    setGroups((prev) =>
-      prev.map((group) => (group.id === groupId ? { ...group, ...updates } : group))
-    );
-  };
-
-  const handleDeleteGroup = (groupId: string) => {
-    setGroups((prev) => prev.filter((group) => group.id !== groupId));
-    if (selectedGroupId === groupId) {
-      setSelectedGroupId(null);
+  const handleUpdateGroup = async (groupId: string, updateData: Partial<AMLListGroup>) => {
+    try {
+      await updateAMLGroup(groupId, {
+        name: updateData.name,
+        description: updateData.description,
+        sources: updateData.sources,
+        min_score: updateData.min_score
+      });
+      fetchGroups();
+    } catch (err) {
+      console.error("Error updating group:", err);
     }
   };
 
-  const handleToggleListInGroup = (groupId: string, listId: string, add: boolean) => {
-    setGroups((prev) =>
-      prev.map((group) => {
-        if (group.id === groupId) {
-          const currentListIds = group.listIds;
-          const newListIds = add
-            ? [...currentListIds, listId]
-            : currentListIds.filter((id) => id !== listId);
-          return { ...group, listIds: newListIds };
-        }
-        return group;
-      })
-    );
+  const handleDeleteGroup = async (groupId: string) => {
+    try {
+      await deleteAMLGroup(groupId);
+      fetchGroups();
+    } catch (err) {
+      console.error("Error deleting group:", err);
+    }
   };
 
-  const selectedValidation = displayedValidation || validations.find((v) => v.id === selectedValidationId);
+  const mapScreeningToValidation = (item: AMLScreeningItem): AMLValidation => ({
+    id: item.screening_id,
+    name: item.name,
+    country: "Global",
+    documentNumber: "N/D",
+    verification: item.has_matches ? "hit" : "success",
+    createdAt: new Date(item.created_at).toLocaleDateString()
+  });
+
+  const handleViewDetail = async (id: string) => {
+    try {
+      const detail = await getAMLScreeningDetail(id);
+      setValidations(prev => prev.map(v => 
+        v.id === id ? { ...v, rawDetail: detail } : v
+      ));
+      setSelectedValidation(id);
+    } catch (err) {
+      console.error("Error fetching screening detail:", err);
+    }
+  };
+
+  const selectedValidationData = validations.find((v) => v.id === selectedValidation);
 
   return (
-    <div className="mx-auto w-full max-w-[1400px]">
-      <Breadcrumb pageName={translations.pageTitle} />
-
-      {/* Navegación entre vistas */}
-      <div className="mb-6 flex gap-4 border-b border-stroke dark:border-dark-3">
+    <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+      {/* View Selectors */}
+      <div className="mb-6 flex space-x-8 border-b border-stroke dark:border-dark-3">
         <button
           onClick={() => {
-            setViewMode("validations");
-            setSelectedValidationId(null);
-            setIsCreatingNew(false);
+            setActiveTab("auditoria");
+            setSelectedValidation(null);
+            setShowForm(false);
           }}
-          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${viewMode === "validations"
-            ? "border-primary text-primary"
-            : "border-transparent text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
-            }`}
+          className={cn(
+            "pb-4 text-sm font-bold transition-all",
+            activeTab === "auditoria" 
+              ? "border-b-2 border-primary text-primary" 
+              : "text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
+          )}
         >
-          {translations.validationsTitle}
+          Historial de Auditoría
         </button>
         <button
-          onClick={() => {
-            setViewMode("config");
-            setSelectedValidationId(null);
-            setIsCreatingNew(false);
-          }}
-          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${viewMode === "config"
-            ? "border-primary text-primary"
-            : "border-transparent text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
-            }`}
+          onClick={() => setActiveTab("configuracion")}
+          className={cn(
+            "pb-4 text-sm font-bold transition-all",
+            activeTab === "configuracion" 
+              ? "border-b-2 border-primary text-primary" 
+              : "text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
+          )}
         >
-          {translations.config.title}
-        </button>
-        <button
-          onClick={() => {
-            setViewMode("personalization");
-            setSelectedValidationId(null);
-            setIsCreatingNew(false);
-          }}
-          className={`border-b-2 px-4 py-2 text-sm font-medium transition-colors ${viewMode === "personalization"
-            ? "border-primary text-primary"
-            : "border-transparent text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
-            }`}
-        >
-          Personalización
+          Configuración de Listas y Grupos
         </button>
       </div>
 
-      {viewMode === "config" ? (
-        <AMLListConfig
-          lists={lists}
-          groups={groups}
-          onToggleList={handleToggleList}
-          onCreateGroup={handleCreateGroup}
-          onUpdateGroup={handleUpdateGroup}
-          onDeleteGroup={handleDeleteGroup}
-          selectedGroupId={selectedGroupId}
-          onSelectGroup={setSelectedGroupId}
-          onToggleListInGroup={handleToggleListInGroup}
-          pagination={catalogPagination}
-          onPageChange={handleCatalogPageChange}
-        />
-      ) : viewMode === "personalization" ? (
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          {/* Panel Izquierdo: Preview */}
-          <div
-            className="relative min-h-[600px] overflow-hidden rounded-2xl border border-stroke bg-white shadow-default dark:border-dark-3 dark:bg-dark-2"
-            data-tour-id="tour-aml-preview"
-          >
-            <AMLPreviewPanel config={amlConfig} isActive={viewMode === "personalization"} />
-          </div>
-
-          {/* Panel Derecho: Configuración */}
-          <div className="relative">
-            <AMLPersonalizationConfig
-              config={amlConfig}
-              updateConfig={(updates) => setAmlConfig({ ...amlConfig, ...updates })}
+      <div className="grid grid-cols-1 gap-4 md:gap-6 2xl:gap-7.5">
+        {activeTab === "auditoria" ? (
+          selectedValidationData ? (
+            <div>
+              <Button
+                onClick={() => setSelectedValidation(null)}
+                label={translations.backToValidations}
+                variant="outlineDark"
+                size="small"
+                shape="rounded"
+                className="mb-4"
+              />
+              <AMLValidationDetail validation={selectedValidationData} />
+            </div>
+          ) : showForm ? (
+            <div>
+              <Button
+                onClick={() => setShowForm(false)}
+                label={translations.backToValidations}
+                variant="outlineDark"
+                size="small"
+                shape="rounded"
+                className="mb-4"
+              />
+              <AMLValidationForm 
+                groups={groups}
+                selectedGroupId={selectedGroupId}
+                onStartVerification={(v) => {
+                  setValidations(prev => [v, ...prev]);
+                  setShowForm(false);
+                  setActiveTab("auditoria");
+                }}
+                onCancel={() => setShowForm(false)}
+              />
+            </div>
+          ) : (
+            <AMLValidationsList
+              validations={validations}
+              onSelectValidation={handleViewDetail}
+              onCreateNew={() => setShowForm(true)}
+              loading={loading}
             />
-          </div>
-        </div>
-      ) : selectedValidationId === "new" ? (
-        <div>
-          <div className="mb-4">
-            <Button
-              onClick={handleBackToList}
-              label={translations.backToValidations}
-              variant="outlineDark"
-              shape="rounded"
-              size="small"
-              className="text-sm py-2 px-4"
-              icon={
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              }
-            />
-          </div>
-          <AMLValidationForm
-            onStartVerification={handleStartVerification}
-            onCancel={handleBackToList}
+          )
+        ) : (
+          <AMLListConfig 
+            lists={paginatedCatalog}
             groups={groups}
+            onToggleList={(id, enabled) => console.log("Global Toggle:", id, enabled)}
+            onCreateGroup={handleCreateGroup}
+            onUpdateGroup={handleUpdateGroup}
+            onDeleteGroup={handleDeleteGroup}
             selectedGroupId={selectedGroupId}
+            onSelectGroup={setSelectedGroupId}
+            pagination={catalogPagination}
+            onPageChange={setCurrentPage}
+            searchTerm={catalogSearch}
+            onSearch={setCatalogSearch}
+            isLoading={isCatalogLoading}
           />
-        </div>
-      ) : selectedValidation ? (
-        <div>
-          <div className="mb-4">
-            <Button
-              onClick={handleBackToList}
-              label={translations.backToValidations}
-              variant="outlineDark"
-              shape="rounded"
-              size="small"
-              className="text-sm py-2 px-4"
-              icon={
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              }
-            />
-          </div>
-          <AMLValidationDetail validation={selectedValidation} />
-        </div>
-      ) : (
-        <AMLValidationsList
-          validations={validations}
-          onSelectValidation={handleSelectValidation}
-          onCreateNew={handleCreateNew}
-        />
-      )}
+        )}
+      </div>
     </div>
   );
 }

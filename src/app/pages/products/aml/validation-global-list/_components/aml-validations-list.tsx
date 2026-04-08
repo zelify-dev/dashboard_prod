@@ -76,6 +76,7 @@ interface AMLValidationsListProps {
   validations: AMLValidation[];
   onSelectValidation: (validationId: string) => void;
   onCreateNew: () => void;
+  loading?: boolean;
 }
 
 function VerificationStatus({ 
@@ -143,7 +144,7 @@ function VerificationStatus({
   );
 }
 
-export function AMLValidationsList({ validations, onSelectValidation, onCreateNew }: AMLValidationsListProps) {
+export function AMLValidationsList({ validations, onSelectValidation, onCreateNew, loading = false }: AMLValidationsListProps) {
   const translations = useAMLTranslations();
   return (
     <div className="mt-6">
@@ -179,7 +180,16 @@ export function AMLValidationsList({ validations, onSelectValidation, onCreateNe
               </tr>
             </thead>
             <tbody>
-              {validations.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className="border-b border-stroke animate-pulse dark:border-dark-3">
+                    <td className="px-4 py-3"><div className="h-4 w-32 rounded bg-gray-200 dark:bg-dark-3" md-tour-id="skeleton-row"></div></td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 rounded bg-gray-200 dark:bg-dark-3"></div></td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 rounded bg-gray-200 dark:bg-dark-3"></div></td>
+                    <td className="px-4 py-3 text-right"><div className="ml-auto h-8 w-16 rounded bg-gray-200 dark:bg-dark-3"></div></td>
+                  </tr>
+                ))
+              ) : validations.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-sm text-dark-6 dark:text-dark-6">
                     {translations.validationsTable.noValidations}

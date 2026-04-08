@@ -81,6 +81,7 @@ export type AuthUser = {
   email: string;
   full_name: string;
   status: string;
+  photo?: string | null;
   must_change_password?: boolean;
 };
 
@@ -170,6 +171,7 @@ export type SessionItem = {
   user_agent?: string;
   expires_at?: string;
   revoked_at?: string | null;
+  active?: boolean;
 };
 
 export type MeResponse = {
@@ -189,6 +191,32 @@ export function getAccessToken(): string | null {
   if (typeof window === "undefined") return null;
   const token = sessionStorage.getItem(AUTH_STORAGE_KEYS.ACCESS_TOKEN);
   return token && token.trim() ? token.trim() : null;
+}
+
+/** 
+ * Extrae el sid (Session ID) del access_token (JWT) para identificar la sesión actual.
+ */
+export function getCurrentSessionId(): string | null {
+  const token = getAccessToken();
+  if (!token) return null;
+  try {
+    // Decodificar el payload del JWT (segunda parte)
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    const payload = JSON.parse(jsonPayload);
+    return payload.sid || null;
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[auth-api] Error al decodificar sid del token:", err);
+    }
+    return null;
+  }
 }
 
 /** Request genérico al API con Authorization Bearer. Si recibe 401, intenta refresh y reintenta una vez.
@@ -565,8 +593,14 @@ export async function updateOrganizationBranding(
 /** GET /api/me — perfil del usuario logueado. */
 export async function getMe(): Promise<MeResponse> {
   const res = await fetchWithAuth("/api/me");
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new AuthError(data.message || "Error al obtener perfil", res.status, data);
+  if (!res.ok) {
+    throw new AuthError("No se pudo obtener el perfil del usuario", res.status);
+  }
+  const data = await res.json();
+  if (typeof window !== "undefined") {
+    console.log("[auth-api] getMe Raw Response:", data);
+  }
+  // El backend devuelve los datos del usuario en la raíz. 
   return data as MeResponse;
 }
 
@@ -628,10 +662,17 @@ export async function syncMe(): Promise<void> {
   if (typeof window === "undefined") return;
   const me = await getMe();
   const k = AUTH_STORAGE_KEYS;
-  if (me.user) sessionStorage.setItem(k.USER, JSON.stringify(me.user));
-  if (me.organization) sessionStorage.setItem(k.ORGANIZATION, JSON.stringify(me.organization));
+  
+  // Si me.user existe (versión vieja), lo usamos. 
+  // Si no (versión nueva), el objeto 'me' es el usuario.
+  const user = me.user || (me as unknown as AuthUser);
+  const organization = me.organization;
+  
+  if (user && user.id) sessionStorage.setItem(k.USER, JSON.stringify(user));
+  if (organization) sessionStorage.setItem(k.ORGANIZATION, JSON.stringify(organization));
+  
   const topRoles = (me as { roles?: unknown }).roles;
-  const userRoles = (me.user as { roles?: unknown })?.roles;
+  const userRoles = (user as { roles?: unknown })?.roles;
   const rolesInput: unknown[] = [
     ...(Array.isArray(topRoles) ? topRoles : []),
     ...(Array.isArray(userRoles) ? userRoles : []),
@@ -786,4 +827,104 @@ export async function sendEmail(payload: {
     );
   }
   return data as { message: string };
+}
+
+/**
+ * POST /api/me/photo — subir/cambiar foto de perfil (multipart/form-data).
+ * Backend actualiza automáticamente url_photo del perfil.
+ */
+export async function uploadProfilePhoto(file: File): Promise<MeResponse> {
+  const form = new FormData();
+  form.append("photo", file);
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[auth-api] POST /api/me/photo | File: ${file.name} (${file.size} bytes)`);
+  }
+  const res = await fetchWithAuth("/api/me/photo", {
+    method: "POST",
+    body: form,
+    // Nota: El navegador establecerá el boundary correcto para multipart/form-data
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[auth-api] Error en POST /api/me/photo:", data);
+    }
+    throw new AuthError(data.message || "Error al subir la foto de perfil", res.status, data);
+  }
+  
+  // Sincronizar localmente si la respuesta trae el usuario o la nueva url_photo
+  if (typeof window !== "undefined") {
+    const currentUser = getStoredUser();
+    if (currentUser) {
+      // El backend usa la propiedad 'photo' (según log) pero manejamos fallback por si acaso
+      const updatedUser = data.user || { ...currentUser, photo: data.photo || data.url_photo };
+      sessionStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("user-updated"));
+    }
+  }
+  return data as MeResponse;
+}
+
+/**
+ * PATCH /api/me/email/change — iniciar flujo de cambio de correo (envía OTP al nuevo email).
+ */
+export async function initiateEmailChange(email: string): Promise<{ message: string }> {
+  const res = await fetchWithAuth("/api/me/email/change", {
+    method: "PATCH",
+    body: JSON.stringify({ email }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new AuthError(data.message || "Error al iniciar cambio de email", res.status, data);
+  return data as { message: string };
+}
+
+/**
+ * PATCH /api/me/email/verify — verificar código OTP y completar cambio de correo.
+ */
+export async function verifyEmailChange(otpCode: string): Promise<MeResponse> {
+  const res = await fetchWithAuth("/api/me/email/verify", {
+    method: "PATCH",
+    body: JSON.stringify({ otp_code: otpCode }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new AuthError(data.message || "Código OTP inválido o expirado", res.status, data);
+  
+  if (data.user && typeof window !== "undefined") {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(data.user));
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.USER_EMAIL, data.user.email);
+    window.dispatchEvent(new Event("storage"));
+  }
+  return data as MeResponse;
+}
+
+/**
+ * PATCH /api/me/phone/change — iniciar flujo de cambio de teléfono (envía OTP vía SMS).
+ */
+export async function initiatePhoneChange(phone: string): Promise<{ message: string }> {
+  const res = await fetchWithAuth("/api/me/phone/change", {
+    method: "PATCH",
+    body: JSON.stringify({ phone }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new AuthError(data.message || "Error al iniciar cambio de teléfono", res.status, data);
+  return data as { message: string };
+}
+
+/**
+ * PATCH /api/me/phone/verify — verificar código OTP y completar cambio de teléfono.
+ */
+export async function verifyPhoneChange(otpCode: string): Promise<MeResponse> {
+  const res = await fetchWithAuth("/api/me/phone/verify", {
+    method: "PATCH",
+    body: JSON.stringify({ otp_code: otpCode }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new AuthError(data.message || "Código OTP inválido o expirado", res.status, data);
+  
+  if (data.user && typeof window !== "undefined") {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.USER, JSON.stringify(data.user));
+    window.dispatchEvent(new Event("storage"));
+  }
+  return data as MeResponse;
 }
