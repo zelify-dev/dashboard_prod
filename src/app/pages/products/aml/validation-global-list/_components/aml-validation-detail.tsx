@@ -3,7 +3,7 @@
 import { AMLValidation } from "./aml-validations-list";
 import { useAMLTranslations } from "./use-aml-translations";
 import { useLanguage } from "@/contexts/language-context";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface AMLValidationDetailProps {
@@ -14,16 +14,22 @@ interface AMLValidationDetailProps {
  * Utility to provide professional icons for global jurisdictions.
  * Returns technical SVG for international/EU and flag emojis for specific countries.
  */
-const getJurisdictionIcon = (countryCode: string) => {
-  if (!countryCode || countryCode === "ND") return "📍";
-  if (countryCode === "INT" || countryCode === "GL") {
+const getJurisdictionIcon = (jurisdiction: string) => {
+  const raw = (jurisdiction || "").trim();
+  const upper = raw.toUpperCase();
+
+  if (!raw || upper === "ND" || upper === "N/D") return "📍";
+
+  // Treat full names as global scope instead of trying to render as flag letters.
+  if (upper === "GLOBAL" || upper === "MUNDO" || upper === "INTERNATIONAL" || upper === "INT" || upper === "GL") {
     return (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     );
   }
-  if (countryCode === "EU") {
+
+  if (upper === "EU") {
     return (
       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 2L13.09 5.36H16.62L13.76 7.44L14.85 10.8L12 8.72L9.15 10.8L10.24 7.44L7.38 5.36H10.91L12 2Z" />
@@ -32,12 +38,20 @@ const getJurisdictionIcon = (countryCode: string) => {
     );
   }
 
+  // If it is not a 2-letter ISO-like code, avoid malformed flag rendering.
+  if (!/^[A-Z]{2}$/.test(upper)) {
+    return (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    );
+  }
+
   // Convert ISO code to regional indicator symbols (Flag Emoji)
   try {
-    return countryCode
-      .toUpperCase()
+    return upper
       .replace(/./g, (char) => String.fromCodePoint(char.charCodeAt(0) + 127397));
-  } catch (e) {
+  } catch {
     return "📍";
   }
 };
@@ -45,14 +59,126 @@ const getJurisdictionIcon = (countryCode: string) => {
 export function AMLValidationDetail({ validation }: AMLValidationDetailProps) {
   const translations = useAMLTranslations();
   const { language } = useLanguage();
+  const [listFilter, setListFilter] = useState<"all" | "match" | "clean">("all");
+
+  const uiText = language === "es"
+    ? {
+        listDetailTitle: "Detalle por lista consultada",
+        sourceLabel: "Fuente",
+        listLabel: "Lista",
+      allLabel: "Todas",
+      withMatchLabel: "Con match",
+      withoutMatchLabel: "Sin match",
+        noMatch: "Sin match",
+        withMatch: "Con match",
+        entriesLabel: "hallazgos",
+        noListData: "No se recibieron todas las listas consultadas para este screening.",
+      }
+    : {
+        listDetailTitle: "Per-list screening detail",
+        sourceLabel: "Source",
+        listLabel: "List",
+      allLabel: "All",
+      withMatchLabel: "Matched",
+      withoutMatchLabel: "No match",
+        noMatch: "No match",
+        withMatch: "Match",
+        entriesLabel: "findings",
+        noListData: "The API did not return all searched list sources for this screening.",
+      };
   
   const isSuccess = validation.verification === "success";
   const isPending = validation.verification === "pending";
   const hasMatch = !isSuccess && !isPending;
+
+  const requestData = (validation.rawDetail?.request || {}) as {
+    name?: string;
+    country?: string;
+    nationality?: string;
+    identifier?: string;
+  };
+
+  const screeningCreatedAt =
+    (validation.rawDetail?.created_at as string | undefined) ||
+    validation.createdAt;
+
+  const displayName = requestData.name || validation.name || "N/D";
+  const displayJurisdiction = requestData.country || requestData.nationality || validation.country || "Global";
+  const displayDocument = requestData.identifier || validation.documentNumber || "N/D";
+  const displayCreatedAt = screeningCreatedAt
+    ? new Date(screeningCreatedAt).toLocaleDateString(language === "es" ? "es-EC" : "en-US")
+    : "N/D";
   
   // Destructuring deep data from rawDetail (Real API Response)
   const results = validation.rawDetail?.response?.results || [];
   const matchCount = validation.rawDetail?.response?.count || 0;
+
+  const listChecks = useMemo(() => {
+    const request = validation.rawDetail?.request as { data_source?: unknown; sources?: unknown } | undefined;
+    const responseSearchParams = validation.rawDetail?.response?.search?.params as { data_source?: unknown } | undefined;
+
+    const parseSources = (value: unknown): string[] => {
+      if (Array.isArray(value)) {
+        return value
+          .map((v) => (typeof v === "string" ? v.trim() : ""))
+          .filter(Boolean);
+      }
+      if (typeof value !== "string") return [];
+      return value
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0 && p !== "all" && p !== "*");
+    };
+
+    const requestedSources = [
+      ...(validation.verifiedListIds || []),
+      ...parseSources(request?.data_source),
+      ...parseSources(request?.sources),
+      ...parseSources(responseSearchParams?.data_source),
+    ];
+
+    const matchesBySource = new Map<string, { count: number; maxScore: number; name?: string }>();
+    for (const result of results as Array<any>) {
+      const sourceId = (result?.data_source?.short_name || "").toString().trim();
+      if (!sourceId) continue;
+
+      const prev = matchesBySource.get(sourceId);
+      const score = typeof result?.confidence_score === "number" ? result.confidence_score : 0;
+      matchesBySource.set(sourceId, {
+        count: (prev?.count || 0) + 1,
+        maxScore: Math.max(prev?.maxScore || 0, score),
+        name: result?.data_source?.name || prev?.name,
+      });
+    }
+
+    const allSourceIds = Array.from(new Set([...requestedSources, ...matchesBySource.keys()]));
+
+    return allSourceIds
+      .map((sourceId) => {
+        const match = matchesBySource.get(sourceId);
+        const matched = Boolean(match && match.count > 0);
+        return {
+          sourceId,
+          listName: match?.name || sourceId,
+          matched,
+          count: match?.count || 0,
+          maxScore: match?.maxScore || 0,
+        };
+      })
+      .sort((a, b) => Number(b.matched) - Number(a.matched));
+  }, [results, validation.rawDetail, validation.verifiedListIds]);
+
+  const listSummary = useMemo(() => {
+    const matched = listChecks.filter((item) => item.matched).length;
+    const clean = listChecks.length - matched;
+    return { matched, clean, total: listChecks.length };
+  }, [listChecks]);
+
+  const filteredListChecks = useMemo(() => {
+    if (listFilter === "match") return listChecks.filter((item) => item.matched);
+    if (listFilter === "clean") return listChecks.filter((item) => !item.matched);
+    return listChecks;
+  }, [listChecks, listFilter]);
 
   return (
     <div className="mt-6 space-y-8 pb-10">
@@ -70,7 +196,7 @@ export function AMLValidationDetail({ validation }: AMLValidationDetailProps) {
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Columna Izquierda: Información de la Búsqueda */}
-        <div className="lg:col-span-1 space-y-6">
+        <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6 lg:self-start">
           <div className="rounded-xl border border-stroke bg-white p-6 shadow-sm dark:border-dark-3 dark:bg-dark-2">
             <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-dark-6">
               Sujeto de Auditoría
@@ -78,26 +204,26 @@ export function AMLValidationDetail({ validation }: AMLValidationDetailProps) {
             <div className="space-y-4">
               <div>
                 <p className="text-sm font-medium text-dark-6">Nombre Completo</p>
-                <p className="text-lg font-bold text-dark dark:text-white">{validation.name}</p>
+                <p className="text-lg font-bold text-dark dark:text-white">{displayName}</p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-medium text-dark-6">Jurisdicción</p>
                   <p className="flex items-center gap-1.5 text-sm font-bold text-dark dark:text-white">
                     <span className="flex h-5 w-5 items-center justify-center rounded-sm bg-primary/10 text-primary">
-                      {getJurisdictionIcon(validation.country || "ND")}
+                      {getJurisdictionIcon(displayJurisdiction)}
                     </span>
-                    {validation.country || "ND"}
+                    {displayJurisdiction}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs font-medium text-dark-6">Documento</p>
-                  <p className="text-sm font-bold text-dark dark:text-white">{validation.documentNumber || "No proporcionado"}</p>
+                  <p className="text-sm font-bold text-dark dark:text-white">{displayDocument}</p>
                 </div>
               </div>
               <div>
                 <p className="text-xs font-medium text-dark-6">Fecha de Consulta</p>
-                <p className="text-sm font-bold text-dark dark:text-white">{validation.createdAt}</p>
+                <p className="text-sm font-bold text-dark dark:text-white">{displayCreatedAt}</p>
               </div>
               <div className="pt-2">
                 <p className="text-xs font-medium text-dark-6">Estado Global</p>
@@ -129,6 +255,92 @@ export function AMLValidationDetail({ validation }: AMLValidationDetailProps) {
             </div>
           </div>
 
+          <div className="rounded-xl border border-stroke bg-white p-5 shadow-sm dark:border-dark-3 dark:bg-dark-2">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-base font-bold text-dark dark:text-white">{uiText.listDetailTitle}</h3>
+              <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-dark-6 dark:bg-dark-3 dark:text-dark-6">
+                {listChecks.length} {uiText.listLabel.toLowerCase()}
+              </span>
+            </div>
+
+            <div className="mb-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setListFilter("all")}
+                className={cn(
+                  "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                  listFilter === "all"
+                    ? "bg-dark text-white dark:bg-white dark:text-dark"
+                    : "bg-gray-100 text-dark-6 hover:bg-gray-200 dark:bg-dark-3 dark:text-dark-6"
+                )}
+              >
+                {uiText.allLabel} ({listSummary.total})
+              </button>
+              <button
+                type="button"
+                onClick={() => setListFilter("match")}
+                className={cn(
+                  "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                  listFilter === "match"
+                    ? "bg-red-600 text-white"
+                    : "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300"
+                )}
+              >
+                {uiText.withMatchLabel} ({listSummary.matched})
+              </button>
+              <button
+                type="button"
+                onClick={() => setListFilter("clean")}
+                className={cn(
+                  "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+                  listFilter === "clean"
+                    ? "bg-green-600 text-white"
+                    : "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300"
+                )}
+              >
+                {uiText.withoutMatchLabel} ({listSummary.clean})
+              </button>
+            </div>
+
+            {filteredListChecks.length > 0 ? (
+              <div className="max-h-[380px] space-y-2 overflow-y-auto pr-1">
+                {filteredListChecks.map((item) => (
+                  <div
+                    key={item.sourceId}
+                    className="flex items-center justify-between rounded-lg border border-stroke px-4 py-3 dark:border-dark-3"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-dark dark:text-white">{item.listName}</p>
+                      <p className="text-xs text-dark-6">
+                        {uiText.sourceLabel}: <span className="font-mono">{item.sourceId}</span>
+                      </p>
+                    </div>
+
+                    {item.matched ? (
+                      <div className="text-right">
+                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700 dark:bg-red-900/30 dark:text-red-300">
+                          {uiText.withMatch}
+                        </span>
+                        <p className="mt-1 text-xs text-dark-6">
+                          {item.count} {uiText.entriesLabel} • {Math.round(item.maxScore * 100)}%
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-1 text-xs font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {uiText.noMatch}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-dark-6">{uiText.noListData}</p>
+            )}
+          </div>
+
           {!isSuccess && !isPending && (
             <div className="rounded-xl bg-primary/5 p-6 border border-primary/10">
               <h4 className="text-sm font-bold text-primary mb-2 uppercase tracking-wide">Nota del Analista</h4>
@@ -155,6 +367,7 @@ export function AMLValidationDetail({ validation }: AMLValidationDetailProps) {
               <div className="space-y-4">
                 {results.map((result: any, idx: number) => {
                   const isHighRisk = result.confidence_score >= 0.95;
+                  const confidencePct = Math.round(result.confidence_score * 100);
                   
                   return (
                     <div 
@@ -189,13 +402,26 @@ export function AMLValidationDetail({ validation }: AMLValidationDetailProps) {
                             </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className={cn(
-                            "inline-flex flex-col items-center justify-center rounded-lg p-2 min-w-[80px]",
-                            isHighRisk ? "bg-red-600 text-white" : "bg-orange-500 text-white"
-                          )}>
-                            <span className="text-lg font-black leading-none">{Math.round(result.confidence_score * 100)}%</span>
-                            <span className="text-[10px] font-bold uppercase tracking-tighter">Confianza</span>
+                        <div className="min-w-[132px] rounded-lg border border-stroke bg-white px-3 py-2 dark:border-dark-3 dark:bg-dark-2">
+                          <div className="mb-1 flex items-center justify-between">
+                            <span className="text-[10px] font-semibold uppercase tracking-wide text-dark-6">Confianza</span>
+                            <span
+                              className={cn(
+                                "text-sm font-extrabold",
+                                isHighRisk ? "text-red-600 dark:text-red-400" : "text-orange-600 dark:text-orange-400"
+                              )}
+                            >
+                              {confidencePct}%
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-dark-3">
+                            <div
+                              className={cn(
+                                "h-1.5 rounded-full transition-all",
+                                isHighRisk ? "bg-red-500" : "bg-orange-500"
+                              )}
+                              style={{ width: `${confidencePct}%` }}
+                            />
                           </div>
                         </div>
                       </div>

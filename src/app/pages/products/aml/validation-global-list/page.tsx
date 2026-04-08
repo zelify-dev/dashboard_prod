@@ -21,6 +21,21 @@ import {
   AMLGroup
 } from "@/lib/aml-api";
 
+function parseListSources(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((v) => (typeof v === "string" ? v.trim() : ""))
+      .filter(Boolean);
+  }
+
+  if (typeof value !== "string") return [];
+
+  return value
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0 && part !== "all" && part !== "*");
+}
+
 export default function AMLValidationPage() {
   const translations = useAMLTranslations();
   const [activeTab, setActiveTab] = useState<"auditoria" | "configuracion">("auditoria");
@@ -197,14 +212,27 @@ export default function AMLValidationPage() {
     country: "Global",
     documentNumber: "N/D",
     verification: item.has_matches ? "hit" : "success",
-    createdAt: new Date(item.created_at).toLocaleDateString()
+    createdAt: new Date(item.created_at).toLocaleDateString(),
+    verifiedListIds: parseListSources((item as AMLScreeningItem & { data_source?: unknown }).data_source),
   });
 
   const handleViewDetail = async (id: string) => {
     try {
       const detail = await getAMLScreeningDetail(id);
+      const requestData = detail?.request as { data_source?: unknown; sources?: unknown } | undefined;
+      const detailedSources = [
+        ...parseListSources(requestData?.data_source),
+        ...parseListSources(requestData?.sources),
+      ];
+
       setValidations(prev => prev.map(v => 
-        v.id === id ? { ...v, rawDetail: detail } : v
+        v.id === id
+          ? {
+              ...v,
+              rawDetail: detail,
+              verifiedListIds: Array.from(new Set([...(v.verifiedListIds || []), ...detailedSources])),
+            }
+          : v
       ));
       setSelectedValidation(id);
     } catch (err) {
