@@ -13,6 +13,8 @@ interface ConfigPanelProps {
     onSave?: () => void;
     hasChanges?: boolean;
     isSaving?: boolean;
+    /** Layout plano sin acordeón (columna derecha unificada de Diseño) */
+    embedded?: boolean;
 }
 
 function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -33,7 +35,14 @@ function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
     );
 }
 
-export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, isSaving = false }: ConfigPanelProps) {
+export function ConfigPanel({
+    config,
+    updateConfig,
+    onSave,
+    hasChanges = false,
+    isSaving = false,
+    embedded = false,
+}: ConfigPanelProps) {
     const { language } = useLanguage();
     const t = cardsTranslations[language].configurator;
 
@@ -207,32 +216,7 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
         }
     };
 
-    return (
-        <div className="space-y-6">
-            {uploadError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-                    {uploadError}
-                </div>
-            )}
-            {/* Personalización de Marca */}
-            <div className="rounded-lg bg-white shadow-sm dark:bg-dark-2">
-                <button
-                    onClick={() => setIsBrandingOpen(!isBrandingOpen)}
-                    className="flex w-full items-center justify-between px-6 py-4 transition hover:bg-gray-50 dark:hover:bg-dark-3"
-                >
-                    <h3 className="text-lg font-semibold text-dark dark:text-white">
-                        {t.configPanel.brandingTitle}
-                    </h3>
-                    <ChevronDownIcon
-                        className={cn(
-                            "h-5 w-5 text-dark-6 transition-transform duration-200 dark:text-dark-6",
-                            isBrandingOpen && "rotate-180"
-                        )}
-                    />
-                </button>
-
-                {isBrandingOpen && (
-                    <div className="border-t border-stroke px-6 py-4 dark:border-dark-3" data-tour-id="tour-cards-config-branding">
+    const brandingFields = (
                         <div className="space-y-6">
                             {/* Theme Selector */}
                             <div>
@@ -402,17 +386,64 @@ export function ConfigPanel({ config, updateConfig, onSave, hasChanges = false, 
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
-            </div>
+    );
 
-            {/* Save Button */}
-            <div className="flex justify-end">
+    return (
+        <div className={cn("space-y-5", embedded && "space-y-4")}>
+            {uploadError && (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                    {uploadError}
+                </div>
+            )}
+            {embedded ? (
+                <div
+                    className="rounded-xl border border-stroke bg-white p-5 dark:border-dark-3 dark:bg-dark-2"
+                    data-tour-id="tour-cards-config-branding"
+                >
+                    {brandingFields}
+                </div>
+            ) : (
+                <div className="rounded-lg bg-white shadow-sm dark:bg-dark-2">
+                    <button
+                        type="button"
+                        onClick={() => setIsBrandingOpen(!isBrandingOpen)}
+                        className="flex w-full items-center justify-between px-6 py-4 transition hover:bg-gray-50 dark:hover:bg-dark-3"
+                    >
+                        <h3 className="text-lg font-semibold text-dark dark:text-white">
+                            {t.configPanel.brandingTitle}
+                        </h3>
+                        <ChevronDownIcon
+                            className={cn(
+                                "h-5 w-5 text-dark-6 transition-transform duration-200 dark:text-dark-6",
+                                isBrandingOpen && "rotate-180"
+                            )}
+                        />
+                    </button>
+
+                    {isBrandingOpen && (
+                        <div
+                            className="border-t border-stroke px-6 py-4 dark:border-dark-3"
+                            data-tour-id="tour-cards-config-branding"
+                        >
+                            {brandingFields}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div
+                className={cn(
+                    "flex justify-end",
+                    embedded && "border-t border-stroke pt-5 dark:border-dark-3"
+                )}
+            >
                 <button
+                    type="button"
                     onClick={onSave}
                     disabled={!hasChanges || isSaving}
                     className={cn(
-                        "rounded-lg px-6 py-2.5 text-sm font-medium text-white transition",
+                        "rounded-xl px-6 py-3 text-sm font-medium text-white transition",
+                        embedded && "w-full sm:w-auto sm:min-w-[11rem]",
                         hasChanges && !isSaving
                             ? "bg-primary hover:bg-primary/90"
                             : "cursor-not-allowed bg-gray-400 dark:bg-gray-600"

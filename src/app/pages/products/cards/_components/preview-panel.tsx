@@ -6,10 +6,14 @@ import { CardsConfig } from "./cards-config";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/language-context";
 import { cardsTranslations } from "./cards-translations";
+import { SdkCardAppearancePreview } from "./sdk-card-appearance-preview";
+import type { CardDesignConfig } from "../issuing/design/_components/card-editor";
 
 interface PreviewPanelProps {
   config: CardsConfig;
   updateConfig: (updates: Partial<CardsConfig>) => void;
+  /** Apariencia en vivo (mismo estado que el editor) */
+  cardAppearance?: CardDesignConfig;
 }
 
 type HorizontalActionLabels = {
@@ -762,7 +766,11 @@ function DailySpentCard({
   );
 }
 
-export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
+export function PreviewPanel({
+  config,
+  updateConfig,
+  cardAppearance,
+}: PreviewPanelProps) {
   const { language } = useLanguage();
   const previewT = cardsTranslations[language].configurator.preview;
   const sheetT = previewT.sheet;
@@ -811,17 +819,26 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
           )}
         </div>
 
-        {/* Tarjeta SVG */}
-        <div className="flex-shrink-0 px-6 py-4 flex justify-center">
-          <div className="relative w-full max-w-[280px]">
-            <Image
-              src="/images/cards/card.svg"
-              alt="Card"
-              width={280}
-              height={174}
-              className="w-full h-auto"
+        {/* Tarjeta: refleja apariencia del editor en tiempo real */}
+        <div className="flex-shrink-0 px-6 py-4">
+          {cardAppearance ? (
+            <SdkCardAppearancePreview
+              config={cardAppearance}
+              brandLogoUrl={currentBranding.logo}
             />
-          </div>
+          ) : (
+            <div className="flex justify-center">
+              <div className="relative w-full max-w-[280px]">
+                <Image
+                  src="/images/cards/card.svg"
+                  alt="Card"
+                  width={280}
+                  height={174}
+                  className="w-full h-auto"
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Acciones horizontales */}
@@ -857,48 +874,6 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
       />
     </>
   );
-
-  // Funciones auxiliares para ajustar el color del SVG
-  function getHueRotate(color: string): number {
-    // Convertir hex a HSL y calcular rotación de matiz
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16) / 255;
-    const g = parseInt(hex.substr(2, 2), 16) / 255;
-    const b = parseInt(hex.substr(4, 2), 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0;
-
-    if (max === min) {
-      h = 0;
-    } else if (max === r) {
-      h = ((g - b) / (max - min)) % 6;
-    } else if (max === g) {
-      h = (b - r) / (max - min) + 2;
-    } else {
-      h = (r - g) / (max - min) + 4;
-    }
-
-    h = Math.round(h * 60);
-    // El color base del SVG es #002340 (azul oscuro), así que calculamos la diferencia
-    const baseHue = 210; // Aproximado para #002340
-    return h - baseHue;
-  }
-
-  function getSaturate(color: string): number {
-    // Calcular saturación basada en el color
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16) / 255;
-    const g = parseInt(hex.substr(2, 2), 16) / 255;
-    const b = parseInt(hex.substr(4, 2), 16) / 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const saturation = max === 0 ? 0 : (max - min) / max;
-
-    return Math.round(saturation * 100);
-  }
 
   return (
     <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">

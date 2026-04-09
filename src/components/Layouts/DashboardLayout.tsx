@@ -7,6 +7,7 @@ import { Header } from "./header";
 import { TourModal } from "@/components/Tour/TourModal";
 import { TourOverlay } from "@/components/Tour/TourOverlay";
 import { ScopesLoader } from "@/components/ScopesLoader";
+import { ZendeskWidget } from "@/components/ZendeskWidget";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -28,6 +29,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <div className="flex min-h-screen">
+        <ZendeskWidget />
         <ScopesLoader />
         <Sidebar />
         <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
@@ -42,6 +44,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
+      <ZendeskWidget />
       <ScopesLoader />
       <Sidebar />
       <div className="w-full bg-gray-2 dark:bg-[#020d1a]">

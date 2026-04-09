@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CardsPageContent } from "./_components/cards-page-content";
 
 export const metadata: Metadata = {
-  title: "Cards",
+  title: "Diseño — Tarjetas",
 };
 
 export default function CardsPage() {

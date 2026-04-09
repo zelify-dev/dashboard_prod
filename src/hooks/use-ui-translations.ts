@@ -39,7 +39,7 @@ export type UiTranslations = {
       notifications: string;
       discountsCoupons: string;
       insurance: string;
-      businessInfo: string;
+      integrationSupport: string;
       kyb: string;
       amlDocumentation: string;
       technicalDocumentation: string;
@@ -59,6 +59,8 @@ export type UiTranslations = {
         issuing: string;
         design: string;
         transactions: string;
+        cardUsers: string;
+        issuedCards: string;
         diligence: string;
         basicService: string;
         transfers: string;
@@ -432,7 +434,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         notifications: "Notifications",
         discountsCoupons: "Discounts & Coupons",
         insurance: "Insurance",
-        businessInfo: "Business Information",
+        integrationSupport: "Support",
         kyb: "KYB",
         amlDocumentation: "AML Documentation",
         technicalDocumentation: "Technical Documentation",
@@ -452,6 +454,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           issuing: "Issuing",
           design: "Design",
           transactions: "Transactions",
+          cardUsers: "Users",
+          issuedCards: "Issued cards",
           diligence: "Diligence",
           basicService: "Basic Service",
           transfers: "Transfers",
@@ -826,7 +830,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         notifications: "Notificaciones",
         discountsCoupons: "Descuentos y Cupones",
         insurance: "Seguros",
-        businessInfo: "Información de negocio",
+        integrationSupport: "Soporte",
         kyb: "KYB",
         amlDocumentation: "Documentación AML",
         technicalDocumentation: "Documentación técnica",
@@ -846,6 +850,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           issuing: "Emisión",
           design: "Diseño",
           transactions: "Transacciones",
+          cardUsers: "Usuarios",
+          issuedCards: "Tarjetas emitidas",
           diligence: "Diligencia",
           basicService: "Servicios Básicos",
           transfers: "Transferencias",

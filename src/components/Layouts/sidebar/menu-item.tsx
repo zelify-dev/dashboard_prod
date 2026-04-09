@@ -31,19 +31,39 @@ export function MenuItem(
   const { className, children, isActive, "data-tour-id": dataTourId, ...rest } = props;
 
   if (props.as === "link") {
+    const href = props.href;
+    const useNativeAnchor =
+      href.startsWith("mailto:") ||
+      href.startsWith("tel:") ||
+      href.startsWith("sms:");
+    const linkClassName = cn(
+      menuItemBaseStyles({
+        isActive: isActive,
+        className: "relative block py-2",
+      }),
+      className,
+    );
+    const closeOnNavigate = () => isMobile && toggleSidebar();
+
+    if (useNativeAnchor) {
+      return (
+        <a
+          href={href}
+          onClick={closeOnNavigate}
+          data-tour-id={dataTourId}
+          className={linkClassName}
+        >
+          {children}
+        </a>
+      );
+    }
+
     return (
       <Link
-        href={props.href}
-        // Close sidebar on clicking link if it's mobile
-        onClick={() => isMobile && toggleSidebar()}
+        href={href}
+        onClick={closeOnNavigate}
         data-tour-id={dataTourId}
-        className={cn(
-          menuItemBaseStyles({
-            isActive: isActive,
-            className: "relative block py-2",
-          }),
-          className,
-        )}
+        className={linkClassName}
       >
         {children}
       </Link>

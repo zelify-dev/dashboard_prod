@@ -1,5 +1,6 @@
 import * as Icons from "../icons";
 import type { UiTranslations } from "@/hooks/use-ui-translations";
+import { ZENDESK_SUPPORT_MENU_HREF } from "@/lib/zendesk-widget";
 
 /** Verifica si al menos un scope de la org coincide con el prefijo (o con alguno de los prefijos). */
 function hasScope(scopePrefix: string | string[], scopeStrings: string[]): boolean {
@@ -88,17 +89,16 @@ export function getNavData(
       icon: Icons.CardsIcon,
           items: [
             {
-              title: translations.sidebar.menuItems.cards,
+              title: translations.sidebar.menuItems.subItems.cardUsers,
+              url: "/pages/products/cards/users",
+            },
+            {
+              title: translations.sidebar.menuItems.subItems.design,
               url: "/pages/products/cards",
             },
             {
-              title: translations.sidebar.menuItems.subItems.issuing,
-              items: [
-                {
-                  title: translations.sidebar.menuItems.subItems.design,
-                  url: "/pages/products/cards/issuing/design",
-                },
-              ],
+              title: translations.sidebar.menuItems.subItems.issuedCards,
+              url: "/pages/products/cards/issued-cards",
             },
             {
               title: translations.sidebar.menuItems.subItems.transactions,
@@ -304,9 +304,9 @@ export function getNavData(
       label: translations.sidebar.onboarding,
       items: [
         {
-          title: translations.sidebar.menuItems.businessInfo,
-          icon: Icons.Organization,
-          url: "/pages/onboarding/business-info",
+          title: translations.sidebar.menuItems.integrationSupport,
+          icon: Icons.ChatSupportIcon,
+          url: ZENDESK_SUPPORT_MENU_HREF,
           items: [],
         },
         {

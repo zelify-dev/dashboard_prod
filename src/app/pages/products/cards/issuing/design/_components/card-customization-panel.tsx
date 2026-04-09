@@ -86,39 +86,39 @@ export function CardCustomizationPanel({
 
   const inputBase =
     "w-full rounded-lg border border-gray-3 bg-white px-4 py-2.5 text-sm text-dark placeholder:text-gray-5 focus:border-gray-5 focus:outline-none focus:ring-1 focus:ring-gray-5/20 dark:border-dark-3 dark:bg-dark-3 dark:text-white dark:placeholder:text-dark-6";
-  const sectionTitle =
-    "text-sm font-medium text-dark-5 dark:text-dark-6 mb-1";
+  const groupTitle =
+    "mb-4 text-xs font-semibold uppercase tracking-wider text-dark-6 dark:text-dark-6";
   const fieldLabel =
-    "mb-2 block text-sm font-normal text-gray-6 dark:text-dark-6";
+    "mb-2 block text-sm font-medium text-dark dark:text-white";
+
+  const chipBtn = (active: boolean) =>
+    cn(
+      "rounded-xl border px-3 py-2.5 text-sm font-medium transition-all",
+      active
+        ? "border-primary bg-primary/[0.08] text-primary shadow-sm ring-1 ring-primary/20 dark:bg-primary/15 dark:text-white"
+        : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-2 dark:text-dark-6 dark:hover:border-dark-4"
+    );
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h3 className={sectionTitle}>{t.sectionAppearance}</h3>
-        <div className="mt-5 space-y-6">
+    <div className="space-y-5">
+      <div className="rounded-xl border border-stroke bg-gray-1/40 p-4 sm:p-5 dark:border-dark-3 dark:bg-dark-2/50">
+        <h3 className={groupTitle}>{t.groupNetworkColor}</h3>
+        <div className="space-y-5">
           <div>
             <label className={fieldLabel}>{t.cardNetworkLabel}</label>
-            <div className="flex gap-3">
+            <div className="mt-2 grid grid-cols-2 gap-2">
               <button
+                type="button"
                 onClick={() => handleCardNetworkChange("visa")}
-                className={cn(
-                  "flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all",
-                  config.cardNetwork === "visa"
-                    ? "border-blue-light bg-white text-blue-light shadow-sm"
-                    : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6"
-                )}
-                >
+                className={chipBtn(config.cardNetwork === "visa")}
+              >
                 Visa
               </button>
               <button
+                type="button"
                 onClick={() => handleCardNetworkChange("mastercard")}
-                className={cn(
-                  "flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all",
-                  config.cardNetwork === "mastercard"
-                    ? "border-blue-light bg-white text-blue-light shadow-sm"
-                    : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6"
-                )}
-                >
+                className={chipBtn(config.cardNetwork === "mastercard")}
+              >
                 Mastercard
               </button>
             </div>
@@ -126,27 +126,19 @@ export function CardCustomizationPanel({
 
           <div>
             <label className={fieldLabel}>{t.colorTypeLabel}</label>
-            <div className="flex gap-3">
+            <div className="mt-2 grid grid-cols-2 gap-2">
               <button
+                type="button"
                 onClick={() => handleColorTypeChange("solid")}
-                className={cn(
-                  "flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all",
-                  config.colorType === "solid"
-                    ? "border-blue-light bg-white text-blue-light shadow-sm"
-                    : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6"
-                )}
-                >
+                className={chipBtn(config.colorType === "solid")}
+              >
                 {t.solidLabel}
               </button>
               <button
+                type="button"
                 onClick={() => handleColorTypeChange("gradient")}
-                className={cn(
-                  "flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all",
-                  config.colorType === "gradient"
-                    ? "border-blue-light bg-white text-blue-light shadow-sm"
-                    : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6"
-                )}
-                >
+                className={chipBtn(config.colorType === "gradient")}
+              >
                 {t.gradientLabel}
               </button>
             </div>
@@ -282,59 +274,64 @@ export function CardCustomizationPanel({
             </div>
           )}
 
-          {/* Finish Type */}
-          <div>
-              <label className={fieldLabel}>{t.finishLabel}</label>
-            <div className="space-y-3">
-              <button
-                onClick={() => handleFinishTypeChange("standard")}
-                className={cn(
-                  "w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-all",
-                  config.finishType === "standard"
-                    ? "border-blue-light bg-white text-blue-light shadow-sm"
-                    : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6"
-                )}
-                >
-                {t.finishStandard}
-              </button>
-              <button
-                onClick={() => handleFinishTypeChange("embossed")}
-                className={cn(
-                  "w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-all",
-                  config.finishType === "embossed"
-                    ? "border-blue-light bg-white text-blue-light shadow-sm"
-                    : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6"
-                )}
-                >
-                {t.finishEmbossed}
-              </button>
-              <button
-                onClick={() => handleFinishTypeChange("metallic")}
-                className={cn(
-                  "w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-all",
-                  config.finishType === "metallic"
-                    ? "border-blue-light bg-white text-blue-light shadow-sm"
-                    : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6"
-                )}
-                >
-                {t.finishMetallic}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3 pt-6">
+      <div className="rounded-xl border border-stroke bg-gray-1/40 p-4 sm:p-5 dark:border-dark-3 dark:bg-dark-2/50">
+        <h3 className={groupTitle}>{t.groupFinish}</h3>
+        <label className={fieldLabel}>{t.finishLabel}</label>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <button
+            type="button"
+            onClick={() => handleFinishTypeChange("standard")}
+            className={cn(
+              "rounded-xl border px-3 py-2.5 text-left text-xs font-medium leading-snug transition-all sm:min-h-[4.25rem] sm:text-sm",
+              config.finishType === "standard"
+                ? "border-primary bg-primary/[0.08] text-primary shadow-sm ring-1 ring-primary/20 dark:bg-primary/15 dark:text-white"
+                : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-2 dark:text-dark-6"
+            )}
+          >
+            {t.finishStandard}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleFinishTypeChange("embossed")}
+            className={cn(
+              "rounded-xl border px-3 py-2.5 text-left text-xs font-medium leading-snug transition-all sm:min-h-[4.25rem] sm:text-sm",
+              config.finishType === "embossed"
+                ? "border-primary bg-primary/[0.08] text-primary shadow-sm ring-1 ring-primary/20 dark:bg-primary/15 dark:text-white"
+                : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-2 dark:text-dark-6"
+            )}
+          >
+            {t.finishEmbossed}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleFinishTypeChange("metallic")}
+            className={cn(
+              "rounded-xl border px-3 py-2.5 text-left text-xs font-medium leading-snug transition-all sm:min-h-[4.25rem] sm:text-sm",
+              config.finishType === "metallic"
+                ? "border-primary bg-primary/[0.08] text-primary shadow-sm ring-1 ring-primary/20 dark:bg-primary/15 dark:text-white"
+                : "border-gray-3 bg-white text-gray-6 hover:border-gray-4 dark:border-dark-3 dark:bg-dark-2 dark:text-dark-6"
+            )}
+          >
+            {t.finishMetallic}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-col-reverse gap-3 border-t border-stroke pt-5 dark:border-dark-3 sm:flex-row sm:justify-end">
         <button
+          type="button"
           onClick={onCancel}
-          className="flex-1 rounded-lg border border-gray-3 bg-white px-4 py-3 text-sm font-medium text-dark shadow-sm transition hover:bg-gray-1 dark:border-dark-3 dark:bg-dark-3 dark:text-white dark:hover:bg-dark-4"
+          className="w-full rounded-xl border border-gray-3 bg-white px-4 py-3 text-sm font-medium text-dark transition hover:bg-gray-1 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3 sm:w-auto sm:min-w-[8rem]"
         >
           {t.cancelButton}
         </button>
         <button
+          type="button"
           onClick={onSave}
-          className="flex-1 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90"
+          className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90 sm:w-auto sm:min-w-[10rem]"
         >
           {t.saveButton}
         </button>

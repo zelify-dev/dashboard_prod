@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { ZENDESK_SUPPORT_MENU_HREF, openZendeskWidget } from "@/lib/zendesk-widget";
 import { getNavData } from "./data";
 import { ArrowLeftIcon, ChevronUp, Lock } from "./icons";
 import { MenuItem } from "./menu-item";
@@ -30,7 +31,7 @@ interface NavSubItem {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const isOnboardingEnabled = false;
+  const isOnboardingEnabled = true;
   const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
   const translations = useUiTranslations();
   const { isTourActive, currentStep, steps } = useTour();
@@ -809,12 +810,17 @@ export function Sidebar() {
                                                       .menuItems.subItems
                                                       .geolocalization
                                                   ? "tour-geolocalization"
-                                                  : subItem.title ===
-                                                      translations.sidebar
-                                                        .menuItems.subItems
-                                                        .deviceInformation
-                                                    ? "tour-device-information"
-                                                    : undefined
+                                                : subItem.title ===
+                                                    translations.sidebar
+                                                      .menuItems.subItems
+                                                      .deviceInformation
+                                                  ? "tour-device-information"
+                                                : subItem.title ===
+                                                    translations.sidebar
+                                                      .menuItems.subItems
+                                                      .cardUsers
+                                                  ? "tour-cards-users"
+                                                  : undefined
                                             }
                                           >
                                             <span>{subItem.title}</span>
@@ -844,8 +850,15 @@ export function Sidebar() {
                               const isSectionOnboarding =
                                 section.label ===
                                 translations.sidebar.onboarding;
+                              const isSupportContactLink =
+                                href === ZENDESK_SUPPORT_MENU_HREF ||
+                                href.startsWith("mailto:") ||
+                                href.startsWith("tel:") ||
+                                href.startsWith("sms:");
                               const isDisabled =
-                                isSectionOnboarding && !isOnboardingEnabled;
+                                isSectionOnboarding &&
+                                !isOnboardingEnabled &&
+                                !isSupportContactLink;
 
                               if (isDisabled) {
                                 return (
@@ -879,6 +892,28 @@ export function Sidebar() {
                                 );
                               }
 
+                              if (href === ZENDESK_SUPPORT_MENU_HREF) {
+                                return (
+                                  <MenuItem
+                                    className="flex items-center gap-3 py-3"
+                                    isActive={false}
+                                    onClick={() => {
+                                      openZendeskWidget();
+                                      if (isMobile) toggleSidebar();
+                                    }}
+                                  >
+                                    <IconComponent
+                                      className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
+                                      aria-hidden="true"
+                                    />
+
+                                    <span className="text-left flex-1">
+                                      {item.title}
+                                    </span>
+                                  </MenuItem>
+                                );
+                              }
+
                               return (
                                 <MenuItem
                                   className="flex items-center gap-3 py-3"
@@ -894,25 +929,6 @@ export function Sidebar() {
                                   <span className="text-left flex-1">
                                     {item.title}
                                   </span>
-
-                                  {isSectionOnboarding && (
-                                    <div
-                                      className="group relative ml-2"
-                                      title={
-                                        translations.sidebar.menuItems
-                                          .lockedTooltip
-                                      }
-                                    >
-                                      <Lock className="size-4 text-gray-400 dark:text-gray-500" />
-                                      <div className="absolute right-full top-1/2 z-50 mr-2 hidden w-48 -translate-y-1/2 rounded bg-black/90 px-2 py-1 text-center text-xs text-white shadow-lg group-hover:block">
-                                        {
-                                          translations.sidebar.menuItems
-                                            .lockedTooltip
-                                        }
-                                        <div className="absolute -right-1 top-1/2 -mt-1 h-2 w-2 rotate-45 bg-black/90"></div>
-                                      </div>
-                                    </div>
-                                  )}
                                 </MenuItem>
                               );
                             })()

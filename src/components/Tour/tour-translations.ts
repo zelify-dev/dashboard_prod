@@ -292,7 +292,7 @@ export const TOUR_TRANSLATIONS: Record<Language, Record<ProductKey, TourStep[]>>
         content:
           "Gestiona y crea diseños de tarjetas personalizados.",
         position: "bottom" as const,
-        url: "/pages/products/cards/issuing/design",
+        url: "/pages/products/cards",
       },
       {
         id: "cards-create-design",
@@ -301,7 +301,7 @@ export const TOUR_TRANSLATIONS: Record<Language, Record<ProductKey, TourStep[]>>
         content:
           "Crea un nuevo diseño de tarjeta de débito o crédito con tu marca.",
         position: "top" as const,
-        url: "/pages/products/cards/issuing/design",
+        url: "/pages/products/cards",
       },
       {
         id: "cards-design-editor",
@@ -894,7 +894,7 @@ export const TOUR_TRANSLATIONS: Record<Language, Record<ProductKey, TourStep[]>>
         content:
           "Manage available card designs. You can create multiple custom designs with different colors, gradients, card networks, and finishes to offer variety to your users.",
         position: "bottom" as const,
-        url: "/pages/products/cards/issuing/design",
+        url: "/pages/products/cards",
       },
       {
         id: "cards-create-design",
@@ -903,7 +903,7 @@ export const TOUR_TRANSLATIONS: Record<Language, Record<ProductKey, TourStep[]>>
         content:
           "Create a new card design from scratch. Define the design name and customize all visual aspects to reflect your brand identity.",
         position: "top" as const,
-        url: "/pages/products/cards/issuing/design",
+        url: "/pages/products/cards",
       },
       {
         id: "cards-design-editor",
