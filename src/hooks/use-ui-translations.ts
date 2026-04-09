@@ -50,7 +50,6 @@ export type UiTranslations = {
         organizationAdmin: string;
         branding: string;
         authentication: string;
-        geolocalization: string;
         deviceInformation: string;
         registeredUsers: string;
         validationGlobalList: string;
@@ -64,7 +63,9 @@ export type UiTranslations = {
         diligence: string;
         basicService: string;
         transfers: string;
+        paymentsWorkflow: string;
         internationalTransfers: string;
+        internationalTransfersWorkflow: string;
         alaiza: string;
         behaviorAnalysis: string;
         financialEducation: string;
@@ -445,7 +446,6 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           organizationAdmin: "Organization Admin",
           branding: "Branding",
           authentication: "Authentication",
-          geolocalization: "Geolocalization",
           deviceInformation: "Device information",
           registeredUsers: "Registered users",
           validationGlobalList: "Global list validation",
@@ -459,7 +459,9 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           diligence: "Diligence",
           basicService: "Basic Service",
           transfers: "Transfers",
+          paymentsWorkflow: "Monitoring",
           internationalTransfers: "International transfers",
+          internationalTransfersWorkflow: "Monitoring",
           alaiza: "Alaiza",
           behaviorAnalysis: "Behavior Analysis",
           financialEducation: "Financial Education",
@@ -841,7 +843,6 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           organizationAdmin: "Administración de organizaciones",
           branding: "Branding",
           authentication: "Autenticación",
-          geolocalization: "Geolocalización",
           deviceInformation: "Información del dispositivo",
           registeredUsers: "Usuarios registrados",
           validationGlobalList: "Validación de listas globales",
@@ -855,7 +856,9 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           diligence: "Diligencia",
           basicService: "Servicios Básicos",
           transfers: "Transferencias",
+          paymentsWorkflow: "WorkFlow",
           internationalTransfers: "Transferencias internacionales",
+          internationalTransfersWorkflow: "WorkFlow",
           alaiza: "Alaiza",
           behaviorAnalysis: "Análisis de Comportamiento",
           financialEducation: "Educación Financiera",

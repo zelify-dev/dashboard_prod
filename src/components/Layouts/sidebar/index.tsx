@@ -31,8 +31,8 @@ interface NavSubItem {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const isOnboardingEnabled = true;
-  const { setIsOpen, isOpen, isMobile, toggleSidebar } = useSidebarContext();
+  const isOnboardingEnabled = false;
+  const { setIsOpen, isOpen, isMobile, toggleSidebar, isCollapsed, toggleCollapse } = useSidebarContext();
   const translations = useUiTranslations();
   const { isTourActive, currentStep, steps } = useTour();
 
@@ -81,8 +81,7 @@ export function Sidebar() {
     (steps[currentStep]?.target === "tour-sidebar" ||
       steps[currentStep]?.target === "tour-products-section" ||
       steps[currentStep]?.target === "tour-product-auth" ||
-      steps[currentStep]?.target === "tour-auth-authentication" ||
-      steps[currentStep]?.target === "tour-geolocalization");
+      steps[currentStep]?.target === "tour-auth-authentication");
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const roles = getStoredRoles();
   const isOwnerUser = isOwner(roles);
@@ -147,7 +146,6 @@ export function Sidebar() {
         const target = currentStepData.target;
         const productTargets = [
           "tour-product-auth",
-          "tour-geolocalization",
           "tour-device-information",
           "tour-product-aml",
           "tour-aml-validation-global-list",
@@ -203,7 +201,6 @@ export function Sidebar() {
 
               if (
                 target === "tour-product-auth" ||
-                target === "tour-geolocalization" ||
                 target === "tour-device-information"
               ) {
                 shouldExpand =
@@ -315,7 +312,6 @@ export function Sidebar() {
           "tour-product-discounts",
           // Sub-items de Auth
           "tour-auth-authentication",
-          "tour-geolocalization",
           "tour-device-information",
           // Sub-items de AML
           "tour-aml-validation-global-list",
@@ -439,16 +435,18 @@ export function Sidebar() {
       <aside
         data-tour-id="tour-sidebar"
         className={cn(
-          "max-w-[290px] overflow-hidden border-r border-gray-200 bg-white transition-[width] duration-200 ease-linear dark:border-gray-800 dark:bg-gray-dark",
+          "overflow-hidden border-r border-gray-200 bg-white transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-dark",
           isMobile
             ? "fixed bottom-0 top-0 z-50"
             : cn("sticky top-0 h-screen", !isTourActive && "z-30"),
-          isOpen ? "w-full" : "w-0",
+          isMobile 
+            ? (isOpen ? "w-full" : "w-0") 
+            : (isCollapsed ? "w-20" : "w-72"),
           isSidebarTarget ? "z-[102]" : isTourActive && !isMobile ? "z-0" : "",
         )}
         aria-label="Main navigation"
-        aria-hidden={!isOpen}
-        inert={!isOpen}
+        aria-hidden={isMobile && !isOpen}
+        inert={isMobile && !isOpen}
         style={{
           zIndex: isSidebarTarget
             ? 102
@@ -457,15 +455,40 @@ export function Sidebar() {
               : undefined,
         }}
       >
-        <div className="flex h-full flex-col py-10 pl-[25px] pr-[7px]">
-          <div className="relative pr-4.5">
+        <div className={cn(
+          "flex h-full flex-col py-6 transition-all duration-300",
+          isCollapsed && !isMobile ? "px-3" : "pl-[25px] pr-[7px]"
+        )}>
+          <div className={cn(
+            "relative flex items-center pr-4.5",
+            isCollapsed && !isMobile ? "justify-center pr-0" : "justify-between"
+          )}>
             <Link
               href={"/"}
               onClick={() => isMobile && toggleSidebar()}
-              className="px-0 py-2.5 min-[850px]:py-0"
+              className={cn(
+                "transition-all duration-300 flex items-center justify-center",
+                isCollapsed && !isMobile ? "w-10 overflow-hidden" : "px-0 py-2.5 min-[850px]:py-0"
+              )}
             >
-              <Logo />
+              <Logo collapsed={isCollapsed && !isMobile} />
             </Link>
+
+            {!isMobile && (
+              <button
+                onClick={toggleCollapse}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-50 flex h-7 w-7 items-center justify-center rounded-full border border-stroke bg-white text-dark shadow-sm hover:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+              >
+                <svg
+                  className={cn("h-4 w-4 transition-transform duration-300", isCollapsed ? "rotate-180" : "")}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
 
             {isMobile && (
               <button
@@ -496,9 +519,13 @@ export function Sidebar() {
                     : undefined
                 }
               >
-                <h2 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6">
-                  {section.label}
-                </h2>
+                {!isCollapsed || isMobile ? (
+                  <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-dark-4 dark:text-dark-6">
+                    {section.label}
+                  </h2>
+                ) : (
+                  <div className="mb-5 h-px bg-stroke dark:bg-dark-3" />
+                )}
 
                 <nav role="navigation" aria-label={section.label}>
                   <ul className="space-y-2">
@@ -566,13 +593,14 @@ export function Sidebar() {
                             <div>
                               <MenuItem
                                 isActive={isItemActive}
-                                onClick={() => toggleExpanded(itemKey)}
+                                title={item.title}
+                                onClick={() => isCollapsed ? toggleCollapse() : toggleExpanded(itemKey)}
                               >
-                                {item.title === "AI" || item.title === "IA" ? (
+                                {item.title.toUpperCase().includes("AI") || item.title.toUpperCase().includes("IA") ? (
                                   <img
                                     src="/images/iconAlaiza.svg"
                                     alt={item.title}
-                                    className="size-6 shrink-0 rounded-full"
+                                    className="size-6 shrink-0 rounded-full object-contain"
                                   />
                                 ) : (
                                   <IconComponent
@@ -581,20 +609,24 @@ export function Sidebar() {
                                   />
                                 )}
 
-                                <span className="text-left flex-1">
+                                <span className={cn(
+                                  "text-left flex-1 transition-opacity duration-300",
+                                  isCollapsed && !isMobile ? "hidden" : "block"
+                                )}>
                                   {item.title}
                                 </span>
 
                                 <ChevronUp
                                   className={cn(
-                                    "ml-auto rotate-180 transition-transform duration-200",
+                                    "ml-auto rotate-180 transition-all duration-200",
                                     isItemExpanded && "rotate-0",
+                                    isCollapsed && !isMobile ? "hidden" : "block"
                                   )}
                                   aria-hidden="true"
                                 />
                               </MenuItem>
 
-                              {isItemExpanded && (
+                              {isItemExpanded && !isCollapsed && (
                                 <ul
                                   className="ml-9 mr-0 space-y-1.5 pb-[15px] pr-0 pt-2"
                                   role="menu"
@@ -624,10 +656,6 @@ export function Sidebar() {
                                             .subItems.authentication
                                             ? "tour-auth-authentication"
                                             : subItem.title ===
-                                                translations.sidebar.menuItems
-                                                  .subItems.geolocalization
-                                              ? "tour-geolocalization"
-                                              : subItem.title ===
                                                   translations.sidebar.menuItems
                                                     .subItems.deviceInformation
                                                 ? "tour-device-information"
@@ -741,6 +769,7 @@ export function Sidebar() {
                                           <div>
                                             <MenuItem
                                               isActive={isSubItemActive}
+                                              title={subItem.title}
                                               onClick={() =>
                                                 toggleExpanded(subItemKey)
                                               }
@@ -798,6 +827,7 @@ export function Sidebar() {
                                         ) : subItem.url ? (
                                           <MenuItem
                                             as="link"
+                                            title={subItem.title}
                                             href={subItem.url}
                                             isActive={pathname === subItem.url}
                                             data-tour-id={
@@ -805,11 +835,6 @@ export function Sidebar() {
                                               translations.sidebar.menuItems
                                                 .subItems.authentication
                                                 ? "tour-auth-authentication"
-                                                : subItem.title ===
-                                                    translations.sidebar
-                                                      .menuItems.subItems
-                                                      .geolocalization
-                                                  ? "tour-geolocalization"
                                                 : subItem.title ===
                                                     translations.sidebar
                                                       .menuItems.subItems
@@ -862,18 +887,29 @@ export function Sidebar() {
 
                               if (isDisabled) {
                                 return (
-                                  <div className="flex w-full items-center gap-3 rounded-lg px-3.5 py-3 font-medium text-dark-4 opacity-60 transition-all duration-200 hover:cursor-not-allowed dark:text-dark-6">
+                                  <div 
+                                    title={isCollapsed ? item.title : undefined}
+                                    className={cn(
+                                      "flex w-full items-center rounded-lg py-3 font-medium text-dark-4 opacity-60 transition-all duration-200 hover:cursor-not-allowed dark:text-dark-6",
+                                      isCollapsed && !isMobile ? "justify-center px-0" : "px-3.5 gap-3"
+                                    )}>
                                     <IconComponent
                                       className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
                                       aria-hidden="true"
                                     />
 
-                                    <span className="flex-1 text-left">
+                                    <span className={cn(
+                                      "flex-1 text-left line-clamp-1 transition-opacity duration-300",
+                                      isCollapsed && !isMobile ? "hidden" : "block"
+                                    )}>
                                       {item.title}
                                     </span>
 
                                     <div
-                                      className="group relative ml-2"
+                                      className={cn(
+                                        "group relative ml-2",
+                                        isCollapsed && !isMobile ? "hidden" : "block"
+                                      )}
                                       title={
                                         translations.sidebar.menuItems
                                           .lockedTooltip
@@ -896,6 +932,7 @@ export function Sidebar() {
                                 return (
                                   <MenuItem
                                     className="flex items-center gap-3 py-3"
+                                    title={item.title}
                                     isActive={false}
                                     onClick={() => {
                                       openZendeskWidget();
@@ -916,8 +953,8 @@ export function Sidebar() {
 
                               return (
                                 <MenuItem
-                                  className="flex items-center gap-3 py-3"
                                   as="link"
+                                  title={item.title}
                                   href={href}
                                   isActive={pathname === href}
                                 >
@@ -926,9 +963,34 @@ export function Sidebar() {
                                     aria-hidden="true"
                                   />
 
-                                  <span className="text-left flex-1">
+                                  <span className={cn(
+                                    "text-left flex-1 transition-opacity duration-300",
+                                    isCollapsed && !isMobile ? "hidden" : "block"
+                                  )}>
                                     {item.title}
                                   </span>
+
+                                  {isSectionOnboarding && (
+                                    <div
+                                      className={cn(
+                                        "group relative ml-2",
+                                        isCollapsed && !isMobile ? "hidden" : "block"
+                                      )}
+                                      title={
+                                        translations.sidebar.menuItems
+                                          .lockedTooltip
+                                      }
+                                    >
+                                      <Lock className="size-4 text-gray-400 dark:text-gray-500" />
+                                      <div className="absolute right-full top-1/2 z-50 mr-2 hidden w-48 -translate-y-1/2 rounded bg-black/90 px-2 py-1 text-center text-xs text-white shadow-lg group-hover:block">
+                                        {
+                                          translations.sidebar.menuItems
+                                            .lockedTooltip
+                                        }
+                                        <div className="absolute -right-1 top-1/2 -mt-1 h-2 w-2 rotate-45 bg-black/90"></div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </MenuItem>
                               );
                             })()

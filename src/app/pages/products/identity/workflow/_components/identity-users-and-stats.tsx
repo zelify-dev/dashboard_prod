@@ -7,11 +7,10 @@ import { listOrgUsers } from "@/lib/organization-users-api";
 import type { OrgUserListItem } from "@/lib/organization-users-api";
 import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
 import { formatLocalDateOnly } from "@/lib/date-utils";
+import { IdentityUserDetailDrawer } from "./identity-user-detail-drawer";
 
 const SEARCH_DEBOUNCE_MS = 400;
 const PAGE_SIZE = 20;
-
-
 
 export function IdentityUsersAndStats() {
   const { appUsersTable: usersT } = useIdentityWorkflowTranslations();
@@ -27,6 +26,10 @@ export function IdentityUsersAndStats() {
   const [searchInput, setSearchInput] = useState("");
   const [searchDebounced, setSearchDebounced] = useState("");
   const prevSearchRef = useRef("");
+
+  // Detalle del usuario (Drawer)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Debounce search
   useEffect(() => {
@@ -67,6 +70,11 @@ export function IdentityUsersAndStats() {
     if (canSee && org?.id) fetchUsers();
   }, [canSee, org?.id, fetchUsers]);
 
+  const handleRowClick = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsDrawerOpen(true);
+  };
+
   if (!canSee || !org?.id) return null;
 
   return (
@@ -81,14 +89,21 @@ export function IdentityUsersAndStats() {
             <label htmlFor="app-users-search" className="sr-only">
               {usersT.searchPlaceholder}
             </label>
-            <input
-              id="app-users-search"
-              type="search"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={usersT.searchPlaceholder}
-              className="w-full rounded-lg border border-stroke bg-gray-2/60 px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary dark:border-dark-3 dark:bg-dark-2/80 dark:text-white dark:focus:border-primary"
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-6">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </span>
+              <input
+                id="app-users-search"
+                type="search"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder={usersT.searchPlaceholder}
+                className="w-full rounded-lg border border-stroke bg-gray-2/60 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary dark:border-dark-3 dark:bg-dark-2/80 dark:text-white dark:focus:border-primary"
+              />
+            </div>
           </div>
         </div>
         {usersLoading ? (
@@ -116,7 +131,11 @@ export function IdentityUsersAndStats() {
                   </tr>
                 ) : (
                   users.map((u) => (
-                    <tr key={u.id} className="border-b border-stroke dark:border-dark-3">
+                    <tr
+                      key={u.id}
+                      onClick={() => handleRowClick(u.id)}
+                      className="group cursor-pointer border-b border-stroke transition hover:bg-gray-2 dark:border-dark-3 dark:hover:bg-dark-3/50"
+                    >
                       <td className="px-4 py-3 text-sm text-dark dark:text-white">{u.email}</td>
                       <td className="px-4 py-3 text-sm text-dark dark:text-white">{u.full_name || "—"}</td>
                       <td className="px-4 py-3">
@@ -186,6 +205,13 @@ export function IdentityUsersAndStats() {
           </div>
         )}
       </div>
+
+      {/* Drawer Detalle */}
+      <IdentityUserDetailDrawer
+        userId={selectedUserId}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
     </div>
   );
 }

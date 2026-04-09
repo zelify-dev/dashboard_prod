@@ -6,23 +6,26 @@ import { useAMLTranslations } from "./use-aml-translations";
 export interface AMLValidation {
   id: string;
   name: string;
-  documentNumber: string;
-  country: string;
-  verification: "success" | "pending" | "PEP" | "OFAC" | "Sanctions" | "Watchlist" | "Adverse Media" | string;
-  foundIn?: string; // Lista AML donde se encontró (nombre legible)
-  foundInListId?: string; // ID de la lista AML donde se encontró
-  verifiedListIds?: string[]; // IDs de las listas que se verificaron
-  groupId?: string; // ID del grupo de listas usado
+  documentNumber?: string;
+  country?: string;
+  verification: "success" | "pending" | "Hit" | string;
+  matchCount?: number;
+  hasMatches?: boolean;
+  foundIn?: string;
+  foundInListId?: string;
+  verifiedListIds?: string[];
+  groupId?: string;
   includePEPs?: {
     country: string;
     enabled: boolean;
-  }; // Información sobre verificación PEPs
+  };
   details?: {
     listName: string;
     matchScore?: number;
     source?: string;
     dateFound?: string;
   };
+  rawDetail?: any; // To store the full API response for the Radiography view
   createdAt: string;
 }
 
@@ -73,6 +76,7 @@ interface AMLValidationsListProps {
   validations: AMLValidation[];
   onSelectValidation: (validationId: string) => void;
   onCreateNew: () => void;
+  loading?: boolean;
 }
 
 function VerificationStatus({ 
@@ -125,7 +129,7 @@ function VerificationStatus({
     );
   }
 
-  // Para cualquier lista AML encontrada (PEP, OFAC, etc.)
+  // Para cualquier coincidencia encontrada (Hit, PEP, OFAC, etc.)
   return (
     <div className="flex items-center gap-2">
       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
@@ -133,12 +137,14 @@ function VerificationStatus({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </div>
-      <span className="text-sm font-medium text-red-600 dark:text-red-400">{foundIn || status}</span>
+      <span className="text-sm font-medium text-red-600 dark:text-red-400">
+        {status === "Hit" ? "Hit Detectado" : (foundIn || status)}
+      </span>
     </div>
   );
 }
 
-export function AMLValidationsList({ validations, onSelectValidation, onCreateNew }: AMLValidationsListProps) {
+export function AMLValidationsList({ validations, onSelectValidation, onCreateNew, loading = false }: AMLValidationsListProps) {
   const translations = useAMLTranslations();
   return (
     <div className="mt-6">
@@ -174,7 +180,16 @@ export function AMLValidationsList({ validations, onSelectValidation, onCreateNe
               </tr>
             </thead>
             <tbody>
-              {validations.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`} className="border-b border-stroke animate-pulse dark:border-dark-3">
+                    <td className="px-4 py-3"><div className="h-4 w-32 rounded bg-gray-200 dark:bg-dark-3" md-tour-id="skeleton-row"></div></td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 rounded bg-gray-200 dark:bg-dark-3"></div></td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 rounded bg-gray-200 dark:bg-dark-3"></div></td>
+                    <td className="px-4 py-3 text-right"><div className="ml-auto h-8 w-16 rounded bg-gray-200 dark:bg-dark-3"></div></td>
+                  </tr>
+                ))
+              ) : validations.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-sm text-dark-6 dark:text-dark-6">
                     {translations.validationsTable.noValidations}

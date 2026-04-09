@@ -9,8 +9,11 @@ type SidebarContextType = {
   state: SidebarState;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  isCollapsed: boolean;
+  setIsCollapsed: (collapsed: boolean) => void;
   isMobile: boolean;
   toggleSidebar: () => void;
+  toggleCollapse: () => void;
 };
 
 const SidebarContext = createContext<SidebarContextType | null>(null);
@@ -31,7 +34,16 @@ export function SidebarProvider({
   defaultOpen?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const isMobile = useIsMobile();
+
+  // Escuchar cambios de persistencia
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("sidebar-collapsed");
+      if (stored === "true") setIsCollapsed(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (isMobile) {
@@ -45,14 +57,25 @@ export function SidebarProvider({
     setIsOpen((prev) => !prev);
   }
 
+  function toggleCollapse() {
+    setIsCollapsed((prev) => {
+      const newVal = !prev;
+      localStorage.setItem("sidebar-collapsed", String(newVal));
+      return newVal;
+    });
+  }
+
   return (
     <SidebarContext.Provider
       value={{
-        state: isOpen ? "expanded" : "collapsed",
+        state: isMobile ? (isOpen ? "expanded" : "collapsed") : (isCollapsed ? "collapsed" : "expanded"),
         isOpen,
         setIsOpen,
+        isCollapsed,
+        setIsCollapsed,
         isMobile,
         toggleSidebar,
+        toggleCollapse,
       }}
     >
       {children}

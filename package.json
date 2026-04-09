@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "20": "^3.1.9",
+    "22": "^0.0.0",
     "@fingerprintjs/fingerprintjs-pro-react": "^2.7.1",
     "@fingerprintjs/fingerprintjs-pro-server-api": "^6.10.0",
     "@react-three/drei": "^10.7.7",
@@ -21,6 +23,7 @@
     "flatpickr": "^4.6.13",
     "jsvectormap": "^1.6.0",
     "leaflet": "^1.9.4",
+    "lucide-react": "^0.542.0",
     "next": "^16.0.8",
     "next-themes": "^0.4.4",
     "nextjs-toploader": "^3.7.15",

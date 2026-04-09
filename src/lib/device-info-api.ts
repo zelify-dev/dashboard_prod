@@ -32,8 +32,107 @@ export type DeviceInfoNowResponse = {
   [key: string]: unknown;
 };
 
+export type SnapshotListItem = {
+  id: string;
+  client_ip: string;
+  device_type: string;
+  browser: string;
+  os: string;
+  city: string;
+  vpn_detected: boolean;
+  created_at: string;
+  user: {
+    id: string;
+    email: string;
+    full_name: string;
+  };
+};
+
+export type ListSnapshotsResponse = {
+  items: SnapshotListItem[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type DeviceSnapshotDetail = {
+  id: string;
+  client_ip: string;
+  detected_ip: string;
+  device_type: string;
+  browser: string;
+  os: string;
+  isp: string;
+  timezone: string;
+  city: string;
+  region: string;
+  country_code: string;
+  lat: number;
+  lng: number;
+  vpn_detected: boolean;
+  user_agent: string;
+  fingerprint: string;
+  created_at: string;
+  user: {
+    id: string;
+    email: string;
+    full_name: string;
+  };
+};
+
 function headersWithOrg(organizationId: string): Record<string, string> {
   return { "x-org-id": organizationId };
+}
+
+/**
+ * GET /api/device-info/snapshots
+ * Get global list of snapshots for an organization.
+ */
+export async function listSnapshots(
+  organizationId: string,
+  params: { page?: number; limit?: number; search?: string } = {}
+): Promise<ListSnapshotsResponse> {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", params.page.toString());
+  if (params.limit) query.set("limit", params.limit.toString());
+  if (params.search) query.set("search", params.search);
+
+  const res = await fetchWithAuth(
+    `/api/device-info/snapshots?${query.toString()}`,
+    { headers: headersWithOrg(organizationId) }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al obtener snapshots",
+      res.status,
+      data
+    );
+  }
+  return data as ListSnapshotsResponse;
+}
+
+/**
+ * GET /api/device-info/snapshots/{snapshotId}
+ * Get full radiography detail for a single snapshot.
+ */
+export async function getSnapshotDetail(
+  organizationId: string,
+  snapshotId: string
+): Promise<DeviceSnapshotDetail> {
+  const res = await fetchWithAuth(
+    `/api/device-info/snapshots/${encodeURIComponent(snapshotId)}`,
+    { headers: headersWithOrg(organizationId) }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al obtener detalle del snapshot",
+      res.status,
+      data
+    );
+  }
+  return data as DeviceSnapshotDetail;
 }
 
 /**

@@ -2,6 +2,25 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
+  Smartphone,
+  Monitor,
+  Tablet,
+  ShieldCheck,
+  ShieldAlert,
+  MapPin,
+  Clock,
+  User,
+  Copy,
+  CheckCircle2,
+  ExternalLink,
+  Wifi,
+  Navigation2,
+  AlertTriangle,
+  Info,
+  Search,
+  RotateCcw
+} from "lucide-react";
+import {
   Table,
   TableBody,
   TableCell,
@@ -17,11 +36,17 @@ import { createPortal } from "react-dom";
 import { useDeviceInfoTranslations } from "./use-device-info-translations";
 import { useTour } from "@/contexts/tour-context";
 import { cn } from "@/lib/utils";
-import { getStoredOrganization, getStoredUser, getStoredRoles } from "@/lib/auth-api";
-import { getOrganizationUser, getDeviceInfoNow, type DeviceSnapshot } from "@/lib/device-info-api";
-import { listOrgUsers, type OrgUserListItem } from "@/lib/organization-users-api";
+import { getStoredOrganization, getStoredUser, getStoredRoles, AuthError } from "@/lib/auth-api";
+import { 
+  getDeviceInfoNow, 
+  listSnapshots, 
+  getSnapshotDetail,
+  getOrganizationUser,
+  type SnapshotListItem,
+  type DeviceSnapshotDetail,
+  type DeviceSnapshot 
+} from "@/lib/device-info-api";
 import { TEAM_ROLE, userHasRole, isOwner } from "@/app/organization/teams/_constants/team-roles";
-import { AuthError } from "@/lib/auth-api";
 
 dayjs.extend(relativeTime);
 
@@ -51,6 +76,10 @@ interface DeviceDetails {
   proxy?: boolean | undefined;
   highActivity?: boolean | undefined;
   suspectScore?: number | undefined;
+  city?: string;
+  detectedIp?: string;
+  clientIp?: string;
+  fingerprint?: string;
 }
 
 interface IdentificationEvent {
@@ -60,16 +89,89 @@ interface IdentificationEvent {
   countryCode?: string;
   country?: string;
   city?: string;
+  os?: string;
   requestId: string;
   date: string;
   timestamp: number;
   details?: DeviceDetails;
+  userName?: string;
+  userEmail?: string;
+  userId?: string;
+  userStatus?: string;
+  impossibleTravel?: boolean;
 }
 
 const STORAGE_KEY = "device_info_events";
 
-/** Convierte un DeviceSnapshot del API en IdentificationEvent para reutilizar tabla y modal. */
-function snapshotToEvent(s: DeviceSnapshot): IdentificationEvent {
+function snapshotListItemToEvent(s: SnapshotListItem): IdentificationEvent {
+  const timestamp = new Date(s.created_at).getTime();
+  return {
+    id: s.id,
+    visitorId: s.id,
+    ipAddress: s.client_ip,
+    requestId: s.id,
+    date: dayjs(s.created_at).format("DD/MMM, HH:mm[h]"),
+    timestamp,
+    userName: s.user?.full_name,
+    userEmail: s.user?.email,
+    userId: s.user?.id,
+    city: s.city,
+    os: s.os,
+    details: {
+      browserName: s.browser || "Unknown",
+      os: s.os || "Unknown",
+      device: s.device_type,
+      browserVersion: "",
+      osVersion: "",
+      userAgent: "—",
+      confidence: 0,
+      incognito: false,
+      city: s.city,
+      clientIp: s.client_ip,
+      vpn: s.vpn_detected,
+    },
+  };
+}
+
+function snapshotDetailToEvent(s: DeviceSnapshotDetail): IdentificationEvent {
+  const timestamp = new Date(s.created_at).getTime();
+  return {
+    id: s.id,
+    visitorId: s.id,
+    ipAddress: s.client_ip,
+    requestId: s.id,
+    date: dayjs(s.created_at).format("DD/MMM, HH:mm[h]"),
+    timestamp,
+    userName: s.user?.full_name,
+    userEmail: s.user?.email,
+    userId: s.user?.id,
+    city: s.city,
+    os: s.os,
+    countryCode: s.country_code,
+    details: {
+      browserName: s.browser || "Unknown",
+      os: s.os || "Unknown",
+      device: s.device_type,
+      browserVersion: "",
+      osVersion: "",
+      userAgent: s.user_agent,
+      confidence: 100,
+      incognito: false,
+      latitude: s.lat,
+      longitude: s.lng,
+      vpn: s.vpn_detected,
+      region: s.region,
+      asnName: s.isp,
+      timezone: s.timezone,
+      detectedIp: s.detected_ip,
+      clientIp: s.client_ip,
+      fingerprint: s.fingerprint,
+    },
+  };
+}
+
+/** Convierte un DeviceSnapshot heredado del API anterior (si queda alguno) */
+function snapshotToEvent(s: DeviceSnapshot, userName?: string, userEmail?: string): IdentificationEvent {
   const timestamp = new Date(s.created_at).getTime();
   return {
     id: s.id,
@@ -78,6 +180,8 @@ function snapshotToEvent(s: DeviceSnapshot): IdentificationEvent {
     requestId: s.id,
     date: formatLocalDateTime(timestamp),
     timestamp,
+    userName: userName,
+    userEmail: userEmail,
     details: {
       browserName: "—",
       browserVersion: "—",
@@ -92,6 +196,79 @@ function snapshotToEvent(s: DeviceSnapshot): IdentificationEvent {
       vpn: s.vpn_detected,
     },
   };
+}
+
+/** Componente pequeño para copiar IP al portapapeles */
+function CopyableIP({ ip, translations }: { ip: string; translations: any }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(ip);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="group flex items-center gap-2">
+      <span className="font-mono text-sm text-dark-3 dark:text-dark-6">
+        {ip}
+      </span>
+      <button
+        onClick={handleCopy}
+        className="opacity-0 transition-opacity group-hover:opacity-100 p-1 hover:bg-gray-2 dark:hover:bg-dark-3 rounded"
+        title={translations.common.copy}
+      >
+        {copied ? (
+          <CheckCircle2 className="h-3.5 w-3.5 text-green" />
+        ) : (
+          <Copy className="h-3.5 w-3.5 text-dark-6" />
+        )}
+      </button>
+    </div>
+  );
+}
+
+/** Lógica para calcular distancia entre dos puntos (Haversine formula) */
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Radio de la Tierra en km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+/** Detectar Viaje Imposible */
+function detectImpossibleTravel(events: IdentificationEvent[]): IdentificationEvent[] {
+  if (events.length < 2) return events;
+  
+  // Clonar y ordenar por tiempo ascendente para procesar
+  const sorted = [...events].sort((a, b) => a.timestamp - b.timestamp);
+  
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1];
+    const curr = sorted[i];
+    
+    if (prev.details?.latitude && prev.details?.longitude && curr.details?.latitude && curr.details?.longitude) {
+      const distance = calculateDistance(
+        prev.details.latitude, prev.details.longitude,
+        curr.details.latitude, curr.details.longitude
+      );
+      
+      const timeDiffHours = (curr.timestamp - prev.timestamp) / (1000 * 60 * 60);
+      
+      // Si la velocidad requerida es > 1000 km/h, es "Imposible"
+      if (timeDiffHours > 0 && (distance / timeDiffHours) > 1000) {
+        curr.impossibleTravel = true;
+      }
+    }
+  }
+  
+  return sorted;
 }
 
 // Función para obtener bandera del país (emoji)
@@ -117,13 +294,11 @@ function generateRequestId(): string {
 // Función para obtener la IP real del usuario
 async function getRealIPAddress(): Promise<string> {
   try {
-    // Intentar con ipify (simple y rápido)
     const response = await fetch("https://api.ipify.org?format=json");
     const data = await response.json();
     return data.ip || "Unknown";
   } catch (error) {
     console.error("Error getting IP address:", error);
-    // Fallback a otra API
     try {
       const response = await fetch("https://api64.ipify.org?format=json");
       const data = await response.json();
@@ -150,7 +325,6 @@ async function getLocationInfo(lat: number, lng: number, ipAddress: string): Pro
     );
     const data = await response.json();
 
-    // Mapear continentes por país
     const continentMap: Record<string, string> = {
       "US": "North America", "CA": "North America", "MX": "North America",
       "EC": "South America", "CO": "South America", "AR": "South America", "BR": "South America", "CL": "South America",
@@ -168,56 +342,49 @@ async function getLocationInfo(lat: number, lng: number, ipAddress: string): Pro
       city: data.address?.city || data.address?.town || data.address?.village,
       region: data.address?.state || data.address?.region,
       continent: continentMap[countryCode || ""] || "Unknown",
-      ipAddress: ipAddress, // Usar la IP real obtenida
+      ipAddress: ipAddress,
     };
   } catch (error) {
     console.error("Error getting location info:", error);
     return {
-      ipAddress: ipAddress, // Usar la IP real incluso si falla la geolocalización
+      ipAddress: ipAddress,
     };
   }
 }
 
 // Función para detectar información real del navegador
 function getRealDeviceDetails(lat?: number, lng?: number): DeviceDetails {
-  const userAgent = navigator.userAgent;
+  const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : "";
 
-  // Detectar navegador
   let browserName = "Unknown";
   let browserVersion = "Unknown";
 
-  // Edge debe detectarse primero porque su user agent incluye "Chrome"
   if (userAgent.includes("Edg/")) {
     browserName = "Edge";
     const match = userAgent.match(/Edg\/(\d+)/);
     browserVersion = match ? match[1] : "Unknown";
   }
-  // Safari debe detectarse antes de Chrome porque Safari incluye "Chrome" en su user agent
   else if (userAgent.includes("Safari/") && !userAgent.includes("Chrome/") && !userAgent.includes("Edg/")) {
     browserName = "Safari";
     const match = userAgent.match(/Version\/(\d+(?:\.\d+)?)/);
     browserVersion = match ? match[1] : "Unknown";
   }
-  // Chrome
   else if (userAgent.includes("Chrome/") && !userAgent.includes("Edg/")) {
     browserName = "Chrome";
     const match = userAgent.match(/Chrome\/(\d+)/);
     browserVersion = match ? match[1] : "Unknown";
   }
-  // Firefox
   else if (userAgent.includes("Firefox/")) {
     browserName = "Firefox";
     const match = userAgent.match(/Firefox\/(\d+)/);
     browserVersion = match ? match[1] : "Unknown";
   }
-  // Opera
   else if (userAgent.includes("Opera/") || userAgent.includes("OPR/")) {
     browserName = "Opera";
     const match = userAgent.match(/(?:Opera|OPR)\/(\d+)/);
     browserVersion = match ? match[1] : "Unknown";
   }
 
-  // Detectar OS
   let os = "Unknown";
   let osVersion = "Unknown";
 
@@ -261,7 +428,6 @@ function getRealDeviceDetails(lat?: number, lng?: number): DeviceDetails {
     }
   }
 
-  // Detectar tipo de dispositivo
   let device = "Desktop";
   const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
   const isTablet = /iPad|Android/i.test(userAgent) && !/Mobile/i.test(userAgent);
@@ -274,10 +440,8 @@ function getRealDeviceDetails(lat?: number, lng?: number): DeviceDetails {
     device = "Desktop";
   }
 
-  // Detectar modo incógnito (limitado, no siempre funciona)
   let incognito = false;
   try {
-    // Safari en modo privado
     if (browserName === "Safari") {
       try {
         localStorage.setItem("__test_incognito__", "1");
@@ -286,19 +450,16 @@ function getRealDeviceDetails(lat?: number, lng?: number): DeviceDetails {
         incognito = true;
       }
     }
-    // Chrome/Edge en modo incógnito
     if (browserName === "Chrome" || browserName === "Edge") {
-      // @ts-ignore - webdriver puede indicar modo incógnito
+      // @ts-ignore
       if (navigator.webdriver) {
         incognito = true;
       }
     }
   } catch {
-    // Si no se puede detectar, asumir false
     incognito = false;
   }
 
-  // Obtener timezone real
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   return {
@@ -308,17 +469,15 @@ function getRealDeviceDetails(lat?: number, lng?: number): DeviceDetails {
     osVersion,
     device,
     userAgent,
-    confidence: 100, // Confianza alta ya que son datos reales
+    confidence: 100,
     incognito,
     latitude: lat,
     longitude: lng,
     timezone,
-    continent: "Unknown", // Se llenará después con datos de geolocalización
-    region: "Unknown", // Se llenará después con datos de geolocalización
-    // No mostrar ASN si no es real
+    continent: "Unknown",
+    region: "Unknown",
     asn: undefined,
     asnName: undefined,
-    // No mostrar VPN/Proxy si no podemos detectarlo realmente
     vpn: undefined,
     proxy: undefined,
     highActivity: undefined,
@@ -352,241 +511,221 @@ function DeviceDetailsModal({
   event,
   onClose,
   allEvents,
+  isLoading,
 }: {
   event: IdentificationEvent;
   onClose: () => void;
   allEvents: IdentificationEvent[];
+  isLoading: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<"details" | "history">("details");
   const [showJSON, setShowJSON] = useState(false);
-  const [copiedMessage, setCopiedMessage] = useState("");
   const translations = useDeviceInfoTranslations();
-  const formatUnknown = (value?: string | number | null) => {
-    if (value === undefined || value === null || value === "" || value === "Unknown") {
-      return translations.common.unknown;
-    }
-    return value;
-  };
+  const t = translations.modal;
+  const ht = translations.historyTable;
 
   const details = event.details || getRealDeviceDetails();
   const relatedEvents = allEvents.filter((e) => e.visitorId === event.visitorId);
   const firstSeen = relatedEvents.length > 0
     ? Math.min(...relatedEvents.map((e) => e.timestamp))
     : event.timestamp;
-  const lastSeen = event.timestamp;
 
-  const lastSeenAgo = dayjs(lastSeen).fromNow();
+  const lastSeenAgo = dayjs(event.timestamp).fromNow();
   const firstSeenAgo = dayjs(firstSeen).fromNow();
-
-  const copyJSON = async () => {
-    try {
-      await navigator.clipboard.writeText(JSON.stringify(event, null, 2));
-      setCopiedMessage(translations.modal.jsonCopied);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
-
-  useEffect(() => {
-    if (!copiedMessage) return;
-    const t = setTimeout(() => setCopiedMessage(""), 2000);
-    return () => clearTimeout(t);
-  }, [copiedMessage]);
 
   const { isTourActive, currentStep, steps } = useTour();
   const currentStepData = steps[currentStep];
   const isModalTarget = isTourActive && currentStepData?.target === "tour-device-information-modal";
 
-  // Ensure we are on the client
   if (typeof window === "undefined") return null;
 
   return createPortal(
     <div
-      className={cn("fixed inset-0 flex items-center justify-center bg-black/50 p-4", isModalTarget ? "z-[110]" : "z-50")}
+      className={cn(
+        "fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all animate-in fade-in duration-300",
+        isModalTarget ? "z-[110]" : "z-[100]"
+      )}
       onClick={(e) => {
-        // No cerrar el modal si está en el tour
-        if (isModalTarget) {
-          return;
-        }
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
+        if (isModalTarget) return;
+        if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className={cn("relative w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl dark:bg-dark-2", isModalTarget && "z-[111]")}>
-        {/* Header */}
-        <div className="sticky top-0 z-10 border-b border-stroke bg-white px-6 py-4 dark:border-dark-3 dark:bg-dark-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={onClose}
-                className="text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
-              >
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </button>
+      <div className={cn(
+        "relative w-full max-w-5xl max-h-[95vh] overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-dark-2 border border-stroke dark:border-dark-3 transition-all animate-in zoom-in-95 duration-500",
+        isModalTarget && "z-[111]"
+      )}>
+        
+        {event.impossibleTravel && (
+          <div className="bg-red/10 border-b border-red/20 px-6 py-3 flex items-center gap-3 animate-pulse">
+            <AlertTriangle className="h-5 w-5 text-red" />
+            <div className="flex-1">
+              <p className="text-sm font-bold text-red uppercase tracking-wider">{t.impossibleTravel}</p>
+              <p className="text-xs text-red/80">{t.impossibleTravelDesc}</p>
+            </div>
+          </div>
+        )}
+
+        <div className="sticky top-0 z-20 border-b border-stroke bg-white/100 px-8 py-6 dark:border-dark-3 dark:bg-dark-2">
+          <div className="flex items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-2 dark:bg-dark-3 shrink-0">
+                {isLoading ? (
+                  <div className="h-6 w-6 animate-pulse rounded-full bg-primary/20" />
+                ) : details.device?.toLowerCase() === "mobile" ? (
+                  <Smartphone className="h-6 w-6 text-primary" />
+                ) : (
+                  <Monitor className="h-6 w-6 text-primary" />
+                )}
+              </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm text-dark dark:text-white">{event.requestId}</span>
-                  <span className="text-sm text-dark-6 dark:text-dark-6">
+                <h2 className="text-xl font-bold text-dark dark:text-white tracking-normal flex flex-wrap items-center gap-3">
+                  {t.technicalRadiography}
+                  {isLoading ? (
+                    <div className="h-6 w-16 animate-pulse rounded-full bg-gray-2 dark:bg-dark-3" />
+                  ) : details.vpn ? (
+                    <span className="flex items-center gap-1.5 rounded-full bg-red/10 px-2.5 py-1 text-[10px] font-bold uppercase text-red border border-red/10">
+                      <ShieldAlert className="h-3 w-3" />
+                      {t.vpn}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 rounded-full bg-green/10 px-2.5 py-1 text-[10px] font-bold uppercase text-green border border-green/10">
+                      <ShieldCheck className="h-3 w-3" />
+                      {t.safe}
+                    </span>
+                  )}
+                </h2>
+                <div className="mt-1 flex items-center gap-3 text-xs font-semibold text-dark-6">
+                  <span className="font-mono bg-gray-2 dark:bg-dark-3 px-1.5 py-0.5 rounded uppercase">{event.id.substring(0, 12)}...</span>
+                  <span className="h-1 w-1 rounded-full bg-dark-6/30" />
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
                     {formatLocalDateTime(event.timestamp)}
                   </span>
                 </div>
-                <div className="mt-1 flex items-center gap-2">
-                  {details.vpn !== undefined && details.vpn && (
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                      {translations.modal.vpn}
-                    </span>
-                  )}
-                  {details.proxy !== undefined && details.proxy && (
-                    <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
-                      {translations.modal.proxy}
-                    </span>
-                  )}
-                  {details.highActivity !== undefined && details.highActivity && (
-                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-300">
-                      {translations.modal.highActivity}
-                    </span>
-                  )}
-                </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowJSON(!showJSON)}
-                className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark transition hover:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                className="flex items-center gap-2 rounded-xl border border-stroke px-4 py-2 text-xs font-semibold uppercase text-dark-6 tracking-wide bg-white hover:bg-gray-2 transition-all dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6 dark:hover:bg-dark-4 dark:hover:text-white"
               >
-                {showJSON ? translations.modal.hideJson : translations.modal.showJson}
+                {showJSON ? t.hideJson : t.showJson}
               </button>
               <button
                 onClick={onClose}
-                className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark transition hover:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-stroke bg-white text-dark-6 hover:bg-red hover:text-white transition-all dark:border-dark-3 dark:bg-dark-3"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="mt-4 flex gap-4 border-b border-stroke dark:border-dark-3">
+          <div className="mt-8 flex gap-8 border-b border-stroke dark:border-dark-3">
             <button
               onClick={() => setActiveTab("details")}
-              className={`pb-2 text-sm font-medium transition ${activeTab === "details"
-                ? "border-b-2 border-primary text-primary"
-                : "text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
-                }`}
+              className={cn(
+                "pb-3 text-[11px] font-bold uppercase tracking-[0.15em] transition-all",
+                activeTab === "details"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-dark-6 hover:text-dark-3"
+              )}
             >
-              {translations.modal.detailsTab}
+              {t.detailsTab}
             </button>
             <button
               onClick={() => setActiveTab("history")}
-              className={`pb-2 text-sm font-medium transition ${activeTab === "history"
-                ? "border-b-2 border-primary text-primary"
-                : "text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
-                }`}
+              className={cn(
+                "pb-3 text-[11px] font-bold uppercase tracking-[0.15em] transition-all",
+                activeTab === "history"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-dark-6 hover:text-dark-3"
+              )}
             >
-              {translations.modal.historyTab(relatedEvents.length)}
+              {t.historyTab(relatedEvents.length)}
             </button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        <div className="overflow-y-auto px-8 py-8" style={{ maxHeight: "calc(95vh - 220px)" }}>
           {activeTab === "details" ? (
-            <div className="space-y-6">
-              {/* Device Information Grid */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                {/* Identification */}
-                <div className="rounded-lg border border-stroke bg-white p-6 dark:border-dark-3 dark:bg-dark-2" data-tour-id="tour-device-information-modal">
-                  <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">{translations.modal.identification}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-dark-6 dark:text-dark-6">
-                        {translations.modal.visitorId}
-                      </p>
-                      <p className="mt-1 font-mono text-sm font-semibold text-dark dark:text-white">
-                        {event.visitorId}
-                      </p>
+            <div className="space-y-8 animate-in slide-in-from-bottom-5 duration-700 pb-10">
+              
+              {/* Bloque A: Análisis de Conexión (Seguridad) */}
+              <div className="rounded-2xl border border-stroke bg-white p-8 dark:border-dark-3 dark:bg-dark-3 shadow-sm lg:col-span-12">
+                <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h3 className="text-[11px] font-bold uppercase text-dark-6 tracking-[0.2em] flex items-center gap-2 mb-2">
+                       <ShieldAlert className="h-4 w-4 text-primary" />
+                       Bloque A: Análisis de Conexión
+                    </h3>
+                    <p className="text-sm font-semibold text-dark-6">Auditoría técnica de la red y seguridad de la sesión.</p>
+                  </div>
+                  {details.vpn && (
+                    <div className="flex items-center gap-3 rounded-xl bg-red/10 px-4 py-3 border border-red/20 animate-pulse">
+                      <AlertTriangle className="h-5 w-5 text-red" />
+                      <span className="text-xs font-bold text-red uppercase tracking-wider">⚠️ Este usuario está enmascarando su conexión</span>
                     </div>
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-dark-6 dark:text-dark-6">
-                        {translations.modal.lastSeen}
-                      </p>
-                      <p className="mt-1 text-sm text-dark dark:text-white">{lastSeenAgo}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-dark-6 dark:text-dark-6">
-                        {translations.modal.firstSeen}
-                      </p>
-                      <p className="mt-1 text-sm text-dark dark:text-white">{firstSeenAgo}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-dark-6 dark:text-dark-6">
-                        {translations.modal.confidence}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-dark dark:text-white">{details.confidence}%</p>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-dark-6 dark:text-dark-6">
-                        {translations.modal.incognito}
-                      </p>
-                      <p className="mt-1 text-sm text-dark dark:text-white">
-                        {details.incognito ? translations.modal.yes : translations.modal.no}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-dark-6 dark:text-dark-6">
-                        {translations.modal.client}
-                      </p>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <svg className="h-4 w-4 text-dark-6 dark:text-dark-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                          </svg>
-                          <span className="text-sm text-dark dark:text-white">
-                            {translations.modal.browser}: {details.browserName} {details.browserVersion}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <svg className="h-4 w-4 text-dark-6 dark:text-dark-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                          <span className="text-sm text-dark dark:text-white">
-                            {translations.modal.os}: {details.os} {details.osVersion}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <svg className="h-4 w-4 text-dark-6 dark:text-dark-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                          </svg>
-                          <span className="text-sm text-dark dark:text-white">
-                            {translations.modal.device}: {details.device}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-xl bg-gray-2 p-5 dark:bg-dark-2">
+                    <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">IP Declarada (Client)</span>
+                    <p className="text-sm font-bold text-dark dark:text-white font-mono">{details.clientIp || event.ipAddress}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-2 p-5 dark:bg-dark-2">
+                    <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">IP Real Detectada</span>
+                    <p className="text-sm font-bold text-primary font-mono">{details.detectedIp || details.clientIp || "En análisis..."}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-2 p-5 dark:bg-dark-2">
+                    <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">Proveedor (ISP)</span>
+                    <p className="text-sm font-bold text-dark dark:text-white truncate" title={details.asnName}>{details.asnName || "—"}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-2 p-5 dark:bg-dark-2">
+                    <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">Zona Horaria</span>
+                    <p className="text-sm font-bold text-dark dark:text-white">{details.timezone || "—"}</p>
                   </div>
                 </div>
 
-                {/* Location */}
-                <div className="rounded-lg border border-stroke bg-white p-6 dark:border-dark-3 dark:bg-dark-2">
-                  <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">{translations.modal.location}</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-dark-6 dark:text-dark-6">
-                        {translations.modal.ipAddress}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-lg">{getCountryFlag(event.countryCode)}</span>
-                        <span className="font-mono text-sm font-semibold text-dark dark:text-white">
-                          {event.ipAddress}
-                        </span>
+                <div className="mt-6 flex flex-wrap gap-4">
+                   <div className="flex items-center gap-3 rounded-lg border border-stroke px-4 py-2 dark:border-dark-3">
+                      <div className={cn(
+                        "h-2 w-2 rounded-full",
+                        details.vpn ? "bg-red shadow-[0_0_8px_rgba(255,0,0,0.5)]" : "bg-green shadow-[0_0_8px_rgba(0,255,0,0.5)]"
+                      )} />
+                      <span className="text-[10px] font-bold uppercase text-dark-6">{details.vpn ? "VPN Detectada" : "Conexión Segura"}</span>
+                   </div>
+                   <div className="flex items-center gap-3 rounded-lg border border-stroke px-4 py-2 dark:border-dark-3">
+                      <Info className="h-4 w-4 text-primary" />
+                      <span className="text-[10px] font-bold uppercase text-dark-6">Confianza: {details.confidence}%</span>
+                   </div>
+                   {event.impossibleTravel && (
+                      <div className="flex items-center gap-3 rounded-lg bg-red/5 border border-red/20 px-4 py-2">
+                        <AlertTriangle className="h-4 w-4 text-red" />
+                        <span className="text-[10px] font-bold uppercase text-red">Viaje Imposible</span>
                       </div>
+                   )}
+                </div>
+              </div>
+
+              {/* Bloque B & C Row */}
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+                
+                {/* Bloque B: Ubicación Geográfica */}
+                <div className="lg:col-span-8 flex flex-col gap-6">
+                  <div className="flex-1 rounded-2xl border border-stroke bg-white p-2 dark:border-dark-3 dark:bg-dark-3 shadow-sm overflow-hidden min-h-[400px] relative">
+                    <div className="absolute top-4 left-4 z-[10] flex flex-col gap-2">
+                       <div className="flex items-center gap-2 rounded-xl bg-white/90 backdrop-blur px-3 py-2 shadow-lg border border-stroke dark:bg-dark-2/90 dark:border-dark-3">
+                          <MapPin className="h-4 w-4 text-primary" />
+                          <span className="text-xs font-bold uppercase tracking-wider text-dark dark:text-white">
+                            Bloque B: {event.city || "—"}, {event.country || t.location}
+                          </span>
+                       </div>
                     </div>
-                    <div className="h-64 rounded-lg border border-stroke bg-gray-100 dark:border-dark-3 dark:bg-dark-3 overflow-hidden">
+                    <div className="h-full w-full rounded-xl overflow-hidden">
                       <LocationMap
                         latitude={details.latitude}
                         longitude={details.longitude}
@@ -595,129 +734,89 @@ function DeviceDetailsModal({
                         ipAddress={event.ipAddress}
                       />
                     </div>
-                    <div className="space-y-1 text-xs text-dark-6 dark:text-dark-6">
-                      {event.city && <div>{translations.modal.city}: {event.city}</div>}
-                      {details.region && (
-                        <div>
-                          {translations.modal.region}: {formatUnknown(details.region)}
-                        </div>
-                      )}
-                      {event.country && (
-                        <div>
-                          {translations.modal.country}: {formatUnknown(event.country)} ({event.countryCode})
-                        </div>
-                      )}
-                      {details.continent && (
-                        <div>
-                          {translations.modal.continent}: {formatUnknown(details.continent)}
-                        </div>
-                      )}
-                      {details.timezone && (
-                        <div>
-                          {translations.modal.timezone}: {formatUnknown(details.timezone)}
-                        </div>
-                      )}
+                  </div>
+                </div>
+
+                {/* Bloque C: Hardware y Software */}
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="rounded-2xl border border-stroke bg-white p-8 dark:border-dark-3 dark:bg-dark-3 shadow-sm">
+                    <h3 className="text-[11px] font-bold uppercase text-dark-6 tracking-[0.2em] flex items-center gap-2 mb-8">
+                       <Smartphone className="h-4 w-4 text-primary" />
+                       Bloque C: Hardware/Software
+                    </h3>
+                    
+                    <div className="space-y-6">
+                       <div>
+                          <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">Navegador</span>
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-bold text-dark dark:text-white">{details.browserName} {details.browserVersion}</p>
+                            <ExternalLink className="h-4 w-4 text-dark-6 opacity-40" />
+                          </div>
+                       </div>
+                       <div className="pt-6 border-t border-stroke dark:border-dark-3">
+                          <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">Sistema Operativo</span>
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-bold text-dark dark:text-white">{details.os} {details.osVersion}</p>
+                            <Monitor className="h-4 w-4 text-dark-6 opacity-40" />
+                          </div>
+                       </div>
+                       <div className="pt-6 border-t border-stroke dark:border-dark-3">
+                          <div className="flex items-center gap-2 mb-3">
+                            <ShieldCheck className="h-4 w-4 text-green" />
+                            <span className="text-[9px] font-bold text-green uppercase tracking-wider">Fingerprint Unico</span>
+                          </div>
+                          <p className="font-mono text-[10px] break-all bg-gray-2 dark:bg-dark-2 p-4 rounded-xl text-dark-6 leading-relaxed border border-stroke dark:border-dark-3">
+                            {details.fingerprint || event.visitorId}
+                          </p>
+                          <p className="mt-3 text-[9px] font-semibold text-dark-6 italic leading-relaxed">
+                            💡 Si este fingerprint aparece en múltiples cuentas, podría indicar fraude multicuenta.
+                          </p>
+                       </div>
                     </div>
-                    {details.asn && details.asnName && (
-                      <div className="mt-2 text-xs text-dark-6 dark:text-dark-6">
-                        <div>
-                          {translations.modal.asn}: {details.asn} - {details.asnName}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Smart Signals */}
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                {/* Suspect Score - Solo mostrar si hay datos */}
-                {details.suspectScore !== undefined && (
-                  <div className="rounded-lg border border-stroke bg-white p-6 dark:border-dark-3 dark:bg-dark-2">
-                    <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">{translations.modal.suspectScore}</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl font-bold text-dark dark:text-white">{details.suspectScore}</span>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${details.suspectScore >= 50
-                            ? "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300"
-                            : details.suspectScore >= 25
-                              ? "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300"
-                              : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
-                            }`}
-                        >
-                          {details.suspectScore >= 50
-                            ? translations.modal.suspectLevels.high
-                            : details.suspectScore >= 25
-                              ? translations.modal.suspectLevels.medium
-                              : translations.modal.suspectLevels.low}
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-dark-3">
-                          <div
-                            className={`h-2 rounded-full ${details.suspectScore >= 50 ? "bg-red-500" : details.suspectScore >= 25 ? "bg-orange-500" : "bg-green-500"
-                              }`}
-                            style={{ width: `${Math.min(details.suspectScore, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Additional Info */}
-                <div className="rounded-lg border border-stroke bg-white p-6 dark:border-dark-3 dark:bg-dark-2">
-                  <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">{translations.modal.additionalInfo}</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-dark dark:text-white">{translations.modal.totalEvents}</span>
-                      <span className="font-semibold text-dark dark:text-white">{relatedEvents.length}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-dark dark:text-white">{translations.modal.userAgent}</span>
-                      <span className="text-xs text-dark-6 dark:text-dark-6 truncate max-w-[200px]" title={details.userAgent}>
-                        {details.userAgent}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
-            <div>
-              <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">{translations.modal.visitorHistoryTitle}</h3>
-              <div className="overflow-x-auto">
+            <div className="animate-in fade-in duration-500">
+              <h3 className="mb-6 text-lg font-bold text-dark dark:text-white tracking-normal">{t.visitorHistoryTitle}</h3>
+              <div className="overflow-hidden rounded-2xl border border-stroke dark:border-dark-3 shadow-sm">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2">
-                      <TableHead>{translations.historyTable.visitorId}</TableHead>
-                      <TableHead>{translations.historyTable.ipAddress}</TableHead>
-                      <TableHead>{translations.historyTable.requestId}</TableHead>
-                      <TableHead>{translations.historyTable.date}</TableHead>
+                    <TableRow className="border-none bg-gray-2 dark:bg-dark-3">
+                      <TableHead className="py-4 px-6 text-[10px] font-semibold uppercase text-dark-6 tracking-wide">{ht.visitorId}</TableHead>
+                      <TableHead className="py-4 px-6 text-[10px] font-semibold uppercase text-dark-6 tracking-wide">{ht.ipAddress}</TableHead>
+                      <TableHead className="py-4 px-6 text-[10px] font-semibold uppercase text-dark-6 tracking-wide">ID / {ht.requestId}</TableHead>
+                      <TableHead className="py-4 px-6 text-[10px] font-semibold uppercase text-dark-6 tracking-wide text-right">{ht.date}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {relatedEvents.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="py-8 text-center text-dark-6 dark:text-dark-6">
-                          {translations.modal.historyEmpty}
+                        <TableCell colSpan={4} className="py-20 text-center">
+                           <div className="flex flex-col items-center gap-2 grayscale brightness-50">
+                             <Clock className="h-10 w-10 text-dark-6 opacity-20" />
+                             <p className="text-sm font-bold text-dark-6 uppercase tracking-widest">{t.historyEmpty}</p>
+                           </div>
                         </TableCell>
                       </TableRow>
                     ) : (
                       relatedEvents.map((e) => (
-                        <TableRow key={e.id}>
-                          <TableCell className="font-medium text-dark dark:text-white">
-                            {e.visitorId}
+                        <TableRow key={e.id} className="hover:bg-gray-2/50 dark:hover:bg-dark-3/50 transition-colors cursor-pointer group">
+                          <TableCell className="py-4 px-6 font-mono text-xs font-bold text-dark dark:text-white group-hover:text-primary transition-colors">
+                            {e.visitorId.substring(0, 12)}...
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="py-4 px-6">
                             <div className="flex items-center gap-2">
-                              <span className="text-lg">{getCountryFlag(e.countryCode)}</span>
-                              <span className="text-dark dark:text-white">{e.ipAddress}</span>
+                              <span className="text-lg leading-none">{getCountryFlag(e.countryCode)}</span>
+                              <span className="text-xs font-bold text-dark dark:text-white">{e.ipAddress}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-dark dark:text-white">{e.requestId}</TableCell>
-                          <TableCell className="text-dark dark:text-white">{e.date}</TableCell>
+                          <TableCell className="py-4 px-6 text-xs text-dark-6">{e.requestId.substring(0, 10)}...</TableCell>
+                          <TableCell className="py-4 px-6 text-xs font-bold text-dark dark:text-white text-right">
+                             {dayjs(e.timestamp).format("DD MMM, HH:mm")}
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
@@ -728,22 +827,22 @@ function DeviceDetailsModal({
           )}
         </div>
 
-        {/* JSON View */}
         {showJSON && (
-          <div className="border-t border-stroke p-6 dark:border-dark-3">
-            <div className="relative rounded-lg bg-gray-50 p-4 dark:bg-dark-3">
-              <button
-                onClick={copyJSON}
-                className="absolute right-2 top-2 rounded p-1 hover:bg-gray-200 dark:hover:bg-dark-2"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </button>
-              {copiedMessage && (
-                <p className="mb-2 text-xs text-green-600 dark:text-green-400">{copiedMessage}</p>
-              )}
-              <pre className="overflow-auto text-xs" style={{ maxHeight: "400px" }}>
+          <div className="border-t border-stroke p-8 bg-gray-2/30 dark:border-dark-3 dark:bg-dark-3/30 animate-in slide-in-from-bottom-2 duration-500">
+            <div className="relative rounded-2xl bg-gray-2 px-6 py-6 dark:bg-dark-3 border border-stroke dark:border-dark-2">
+              <div className="flex items-center justify-between mb-4">
+                 <span className="text-[10px] font-semibold uppercase tracking-wider text-dark-6">Raw Event JSON Data</span>
+                 <button
+                    onClick={() => {
+                       navigator.clipboard.writeText(JSON.stringify(event, null, 2));
+                    }}
+                    className="flex items-center gap-2 text-xs font-bold text-primary"
+                 >
+                    <Copy className="h-3.5 w-3.5" />
+                    Copy Data
+                 </button>
+              </div>
+              <pre className="overflow-auto text-[10px] font-mono leading-relaxed text-dark-6 scrollbar-hide" style={{ maxHeight: "400px" }}>
                 <code>{JSON.stringify(event, null, 2)}</code>
               </pre>
             </div>
@@ -763,16 +862,16 @@ export function DeviceInformationContent() {
   const hasLoadedRef = useRef(false);
   const translations = useDeviceInfoTranslations();
 
-  // API: dispositivos y geolocalización del backend
   const [apiSnapshots, setApiSnapshots] = useState<DeviceSnapshot[] | null>(null);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [orgUsers, setOrgUsers] = useState<OrgUserListItem[]>([]);
-  const [loadingUser, setLoadingUser] = useState(false);
+  const [globalEvents, setGlobalEvents] = useState<IdentificationEvent[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isAggregating, setIsAggregating] = useState(false);
   const [errorApi, setErrorApi] = useState<string | null>(null);
 
   const org = typeof window !== "undefined" ? getStoredOrganization() : null;
   const currentUser = typeof window !== "undefined" ? getStoredUser() : null;
   const roles = typeof window !== "undefined" ? getStoredRoles() : [];
+  
   const canViewOtherUsers =
     isOwner(roles) ||
     userHasRole(roles, TEAM_ROLE.ORG_ADMIN) ||
@@ -780,52 +879,66 @@ export function DeviceInformationContent() {
 
   const orgId = org?.id ?? null;
   const currentUserId = currentUser?.id ?? null;
-  const targetUserId = selectedUserId ?? currentUserId;
 
-  // Eventos a mostrar: desde API (device_snapshots) o desde localStorage
-  const displayEvents: IdentificationEvent[] =
-    apiSnapshots !== null
-      ? apiSnapshots.map(snapshotToEvent)
-      : events;
-  const isApiMode = apiSnapshots !== null;
-
-  // Tour integration
-  const { isTourActive, currentStep, steps } = useTour();
-
-  // Log cuando selectedEvent cambia
-  useEffect(() => {
-    if (selectedEvent) {
-      console.log("🎯 selectedEvent establecido:", selectedEvent.visitorId);
+  const displayEvents: IdentificationEvent[] = (() => {
+    let eventsList: IdentificationEvent[] = [];
+    if (globalEvents.length > 0) {
+      eventsList = globalEvents;
+    } else if (apiSnapshots !== null) {
+      eventsList = apiSnapshots.map(s => snapshotToEvent(s, undefined, undefined));
     } else {
-      console.log("🎯 selectedEvent es null");
+      eventsList = events;
     }
-  }, [selectedEvent]);
+    return detectImpossibleTravel(eventsList);
+  })();
 
-  // Cargar lista de usuarios de la org para el selector (solo admin)
+  const isApiMode = apiSnapshots !== null || globalEvents.length > 0;
+
+  const fetchGlobalSnapshots = async (search?: string) => {
+    if (!orgId) return;
+    setIsAggregating(true);
+    try {
+      const res = await listSnapshots(orgId, { limit: 100, search });
+      const mapped = res.items.map(s => snapshotListItemToEvent(s));
+      setGlobalEvents(mapped);
+    } catch (err) {
+      console.error("Error fetching global snapshots:", err);
+      setGlobalEvents([]);
+    } finally {
+      setIsAggregating(false);
+    }
+  };
+
   useEffect(() => {
-    if (!canViewOtherUsers || !orgId) return;
-    listOrgUsers(orgId, { limit: 100 })
-      .then((res) => setOrgUsers(res.items))
-      .catch(() => setOrgUsers([]));
-  }, [canViewOtherUsers, orgId]);
+    if (!orgId) return;
+    
+    // Debounce manual simple
+    const timer = setTimeout(() => {
+      fetchGlobalSnapshots(searchTerm || undefined);
+    }, 400);
 
-  // Cargar device_snapshots del usuario seleccionado (o actual) cuando hay org + usuario
-  useEffect(() => {
-    if (!orgId || !targetUserId) return;
-    setLoadingUser(true);
-    setErrorApi(null);
-    getOrganizationUser(orgId, targetUserId)
-      .then((data) => {
-        setApiSnapshots(data.device_snapshots ?? []);
-      })
-      .catch((err: unknown) => {
-        setApiSnapshots([]);
-        setErrorApi(err instanceof AuthError ? err.message : "Error al cargar dispositivos");
-      })
-      .finally(() => setLoadingUser(false));
-  }, [orgId, targetUserId]);
+    return () => clearTimeout(timer);
+  }, [orgId, searchTerm]);
 
-  // Función para generar un nuevo evento mockeado (modo local) o registrar dispositivo actual (modo API)
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+
+  const handleSelectEvent = async (event: IdentificationEvent) => {
+    setSelectedEvent(event);
+    if (!orgId) return;
+
+    if (!event.details?.latitude) {
+      setIsDetailLoading(true);
+      try {
+        const detail = await getSnapshotDetail(orgId, event.id);
+        setSelectedEvent(snapshotDetailToEvent(detail));
+      } catch (err) {
+        console.error("Error fetching snapshot detail:", err);
+      } finally {
+        setIsDetailLoading(false);
+      }
+    }
+  };
+
   const handleReloadData = async () => {
     setIsLoading(true);
     setError(null);
@@ -834,7 +947,6 @@ export function DeviceInformationContent() {
     const orgIdNow = getStoredOrganization()?.id ?? null;
     const currentUserIdNow = getStoredUser()?.id ?? null;
 
-    // Modo API: registrar dispositivo/geolocalización ahora y refrescar lista
     if (orgIdNow && currentUserIdNow) {
       try {
         if (!navigator.geolocation) {
@@ -851,31 +963,20 @@ export function DeviceInformationContent() {
         const realIP = await getRealIPAddress();
         const coordinates = `${latitude},${longitude}`;
         await getDeviceInfoNow(realIP, coordinates, orgIdNow);
-        const data = await getOrganizationUser(orgIdNow, currentUserIdNow);
-        setApiSnapshots(data.device_snapshots ?? []);
-        setSelectedUserId(null);
+        fetchGlobalSnapshots();
+        setSearchTerm("");
       } catch (err: unknown) {
-        if (err && typeof err === "object" && "code" in err) {
-          const code = (err as { code: number }).code;
-          if (code === 1) setError(translations.errors.permissionDenied);
-          else if (code === 2) setError(translations.errors.positionUnavailable);
-          else if (code === 3) setError(translations.errors.timeout);
-          else setErrorApi(err instanceof AuthError ? err.message : translations.errors.default);
-        } else {
-          setErrorApi(err instanceof AuthError ? err.message : translations.errors.default);
-        }
+        setErrorApi(err instanceof AuthError ? err.message : translations.errors.default);
       } finally {
         setIsLoading(false);
         return;
       }
     }
 
-    // Modo local: flujo original con geolocalización e IP y evento mock
     try {
       if (!navigator.geolocation) {
         throw new Error(translations.errors.geolocationUnsupported);
       }
-
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
@@ -883,21 +984,13 @@ export function DeviceInformationContent() {
           maximumAge: 0,
         });
       });
-
       const { latitude, longitude } = position.coords;
-
-      // Obtener IP real del usuario
       const realIP = await getRealIPAddress();
-
-      // Obtener información de ubicación
       const locationInfo = await getLocationInfo(latitude, longitude, realIP);
-
-      // Obtener detalles reales del dispositivo
       const deviceDetails = getRealDeviceDetails(latitude, longitude);
       deviceDetails.continent = locationInfo.continent;
       deviceDetails.region = locationInfo.region;
 
-      // Generar datos mockeados
       const newEvent: IdentificationEvent = {
         id: generateId(),
         visitorId: generateId().toUpperCase(),
@@ -911,287 +1004,186 @@ export function DeviceInformationContent() {
         details: deviceDetails,
       };
 
-      // Agregar el nuevo evento
       setEvents((prevEvents) => {
-        // Evitar duplicados basados en requestId
         const exists = prevEvents.some((e) => e.requestId === newEvent.requestId);
         if (exists) return prevEvents;
-
         const updated = [newEvent, ...prevEvents].slice(0, 100);
         saveEvents(updated);
         return updated;
       });
-
-      // Log en consola
-      console.log("=".repeat(80));
-      console.log("📦 NUEVO EVENTO GENERADO:");
-      console.log("=".repeat(80));
-      console.log(JSON.stringify(newEvent, null, 2));
-      console.log("=".repeat(80));
     } catch (err: any) {
-      console.error("Error generating event:", err);
-      if (err.code === 1) {
-        setError(translations.errors.permissionDenied);
-      } else if (err.code === 2) {
-        setError(translations.errors.positionUnavailable);
-      } else if (err.code === 3) {
-        setError(translations.errors.timeout);
-      } else {
-        setError(err.message || translations.errors.default);
-      }
+      setError(err.message || translations.errors.default);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Cargar eventos locales o solicitar geolocalización al montar (solo modo local, sin org/usuario)
   useEffect(() => {
     if (hasLoadedRef.current) return;
     hasLoadedRef.current = true;
-
     const orgIdNow = getStoredOrganization()?.id;
     const currentUserIdNow = getStoredUser()?.id;
-
-    if (orgIdNow && currentUserIdNow) {
-      // Modo API: los device_snapshots se cargan en el useEffect de orgId/targetUserId
-      return;
+    if (!(orgIdNow && currentUserIdNow)) {
+      setEvents(loadEvents());
+      handleReloadData();
     }
-
-    const savedEvents = loadEvents();
-    setEvents(savedEvents);
-    handleReloadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Hacer clic automáticamente en el primer registro cuando el tour llegue al paso 13
-  // Y abrir el modal cuando llegue al paso 14
-  useEffect(() => {
-    console.log("🔍 Device Information Tour Effect:", {
-      isTourActive,
-      currentStep,
-      stepsLength: steps.length,
-      eventsLength: displayEvents.length,
-      currentStepData: steps[currentStep]
-    });
-
-    if (!isTourActive || steps.length === 0 || displayEvents.length === 0) {
-      console.log("❌ Condiciones no cumplidas:", {
-        isTourActive,
-        stepsLength: steps.length,
-        eventsLength: displayEvents.length
-      });
-      return;
-    }
-
-    const currentStepData = steps[currentStep];
-    if (!currentStepData) {
-      console.log("❌ No hay currentStepData");
-      return;
-    }
-
-    console.log("✅ Condiciones cumplidas, procesando paso:", currentStep, currentStepData.id);
-
-    // Paso 14 (device-information-first-row): Solo hacer clic, NO abrir el modal
-    if (currentStepData.id === "device-information-first-row") {
-      console.log("📝 Paso 14 (índice", currentStep, "): Seleccionando primer registro (NO abrir modal)...");
-      // Prevenir que el clic abra el modal temporalmente
-      // Hacer clic en el elemento, pero el modal NO debe abrirse todavía
-      setTimeout(() => {
-        const firstRow = document.querySelector('[data-tour-id="tour-device-information-first-row"]');
-        if (firstRow) {
-          console.log("🖱️ Haciendo clic en el primer registro (sin abrir modal)");
-          // NO hacer clic aquí, solo preparar para el siguiente paso
-          // El clic se hará en el paso 15
-        } else {
-          console.log("⚠️ No se encontró el primer registro");
-        }
-      }, 100);
-    }
-
-    // Paso 15 (device-information-modal): Abrir el modal cuando llegue a este paso
-    if (currentStepData.id === "device-information-modal") {
-      console.log("📝 Paso 15 (índice", currentStep, "): Abriendo modal...", displayEvents[0]);
-      console.log("🔧 Llamando a setSelectedEvent con:", displayEvents[0]?.visitorId);
-
-      // Primero hacer clic en el registro para que se seleccione
-      setTimeout(() => {
-        const firstRow = document.querySelector('[data-tour-id="tour-device-information-first-row"]');
-        if (firstRow) {
-          console.log("🖱️ Haciendo clic en el primer registro para abrir modal");
-          (firstRow as HTMLElement).click();
-        }
-      }, 100);
-
-      // Luego forzar la apertura del modal inmediatamente
-      setSelectedEvent(displayEvents[0]);
-      console.log("✅ setSelectedEvent llamado en paso 15");
-
-      // Verificar múltiples veces que el modal esté abierto
-      const checkModal = () => {
-        const modal = document.querySelector('[data-tour-id="tour-device-information-modal"]');
-        console.log("🔍 Verificando modal en DOM:", modal ? "✅ encontrado" : "❌ no encontrado");
-        if (!modal && displayEvents.length > 0) {
-          console.log("⚠️ Modal no encontrado, abriendo...");
-          setSelectedEvent(displayEvents[0]);
-        } else if (modal) {
-          console.log("✅ Modal encontrado en el DOM");
-        }
-      };
-
-      // Verificar inmediatamente
-      setTimeout(checkModal, 200);
-      // Verificar después de un delay
-      setTimeout(checkModal, 600);
-      // Verificar una vez más
-      setTimeout(checkModal, 1200);
-    }
-  }, [isTourActive, currentStep, steps, displayEvents]);
 
   return (
     <div className="mt-6 space-y-6">
-      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2" data-tour-id="tour-device-information">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-dark dark:text-white">
+      <div className="rounded-2xl bg-white p-8 shadow-sm dark:bg-dark-2 border border-stroke dark:border-dark-3" data-tour-id="tour-device-information">
+        <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <h2 className="text-2xl font-bold text-dark dark:text-white tracking-normal flex items-center gap-3">
+              <ShieldCheck className="h-7 w-7 text-primary" />
               {translations.pageTitle}
             </h2>
-            <p className="mt-1 text-sm text-dark-6 dark:text-dark-6">
+            <p className="mt-2 text-sm font-semibold text-dark-6 leading-relaxed">
               {translations.pageDescription}
             </p>
-            <p className="mt-0.5 text-sm font-medium text-dark dark:text-white">
-              {isApiMode
-                ? translations.subtitleUserDevices(
-                    displayEvents.length,
-                    selectedUserId
-                      ? orgUsers.find((u) => u.id === selectedUserId)?.full_name ||
-                        orgUsers.find((u) => u.id === selectedUserId)?.email ||
-                        selectedUserId
-                      : translations.myDevices
-                  )
-                : translations.subtitle(displayEvents.length)}
-            </p>
+            <div className="mt-4 flex items-center gap-2">
+                <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[9px] font-semibold uppercase text-primary border border-primary/20 tracking-wider">
+                  {translations.subtitleGlobal(displayEvents.length)}
+                </span>
+            </div>
           </div>
-          <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center sm:gap-3">
+          
+          <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
             {canViewOtherUsers && orgId && currentUserId && (
-              <div className="flex w-full flex-col gap-1 sm:w-auto sm:flex-row sm:items-center">
-                <label htmlFor="device-info-user-select" className="text-xs font-medium text-dark-6 dark:text-dark-6 sm:text-sm">
-                  {translations.viewDevicesFor}:
-                </label>
-                <select
-                  id="device-info-user-select"
-                  value={selectedUserId ?? ""}
-                  onChange={(e) => setSelectedUserId(e.target.value || null)}
-                  className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white sm:w-[220px]"
-                >
-                  <option value="">{translations.myDevices}</option>
-                  {orgUsers
-                    .filter((u) => u.id !== currentUserId)
-                    .map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.full_name || u.email}
-                      </option>
-                    ))}
-                </select>
+              <div className="relative group w-full sm:w-[360px]">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-6 group-focus-within:text-primary transition-colors">
+                  <Search className="h-4 w-4" />
+                </div>
+                <input
+                  type="text"
+                  placeholder={translations.table.searchPlaceholder}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full rounded-xl border border-stroke bg-white pl-11 pr-4 py-3 text-sm font-bold text-dark transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 dark:border-dark-3 dark:bg-dark-3 dark:text-white outline-none"
+                />
               </div>
             )}
             <button
               onClick={handleReloadData}
-              disabled={isLoading || loadingUser}
-              className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isLoading}
+              className="group relative flex h-11 items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark shadow-sm transition-all hover:border-dark hover:bg-dark hover:text-white dark:border-dark-3 dark:bg-dark-3 dark:text-white dark:hover:border-white dark:hover:bg-white dark:hover:text-dark active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isLoading ? translations.reloadButton.loading : translations.reloadButton.default}
+              <RotateCcw className={cn(
+                "h-4 w-4 transition-all duration-500",
+                isLoading ? "animate-spin text-primary group-hover:text-inherit" : "group-hover:rotate-180"
+              )} />
+              <span>{isLoading ? translations.reloadButton.loading : translations.reloadButton.default}</span>
             </button>
           </div>
         </div>
 
-        {/* Error Message */}
         {(error || errorApi) && (
-          <div className="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">
-            <p className="text-xs">{error || errorApi}</p>
+          <div className="mb-8 flex items-center gap-3 rounded-xl border border-red/20 bg-red/5 p-4 text-sm text-red animate-in slide-in-from-top-2">
+            <AlertTriangle className="h-5 w-5 shrink-0" />
+            <p className="font-bold">{error || errorApi}</p>
           </div>
         )}
 
-        {/* Events Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-hidden rounded-2xl border border-stroke dark:border-dark-3 shadow-sm">
           <Table>
             <TableHeader>
-              <TableRow
-                className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:font-semibold [&>th]:text-dark [&>th]:dark:text-white"
-                data-tour-id="tour-device-information-table"
-              >
-                <TableHead className="min-w-[200px]">{translations.table.visitorId}</TableHead>
-                <TableHead className="min-w-[180px]">{translations.table.ipAddress}</TableHead>
-                {isApiMode && (
-                  <TableHead className="min-w-[100px]">{translations.modal.device}</TableHead>
-                )}
-                <TableHead className="min-w-[200px]">{translations.table.requestId}</TableHead>
-                <TableHead className="min-w-[180px]">{translations.table.date}</TableHead>
-                {isApiMode && (
-                  <TableHead className="min-w-[80px]">VPN</TableHead>
-                )}
+              <TableRow className="border-none bg-gray-2 dark:bg-dark-3">
+                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6">{translations.table.user}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6">{translations.table.date}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6 text-center">{translations.table.device}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6">{translations.table.ipAddress}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6 text-center">{translations.table.risk}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6 text-right">{translations.table.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {displayEvents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={isApiMode ? 6 : 4} className="py-8 text-center text-dark-6 dark:text-dark-6">
-                    {loadingUser ? translations.reloadButton.loading : translations.table.empty}
+                  <TableCell colSpan={6} className="py-32 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                       <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-2 dark:bg-dark-3">
+                          <Smartphone className="h-8 w-8 text-dark-6 opacity-20" />
+                       </div>
+                        <p className="text-sm font-bold text-dark-6 uppercase tracking-[0.2em]">
+                          {isAggregating ? translations.reloadButton.loading : translations.table.empty}
+                        </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
                 displayEvents.map((event, index) => {
                   const isFirstRow = index === 0;
-                  const currentStepData = steps[currentStep];
-                  const isStep14 = isTourActive && currentStepData?.id === "device-information-first-row";
-                  const snapshot = isApiMode && apiSnapshots ? apiSnapshots[index] : null;
-
                   return (
-                    <TableRow
-                      key={event.id}
-                      onClick={() => {
-                        // En el paso 14, NO abrir el modal todavía
-                        if (isStep14 && isFirstRow) {
-                          console.log("🚫 Previniendo apertura del modal en paso 14");
-                          return;
-                        }
-                        setSelectedEvent(event);
-                      }}
-                      className="cursor-pointer transition-colors hover:bg-gray-2 dark:hover:bg-dark-3"
+                     <TableRow
+                       key={event.id}
+                       onClick={() => handleSelectEvent(event)}
+                      className="group cursor-pointer border-b border-stroke hover:bg-gray-2/50 dark:border-dark-3 dark:hover:bg-dark-3/50 transition-all font-semibold"
                       data-tour-id={isFirstRow ? "tour-device-information-first-row" : undefined}
                     >
-                      <TableCell className="font-medium text-dark dark:text-white">
-                        {event.visitorId}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl" title={event.country || translations.common.unknown}>
-                            {getCountryFlag(event.countryCode)}
-                          </span>
-                          <span className="font-mono text-sm text-dark dark:text-white">{event.ipAddress}</span>
+                      <TableCell className="py-6 px-6">
+                        <div className="flex items-center gap-3">
+                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-2 text-dark-6 group-hover:bg-primary group-hover:text-white transition-all dark:bg-dark-3">
+                              <User className="h-5 w-5" />
+                           </div>
+                           <div className="max-w-[140px] truncate">
+                              <p className="text-sm font-semibold text-dark dark:text-white leading-none">{event.userName || translations.common.unknown}</p>
+                              <p className="mt-1.5 text-[10px] font-semibold text-dark-6 truncate">{event.userEmail || "—"}</p>
+                           </div>
                         </div>
                       </TableCell>
-                      {isApiMode && (
-                        <TableCell className="text-dark dark:text-white">
-                          {snapshot?.device_type ?? event.details?.device ?? "—"}
-                        </TableCell>
-                      )}
-                      <TableCell className="text-dark dark:text-white">
-                        {event.requestId}
+                      <TableCell className="py-6 px-6">
+                        <p className="text-xs font-bold text-dark dark:text-white uppercase leading-none">{event.date}</p>
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-dark-6 uppercase tracking-wider">
+                           <Clock className="h-3 w-3" />
+                           {dayjs(event.timestamp).fromNow()}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-dark dark:text-white">
-                        {event.date}
-                      </TableCell>
-                      {isApiMode && (
-                        <TableCell>
-                          {snapshot?.vpn_detected ? (
-                            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                              {translations.modal.vpn}
+                      <TableCell className="py-6 px-6 text-center">
+                         <div className="inline-flex flex-col items-center gap-1.5">
+                            {event.details?.device?.toLowerCase() === "mobile" ? (
+                              <Smartphone className="h-5 w-5 text-dark-6" />
+                            ) : (
+                              <Monitor className="h-5 w-5 text-dark-6" />
+                            )}
+                            <span className="text-[9px] font-bold uppercase text-dark-6 leading-tight">
+                              {event.details?.os || "Desktop"}
                             </span>
+                         </div>
+                      </TableCell>
+                      <TableCell className="py-6 px-6">
+                        <div className="flex flex-col gap-1.5">
+                           <CopyableIP ip={event.ipAddress} translations={translations} />
+                           <div className="flex items-center gap-1.5 text-[10px] font-bold text-dark-6 uppercase tracking-wider">
+                              <span>{getCountryFlag(event.countryCode)}</span>
+                              <span className="max-w-[120px] truncate">{event.city || "—"}, {event.country || "—"}</span>
+                           </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-6 px-6 text-center">
+                        <div className="flex justify-center">
+                          {event.details?.vpn === undefined ? (
+                            <div className="flex items-center gap-1 w-fit rounded-full bg-gray-2 px-2 py-1 text-[9px] font-bold uppercase text-dark-6 border border-stroke dark:bg-dark-3">
+                              <Clock className="h-3 w-3" />
+                              PENDING
+                            </div>
+                          ) : event.details?.vpn ? (
+                            <div className="flex items-center gap-1 w-fit rounded-full bg-red/10 px-2 py-1 text-[9px] font-bold uppercase text-red border border-red/10">
+                              <ShieldAlert className="h-3 w-3" />
+                              VPN
+                            </div>
                           ) : (
-                            "—"
+                            <div className="flex items-center gap-1 w-fit rounded-full bg-green/10 px-2 py-1 text-[9px] font-bold uppercase text-green border border-green/10">
+                              <ShieldCheck className="h-3 w-3" />
+                              SAFE
+                            </div>
                           )}
-                        </TableCell>
-                      )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-6 px-6 text-right">
+                         <button className="group/action inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gray-2 text-dark-6 shadow-sm transition-all hover:bg-primary hover:text-white dark:bg-dark-3 dark:hover:bg-primary">
+                            <Search className="h-4.5 w-4.5 group-hover/action:scale-110 transition-transform" />
+                         </button>
+                      </TableCell>
                     </TableRow>
                   );
                 })
@@ -1201,12 +1193,12 @@ export function DeviceInformationContent() {
         </div>
       </div>
 
-      {/* Modal */}
       {selectedEvent && (
         <DeviceDetailsModal
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
           allEvents={displayEvents}
+          isLoading={isDetailLoading}
         />
       )}
     </div>

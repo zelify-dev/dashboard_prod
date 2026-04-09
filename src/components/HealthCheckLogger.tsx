@@ -23,6 +23,14 @@ export function HealthCheckLogger() {
 
     const org = getStoredOrganization();
     if (org?.id) {
+      // Optimización: si ya tenemos los scopes en sesión, no los re-pedimos en cada montaje del logger
+      // a menos que sea necesario (ej. tras login).
+      const existingScopes = sessionStorage.getItem("organization_scopes");
+      if (existingScopes) {
+        console.log("[Health Check] Scopes ya presentes en sesión, omitiendo llamado.");
+        return;
+      }
+
       const path = `/api/organizations/${org.id}/scopes`;
       console.log("[Health Check] GET", path);
       getOrganizationScopes(org.id)

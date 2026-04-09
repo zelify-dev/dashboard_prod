@@ -1,15 +1,32 @@
 import zelifyLogoDark from "@/assets/logos/zelifyLogo_dark.svg";
 import zelifyLogoLight from "@/assets/logos/zelifyLogo_ligth.svg";
 
+import logoIcon from "../../public/images/logo/logo-icon.svg";
+
 import Image from "next/image";
 
-export function Logo() {
+export function Logo({ collapsed }: { collapsed?: boolean }) {
+  if (collapsed) {
+    return (
+      <div className="relative h-8 w-8 overflow-hidden">
+        <Image
+          src={logoIcon}
+          fill
+          className="object-contain"
+          alt="Zelify Icon"
+          role="presentation"
+          quality={100}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="relative h-8 max-w-[10.847rem]">
+    <div className="relative h-8 w-[120px]">
       <Image
         src={zelifyLogoLight}
         fill
-        className="dark:hidden"
+        className="object-contain dark:hidden"
         alt="Zelify logo"
         role="presentation"
         quality={100}
@@ -18,7 +35,7 @@ export function Logo() {
       <Image
         src={zelifyLogoDark}
         fill
-        className="hidden dark:block"
+        className="hidden object-contain dark:block"
         alt="Zelify logo"
         role="presentation"
         quality={100}

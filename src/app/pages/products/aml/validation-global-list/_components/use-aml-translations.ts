@@ -22,6 +22,15 @@ type AMLTranslations = {
     selectLists: string;
     create: string;
     cancel: string;
+    advancedOptions: string;
+    entityType: string;
+    individual: string;
+    entity: string;
+    vessel: string;
+    aircraft: string;
+    dateOfBirth: string;
+    nationality: string;
+    confidenceScore: string;
   };
   pageTitle: string;
   backToValidations: string;
@@ -47,6 +56,7 @@ type AMLTranslations = {
   status: {
     approved: string;
     pending: string;
+    hit: string;
   };
   faceScan: {
     scanning: string;
@@ -142,6 +152,15 @@ const AML_TRANSLATIONS: Record<Language, AMLTranslations> = {
       selectLists: "Seleccionar listas para este grupo",
       create: "Crear",
       cancel: "Cancelar",
+      advancedOptions: "Opciones avanzadas",
+      entityType: "Tipo de entidad",
+      individual: "Persona física",
+      entity: "Empresa / Entidad",
+      vessel: "Buque / Barco",
+      aircraft: "Aeronave",
+      dateOfBirth: "Fecha de nacimiento",
+      nationality: "Nacionalidad",
+      confidenceScore: "Puntaje de confianza",
     },
     pageTitle: "Validación de listas globales",
     backToValidations: "Volver a validaciones",
@@ -175,6 +194,7 @@ const AML_TRANSLATIONS: Record<Language, AMLTranslations> = {
     status: {
       approved: "Aprobado",
       pending: "Pendiente",
+      hit: "Match Detectado",
     },
     faceScan: {
       scanning: "Escaneando",
@@ -376,6 +396,15 @@ const AML_TRANSLATIONS: Record<Language, AMLTranslations> = {
       selectLists: "Select lists for this group",
       create: "Create",
       cancel: "Cancel",
+      advancedOptions: "Advanced Options",
+      entityType: "Entity Type",
+      individual: "Individual",
+      entity: "Company / Entity",
+      vessel: "Vessel / Ship",
+      aircraft: "Aircraft",
+      dateOfBirth: "Date of Birth",
+      nationality: "Nationality",
+      confidenceScore: "Confidence Score",
     },
     pageTitle: "Global List Validation",
     backToValidations: "Back to Validations",
@@ -409,6 +438,7 @@ const AML_TRANSLATIONS: Record<Language, AMLTranslations> = {
     status: {
       approved: "Approved",
       pending: "Pending",
+      hit: "Match Detected",
     },
     faceScan: {
       scanning: "Scanning",

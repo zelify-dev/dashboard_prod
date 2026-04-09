@@ -10,6 +10,7 @@ import { SimpleSelect } from "@/components/FormElements/simple-select";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { createAMLScreening } from "@/lib/aml-api";
 
 function formatTranslation(template: string, values: Record<string, string | number>): string {
   return Object.entries(values).reduce((result, [key, value]) => {
@@ -17,26 +18,6 @@ function formatTranslation(template: string, values: Record<string, string | num
   }, template);
 }
 
-// Componente Toggle
-function Toggle({ enabled, onChange }: { enabled: boolean; onChange: (enabled: boolean) => void }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!enabled)}
-      className={cn(
-        "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-        enabled ? "bg-primary" : "bg-gray-300 dark:bg-dark-3"
-      )}
-    >
-      <span
-        className={cn(
-          "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-          enabled ? "translate-x-6" : "translate-x-1"
-        )}
-      />
-    </button>
-  );
-}
 
 interface AMLValidationFormProps {
   onStartVerification: (validation: AMLValidation) => void;
@@ -100,26 +81,30 @@ export function AMLValidationForm({
   const translations = useAMLTranslations();
   const { language } = useLanguage();
   const { countryName: orgCountryName } = useOrganizationCountry();
-  const [country, setCountry] = useState<string>(orgCountryName || "");
+  const [country, setCountry] = useState<string>("");
+  const [fullName, setFullName] = useState("");
   const [documentNumber, setDocumentNumber] = useState("");
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(defaultSelectedGroupId);
-  const [includePEPs, setIncludePEPs] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [entityType, setEntityType] = useState<string>("individual");
+  const [dob, setDob] = useState("");
+  const [minScore, setMinScore] = useState(0.88);
   const [isSearching, setIsSearching] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
-  const [errors, setErrors] = useState<{ country?: string; documentNumber?: string }>({});
+  const [errors, setErrors] = useState<{ country?: string; documentNumber?: string; fullName?: string }>({});
   
-  useEffect(() => {
-    if (orgCountryName) setCountry(orgCountryName);
-  }, [orgCountryName]);
+  // useEffect(() => {
+  //   if (orgCountryName) setCountry(orgCountryName);
+  // }, [orgCountryName]);
   
   // Obtener listas dinámicas basadas en el idioma
   const amlLists = useMemo(() => getAMLists(language), [language]);
   
-  // Solo mostrar el país de la organización
+  // Mostrar todos los países, pero usar el de la organización como valor inicial
   const countryOptions = useMemo(() => 
-    orgCountryName ? [{ value: orgCountryName, label: orgCountryName }] : [],
-    [orgCountryName]
+    countries.map(c => ({ value: c, label: c })),
+    []
   );
 
   const groupOptions = useMemo(() => [
@@ -127,11 +112,23 @@ export function AMLValidationForm({
     ...groups.map(g => ({ value: g.id, label: g.name }))
   ], [groups, translations.allListsOption]);
 
+  const entityTypeOptions = useMemo(() => [
+    { value: "individual", label: translations.config.individual },
+    { value: "entity", label: translations.config.entity },
+    { value: "vessel", label: translations.config.vessel },
+    { value: "aircraft", label: translations.config.aircraft },
+  ], [translations.config]);
+
+  // const nationalityOptions = useMemo(() => 
+  //   countries.map(c => ({ value: c, label: c })),
+  //   []
+  // );
+
   // Obtener las listas que se usarán para la verificación
   const getListsForVerification = (): string[] => {
     if (selectedGroupId) {
       const group = groups.find((g) => g.id === selectedGroupId);
-      return group?.listIds || [];
+      return group?.sources || [];
     }
     // Si no hay grupo seleccionado, usar todas las listas activas
     return amlLists.filter((list) => list.enabled).map((list) => list.id);
@@ -141,11 +138,6 @@ export function AMLValidationForm({
   const getSearchSteps = (): string[] => {
     const listIds = getListsForVerification();
     const steps: string[] = [];
-    
-    // Si está habilitado PEPs, agregarlo primero
-    if (includePEPs && country) {
-      steps.push(formatTranslation(translations.form.searchingPepStep, { country }));
-    }
     
     listIds.forEach(listId => {
       const list = amlLists.find(l => l.id === listId);
@@ -166,7 +158,7 @@ export function AMLValidationForm({
 
   const searchSteps = useMemo(
     () => getSearchSteps(),
-    [selectedGroupId, groups, amlLists, translations.progressSteps, translations.form, includePEPs, country]
+    [selectedGroupId, groups, amlLists, translations.progressSteps, translations.form, country]
   );
 
   useEffect(() => {
@@ -179,7 +171,7 @@ export function AMLValidationForm({
     let verifiedListIds: string[];
     if (selectedGroupId) {
       const group = groups.find((g) => g.id === selectedGroupId);
-      verifiedListIds = group?.listIds || [];
+      verifiedListIds = group?.sources || [];
     } else {
       verifiedListIds = amlLists.filter((list) => list.enabled).map((list) => list.id);
     }
@@ -201,47 +193,67 @@ export function AMLValidationForm({
       if (currentProgress >= 100) {
         clearInterval(interval);
         
-        // Crear validación con estado "pending" y agregar a la tabla
-        const pendingValidation: AMLValidation = {
-          id: Date.now().toString(),
-          name: generateRandomName(),
-          documentNumber,
-          country,
-          verification: "pending",
-          verifiedListIds,
-          groupId: currentGroupId || undefined,
-          includePEPs: includePEPs && country ? { country, enabled: true } : undefined,
-          createdAt: new Date().toISOString().split("T")[0],
+        // Ejecutar el screening real en el backend
+        const triggerScreening = async () => {
+          try {
+            const listIds = getListsForVerification();
+            const res = await createAMLScreening({
+              name: fullName,
+              validation_group_id: selectedGroupId || undefined,
+              data_source: selectedGroupId ? undefined : listIds.join(","),
+              entity_type: entityType,
+              date_of_birth: dob || undefined,
+              nationality: country || undefined, // Using country as nationality for simplification
+              country: country || undefined,
+              min_score: minScore,
+              identifier: documentNumber || undefined
+            });
+
+            // Crear validación local con los datos reales
+            const pendingValidation: AMLValidation = {
+              id: res.screening_id,
+              name: fullName,
+              documentNumber,
+              country,
+              verification: "pending",
+              verifiedListIds,
+              groupId: currentGroupId || undefined,
+              createdAt: new Date().toISOString().split("T")[0],
+              rawDetail: res, // Guardar respuesta inicial
+            };
+
+            onStartVerification(pendingValidation);
+            
+            // Resetear
+            setIsSearching(false);
+            setProgress(0);
+            setCurrentStep(0);
+            setFullName("");
+            setDocumentNumber("");
+            setSelectedGroupId(defaultSelectedGroupId);
+          } catch (err) {
+            console.error("Error at final screening stage:", err);
+            setIsSearching(false);
+          }
         };
 
-        // Agregar a la lista con estado pending
-        onStartVerification(pendingValidation);
-        
-        // Resetear el formulario
-        setIsSearching(false);
-        setProgress(0);
-        setCurrentStep(0);
-        setCountry("");
-        setDocumentNumber("");
-        setSelectedGroupId(defaultSelectedGroupId);
-        setIncludePEPs(false);
-        setErrors({});
+        triggerScreening();
       }
     }, 50);
 
     return () => clearInterval(interval);
-  }, [isSearching, country, documentNumber, selectedGroupId, includePEPs, searchSteps, onStartVerification, defaultSelectedGroupId, groups, amlLists]);
+  }, [isSearching, country, documentNumber, selectedGroupId, searchSteps, onStartVerification, defaultSelectedGroupId, groups, amlLists, fullName, entityType, dob, minScore]);
 
   const validateForm = (): boolean => {
-    const newErrors: { country?: string; documentNumber?: string } = {};
+    const newErrors: { country?: string; documentNumber?: string; fullName?: string } = {};
     
-    if (!country) {
-      newErrors.country = translations.form.countryRequired;
+    // Solo el nombre completo es estrictamente requerido para el screening
+    if (!fullName.trim()) {
+      newErrors.fullName = "El nombre completo es requerido";
     }
     
-    if (!documentNumber.trim()) {
-      newErrors.documentNumber = translations.form.documentNumberRequired;
-    } else if (documentNumber.trim().length < 5) {
+    // El país y número de documento son opcionales para refinar la búsqueda
+    if (documentNumber.trim() && documentNumber.trim().length < 5) {
       newErrors.documentNumber = translations.form.documentNumberMinLength;
     }
     
@@ -263,8 +275,8 @@ export function AMLValidationForm({
 
   const selectedGroup = groups.find((g) => g.id === selectedGroupId);
   const listsCount = (selectedGroupId 
-    ? selectedGroup?.listIds.length || 0
-    : amlLists.filter((list) => list.enabled).length) + (includePEPs && country ? 1 : 0);
+    ? selectedGroup?.sources.length || 0
+    : amlLists.filter((list) => list.enabled).length);
   const listLabel = listsCount === 1 ? translations.form.listSingular : translations.form.listPlural;
   const scopeLabel = selectedGroupId ? translations.form.scopeInThisGroup : translations.form.scopeActive;
   const listsSummaryText = formatTranslation(translations.form.listsSummary, {
@@ -309,12 +321,43 @@ export function AMLValidationForm({
             </p>
           </div>
         )}
+
+        {/* Nombre Completo */}
+        <div className="space-y-2">
+          <label htmlFor="fullName" className="block text-sm font-semibold text-dark dark:text-white">
+            Nombre Completo del Sujeto
+            <span className="ml-1 text-red-500">*</span>
+          </label>
+          <input
+            id="fullName"
+            type="text"
+            value={fullName}
+            onChange={(e) => {
+              setFullName(e.target.value);
+              if (errors.fullName) {
+                setErrors(prev => ({ ...prev, fullName: undefined }));
+              }
+            }}
+            disabled={isSearching}
+            placeholder="Ej: Patricio Maldonado"
+            className={cn(
+              "block w-full rounded-lg border px-4 py-3 text-sm text-dark placeholder-dark-6 transition-colors focus:outline-none focus:ring-1 dark:bg-dark-2 dark:text-white dark:placeholder-dark-6 disabled:opacity-50",
+              errors.fullName
+                ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500"
+                : "border-stroke focus:border-primary focus:ring-primary dark:border-dark-3"
+            )}
+            required
+          />
+          {errors.fullName && (
+            <p className="text-xs text-red-600 dark:text-red-400">{errors.fullName}</p>
+          )}
+        </div>
         
-        {/* País */}
+        {/* País (Opcional) */}
         <div className="space-y-2">
           <label htmlFor="country" className="block text-sm font-semibold text-dark dark:text-white">
-            {translations.country}
-            <span className="ml-1 text-red-500">*</span>
+            Nacionalidad / Residencia
+            <span className="ml-1 text-xs font-medium text-dark-6">(Opcional)</span>
           </label>
           <SimpleSelect
             options={countryOptions}
@@ -322,10 +365,6 @@ export function AMLValidationForm({
             placeholder={translations.selectCountry}
             onChange={(value) => {
               setCountry(value);
-              // Si se cambia el país, deshabilitar PEPs si no hay país
-              if (!value) {
-                setIncludePEPs(false);
-              }
               if (errors.country) {
                 setErrors(prev => ({ ...prev, country: undefined }));
               }
@@ -341,26 +380,85 @@ export function AMLValidationForm({
           )}
         </div>
 
-        {/* Toggle PEPs */}
-        {country && (
-          <div className="flex items-center justify-between rounded-lg border border-stroke bg-gray-50 p-4 dark:border-dark-3 dark:bg-dark-3">
-            <div className="flex-1">
-              <label className="block text-sm font-semibold text-dark dark:text-white mb-1">
-                {formatTranslation(translations.form.pepToggleTitle, { country })}
+        {/* Toggle para Opciones Avanzadas */}
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+          >
+            <svg 
+              className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} 
+              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+            {translations.config.advancedOptions}
+          </button>
+        </div>
+
+        {showAdvanced && (
+          <div className="grid grid-cols-1 gap-6 rounded-lg border border-dashed border-stroke p-5 dark:border-dark-3 md:grid-cols-2">
+            {/* Tipo de Entidad */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-dark dark:text-white">
+                {translations.config.entityType}
               </label>
-              <p className="text-xs text-dark-6 dark:text-dark-6">
-                {formatTranslation(translations.form.pepToggleDescription, { country })}
-              </p>
+              <SimpleSelect
+                options={entityTypeOptions}
+                value={entityType}
+                onChange={setEntityType}
+                className="w-full"
+              />
             </div>
-            <Toggle enabled={includePEPs} onChange={setIncludePEPs} />
+
+            {/* Fecha de Nacimiento */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-dark dark:text-white">
+                {translations.config.dateOfBirth}
+              </label>
+              <input
+                type="date"
+                value={dob}
+                onChange={(e) => setDob(e.target.value)}
+                className="block w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition-colors focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              />
+            </div>
+
+            {/* Puntaje de Confianza */}
+            <div className="space-y-3">
+              <label className="block text-sm font-semibold text-dark dark:text-white">
+                {translations.config.confidenceScore}
+              </label>
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1">
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="1.0"
+                    step="0.01"
+                    value={minScore}
+                    onChange={(e) => setMinScore(parseFloat(e.target.value))}
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-dark-3 outline-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:ring-2 [&::-webkit-slider-thumb]:ring-primary [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:hover:scale-110"
+                    style={{
+                      background: `linear-gradient(to right, #3C50E0 0%, #3C50E0 ${(minScore - 0.5) / 0.5 * 100}%, #E2E8F0 ${(minScore - 0.5) / 0.5 * 100}%, #E2E8F0 100%)`
+                    }}
+                  />
+                </div>
+                <span className="min-w-[50px] rounded-full bg-primary/10 px-3 py-1 text-center text-[12px] font-bold text-primary border border-primary/20 shadow-sm">
+                  {Math.round(minScore * 100)}%
+                </span>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Número de documento */}
+
+        {/* Número de documento (Opcional) */}
         <div className="space-y-2">
           <label htmlFor="documentNumber" className="block text-sm font-semibold text-dark dark:text-white">
             {translations.documentNumber}
-            <span className="ml-1 text-red-500">*</span>
+            <span className="ml-1 text-xs font-medium text-dark-6">(Opcional)</span>
           </label>
           <input
             id="documentNumber"

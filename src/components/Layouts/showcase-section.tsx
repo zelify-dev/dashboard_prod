@@ -4,12 +4,13 @@ import type { ReactNode } from "react";
 type PropsType = {
   title: string;
   children: ReactNode;
-  className?: string;
+  className?: string;     // Clase para el contenedor de contenido (interno)
+  rootClassName?: string; // Clase para el contenedor raíz (el que tiene el borde/shadow)
 };
 
-export function ShowcaseSection({ title, children, className }: PropsType) {
+export function ShowcaseSection({ title, children, className, rootClassName }: PropsType) {
   return (
-    <div className="rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
+    <div className={cn("rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card", rootClassName)}>
       <h2 className="border-b border-stroke px-4 py-4 font-medium text-dark dark:border-dark-3 dark:text-white sm:px-6 xl:px-7.5">
         {title}
       </h2>

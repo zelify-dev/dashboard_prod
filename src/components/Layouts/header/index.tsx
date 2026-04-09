@@ -20,7 +20,7 @@ export function Header() {
   const { openModal, isTourActive } = useTour();
 
   return (
-    <header className={`sticky top-0 flex items-center justify-between border-b border-stroke bg-white px-4 py-5 shadow-1 dark:border-stroke-dark dark:bg-gray-dark md:px-5 2xl:px-10 ${isTourActive ? "z-[110]" : "z-30"}`}>
+    <header className={`sticky top-0 flex items-center justify-between border-b border-stroke bg-white px-4 py-2 shadow-1 dark:border-stroke-dark dark:bg-gray-dark md:px-5 2xl:px-8 ${isTourActive ? "z-[110]" : "z-30"}`}>
       <button
         onClick={toggleSidebar}
         className="rounded-lg border px-1.5 py-1 dark:border-stroke-dark dark:bg-[#020D1A] hover:dark:bg-[#FFFFFF1A] lg:hidden"
@@ -53,7 +53,7 @@ export function Header() {
       )}
 
       <div className="max-xl:hidden flex items-center gap-3">
-        <h1 className="mb-0.5 text-heading-5 font-bold text-dark dark:text-white">
+        <h1 className="mb-0.5 text-lg font-bold text-dark dark:text-white leading-none tracking-tight">
           {translations.header.title}
         </h1>
       </div>
@@ -61,7 +61,7 @@ export function Header() {
       <div className="flex flex-1 items-center justify-end gap-2 min-[375px]:gap-4">
         <button
           onClick={openModal}
-          className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark transition-colors hover:bg-gray-2 dark:border-stroke-dark dark:bg-gray-dark dark:text-white dark:hover:bg-dark-3"
+          className="rounded-lg border border-stroke bg-white px-3.5 py-1.5 text-xs font-bold text-dark transition-all hover:bg-gray-2 dark:border-stroke-dark dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
         >
           Tour
         </button>
@@ -69,10 +69,10 @@ export function Header() {
           <input
             type="search"
             placeholder={translations.header.searchPlaceholder}
-            className="flex w-full items-center gap-3.5 rounded-full border bg-gray-2 py-3 pl-[53px] pr-5 outline-none transition-colors focus-visible:border-primary dark:border-dark-3 dark:bg-dark-2 dark:hover:border-dark-4 dark:hover:bg-dark-3 dark:hover:text-dark-6 dark:focus-visible:border-primary"
+            className="flex w-full items-center gap-3.5 rounded-full border bg-gray-2 py-1.5 pl-[48px] pr-4 outline-none transition-all focus-visible:border-primary dark:border-dark-3 dark:bg-dark-2 dark:hover:border-dark-4 dark:hover:bg-dark-3 dark:hover:text-dark-6 dark:focus-visible:border-primary text-xs font-medium"
           />
 
-          <SearchIcon className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 max-[1015px]:size-5" />
+          <SearchIcon className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 max-[1015px]:size-4 size-4" />
         </div>
 
         {/* <ThemeToggleSwitch /> */}
