@@ -31,7 +31,7 @@ interface NavSubItem {
 
 export function Sidebar() {
   const pathname = usePathname();
-  const isOnboardingEnabled = false;
+  const isOnboardingEnabled = true;
   const { setIsOpen, isOpen, isMobile, toggleSidebar, isCollapsed, toggleCollapse } = useSidebarContext();
   const translations = useUiTranslations();
   const { isTourActive, currentStep, steps } = useTour();
@@ -969,28 +969,6 @@ export function Sidebar() {
                                   )}>
                                     {item.title}
                                   </span>
-
-                                  {isSectionOnboarding && (
-                                    <div
-                                      className={cn(
-                                        "group relative ml-2",
-                                        isCollapsed && !isMobile ? "hidden" : "block"
-                                      )}
-                                      title={
-                                        translations.sidebar.menuItems
-                                          .lockedTooltip
-                                      }
-                                    >
-                                      <Lock className="size-4 text-gray-400 dark:text-gray-500" />
-                                      <div className="absolute right-full top-1/2 z-50 mr-2 hidden w-48 -translate-y-1/2 rounded bg-black/90 px-2 py-1 text-center text-xs text-white shadow-lg group-hover:block">
-                                        {
-                                          translations.sidebar.menuItems
-                                            .lockedTooltip
-                                        }
-                                        <div className="absolute -right-1 top-1/2 -mt-1 h-2 w-2 rotate-45 bg-black/90"></div>
-                                      </div>
-                                    </div>
-                                  )}
                                 </MenuItem>
                               );
                             })()
