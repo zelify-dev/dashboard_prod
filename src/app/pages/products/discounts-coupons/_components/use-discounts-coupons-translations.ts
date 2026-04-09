@@ -40,6 +40,11 @@ type DiscountsCouponsTranslations = {
     days: string;
     hours: string;
     close: string;
+    deactivate: string;
+    deactivateConfirm: string;
+    deactivating: string;
+    alreadyInactive: string;
+    couponNotEditable: string;
     types: {
       percentage: string;
       fixed: string;
@@ -149,6 +154,11 @@ const DISCOUNTS_COUPONS_TRANSLATIONS: Record<
       days: "Days",
       hours: "Hours",
       close: "Close",
+      deactivate: "Deactivate coupon",
+      deactivateConfirm: "Are you sure you want to deactivate this coupon? This action cannot be undone from dashboard.",
+      deactivating: "Deactivating...",
+      alreadyInactive: "This coupon is already inactive",
+      couponNotEditable: "Coupons are not editable. If you need changes, deactivate this coupon and create a new one.",
       types: {
         percentage: "percentage",
         fixed: "fixed amount",
@@ -253,6 +263,11 @@ const DISCOUNTS_COUPONS_TRANSLATIONS: Record<
       days: "Días",
       hours: "Horas",
       close: "Cerrar",
+      deactivate: "Desactivar cupón",
+      deactivateConfirm: "¿Seguro que deseas desactivar este cupón? Esta acción no se puede revertir desde el dashboard.",
+      deactivating: "Desactivando...",
+      alreadyInactive: "Este cupón ya está inactivo",
+      couponNotEditable: "Los cupones no son editables. Si necesitas cambios, desactiva este cupón y crea uno nuevo.",
       types: {
         percentage: "porcentaje",
         fixed: "monto fijo",

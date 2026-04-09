@@ -9,12 +9,15 @@ import { formatLocalDateTime } from "@/lib/date-utils";
 interface CouponDetailProps {
   coupon: Coupon;
   onClose: () => void;
+  onDeactivate?: (coupon: Coupon) => Promise<void>;
+  isDeactivating?: boolean;
 }
 
-export function CouponDetail({ coupon, onClose }: CouponDetailProps) {
+export function CouponDetail({ coupon, onClose, onDeactivate, isDeactivating = false }: CouponDetailProps) {
   const translations = useDiscountsCouponsTranslations();
   const { language } = useLanguage();
   const locale = language === "es" ? "es-ES" : "en-US";
+  const canDeactivate = coupon.status === "active";
 
   const getStatusColor = (status: Coupon["status"]) => {
     switch (status) {
@@ -78,6 +81,9 @@ export function CouponDetail({ coupon, onClose }: CouponDetailProps) {
         {/* Content */}
         <div className="p-6">
           <div className="space-y-6">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/30 dark:bg-amber-900/20 dark:text-amber-300">
+              {translations.detail.couponNotEditable}
+            </div>
             {/* Status and Code */}
             <div className="flex items-center justify-between">
               <div>
@@ -165,15 +171,22 @@ export function CouponDetail({ coupon, onClose }: CouponDetailProps) {
                 <div>
                   <p className="text-xs text-dark-6 dark:text-dark-6">{translations.detail.days}</p>
                   <p className="mt-1 text-dark dark:text-white">
-                    {coupon.availability.days.map((d) => dayNames[d]).join(", ")}
+                    {coupon.availability?.days?.length
+                      ? coupon.availability.days.map((d) => dayNames[d] || d).join(", ")
+                      : "No disponible"}
                   </p>
                 </div>
-                {coupon.availability.hours && (
+                {coupon.availability?.hours ? (
                   <div>
                     <p className="text-xs text-dark-6 dark:text-dark-6">{translations.detail.hours}</p>
                     <p className="mt-1 text-dark dark:text-white">
                       {coupon.availability.hours.start} - {coupon.availability.hours.end}
                     </p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-xs text-dark-6 dark:text-dark-6">{translations.detail.hours}</p>
+                    <p className="mt-1 text-dark dark:text-white">No disponible</p>
                   </div>
                 )}
               </div>
@@ -182,13 +195,33 @@ export function CouponDetail({ coupon, onClose }: CouponDetailProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 border-t border-stroke p-6 dark:border-dark-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stroke p-6 dark:border-dark-3">
+          <div>
+            {!canDeactivate ? (
+              <span className="text-xs text-dark-6 dark:text-dark-6">{translations.detail.alreadyInactive}</span>
+            ) : null}
+          </div>
+          <div className="flex gap-3">
+            {canDeactivate && onDeactivate ? (
+              <button
+                onClick={async () => {
+                  const confirmed = window.confirm(translations.detail.deactivateConfirm);
+                  if (!confirmed) return;
+                  await onDeactivate(coupon);
+                }}
+                disabled={isDeactivating}
+                className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-70 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300 dark:hover:bg-red-950/40"
+              >
+                {isDeactivating ? translations.detail.deactivating : translations.detail.deactivate}
+              </button>
+            ) : null}
           <button
             onClick={onClose}
             className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
           >
             {translations.detail.close}
           </button>
+          </div>
         </div>
       </div>
     </div>

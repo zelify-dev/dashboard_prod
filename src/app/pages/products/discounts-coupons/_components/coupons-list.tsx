@@ -7,6 +7,10 @@ import { formatLocalDateOnly } from "@/lib/date-utils";
 
 export type Coupon = {
   id: string;
+  couponId?: string;
+  discountId?: string;
+  merchantId?: string;
+  merchantName?: string;
   code: string;
   name: string;
   description: string;
@@ -17,7 +21,10 @@ export type Coupon = {
   usedCount: number;
   validFrom: string;
   validUntil: string;
-  availability: {
+  minPurchase?: number;
+  maxUsesTotal?: number;
+  maxUsesPerUser?: number;
+  availability?: {
     days: string[];
     hours: {
       start: string;
@@ -193,6 +200,13 @@ export function CouponsList({ coupons, onCouponClick }: CouponsListProps) {
     return `$${coupon.discountValue}`;
   };
 
+  const formatAvailability = (coupon: Coupon) => {
+    if (!coupon.availability) return "No disponible";
+    const days = coupon.availability.days.length > 0 ? coupon.availability.days.join(", ") : "No disponible";
+    const hours = coupon.availability.hours ? `${coupon.availability.hours.start} - ${coupon.availability.hours.end}` : null;
+    return [days, hours].filter(Boolean).join(" • ");
+  };
+
 
 
   return (
@@ -244,6 +258,12 @@ export function CouponsList({ coupons, onCouponClick }: CouponsListProps) {
                   <p className="text-xs text-dark-6 dark:text-dark-6">{translations.coupons.validUntil}</p>
                   <p className="mt-1 text-sm font-medium text-dark dark:text-white">
                     {formatLocalDateOnly(coupon.validUntil)}
+                  </p>
+                </div>
+                <div className="sm:col-span-4">
+                  <p className="text-xs text-dark-6 dark:text-dark-6">{translations.detail.availability}</p>
+                  <p className="mt-1 text-sm font-medium text-dark dark:text-white">
+                    {formatAvailability(coupon)}
                   </p>
                 </div>
               </div>

@@ -1,13 +1,16 @@
 "use client";
 
-import { getMockCoupons } from "./coupons-list";
 import { useDiscountsCouponsTranslations } from "./use-discounts-coupons-translations";
-import { useLanguage } from "@/contexts/language-context";
+import { Coupon } from "./coupons-list";
 
-export function CouponAnalytics() {
+interface CouponAnalyticsProps {
+  coupons: Coupon[];
+  merchantLabel?: string;
+  isLoading?: boolean;
+}
+
+export function CouponAnalytics({ coupons, merchantLabel, isLoading = false }: CouponAnalyticsProps) {
   const translations = useDiscountsCouponsTranslations();
-  const { language } = useLanguage();
-  const coupons = getMockCoupons(language);
   const totalCoupons = coupons.length;
   const activeCoupons = coupons.filter((c) => c.status === "active").length;
   const totalUsage = coupons.reduce((sum, c) => sum + c.usedCount, 0);
@@ -75,6 +78,13 @@ export function CouponAnalytics() {
 
   return (
     <div className="space-y-6">
+      {merchantLabel && (
+        <div className="rounded-lg border border-stroke bg-white px-4 py-3 text-sm shadow-sm dark:border-dark-3 dark:bg-dark-2">
+          <span className="font-medium text-dark dark:text-white">Merchant:</span>{" "}
+          <span className="text-dark-6 dark:text-dark-6">{merchantLabel}</span>
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
@@ -125,7 +135,19 @@ export function CouponAnalytics() {
               </tr>
             </thead>
             <tbody>
-              {coupons.map((coupon) => {
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-6 text-center text-sm text-dark-6 dark:text-dark-6">
+                    Cargando analítica...
+                  </td>
+                </tr>
+              ) : coupons.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-4 py-6 text-center text-sm text-dark-6 dark:text-dark-6">
+                    No hay datos disponibles para este merchant.
+                  </td>
+                </tr>
+              ) : coupons.map((coupon) => {
                 const usageRate = (coupon.usedCount / coupon.usageLimit) * 100;
                 return (
                   <tr
