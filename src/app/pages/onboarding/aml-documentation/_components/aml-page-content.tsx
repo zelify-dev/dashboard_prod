@@ -4,6 +4,8 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Button } from "@/components/ui-elements/button";
 import { useState } from "react";
 import { AuthError } from "@/lib/auth-api";
+import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
+import { cn } from "@/lib/utils";
 import { getCurrentOrganizationId, notifyOnboardingStatusUpdated, postAmlFiles } from "@/lib/onboarding-api";
 
 function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -46,6 +48,9 @@ function ShieldCheckIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function AmlPageContent() {
+  const { flags, loading: statusLoading, percents } = useOnboardingStatus();
+  const locked = !statusLoading && flags.amlLocked;
+
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +65,7 @@ export function AmlPageContent() {
   };
 
   const handleSubmit = async () => {
+    if (locked) return;
     const orgId = getCurrentOrganizationId();
     if (!orgId || !file) return;
     setSubmitting(true);
@@ -98,6 +104,19 @@ export function AmlPageContent() {
             Documentación AML
           </h3>
 
+          {locked && (
+            <div
+              className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100"
+              role="status"
+            >
+              <span className="font-semibold">Documentación AML ya enviada.</span>{" "}
+              {percents.aml != null && (
+                <span className="tabular-nums">Progreso: {percents.aml}%.</span>
+              )}{" "}
+              No puedes subir otro archivo desde aquí salvo que el equipo te lo indique.
+            </div>
+          )}
+
           <div className="mb-6 flex items-start gap-3 rounded-lg bg-[#EBF5FF] px-4 py-3 text-[#1C64F2] dark:bg-blue-900/30 dark:text-blue-400">
             <InfoIcon className="mt-0.5 shrink-0" />
             <div className="text-sm">
@@ -114,11 +133,19 @@ export function AmlPageContent() {
             Documentación AML
           </label>
 
-          <div className="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 hover:bg-gray-50 dark:border-strokedark dark:hover:bg-boxdark-2">
+          <div
+            className={cn(
+              "relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 dark:border-strokedark",
+              locked
+                ? "cursor-not-allowed bg-gray-50/80 opacity-70 dark:bg-boxdark/50"
+                : "hover:bg-gray-50 dark:hover:bg-boxdark-2",
+            )}
+          >
             <input
               type="file"
               onChange={handleFileChange}
-              className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0"
+              disabled={locked}
+              className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
               accept=".pdf,.doc,.docx"
             />
 
@@ -178,7 +205,7 @@ export function AmlPageContent() {
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
                 : "!bg-[#004196] hover:!bg-[#004196]/90"
             }`}
-            disabled={!file || submitting}
+            disabled={locked || !file || submitting}
             shape="rounded"
           />
         </div>

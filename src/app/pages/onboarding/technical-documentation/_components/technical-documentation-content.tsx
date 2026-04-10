@@ -4,6 +4,8 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Button } from "@/components/ui-elements/button";
 import { useState } from "react";
 import { AuthError } from "@/lib/auth-api";
+import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
+import { cn } from "@/lib/utils";
 import {
   getCurrentOrganizationId,
   notifyOnboardingStatusUpdated,
@@ -145,6 +147,7 @@ interface FileUploadAreaProps {
   icon: React.ReactNode;
   file: File | null;
   onFileChange: (file: File | null) => void;
+  locked?: boolean;
 }
 
 function FileUploadArea({
@@ -154,8 +157,10 @@ function FileUploadArea({
   icon,
   file,
   onFileChange,
+  locked = false,
 }: FileUploadAreaProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (locked) return;
     if (e.target.files && e.target.files[0]) {
       onFileChange(e.target.files[0]);
     }
@@ -163,14 +168,29 @@ function FileUploadArea({
 
   return (
     <div className="mb-6">
-      <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
-        {label}
-      </label>
-      <div className="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 hover:bg-gray-50 dark:border-strokedark dark:hover:bg-boxdark-2">
+      {label ? (
+        <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
+          {label}
+        </label>
+      ) : null}
+      {locked && (
+        <p className="mb-2 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+          Archivo ya registrado en el sistema. No puedes volver a subirlo aquí.
+        </p>
+      )}
+      <div
+        className={cn(
+          "relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 dark:border-strokedark",
+          locked
+            ? "cursor-not-allowed bg-gray-50/80 opacity-75 dark:bg-boxdark/50"
+            : "hover:bg-gray-50 dark:hover:bg-boxdark-2",
+        )}
+      >
         <input
           type="file"
           onChange={handleChange}
-          className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0"
+          disabled={locked}
+          className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
           accept={accept}
         />
         <div className="flex flex-col items-center justify-center text-center">
@@ -184,7 +204,13 @@ function FileUploadArea({
           </div>
           <div className="mb-4 text-xs text-[#6B7280]">o</div>
           <Button
-            label={file ? "Cambiar archivo" : "Seleccionar archivo"}
+            label={
+              locked
+                ? "Ya enviado"
+                : file
+                  ? "Cambiar archivo"
+                  : "Seleccionar archivo"
+            }
             variant="primary"
             size="small"
             shape="rounded"
@@ -206,6 +232,9 @@ function FileUploadArea({
 }
 
 export function TechnicalDocumentationPageContent() {
+  const { flags, loading: statusLoading, percents } = useOnboardingStatus();
+  const tf = flags.technical;
+
   const [diagramFile, setDiagramFile] = useState<File | null>(null);
   const [securityFile, setSecurityFile] = useState<File | null>(null);
   const [certificationFile, setCertificationFile] = useState<File | null>(null);
@@ -222,6 +251,10 @@ export function TechnicalDocumentationPageContent() {
   const [successDocs, setSuccessDocs] = useState(false);
 
   const handleSaveSandbox = async () => {
+    if (!statusLoading && tf.developmentEnvironmentsLocked) {
+      setErrorDev("Esta información ya fue guardada.");
+      return;
+    }
     const orgId = getCurrentOrganizationId();
     if (!orgId) {
       setErrorDev("No hay organización en sesión.");
@@ -268,10 +301,10 @@ export function TechnicalDocumentationPageContent() {
     setSuccessDocs(false);
     try {
       await postTechnicalDocumentation(orgId, {
-        diagram: diagramFile,
-        securityPolicy: securityFile,
-        certifications: certificationFile,
-        processDocumentation: processFile,
+        diagram: tf.diagram ? undefined : diagramFile ?? undefined,
+        securityPolicy: tf.securityPolicy ? undefined : securityFile ?? undefined,
+        certifications: tf.certifications ? undefined : certificationFile ?? undefined,
+        processDocumentation: tf.processDocumentation ? undefined : processFile ?? undefined,
       });
       setSuccessDocs(true);
       notifyOnboardingStatusUpdated();
@@ -288,8 +321,12 @@ export function TechnicalDocumentationPageContent() {
     }
   };
 
-  const canSubmit =
-    Boolean(diagramFile || securityFile || certificationFile || processFile);
+  const canSubmit = Boolean(
+    (!tf.diagram && diagramFile) ||
+      (!tf.securityPolicy && securityFile) ||
+      (!tf.certifications && certificationFile) ||
+      (!tf.processDocumentation && processFile),
+  );
 
   return (
     <div className="mx-auto w-full max-w-[1080px]">
@@ -315,6 +352,11 @@ export function TechnicalDocumentationPageContent() {
             Cargue la documentación técnica requerida para la integración.
             Asegúrese de que todos los documentos estén completos y
             actualizados.
+            {percents.technical != null && (
+              <span className="mt-1 block tabular-nums">
+                Progreso del módulo: {percents.technical}%
+              </span>
+            )}
           </div>
         </div>
 
@@ -332,6 +374,7 @@ export function TechnicalDocumentationPageContent() {
           }
           file={diagramFile}
           onFileChange={setDiagramFile}
+          locked={!statusLoading && tf.diagram}
         />
 
         {/* Politica de seguridad */}
@@ -343,6 +386,7 @@ export function TechnicalDocumentationPageContent() {
           }
           file={securityFile}
           onFileChange={setSecurityFile}
+          locked={!statusLoading && tf.securityPolicy}
         />
 
         <div className="my-8 border-t border-stroke dark:border-strokedark"></div>
@@ -350,6 +394,12 @@ export function TechnicalDocumentationPageContent() {
         <h3 className="mb-4 text-base font-medium text-black dark:text-white">
           Ambientes de desarrollo
         </h3>
+
+        {!statusLoading && tf.developmentEnvironmentsLocked && (
+          <p className="mb-3 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+            Datos de ambientes de desarrollo ya guardados. No puedes editarlos desde aquí salvo indicación del equipo.
+          </p>
+        )}
 
         <div className="mb-4">
           <label className="mb-2.5 block text-sm font-medium text-black dark:text-white">
@@ -360,7 +410,8 @@ export function TechnicalDocumentationPageContent() {
             placeholder="Ingrese las URLs de los ambientes de desarrollo..."
             value={sandboxUrls}
             onChange={(e) => setSandboxUrls(e.target.value)}
-            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+            disabled={!statusLoading && tf.developmentEnvironmentsLocked}
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:opacity-70 dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
           ></textarea>
         </div>
 
@@ -373,7 +424,8 @@ export function TechnicalDocumentationPageContent() {
             placeholder="Ingrese las API Keys de desarrollo..."
             value={apiKeys}
             onChange={(e) => setApiKeys(e.target.value)}
-            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
+            disabled={!statusLoading && tf.developmentEnvironmentsLocked}
+            className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:opacity-70 dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
           ></textarea>
         </div>
 
@@ -393,7 +445,7 @@ export function TechnicalDocumentationPageContent() {
             label={savingDev ? "Guardando…" : "Guardar información de desarrollo"}
             variant="primary"
             onClick={handleSaveSandbox}
-            disabled={savingDev}
+            disabled={savingDev || (!statusLoading && tf.developmentEnvironmentsLocked)}
             className="w-full sm:w-auto !bg-[#004196] hover:!bg-[#004196]/90 disabled:opacity-60"
             shape="rounded"
           />
@@ -414,6 +466,7 @@ export function TechnicalDocumentationPageContent() {
             }
             file={certificationFile}
             onFileChange={setCertificationFile}
+            locked={!statusLoading && tf.certifications}
           />
           <p className="text-sm text-[#6B7280] -mt-4 mb-4">
             Adjuntar certificaciones (Ejemplo: PCI DSS, etc.)
@@ -433,6 +486,7 @@ export function TechnicalDocumentationPageContent() {
             }
             file={processFile}
             onFileChange={setProcessFile}
+            locked={!statusLoading && tf.processDocumentation}
           />
         </div>
 
@@ -458,7 +512,7 @@ export function TechnicalDocumentationPageContent() {
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
                 : "!bg-[#004196] hover:!bg-[#004196]/90"
             }`}
-            disabled={!canSubmit || submittingDocs}
+            disabled={!canSubmit || submittingDocs || statusLoading}
             shape="rounded"
           />
         </div>

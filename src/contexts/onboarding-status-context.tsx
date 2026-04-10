@@ -12,12 +12,14 @@ import {
 import {
   getCurrentOrganizationId,
   getOnboardingStatus,
-  parseOnboardingStatusPayload,
+  parseOnboardingStatusFull,
+  type OnboardingModuleFlags,
   type OnboardingSectionPercents,
 } from "@/lib/onboarding-api";
 
 type OnboardingStatusContextValue = {
   percents: OnboardingSectionPercents;
+  flags: OnboardingModuleFlags;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -29,10 +31,23 @@ const defaultPercents: OnboardingSectionPercents = {
   technical: null,
 };
 
+const defaultFlags: OnboardingModuleFlags = {
+  kybLocked: false,
+  amlLocked: false,
+  technical: {
+    diagram: false,
+    securityPolicy: false,
+    certifications: false,
+    processDocumentation: false,
+    developmentEnvironmentsLocked: false,
+  },
+};
+
 const OnboardingStatusContext = createContext<OnboardingStatusContextValue | null>(null);
 
 export function OnboardingStatusProvider({ children }: { children: ReactNode }) {
   const [percents, setPercents] = useState<OnboardingSectionPercents>(defaultPercents);
+  const [flags, setFlags] = useState<OnboardingModuleFlags>(defaultFlags);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +55,7 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
     const orgId = getCurrentOrganizationId();
     if (!orgId) {
       setPercents(defaultPercents);
+      setFlags(defaultFlags);
       setLoading(false);
       setError(null);
       return;
@@ -48,9 +64,12 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
     setError(null);
     try {
       const raw = await getOnboardingStatus(orgId);
-      setPercents(parseOnboardingStatusPayload(raw));
+      const { percents: p, flags: f } = parseOnboardingStatusFull(raw);
+      setPercents(p);
+      setFlags(f);
     } catch {
       setPercents(defaultPercents);
+      setFlags(defaultFlags);
       setError(null);
     } finally {
       setLoading(false);
@@ -70,8 +89,8 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
   }, [refresh]);
 
   const value = useMemo(
-    () => ({ percents, loading, error, refresh }),
-    [percents, loading, error, refresh]
+    () => ({ percents, flags, loading, error, refresh }),
+    [percents, flags, loading, error, refresh]
   );
 
   return (
@@ -84,6 +103,7 @@ export function useOnboardingStatus(): OnboardingStatusContextValue {
   if (!ctx) {
     return {
       percents: defaultPercents,
+      flags: defaultFlags,
       loading: false,
       error: null,
       refresh: async () => {},

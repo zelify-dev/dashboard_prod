@@ -4,7 +4,12 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Button } from "@/components/ui-elements/button";
 import { useState } from "react";
 import { AuthError } from "@/lib/auth-api";
+import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
+import { cn } from "@/lib/utils";
 import { getCurrentOrganizationId, notifyOnboardingStatusUpdated, postKybFiles } from "@/lib/onboarding-api";
+
+/** Subida KYB desde esta pantalla desactivada (p. ej. canal Docsend). Pasar a `true` para permitir envío. */
+const KYB_DASHBOARD_UPLOAD_ENABLED = false;
 
 function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -128,6 +133,9 @@ function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function KybPageContent() {
+  const { flags, loading: statusLoading, percents } = useOnboardingStatus();
+  const locked = !statusLoading && flags.kybLocked;
+
   const [file, setFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +150,7 @@ export function KybPageContent() {
   };
 
   const handleSubmit = async () => {
+    if (!KYB_DASHBOARD_UPLOAD_ENABLED || locked) return;
     const orgId = getCurrentOrganizationId();
     if (!orgId || !file) return;
     setSubmitting(true);
@@ -182,6 +191,19 @@ export function KybPageContent() {
               que todos los documentos estén legibles y sean archivos válidos.
             </div>
           </div>
+
+          {locked && (
+            <div
+              className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100"
+              role="status"
+            >
+              <span className="font-semibold">Documentación KYB ya enviada.</span>{" "}
+              {percents.kyb != null && (
+                <span className="tabular-nums">Progreso: {percents.kyb}%.</span>
+              )}{" "}
+              No puedes subir otro archivo desde aquí salvo que el equipo te lo indique.
+            </div>
+          )}
 
           <h3 className="mb-4 text-base font-medium text-black dark:text-white">
             Documentación requerida
@@ -256,11 +278,19 @@ export function KybPageContent() {
             Cargar documentación KYB (archivo ZIP)
           </label>
 
-          <div className="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 hover:bg-gray-50 dark:border-strokedark dark:hover:bg-boxdark-2">
+          <div
+            className={cn(
+              "relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 dark:border-strokedark",
+              locked || !KYB_DASHBOARD_UPLOAD_ENABLED
+                ? "cursor-not-allowed bg-gray-50/80 opacity-70 dark:bg-boxdark/50"
+                : "hover:bg-gray-50 dark:hover:bg-boxdark-2",
+            )}
+          >
             <input
               type="file"
               onChange={handleFileChange}
-              className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0"
+              disabled={locked || !KYB_DASHBOARD_UPLOAD_ENABLED}
+              className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
               accept=".zip,.rar,.7z"
             />
 
@@ -316,13 +346,21 @@ export function KybPageContent() {
             variant="primary"
             onClick={handleSubmit}
             className={`w-full sm:w-auto ${
-              !file || submitting
+              !KYB_DASHBOARD_UPLOAD_ENABLED || !file || submitting
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
                 : "!bg-[#004196] hover:!bg-[#004196]/90"
             }`}
-            disabled={!file || submitting}
+            disabled={
+              !KYB_DASHBOARD_UPLOAD_ENABLED || locked || !file || submitting
+            }
             shape="rounded"
           />
+          {!KYB_DASHBOARD_UPLOAD_ENABLED && (
+            <p className="mt-2 text-xs text-body-color dark:text-body-color-dark">
+              La carga de KYB desde el dashboard está desactivada; usa el canal indicado por el equipo
+              (p. ej. Docsend).
+            </p>
+          )}
         </div>
       </div>
     </div>

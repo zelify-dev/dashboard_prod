@@ -146,6 +146,7 @@ export type UiTranslations = {
       response: string;
       payload: string;
       emptyTitle: string;
+      emptySubtitle: string;
       prodShort: string;
       sandboxShort: string;
     };
@@ -943,6 +944,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         response: "Respuesta",
         payload: "Payload",
         emptyTitle: "No se encontraron logs, prueba con otros filtros",
+        emptySubtitle:
+          "Solo conservamos logs de los últimos 14 días. Prueba otros filtros.",
         prodShort: "Prod",
         sandboxShort: "Sandbox",
       },
