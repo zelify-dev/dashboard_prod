@@ -28,8 +28,8 @@ const COLORS = {
   errorBorder: "#dd2f2c",
 } as const;
 
-// Orden fijo: US, EC, MX, CO, CL (las etiquetas van en TRANSLATIONS)
-const COUNTRY_CODES = ["US", "EC", "MX", "CO", "CL"] as const;
+// Orden fijo: US, EC, MX, CO, CL, VE (las etiquetas van en TRANSLATIONS)
+const COUNTRY_CODES = ["US", "EC", "MX", "CO", "CL", "VE"] as const;
 
 const INDUSTRY_OPTIONS = [
   "fintech",
@@ -71,8 +71,8 @@ const TRANSLATIONS = {
     placeholderFullName: "John Smith",
     placeholderEmail: "admin@company.com",
     placeholderPassword: "Min. 8 characters",
-    // Countries (order: US, EC, MX, CO, CL)
-    countries: { US: "United States", EC: "Ecuador", MX: "Mexico", CO: "Colombia", CL: "Chile" } as Record<string, string>,
+    // Countries (order: US, EC, MX, CO, CL, VE)
+    countries: { US: "United States", EC: "Ecuador", MX: "Mexico", CO: "Colombia", CL: "Chile", VE: "Venezuela" } as Record<string, string>,
     // Industries (solo 4 opciones)
     industries: { fintech: "Fintech", banking: "Banking", neobank: "Neobank", cooperative: "Cooperative", other: "Other" } as Record<string, string>,
   },
@@ -106,7 +106,7 @@ const TRANSLATIONS = {
     placeholderFullName: "Xavier Hernandez",
     placeholderEmail: "admin@empresa.com",
     placeholderPassword: "Mín. 8 caracteres",
-    countries: { US: "Estados Unidos", EC: "Ecuador", MX: "México", CO: "Colombia", CL: "Chile" } as Record<string, string>,
+    countries: { US: "Estados Unidos", EC: "Ecuador", MX: "México", CO: "Colombia", CL: "Chile", VE: "Venezuela" } as Record<string, string>,
     industries: { fintech: "Fintech", banking: "Banca", neobank: "Neobanco", cooperative: "Cooperativa", other: "Otro" } as Record<string, string>,
   },
 };
