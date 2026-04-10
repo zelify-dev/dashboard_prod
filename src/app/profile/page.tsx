@@ -11,10 +11,10 @@ import { useLanguage } from "@/contexts/language-context";
 
 
 const COUNTRY_LABELS: Record<string, string> = {
-  US: "United States", EC: "Ecuador", MX: "Mexico", CO: "Colombia", CL: "Chile",
+  US: "United States", EC: "Ecuador", MX: "Mexico", CO: "Colombia", CL: "Chile", VE: "Venezuela",
 };
 const COUNTRY_LABELS_ES: Record<string, string> = {
-  US: "Estados Unidos", EC: "Ecuador", MX: "México", CO: "Colombia", CL: "Chile",
+  US: "Estados Unidos", EC: "Ecuador", MX: "México", CO: "Colombia", CL: "Chile", VE: "Venezuela",
 };
 const INDUSTRY_LABELS: Record<string, string> = {
   fintech: "Fintech", banking: "Banking", neobank: "Neobank", cooperative: "Cooperative", other: "Other",

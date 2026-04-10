@@ -39,6 +39,7 @@ const MODAL_TRANSLATIONS = {
       cl: "Chile",
       pe: "Peru",
       ec: "Ecuador",
+      ve: "Venezuela",
     },
     successTitle: "Request Sent",
     successMessage:
@@ -72,6 +73,7 @@ const MODAL_TRANSLATIONS = {
       cl: "Chile",
       pe: "Perú",
       ec: "Ecuador",
+      ve: "Venezuela",
     },
     successTitle: "Solicitud Enviada",
     successMessage:
@@ -89,6 +91,7 @@ const COUNTRIES = [
   { value: "cl", label: "cl" },
   { value: "pe", label: "pe" },
   { value: "ec", label: "ec" },
+  { value: "ve", label: "ve" },
 ];
 
 export default function RequestCredentialsModal({
