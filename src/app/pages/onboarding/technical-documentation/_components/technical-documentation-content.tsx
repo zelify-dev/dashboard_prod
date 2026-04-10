@@ -369,37 +369,6 @@ export function TechnicalDocumentationPageContent() {
         </div>
 
         <h3 className="mb-4 text-base font-medium text-black dark:text-white">
-          Documentos requeridos
-        </h3>
-
-        {/* Diagrama de flujo */}
-        <FileUploadArea
-          label="Diagrama de flujo de datos"
-          subLabel="ZIP"
-          accept=".pdf,.doc,.docx,.zip"
-          icon={
-            <FlowChartIcon className="text-[#9CA3AF] dark:text-body-color-dark" />
-          }
-          file={diagramFile}
-          onFileChange={setDiagramFile}
-          locked={!statusLoading && tf.diagram}
-        />
-
-        {/* Politica de seguridad */}
-        <FileUploadArea
-          label="Política de seguridad"
-          accept=".pdf,.doc,.docx" // Image says max 20MB
-          icon={
-            <LockIcon className="text-[#9CA3AF] dark:text-body-color-dark" />
-          }
-          file={securityFile}
-          onFileChange={setSecurityFile}
-          locked={!statusLoading && tf.securityPolicy}
-        />
-
-        <div className="my-8 border-t border-stroke dark:border-strokedark"></div>
-
-        <h3 className="mb-4 text-base font-medium text-black dark:text-white">
           Ambientes de desarrollo
         </h3>
 
@@ -458,6 +427,37 @@ export function TechnicalDocumentationPageContent() {
             shape="rounded"
           />
         </div>
+
+        <div className="my-8 border-t border-stroke dark:border-strokedark"></div>
+
+        <h3 className="mb-4 text-base font-medium text-black dark:text-white">
+          Documentos requeridos
+        </h3>
+
+        {/* Diagrama de flujo */}
+        <FileUploadArea
+          label="Diagrama de flujo de datos"
+          subLabel="ZIP"
+          accept=".pdf,.doc,.docx,.zip"
+          icon={
+            <FlowChartIcon className="text-[#9CA3AF] dark:text-body-color-dark" />
+          }
+          file={diagramFile}
+          onFileChange={setDiagramFile}
+          locked={!statusLoading && tf.diagram}
+        />
+
+        {/* Politica de seguridad */}
+        <FileUploadArea
+          label="Política de seguridad"
+          accept=".pdf,.doc,.docx" // Image says max 20MB
+          icon={
+            <LockIcon className="text-[#9CA3AF] dark:text-body-color-dark" />
+          }
+          file={securityFile}
+          onFileChange={setSecurityFile}
+          locked={!statusLoading && tf.securityPolicy}
+        />
 
         <div className="my-8 border-t border-stroke dark:border-strokedark"></div>
 
