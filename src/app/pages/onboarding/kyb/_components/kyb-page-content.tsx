@@ -3,6 +3,8 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Button } from "@/components/ui-elements/button";
 import { useState } from "react";
+import { AuthError } from "@/lib/auth-api";
+import { getCurrentOrganizationId, notifyOnboardingStatusUpdated, postKybFiles } from "@/lib/onboarding-api";
 
 function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -127,10 +129,38 @@ function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function KybPageContent() {
   const [file, setFile] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+      setError(null);
+      setSuccess(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    const orgId = getCurrentOrganizationId();
+    if (!orgId || !file) return;
+    setSubmitting(true);
+    setError(null);
+    setSuccess(false);
+    try {
+      await postKybFiles(orgId, file);
+      setSuccess(true);
+      notifyOnboardingStatusUpdated();
+    } catch (e) {
+      const msg =
+        e instanceof AuthError
+          ? e.message
+          : e instanceof Error
+            ? e.message
+            : "No se pudo enviar el archivo";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -269,16 +299,28 @@ export function KybPageContent() {
           </div>
         </div>
 
+        {error && (
+          <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="mt-4 text-sm text-green-600 dark:text-green-400">
+            Documentación KYB enviada correctamente.
+          </p>
+        )}
+
         <div className="mt-8">
           <Button
-            label="Enviar documentación KYB"
+            label={submitting ? "Enviando…" : "Enviar documentación KYB"}
             variant="primary"
+            onClick={handleSubmit}
             className={`w-full sm:w-auto ${
-              !file
+              !file || submitting
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
                 : "!bg-[#004196] hover:!bg-[#004196]/90"
             }`}
-            disabled={!file}
+            disabled={!file || submitting}
             shape="rounded"
           />
         </div>

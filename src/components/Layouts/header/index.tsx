@@ -11,7 +11,7 @@ import { MenuIcon } from "./icons";
 import { LanguageToggleSwitch } from "./language-toggle";
 // import { ThemeToggleSwitch } from "./theme-toggle";
 import { UserInfo } from "./user-info";
-import { useTour } from "@/contexts/tour-context";
+import { TOUR_FEATURE_ENABLED, useTour } from "@/contexts/tour-context";
 
 export function Header() {
   const { toggleSidebar, isMobile } = useSidebarContext();
@@ -58,12 +58,15 @@ export function Header() {
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-2 min-[375px]:gap-4">
-        <button
-          onClick={openModal}
-          className="rounded-lg border border-stroke bg-white px-3.5 py-1.5 text-xs font-bold text-dark transition-all hover:bg-gray-2 dark:border-stroke-dark dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
-        >
-          Tour
-        </button>
+        {TOUR_FEATURE_ENABLED && (
+          <button
+            type="button"
+            onClick={openModal}
+            className="rounded-lg border border-stroke bg-white px-3.5 py-1.5 text-xs font-bold text-dark transition-all hover:bg-gray-2 dark:border-stroke-dark dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+          >
+            Tour
+          </button>
+        )}
         <div className="relative w-full max-w-[300px]">
           <input
             type="search"
