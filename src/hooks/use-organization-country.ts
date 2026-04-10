@@ -13,6 +13,7 @@ export function toCountryCode(country: string | undefined): string | null {
   if (n === "co" || n === "colombia") return "CO";
   if (n === "cl" || n === "chile") return "CL";
   if (n === "pe" || n === "peru" || n === "perú") return "PE";
+  if (n === "ve" || n === "venezuela") return "VE";
   if (n === "us" || n === "united states" || n === "estados unidos") return "US";
   return null;
 }
@@ -25,6 +26,7 @@ export function countryCodeToName(code: string): string {
     CO: "Colombia",
     CL: "Chile",
     PE: "Peru",
+    VE: "Venezuela",
     US: "United States",
   };
   return names[code] ?? code;
