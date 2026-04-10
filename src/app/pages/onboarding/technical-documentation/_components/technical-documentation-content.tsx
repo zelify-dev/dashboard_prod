@@ -2,7 +2,7 @@
 
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Button } from "@/components/ui-elements/button";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthError } from "@/lib/auth-api";
 import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
 import { cn } from "@/lib/utils";
@@ -232,8 +232,9 @@ function FileUploadArea({
 }
 
 export function TechnicalDocumentationPageContent() {
-  const { flags, loading: statusLoading, percents } = useOnboardingStatus();
+  const { flags, loading: statusLoading, percents, developmentEnvironments } = useOnboardingStatus();
   const tf = flags.technical;
+  const devEnvHydratedRef = useRef(false);
 
   const [diagramFile, setDiagramFile] = useState<File | null>(null);
   const [securityFile, setSecurityFile] = useState<File | null>(null);
@@ -249,6 +250,13 @@ export function TechnicalDocumentationPageContent() {
   const [errorDocs, setErrorDocs] = useState<string | null>(null);
   const [successDev, setSuccessDev] = useState(false);
   const [successDocs, setSuccessDocs] = useState(false);
+
+  useEffect(() => {
+    if (statusLoading || devEnvHydratedRef.current || !developmentEnvironments) return;
+    setSandboxUrls(developmentEnvironments.development_urls);
+    setApiKeys(developmentEnvironments.api_keys);
+    devEnvHydratedRef.current = true;
+  }, [statusLoading, developmentEnvironments]);
 
   const handleSaveSandbox = async () => {
     if (!statusLoading && tf.developmentEnvironmentsLocked) {

@@ -60,11 +60,45 @@ function docSlotUploaded(obj: Record<string, unknown>, key: string): boolean {
 /** Ambientes de desarrollo: hay datos guardados si URLs, keys o updated_at. */
 function developmentEnvironmentsHasData(de: Record<string, unknown>): boolean {
   const urls = de.development_urls;
+  if (typeof urls === "string" && urls.trim().length > 0) return true;
+  /** Respuestas antiguas: jsonb array */
   if (Array.isArray(urls) && urls.length > 0) return true;
-  const keys = de.development_api_keys;
+  const keys = de.development_api_keys ?? de.api_keys;
   if (typeof keys === "string" && keys.trim().length > 0) return true;
   if (de.updated_at != null && de.updated_at !== "") return true;
   return false;
+}
+
+/** Valores de GET status para textareas (URLs y keys como string). */
+export type ParsedDevelopmentEnvironments = {
+  development_urls: string;
+  api_keys: string;
+};
+
+/**
+ * Lee `development_environments` del GET .../onboarding/status.
+ * `development_urls` es texto libre (una URL por línea); legacy: array → se une con \\n.
+ * Claves: `development_api_keys` o alias `api_keys`.
+ */
+export function parseDevelopmentEnvironmentsFromStatus(
+  data: Record<string, unknown>
+): ParsedDevelopmentEnvironments | null {
+  const de = data.development_environments;
+  if (!de || typeof de !== "object") return null;
+  const o = de as Record<string, unknown>;
+
+  let development_urls = "";
+  const rawUrls = o.development_urls;
+  if (typeof rawUrls === "string") development_urls = rawUrls;
+  else if (Array.isArray(rawUrls)) {
+    development_urls = rawUrls.filter((u): u is string => typeof u === "string").join("\n");
+  }
+
+  let api_keys = "";
+  const rawKeys = o.development_api_keys ?? o.api_keys;
+  if (typeof rawKeys === "string") api_keys = rawKeys;
+
+  return { development_urls, api_keys };
 }
 
 /**
@@ -310,10 +344,12 @@ export function parseOnboardingModuleFlags(
 export function parseOnboardingStatusFull(data: Record<string, unknown>): {
   percents: OnboardingSectionPercents;
   flags: OnboardingModuleFlags;
+  developmentEnvironments: ParsedDevelopmentEnvironments | null;
 } {
   const percents = parseOnboardingStatusPayload(data);
   const flags = parseOnboardingModuleFlags(data, percents);
-  return { percents, flags };
+  const developmentEnvironments = parseDevelopmentEnvironmentsFromStatus(data);
+  return { percents, flags, developmentEnvironments };
 }
 
 /** URL del ítem del sidebar → clave de porcentaje (no aplica a soporte). */
@@ -408,10 +444,12 @@ export async function postTechnicalDocumentation(
 }
 
 export type DevelopmentEnvironmentsPayload = {
-  /** URLs de desarrollo (texto libre o una por línea) */
+  /** URLs de desarrollo (texto libre: una por línea o un bloque) */
   development_urls?: string;
-  /** API keys de desarrollo */
+  /** Alias aceptado por el backend (mismo valor que development_api_keys) */
   api_keys?: string;
+  /** Nombre canónico en API; si envías ambos, prioriza este en el servidor */
+  development_api_keys?: string;
 };
 
 /** PUT /api/organizations/:organizationId/onboarding/development-environments */

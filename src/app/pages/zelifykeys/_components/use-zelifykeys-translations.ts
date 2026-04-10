@@ -41,11 +41,6 @@ type ZelifyKeysTranslations = {
     title: string;
     requestAccess: string;
   };
-  secureKeysInfo: {
-    title: string;
-    description: string;
-    viewDocumentation: string;
-  };
   data: {
     title: string;
     description: string;
@@ -94,11 +89,6 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
       title: "Production Secret",
       requestAccess: "Request access",
     },
-    secureKeysInfo: {
-      title: "Discover how Zelify creates and manages your keys",
-      description: "Want to learn more about how Zelify creates and manages your keys? Click the button below.",
-      viewDocumentation: "View documentation",
-    },
     data: {
       title: "Copy all your access data",
       description: "Need to save or share your credentials? Click the button below to copy all access data (Key Name and Secret Key) in JSON format to your clipboard.",
@@ -144,11 +134,6 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
     production: {
       title: "Secreto de Producción",
       requestAccess: "Solicitar acceso",
-    },
-    secureKeysInfo: {
-      title: "Descubre cómo Zelify crea y gestiona tus claves",
-      description: "¿Quieres saber más sobre cómo Zelify crea y gestiona tus claves? Haz clic en el botón de abajo.",
-      viewDocumentation: "Ver documentación",
     },
     data: {
       title: "Copiar todos tus datos de acceso",

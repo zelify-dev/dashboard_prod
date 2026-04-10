@@ -15,11 +15,14 @@ import {
   parseOnboardingStatusFull,
   type OnboardingModuleFlags,
   type OnboardingSectionPercents,
+  type ParsedDevelopmentEnvironments,
 } from "@/lib/onboarding-api";
 
 type OnboardingStatusContextValue = {
   percents: OnboardingSectionPercents;
   flags: OnboardingModuleFlags;
+  /** Texto de URLs y API keys desde GET status (strings); null si no hay bloque o sin org */
+  developmentEnvironments: ParsedDevelopmentEnvironments | null;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -43,11 +46,16 @@ const defaultFlags: OnboardingModuleFlags = {
   },
 };
 
+const defaultDevelopmentEnvironments: ParsedDevelopmentEnvironments | null = null;
+
 const OnboardingStatusContext = createContext<OnboardingStatusContextValue | null>(null);
 
 export function OnboardingStatusProvider({ children }: { children: ReactNode }) {
   const [percents, setPercents] = useState<OnboardingSectionPercents>(defaultPercents);
   const [flags, setFlags] = useState<OnboardingModuleFlags>(defaultFlags);
+  const [developmentEnvironments, setDevelopmentEnvironments] = useState<ParsedDevelopmentEnvironments | null>(
+    defaultDevelopmentEnvironments
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +64,7 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
     if (!orgId) {
       setPercents(defaultPercents);
       setFlags(defaultFlags);
+      setDevelopmentEnvironments(defaultDevelopmentEnvironments);
       setLoading(false);
       setError(null);
       return;
@@ -64,12 +73,14 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
     setError(null);
     try {
       const raw = await getOnboardingStatus(orgId);
-      const { percents: p, flags: f } = parseOnboardingStatusFull(raw);
+      const { percents: p, flags: f, developmentEnvironments: de } = parseOnboardingStatusFull(raw);
       setPercents(p);
       setFlags(f);
+      setDevelopmentEnvironments(de);
     } catch {
       setPercents(defaultPercents);
       setFlags(defaultFlags);
+      setDevelopmentEnvironments(defaultDevelopmentEnvironments);
       setError(null);
     } finally {
       setLoading(false);
@@ -89,8 +100,8 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
   }, [refresh]);
 
   const value = useMemo(
-    () => ({ percents, flags, loading, error, refresh }),
-    [percents, flags, loading, error, refresh]
+    () => ({ percents, flags, developmentEnvironments, loading, error, refresh }),
+    [percents, flags, developmentEnvironments, loading, error, refresh]
   );
 
   return (
@@ -104,6 +115,7 @@ export function useOnboardingStatus(): OnboardingStatusContextValue {
     return {
       percents: defaultPercents,
       flags: defaultFlags,
+      developmentEnvironments: defaultDevelopmentEnvironments,
       loading: false,
       error: null,
       refresh: async () => {},

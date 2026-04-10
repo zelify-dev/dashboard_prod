@@ -4,7 +4,6 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ClientIdSection } from "./client-id";
 import { ZelifySecretsSandbox } from "./zelify-secrets-sandbox";
 import { ProductionSection } from "./production";
-import { SecureKeysInfo } from "./secure-keys-info";
 import { DataSection } from "./data";
 import { useZelifyKeysTranslations } from "./use-zelifykeys-translations";
 import { ZelifyKeysDataProvider } from "./zelify-keys-data-context";
@@ -29,8 +28,6 @@ export function ZelifyKeysPageContent() {
           <ProductionSection />
         </div>
         <div className="lg:col-span-1">
-          <SecureKeysInfo />
-          <hr className="my-4 border-t border-stroke dark:border-dark-3" />
           <DataSection />
         </div>
       </div>
