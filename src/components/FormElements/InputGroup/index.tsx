@@ -15,6 +15,8 @@ type InputGroupProps = {
   name?: string;
   icon?: React.ReactNode;
   iconPosition?: "left" | "right";
+  /** Contenido a la derecha del input (p. ej. botón ojito para contraseña). */
+  endAdornment?: React.ReactNode;
   height?: "sm" | "default";
   defaultValue?: string;
   customInputClassName?: string;
@@ -31,12 +33,16 @@ const InputGroup: React.FC<InputGroupProps> = ({
   handleChange,
   icon,
   iconPosition,
+  endAdornment,
   height,
   fileStyleVariant,
   customInputClassName,
   ...restProps
 }) => {
   const id = useId();
+  const iconOnLeft = iconPosition === "left";
+  const iconOnRight = Boolean(icon) && !iconOnLeft;
+  const hasEnd = Boolean(endAdornment);
 
   return (
     <div className={className}>
@@ -59,7 +65,14 @@ const InputGroup: React.FC<InputGroupProps> = ({
             type === "file"
               ? getFileStyles(fileStyleVariant!)
               : "px-5.5 py-3 text-dark placeholder:text-dark-6 dark:text-white",
-            iconPosition === "left" ? "pl-12.5" : "pr-12.5",
+            type !== "file" && iconOnLeft && "pl-12.5",
+            type !== "file" &&
+              iconOnRight &&
+              !hasEnd &&
+              "pr-12.5",
+            type !== "file" && iconOnRight && hasEnd && "pr-[4.25rem]",
+            type !== "file" && iconOnLeft && hasEnd && "pr-11",
+            type !== "file" && !icon && hasEnd && "pr-11",
             height === "sm" && "py-2.5",
             customInputClassName
           )}
@@ -72,12 +85,15 @@ const InputGroup: React.FC<InputGroupProps> = ({
         {icon && (
           <span
             className={cn(
-              "absolute top-1/2 -translate-y-1/2 text-dark-5",
-              iconPosition === "left" ? "left-4.5" : "right-4.5",
+              "pointer-events-none absolute top-1/2 -translate-y-1/2 text-dark-5",
+              iconOnLeft ? "left-4.5" : "right-4.5",
             )}
           >
             {icon}
           </span>
+        )}
+        {endAdornment && (
+          <span className="absolute right-2 top-1/2 z-10 -translate-y-1/2 text-dark-5">{endAdornment}</span>
         )}
       </div>
     </div>
