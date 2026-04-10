@@ -1,6 +1,6 @@
 "use client";
 
-import { EmailIcon, PasswordIcon } from "@/assets/icons";
+import { EmailIcon, EyeClosedIcon, EyeOpenIcon, PasswordIcon } from "@/assets/icons";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -40,6 +40,8 @@ const TRANSLATIONS = {
     organizationIdPlaceholder: "b9b3b8c5-0bfe-4fb8-8f6b-0e2d9a6a9d11",
     reqOrganizationId: "Organization ID is required for this email.",
     organizationIdHelp: "This email belongs to multiple organizations. Enter the organization ID to continue.",
+    showPasswordAria: "Show password",
+    hidePasswordAria: "Hide password",
   },
   es: {
     welcome: "Bienvenido de nuevo",
@@ -69,6 +71,8 @@ const TRANSLATIONS = {
     organizationIdPlaceholder: "b9b3b8c5-0bfe-4fb8-8f6b-0e2d9a6a9d11",
     reqOrganizationId: "El ID de organización es obligatorio para este correo.",
     organizationIdHelp: "Este correo existe en múltiples organizaciones. Ingresa el ID de la organización para continuar.",
+    showPasswordAria: "Mostrar contraseña",
+    hidePasswordAria: "Ocultar contraseña",
   },
 };
 
@@ -242,6 +246,7 @@ export default function LoginPage() {
     organization_id: "",
   });
   const [requiresOrganizationId, setRequiresOrganizationId] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -596,7 +601,7 @@ export default function LoginPage() {
                       )}
 
                       <InputGroup
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         label={t.password}
                         className={`mb-5 [&_input]:py-[15px] ${
                           formErrors.password
@@ -608,6 +613,21 @@ export default function LoginPage() {
                         handleChange={handleChange}
                         value={data.password}
                         icon={<PasswordIcon />}
+                        iconPosition="left"
+                        endAdornment={
+                          <button
+                            type="button"
+                            aria-label={showPassword ? t.hidePasswordAria : t.showPasswordAria}
+                            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-md text-dark-5 outline-none transition hover:bg-gray-100 hover:text-dark dark:hover:bg-white/10 dark:hover:text-white"
+                            onClick={() => setShowPassword((v) => !v)}
+                          >
+                            {showPassword ? (
+                              <EyeClosedIcon className="opacity-90" />
+                            ) : (
+                              <EyeOpenIcon className="opacity-90" />
+                            )}
+                          </button>
+                        }
                         required
                       />
                       {formErrors.password && (
