@@ -146,7 +146,6 @@ export type UiTranslations = {
       response: string;
       payload: string;
       emptyTitle: string;
-      emptySubtitle: string;
       prodShort: string;
       sandboxShort: string;
     };

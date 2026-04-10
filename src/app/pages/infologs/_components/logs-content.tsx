@@ -268,9 +268,6 @@ export function LogsPageContent() {
                       <p className="mb-1 text-xs font-semibold text-dark dark:text-white sm:text-sm">
                         {t.table.emptyTitle}
                       </p>
-                      <p className="text-xs text-dark-6 dark:text-dark-6">
-                        {t.table.emptySubtitle}
-                      </p>
                     </div>
                   </TableCell>
                 </TableRow>
