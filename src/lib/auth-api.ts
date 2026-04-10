@@ -219,7 +219,8 @@ export function getCurrentSessionId(): string | null {
   }
 }
 
-/** Request genérico al API con Authorization Bearer. Si recibe 401, intenta refresh y reintenta una vez.
+/** Request genérico al API con Authorization Bearer. Si recibe 401 o 403 con sesión activa,
+ * intenta refresh y reintenta una vez.
  * Si el refresh falla (token inválido/sesión revocada), limpia la sesión y lanza AuthError para redirigir a login. */
 export async function fetchWithAuth(
   path: string,
@@ -240,7 +241,10 @@ export async function fetchWithAuth(
   }
   const fetcher = async () => {
     let res = await fetch(url, { ...options, headers });
-    if (res.status === 401) {
+    const shouldAttemptRefresh =
+      Boolean(token) && (res.status === 401 || res.status === 403);
+
+    if (shouldAttemptRefresh) {
       const refreshed = await refresh();
       if (refreshed) {
         const newToken = getAccessToken();
@@ -364,7 +368,7 @@ export async function refresh(): Promise<boolean> {
     body: JSON.stringify({ refresh_token: refreshToken }),
   });
   const data = await res.json().catch(() => ({}));
-  if (res.status !== 201 || !data.access_token || !data.refresh_token) {
+  if (!res.ok || !data.access_token || !data.refresh_token) {
     return false;
   }
   sessionStorage.setItem(k.ACCESS_TOKEN, data.access_token);

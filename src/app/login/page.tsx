@@ -36,6 +36,10 @@ const TRANSLATIONS = {
     verifying: "Verifying...",
     otpLabel: "Verification Code",
     reqOtp: "Verification code is required.",
+    organizationId: "Organization ID",
+    organizationIdPlaceholder: "b9b3b8c5-0bfe-4fb8-8f6b-0e2d9a6a9d11",
+    reqOrganizationId: "Organization ID is required for this email.",
+    organizationIdHelp: "This email belongs to multiple organizations. Enter the organization ID to continue.",
   },
   es: {
     welcome: "Bienvenido de nuevo",
@@ -61,6 +65,10 @@ const TRANSLATIONS = {
     verifying: "Verificando...",
     otpLabel: "Código de verificación",
     reqOtp: "El código de verificación es obligatorio.",
+    organizationId: "ID de organización",
+    organizationIdPlaceholder: "b9b3b8c5-0bfe-4fb8-8f6b-0e2d9a6a9d11",
+    reqOrganizationId: "El ID de organización es obligatorio para este correo.",
+    organizationIdHelp: "Este correo existe en múltiples organizaciones. Ingresa el ID de la organización para continuar.",
   },
 };
 
@@ -211,6 +219,7 @@ export default function LoginPage() {
   const [data, setData] = useState({
     email: "",
     password: "",
+    organization_id: "",
   });
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
@@ -238,14 +247,19 @@ export default function LoginPage() {
   const [formErrors, setFormErrors] = useState({
     email: "",
     password: "",
+    organization_id: "",
   });
+  const [requiresOrganizationId, setRequiresOrganizationId] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const t = TRANSLATIONS[language];
 
   /** Devuelve el mensaje de error para un campo (validación en tiempo real). */
-  const getFieldError = (name: "email" | "password", d: { email: string; password: string }): string => {
+  const getFieldError = (
+    name: "email" | "password" | "organization_id",
+    d: { email: string; password: string; organization_id: string }
+  ): string => {
     if (name === "email") {
       if (!d.email) return t.reqEmail;
       if (!d.email.includes("@") || !emailRegex.test(d.email)) return t.invalidEmail;
@@ -253,6 +267,10 @@ export default function LoginPage() {
     }
     if (name === "password") {
       return !d.password ? t.reqPassword : "";
+    }
+    if (name === "organization_id") {
+      if (requiresOrganizationId && !d.organization_id.trim()) return t.reqOrganizationId;
+      return "";
     }
     return "";
   };
@@ -293,7 +311,7 @@ export default function LoginPage() {
 
   const validateForm = () => {
     let isValid = true;
-    const newErrors = { email: "", password: "" };
+    const newErrors = { email: "", password: "", organization_id: "" };
 
     // Email validation
     if (!data.email) {
@@ -311,15 +329,24 @@ export default function LoginPage() {
       isValid = false;
     }
 
+    if (requiresOrganizationId && !data.organization_id.trim()) {
+      newErrors.organization_id = t.reqOrganizationId;
+      isValid = false;
+    }
+
     setFormErrors(newErrors);
     return isValid;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target as { name: "email" | "password"; value: string };
+    const { name, value } = e.target as { name: "email" | "password" | "organization_id"; value: string };
     const nextData = { ...data, [name]: value };
     setData(nextData);
     setError("");
+    if (name === "email" && requiresOrganizationId) {
+      setRequiresOrganizationId(false);
+      setFormErrors((prev) => ({ ...prev, organization_id: "" }));
+    }
     const fieldError = getFieldError(name, nextData);
     setFormErrors((prev) => ({ ...prev, [name]: fieldError }));
   };
@@ -346,11 +373,12 @@ export default function LoginPage() {
         return;
       }
 
-      try {
-        const result = await login({
-          email: data.email,
-          password: data.password,
-        });
+        try {
+          const result = await login({
+            email: data.email,
+            password: data.password,
+            organization_id: data.organization_id.trim() || undefined,
+          });
 
         // Caso bypass de OTP ( tokens directos )
         if ("access_token" in result || "accessToken" in result) {
@@ -375,11 +403,19 @@ export default function LoginPage() {
           return;
         }
 
-        setLoading(false);
-        setError((result as { message?: string }).message || t.incCreds);
-      } catch (err) {
-        handleAuthError(err);
-      }
+          setLoading(false);
+          const loginResult = result as { message?: string; organizations?: Array<{ id: string; name: string }> };
+          if (Array.isArray(loginResult.organizations) || loginResult.message?.includes("organization_id")) {
+            setRequiresOrganizationId(true);
+            setFormErrors((prev) => ({
+              ...prev,
+              organization_id: !data.organization_id.trim() ? t.reqOrganizationId : "",
+            }));
+          }
+          setError(loginResult.message || t.incCreds);
+        } catch (err) {
+          handleAuthError(err);
+        }
     } else {
       // Step 2: Verify OTP
       if (!otp) {
@@ -586,6 +622,33 @@ export default function LoginPage() {
                         <p className="mb-5 mt-[-15px] text-sm text-red-500">
                           {formErrors.password}
                         </p>
+                      )}
+
+                      {requiresOrganizationId && (
+                        <>
+                          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+                            {t.organizationIdHelp}
+                          </div>
+                          <InputGroup
+                            type="text"
+                            label={t.organizationId}
+                            className={`mb-4 [&_input]:py-[15px] ${
+                              formErrors.organization_id
+                                ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
+                                : ""
+                            }`}
+                            placeholder={t.organizationIdPlaceholder}
+                            name="organization_id"
+                            handleChange={handleChange}
+                            value={data.organization_id}
+                            required
+                          />
+                          {formErrors.organization_id && (
+                            <p className="mb-4 mt-[-10px] text-sm text-red-500">
+                              {formErrors.organization_id}
+                            </p>
+                          )}
+                        </>
                       )}
                     </>
                   ) : (
