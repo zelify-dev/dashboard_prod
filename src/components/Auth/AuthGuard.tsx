@@ -1,8 +1,8 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useState } from "react";
-import { getStoredUser } from "@/lib/auth-api";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { AuthError, clearAuthSession, getAccessToken, getMe, getStoredUser } from "@/lib/auth-api";
 import { ChangePasswordModal } from "@/components/Auth/ChangePasswordModal";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -10,6 +10,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const isValidatingRef = useRef(false);
+  const lastValidationRef = useRef(0);
 
   // Inicializar isMounted basado en si estamos en login o register (usar función de inicialización)
   const [isMounted, setIsMounted] = useState(() => {
@@ -35,6 +37,50 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   const isLoginPage = getIsLoginPage();
 
+  const validateActiveSession = async (force = false) => {
+    if (typeof window === "undefined" || isLoginPage) return;
+    if (isValidatingRef.current) return;
+
+    const auth = sessionStorage.getItem("isAuthenticated");
+    const token = getAccessToken();
+    if (auth !== "true" || !token) {
+      setIsAuthenticated(false);
+      setIsMounted(true);
+      if (pathname !== "/login" && pathname !== "/register") {
+        router.replace("/login");
+      }
+      return;
+    }
+
+    const now = Date.now();
+    if (!force && now - lastValidationRef.current < 15_000) {
+      return;
+    }
+
+    isValidatingRef.current = true;
+    try {
+      await getMe();
+      lastValidationRef.current = now;
+      setIsAuthenticated(true);
+      setIsMounted(true);
+    } catch (err) {
+      if (err instanceof AuthError && (err.statusCode === 401 || err.statusCode === 403)) {
+        clearAuthSession();
+        setIsAuthenticated(false);
+        setIsMounted(true);
+        router.replace("/login");
+        return;
+      }
+
+      // Si falla la red o hay un error no-auth, mantenemos la sesión local
+      // para no expulsar al usuario por un problema transitorio.
+      setIsAuthenticated(true);
+      setIsMounted(true);
+    } finally {
+      isValidatingRef.current = false;
+    }
+  };
+
   // Usar useLayoutEffect para ejecutar antes del render y evitar el flash del spinner
   useLayoutEffect(() => {
     if (isLoginPage) {
@@ -47,9 +93,10 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const checkAuth = () => {
       if (typeof window !== "undefined") {
         const auth = sessionStorage.getItem("isAuthenticated");
+        const token = getAccessToken();
 
         // Verificar si está autenticado en localStorage
-        if (auth === "true") {
+        if (auth === "true" && token) {
           // Usuario autenticado (demo o backend)
           setIsAuthenticated(true);
           setIsMounted(true);
@@ -57,6 +104,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           // Si está autenticado y está en login o register, redirigir al home
           if (pathname === "/login" || pathname === "/register") {
             router.replace("/");
+          } else {
+            void validateActiveSession(true);
           }
         } else {
           // No hay autenticación local
@@ -85,14 +134,30 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       checkAuth();
     };
 
+    const handleWindowFocus = () => {
+      if (pathname !== "/login" && pathname !== "/register") {
+        void validateActiveSession(true);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible" && pathname !== "/login" && pathname !== "/register") {
+        void validateActiveSession();
+      }
+    };
+
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("authchange", handleAuthChange);
+    window.addEventListener("focus", handleWindowFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("authchange", handleAuthChange);
+      window.removeEventListener("focus", handleWindowFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [pathname, router]);
+  }, [isLoginPage, pathname, router]);
 
   // Si está en login o register, permitir renderizar inmediatamente sin verificar autenticación
   // Esto debe ir ANTES de verificar isMounted para evitar el spinner
