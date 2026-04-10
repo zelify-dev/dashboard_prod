@@ -25,7 +25,7 @@ export function SimpleSelect({
 }: SimpleSelectProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [selectedValue, setSelectedValue] = useState<{ value: string; label: string } | null>(
-    value ? options.find(item => item.value === value) || null
+    value ? options.find(item => item.value === value) || { value, label: value }
     : defaultValue ? options.find(item => item.value === defaultValue) || null
     : null
   );
@@ -33,7 +33,7 @@ export function SimpleSelect({
   useEffect(() => {
     if (value !== undefined) {
       const option = options.find(item => item.value === value);
-      setSelectedValue(option || null);
+      setSelectedValue(option || (value ? { value, label: value } : null));
     }
   }, [value, options]);
 
@@ -139,4 +139,3 @@ export function SimpleSelect({
     </div>
   );
 }
-

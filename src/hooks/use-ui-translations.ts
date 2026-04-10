@@ -146,7 +146,6 @@ export type UiTranslations = {
       response: string;
       payload: string;
       emptyTitle: string;
-      emptySubtitle: string;
       prodShort: string;
       sandboxShort: string;
     };
@@ -519,7 +518,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       filters: {
         type: "Type",
         institution: "Institution",
-        environment: "Environment",
+        environment: "Sandbox",
         errorCodesPlaceholder: "Error Codes",
         resetAriaLabel: "Reset filters",
         resetTitle: "Reset all filters",
@@ -919,7 +918,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       filters: {
         type: "Tipo",
         institution: "Institución",
-        environment: "Ambiente",
+        environment: "Sandbox",
         errorCodesPlaceholder: "Códigos de error",
         resetAriaLabel: "Reiniciar filtros",
         resetTitle: "Reiniciar todos los filtros",
@@ -944,7 +943,6 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         response: "Respuesta",
         payload: "Payload",
         emptyTitle: "No se encontraron logs, prueba con otros filtros",
-        emptySubtitle: "Solo guardamos logs de los últimos 14 días. Prueba filtros diferentes.",
         prodShort: "Prod",
         sandboxShort: "Sandbox",
       },
