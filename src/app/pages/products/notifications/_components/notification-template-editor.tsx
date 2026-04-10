@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { cn } from "@/lib/utils";
 import { useLanguage, type Language } from "@/contexts/language-context";
+import { useUiTranslations } from "@/hooks/use-ui-translations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { isOrganizationOnboardingVerified } from "@/lib/auth-api";
 import {
   DEFAULT_NOTIFICATION_TEMPLATES,
   DEFAULT_TEMPLATE_GROUPS,
@@ -31,6 +34,38 @@ interface NotificationTemplateEditorProps {
 }
 
 export function NotificationTemplateEditor({ templateId }: NotificationTemplateEditorProps) {
+  const translations = useNotificationsTranslations();
+  const ui = useUiTranslations();
+  const { organization, loading: orgLoading } = useOrganizationCountry();
+  const canUseWebhooks = isOrganizationOnboardingVerified(organization);
+
+  if (orgLoading) {
+    return (
+      <div className="mx-auto w-full max-w-[1200px]">
+        <Breadcrumb pageName={translations.breadcrumb} />
+        <p className="text-sm text-dark-6 dark:text-dark-6">{ui.webhooksPage.loadingAccess}</p>
+      </div>
+    );
+  }
+
+  if (!canUseWebhooks) {
+    return (
+      <div className="mx-auto w-full max-w-[1200px]">
+        <Breadcrumb pageName={translations.breadcrumb} />
+        <div
+          role="status"
+          className="mt-4 rounded-lg border border-primary/25 bg-primary/10 px-4 py-3 text-sm text-dark dark:text-white/90 dark:border-primary/40 dark:bg-primary/15"
+        >
+          {ui.webhooksPage.lockedUntilOnboarding}
+        </div>
+      </div>
+    );
+  }
+
+  return <NotificationTemplateEditorInner templateId={templateId} />;
+}
+
+function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEditorProps) {
   const router = useRouter();
   const { language } = useLanguage();
   const translations = useNotificationsTranslations();

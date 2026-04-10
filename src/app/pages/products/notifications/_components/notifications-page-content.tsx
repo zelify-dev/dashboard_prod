@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
+import { useUiTranslations } from "@/hooks/use-ui-translations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { isOrganizationOnboardingVerified } from "@/lib/auth-api";
 import {
   DEFAULT_NOTIFICATION_TEMPLATES,
   DEFAULT_TEMPLATE_GROUPS,
@@ -78,6 +81,10 @@ export function NotificationsPageContent() {
   const { language } = useLanguage();
   const locale = language === "es" ? "es-ES" : "en-US";
   const translations = useNotificationsTranslations();
+  const ui = useUiTranslations();
+  const { organization, loading: orgLoading } = useOrganizationCountry();
+  const canUseWebhooks = isOrganizationOnboardingVerified(organization);
+  const locked = orgLoading || !canUseWebhooks;
 
   const [templates, setTemplates] = useState<NotificationTemplate[]>(DEFAULT_NOTIFICATION_TEMPLATES);
   const [groups, setGroups] = useState<TemplateGroup[]>(DEFAULT_TEMPLATE_GROUPS);
@@ -550,7 +557,19 @@ export function NotificationsPageContent() {
   return (
     <div className="mx-auto w-full max-w-[1150px] ">
       <Breadcrumb pageName={translations.breadcrumb} />
-      <div className="space-y-8">
+      {orgLoading && (
+        <p className="text-sm text-dark-6 dark:text-dark-6">{ui.webhooksPage.loadingAccess}</p>
+      )}
+      {!orgLoading && !canUseWebhooks && (
+        <div
+          role="status"
+          className="rounded-lg border border-primary/25 bg-primary/10 px-4 py-3 text-sm text-dark dark:text-white/90 dark:border-primary/40 dark:bg-primary/15"
+        >
+          {ui.webhooksPage.lockedUntilOnboarding}
+        </div>
+      )}
+
+      {!locked && <div className="space-y-8">
         <header className="rounded-3xl border border-stroke bg-gradient-to-r from-primary/5 via-sky-100 to-indigo-100 p-6 dark:border-dark-3 dark:from-primary/10 dark:via-slate-800 dark:to-slate-900">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
@@ -905,7 +924,7 @@ export function NotificationsPageContent() {
             </div>
           )}
         </section>
-      </div>
+      </div>}
     </div>
   );
 }
