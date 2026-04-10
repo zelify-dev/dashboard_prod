@@ -422,7 +422,7 @@ export async function postTechnicalDocumentation(
   files: TechnicalDocumentationFiles
 ): Promise<unknown> {
   const form = new FormData();
-  if (files.diagram) form.append("data_flow_diagram", files.diagram);
+  if (files.diagram) form.append("flow_diagram", files.diagram);
   if (files.securityPolicy) form.append("security_policy", files.securityPolicy);
   if (files.certifications) form.append("certifications", files.certifications);
   if (files.processDocumentation) form.append("process_documentation", files.processDocumentation);
