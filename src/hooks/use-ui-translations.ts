@@ -518,7 +518,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       filters: {
         type: "Type",
         institution: "Institution",
-        environment: "Environment",
+        environment: "Sandbox",
         errorCodesPlaceholder: "Error Codes",
         resetAriaLabel: "Reset filters",
         resetTitle: "Reset all filters",
@@ -917,7 +917,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       filters: {
         type: "Tipo",
         institution: "Institución",
-        environment: "Ambiente",
+        environment: "Sandbox",
         errorCodesPlaceholder: "Códigos de error",
         resetAriaLabel: "Reiniciar filtros",
         resetTitle: "Reiniciar todos los filtros",

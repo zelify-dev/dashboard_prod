@@ -209,12 +209,19 @@ export function LogsPageContent() {
         />
 
         <SimpleSelect
-          options={[
-            { value: "", label: t.filters.environment },
-            ...ENVIRONMENTS.map((env) => ({ value: env, label: environmentLabel(env) })),
-          ]}
+          options={
+            filters.environment
+              ? ([
+                  {
+                    value: filters.environment === "Sandbox" ? "Production" : "Sandbox",
+                    label: environmentLabel(filters.environment === "Sandbox" ? "Production" : "Sandbox"),
+                  },
+                ] as { value: string; label: string }[])
+              : ENVIRONMENTS.map((env) => ({ value: env, label: environmentLabel(env) }))
+          }
             value={filters.environment}
           onChange={(value) => { setFilters({ ...filters, environment: value }); setCurrentPage(1); }}
+          placeholder={t.filters.environment}
           className="min-w-[110px] sm:min-w-[130px]"
         />
 
