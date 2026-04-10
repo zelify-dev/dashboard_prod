@@ -16,9 +16,8 @@ export function formatLocal(
 ): string {
     if (!date) return "—";
 
-    // Check if we have language in localStorage to adjust locale
     if (typeof window !== "undefined") {
-        const lang = localStorage.getItem("preferredLanguage") === "es" ? "es" : "en";
+        const lang = localStorage.getItem("zelify-language") === "en" ? "en" : "es";
         dayjs.locale(lang);
     }
 

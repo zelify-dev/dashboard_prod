@@ -63,6 +63,8 @@ type QRTranslations = {
       urlHint: string;
       eventsLabel: string;
       eventsDescription: string;
+      lockedUntilOnboarding: string;
+      checkingOrg: string;
       events: {
         paymentSucceeded: {
           label: string;
@@ -157,6 +159,9 @@ const QR_TRANSLATIONS: Record<Language, QRTranslations> = {
         urlHint: "The URL where you will receive payment event notifications",
         eventsLabel: "Events to Notify",
         eventsDescription: "Select the events for which you want to receive notifications",
+        lockedUntilOnboarding:
+          "Webhooks stay off until your onboarding data is verified. Complete KYB / onboarding first.",
+        checkingOrg: "Checking organization…",
         events: {
           paymentSucceeded: {
             label: "Successful payment (payment.succeeded)",
@@ -249,6 +254,9 @@ const QR_TRANSLATIONS: Record<Language, QRTranslations> = {
         urlHint: "La URL donde recibirás las notificaciones de eventos de pago",
         eventsLabel: "Eventos a Notificar",
         eventsDescription: "Selecciona los eventos para los que deseas recibir notificaciones",
+        lockedUntilOnboarding:
+          "Los webhooks siguen desactivados hasta verificar tu onboarding. Completa KYB / onboarding antes.",
+        checkingOrg: "Comprobando organización…",
         events: {
           paymentSucceeded: {
             label: "Pago exitoso (payment.succeeded)",

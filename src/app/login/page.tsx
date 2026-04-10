@@ -218,15 +218,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [language, setLanguage] = useState<"en" | "es">("en");
-
-  // Load language preference (same key as dashboard: zelify-language)
-  useEffect(() => {
-    const storedLang = localStorage.getItem("zelify-language");
-    if (storedLang === "en" || storedLang === "es") {
-      setLanguage(storedLang);
-    }
-  }, []);
+  const [language, setLanguage] = useState<"en" | "es">("es");
 
   const toggleLanguage = () => {
     const newLang = language === "en" ? "es" : "en";
@@ -501,8 +493,8 @@ export default function LoginPage() {
           }}
         >
           <div className="w-full p-4 sm:p-10">
-                {/* LOGO #1 - Logo en la sección del formulario (izquierda) */}
-                <div className="mb-10">
+                {/* Logo + título centrados */}
+                <div className="mb-10 flex justify-center">
                   <Link href="/" className="inline-block">
                     <Image
                       className="hidden dark:block"
@@ -521,10 +513,10 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                <h1 className="mb-2 text-2xl font-bold text-dark dark:text-white sm:text-heading-3">
+                <h1 className="mb-2 text-center text-2xl font-bold text-dark dark:text-white sm:text-heading-3">
                   {step === 1 ? t.welcome : t.otpTitle}
                 </h1>
-                <p className="mb-8 text-sm text-dark-6 dark:text-dark-6">
+                <p className="mb-8 text-center text-sm text-dark-6 dark:text-dark-6">
                   {step === 1 ? t.subWelcome : t.otpSub}
                 </p>
 

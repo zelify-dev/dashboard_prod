@@ -126,13 +126,8 @@ export default function RegisterPage() {
   const [emailAlreadyExists, setEmailAlreadyExists] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [language, setLanguage] = useState<"en" | "es">("en");
+  const [language, setLanguage] = useState<"en" | "es">("es");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    const stored = localStorage.getItem("zelify-language");
-    if (stored === "en" || stored === "es") setLanguage(stored);
-  }, []);
 
   useEffect(() => {
     const check = () =>

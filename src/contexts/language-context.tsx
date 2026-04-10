@@ -13,21 +13,8 @@ interface LanguageContextValue {
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  // Siempre iniciar en "en" para que el primer render del cliente coincida con el servidor (evita hydration error)
-  const [language, setLanguage] = useState<Language>("en");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted || typeof window === "undefined") return;
-    const stored = window.localStorage.getItem("zelify-language");
-    if (stored === "es" || stored === "en") {
-      setLanguage(stored);
-    }
-  }, [mounted]);
+  // Siempre inicia en español en cada carga; el usuario puede cambiar en la sesión actual.
+  const [language, setLanguage] = useState<Language>("es");
 
   useEffect(() => {
     if (typeof window !== "undefined") {

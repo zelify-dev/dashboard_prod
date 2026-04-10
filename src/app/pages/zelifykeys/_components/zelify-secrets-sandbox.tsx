@@ -13,6 +13,10 @@ import { useZelifyKeysTranslations } from "./use-zelifykeys-translations";
 import { useZelifyKeysData } from "./zelify-keys-data-context";
 import { useLanguage } from "@/contexts/language-context";
 
+/** Si no es `"true"`, no se cargan ni muestran claves de desarrollo (sin llamadas a la API). */
+const ZELIFY_SANDBOX_SECRETS_ENABLED =
+  typeof process !== "undefined" && process.env.NEXT_PUBLIC_ZELIFY_SANDBOX_SECRETS_ENABLED === "true";
+
 const MASKED_PLACEHOLDER = "••••••••••••••••••••••••••••••";
 
 function formatIssuedDate(iso: string, locale: string): string {
@@ -30,7 +34,97 @@ function formatIssuedDate(iso: string, locale: string): string {
   }
 }
 
+function ZelifySecretsSandboxDisabled() {
+  const translations = useZelifyKeysTranslations();
+
+  return (
+    <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+            <svg
+              className="h-6 w-6 text-blue-600 dark:text-blue-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-dark dark:text-white">{translations.zelifySecrets.title}</h3>
+            <p className="text-sm text-dark-6 dark:text-dark-6">{translations.zelifySecrets.sandbox}</p>
+          </div>
+        </div>
+        <span className="rounded-lg border border-stroke bg-gray-2 px-3 py-1.5 text-sm font-medium text-dark-6 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6">
+          {translations.zelifySecrets.rotate}
+        </span>
+      </div>
+      <div
+        role="status"
+        className="mb-4 flex gap-3 rounded-lg border border-primary/25 bg-primary/10 px-3.5 py-3 dark:border-primary/40 dark:bg-primary/15"
+      >
+        <svg
+          className="mt-0.5 h-5 w-5 shrink-0 text-primary"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.75}
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        <p className="text-sm leading-relaxed text-dark dark:text-white/90">{translations.zelifySecrets.disabledWarning}</p>
+      </div>
+      <div className="pointer-events-none space-y-4 select-none">
+        <div>
+          <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
+            {translations.zelifySecrets.keyName}
+          </label>
+          <input
+            type="text"
+            value=""
+            readOnly
+            placeholder="—"
+            disabled
+            className="w-full cursor-not-allowed rounded-lg border border-stroke bg-gray-2 px-4 py-3 text-sm text-dark-6 outline-none opacity-70 dark:border-dark-3 dark:bg-dark dark:text-dark-6"
+          />
+        </div>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
+            {translations.zelifySecrets.secretKey}
+          </label>
+          <input
+            type="password"
+            value=""
+            readOnly
+            placeholder="—"
+            disabled
+            className="w-full cursor-not-allowed rounded-lg border border-stroke bg-gray-2 px-4 py-3 text-sm text-dark-6 outline-none opacity-70 dark:border-dark-3 dark:bg-dark dark:text-dark-6"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ZelifySecretsSandbox() {
+  if (!ZELIFY_SANDBOX_SECRETS_ENABLED) {
+    return <ZelifySecretsSandboxDisabled />;
+  }
+  return <ZelifySecretsSandboxContent />;
+}
+
+function ZelifySecretsSandboxContent() {
   const translations = useZelifyKeysTranslations();
   const { language } = useLanguage();
   const { setKeysData } = useZelifyKeysData();

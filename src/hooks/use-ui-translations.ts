@@ -204,6 +204,8 @@ export type UiTranslations = {
       linkEvent: string;
       paymentStatusUpdate: string;
     };
+    lockedUntilOnboarding: string;
+    loadingAccess: string;
   };
   organizationTeams: {
     createTeamButton: string;
@@ -602,6 +604,9 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         linkEvent: "Link Event",
         paymentStatusUpdate: "Payment Status Update",
       },
+      lockedUntilOnboarding:
+        "Webhooks stay off until your onboarding data is verified. Complete KYB / onboarding and try again.",
+      loadingAccess: "Checking organization…",
     },
     organizationTeams: {
       createTeamButton: "Create Team",
@@ -999,6 +1004,9 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         linkEvent: "Evento de vinculación",
         paymentStatusUpdate: "Actualización de estado de pago",
       },
+      lockedUntilOnboarding:
+        "Los webhooks siguen desactivados hasta que verifiquemos tu información de onboarding.",
+      loadingAccess: "Comprobando organización…",
     },
     organizationTeams: {
       createTeamButton: "Crear Equipo",

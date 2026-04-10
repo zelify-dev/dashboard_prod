@@ -5,6 +5,8 @@ import { HexColorPicker } from "react-colorful";
 import { QRConfig, WebhookEvent } from "./qr-config";
 import { cn } from "@/lib/utils";
 import { useQRTranslations } from "./use-qr-translations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { isOrganizationOnboardingVerified } from "@/lib/auth-api";
 
 interface ConfigPanelProps {
   config: QRConfig;
@@ -31,6 +33,8 @@ function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
   const translations = useQRTranslations();
+  const { organization, loading: orgLoading } = useOrganizationCountry();
+  const webhooksUnlocked = !orgLoading && isOrganizationOnboardingVerified(organization);
   const { webhookUrl, webhookEvents } = config;
   type OpenSection = "webhooks" | "branding";
   const [openSection, setOpenSection] = useState<OpenSection>("webhooks");
@@ -42,10 +46,12 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
   const colorPickerRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const handleWebhookUrlChange = (value: string) => {
+    if (!webhooksUnlocked) return;
     updateConfig({ webhookUrl: value });
   };
 
   const handleEventToggle = (event: WebhookEvent) => {
+    if (!webhooksUnlocked) return;
     const newEvents = webhookEvents.includes(event)
       ? webhookEvents.filter((e) => e !== event)
       : [...webhookEvents, event];
@@ -269,6 +275,17 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
           {openSection === "webhooks" && (
             <div className="border-t border-stroke px-6 py-4 dark:border-dark-3">
               <div className="space-y-6">
+              {orgLoading && (
+                <p className="text-sm text-dark-6 dark:text-dark-6">{translations.config.webhooks.checkingOrg}</p>
+              )}
+              {!orgLoading && !webhooksUnlocked && (
+                <div
+                  role="status"
+                  className="rounded-lg border border-primary/25 bg-primary/10 px-3 py-2.5 text-sm text-dark dark:border-primary/40 dark:bg-primary/15 dark:text-white/90"
+                >
+                  {translations.config.webhooks.lockedUntilOnboarding}
+                </div>
+              )}
               <div>
                 <p className="text-sm text-dark-6 dark:text-dark-6">
                   {translations.config.webhooks.description}
@@ -276,7 +293,7 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
               </div>
 
               {/* URL del Webhook */}
-              <div>
+              <div className={cn(!webhooksUnlocked && "pointer-events-none opacity-60")}>
                 <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
                   {translations.config.webhooks.urlLabel}
                 </label>
@@ -285,7 +302,8 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
                   value={webhookUrl}
                   onChange={(e) => handleWebhookUrlChange(e.target.value)}
                   placeholder={translations.config.webhooks.urlPlaceholder}
-                  className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm text-dark placeholder-dark-6 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white dark:placeholder-dark-6"
+                  disabled={!webhooksUnlocked}
+                  className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm text-dark placeholder-dark-6 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed dark:border-dark-3 dark:bg-dark-3 dark:text-white dark:placeholder-dark-6"
                 />
                 <p className="mt-1.5 text-xs text-dark-6 dark:text-dark-6">
                   {translations.config.webhooks.urlHint}
@@ -293,7 +311,7 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
               </div>
 
               {/* Eventos a Notificar */}
-              <div>
+              <div className={cn(!webhooksUnlocked && "pointer-events-none opacity-60")}>
                 <label className="mb-3 block text-sm font-medium text-dark dark:text-white">
                   {translations.config.webhooks.eventsLabel}
                 </label>
@@ -319,7 +337,8 @@ export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => handleEventToggle(event.value)}
-                            className="mt-0.5 h-4 w-4 rounded border-stroke text-primary focus:ring-1 focus:ring-primary dark:border-dark-3"
+                            disabled={!webhooksUnlocked}
+                            className="mt-0.5 h-4 w-4 rounded border-stroke text-primary focus:ring-1 focus:ring-primary disabled:cursor-not-allowed dark:border-dark-3"
                           />
                           <div className="flex-1">
                             <p className="text-sm font-medium text-dark dark:text-white">

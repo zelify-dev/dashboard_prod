@@ -120,7 +120,25 @@ export type OrganizationDetails = {
   scopes?: string[];
   created_at?: string;
   updated_at?: string;
+  /** Si el backend las envía en GET /api/organizations/:id, habilitan integraciones (p. ej. webhooks) tras onboarding. */
+  onboarding_verified?: boolean;
+  onboarding_completed?: boolean;
+  kyb_verified?: boolean;
 };
+
+/**
+ * Indica si la organización completó/verificó onboarding según GET /api/organizations/:id.
+ * Sin ningún flag en true, las integraciones sensibles (webhooks) permanecen deshabilitadas.
+ */
+export function isOrganizationOnboardingVerified(
+  org: OrganizationDetails | null | undefined
+): boolean {
+  if (!org) return false;
+  if (org.onboarding_verified === true) return true;
+  if (org.onboarding_completed === true) return true;
+  if (org.kyb_verified === true) return true;
+  return false;
+}
 
 export type AuthSuccessResponse = {
   access_token: string;

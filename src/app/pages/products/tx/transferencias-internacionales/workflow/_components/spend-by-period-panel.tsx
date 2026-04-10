@@ -10,7 +10,7 @@ type Granularity = "week" | "month";
 
 function getLocale(): string {
   if (typeof window === "undefined") return "es-ES";
-  return localStorage.getItem("preferredLanguage") === "es" ? "es-ES" : "en-US";
+  return localStorage.getItem("zelify-language") === "en" ? "en-US" : "es-ES";
 }
 
 function parseMoney(value?: string): number {

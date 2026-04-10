@@ -34,6 +34,8 @@ type ZelifyKeysTranslations = {
     revealToCopy: string;
     rotateWarning: string;
     retry: string;
+    /** Aviso cuando la sección de sandbox aún no está disponible. */
+    disabledWarning: string;
   };
   production: {
     title: string;
@@ -86,6 +88,7 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
       revealToCopy: "Reveal the secret to copy it",
       rotateWarning: "Current keys will be revoked. Save the new secret when shown.",
       retry: "Retry",
+      disabledWarning: "Your dev keys will show up here after the data is in.",
     },
     production: {
       title: "Production Secret",
@@ -136,6 +139,7 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
       revealToCopy: "Revela el secret para copiarlo",
       rotateWarning: "Las claves actuales se revocarán. Guarda el nuevo secret cuando se muestre.",
       retry: "Reintentar",
+      disabledWarning: "Las claves de desarrollo aparecerán aquí cuando tengamos los datos listos.",
     },
     production: {
       title: "Secreto de Producción",

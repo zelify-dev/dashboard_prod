@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Table,
   TableBody,
@@ -13,6 +13,12 @@ import { SimpleSelect } from "@/components/FormElements/simple-select";
 import { useLanguage } from "@/contexts/language-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { formatLocalDateTime } from "@/lib/date-utils";
+import {
+  getStoredOrganization,
+  getOrganization,
+  isOrganizationOnboardingVerified,
+  type OrganizationDetails,
+} from "@/lib/auth-api";
 
 interface Webhook {
   id: string;
@@ -45,7 +51,26 @@ const MOCK_WEBHOOKS: Webhook[] = [
 export function WebhooksPageContent() {
   const { language } = useLanguage();
   const t = useUiTranslations().webhooksPage;
-  const [webhooks, setWebhooks] = useState<Webhook[]>(MOCK_WEBHOOKS);
+  const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
+  const [orgLoading, setOrgLoading] = useState(true);
+  const demoSeeded = useRef(false);
+
+  useEffect(() => {
+    const id = getStoredOrganization()?.id;
+    if (!id) {
+      setOrgLoading(false);
+      return;
+    }
+    setOrgLoading(true);
+    getOrganization(id)
+      .then(setOrgDetails)
+      .catch(() => setOrgDetails(null))
+      .finally(() => setOrgLoading(false));
+  }, []);
+
+  const canUseWebhooks = isOrganizationOnboardingVerified(orgDetails);
+
+  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [showNewWebhook, setShowNewWebhook] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -57,7 +82,22 @@ export function WebhooksPageContent() {
     endpoint: "",
   });
 
+  useEffect(() => {
+    if (orgLoading) return;
+    if (!canUseWebhooks) {
+      setWebhooks([]);
+      setShowNewWebhook(false);
+      demoSeeded.current = false;
+      return;
+    }
+    if (!demoSeeded.current) {
+      demoSeeded.current = true;
+      setWebhooks(MOCK_WEBHOOKS);
+    }
+  }, [orgLoading, canUseWebhooks]);
+
   const locale = language === "es" ? "es-ES" : "en-US";
+  const webhooksLocked = orgLoading || !canUseWebhooks;
 
   const validateURL = (url: string): boolean => {
     return url.startsWith("http://") || url.startsWith("https://");
@@ -89,6 +129,7 @@ export function WebhooksPageContent() {
 
 
   const handleNewWebhook = () => {
+    if (webhooksLocked) return;
     setShowNewWebhook(true);
     setFormData({ event: "", endpoint: "" });
     setErrors({ event: "", endpoint: "" });
@@ -106,6 +147,7 @@ export function WebhooksPageContent() {
   };
 
   const handleConfigure = () => {
+    if (webhooksLocked) return;
     const newErrors = { event: "", endpoint: "" };
     let hasErrors = false;
 
@@ -142,6 +184,7 @@ export function WebhooksPageContent() {
   };
 
   const handleDeleteClick = (id: string) => {
+    if (webhooksLocked) return;
     setShowDeleteModal(id);
   };
 
@@ -158,19 +201,33 @@ export function WebhooksPageContent() {
 
   return (
     <div className="space-y-6">
+      {orgLoading && (
+        <p className="text-sm text-dark-6 dark:text-dark-6">{t.loadingAccess}</p>
+      )}
+      {!orgLoading && !canUseWebhooks && (
+        <div
+          role="status"
+          className="rounded-lg border border-primary/25 bg-primary/10 px-4 py-3 text-sm text-dark dark:text-white/90 dark:border-primary/40 dark:bg-primary/15"
+        >
+          {t.lockedUntilOnboarding}
+        </div>
+      )}
+
       {/* Header with New Webhook button */}
       <div className="flex items-center justify-between">
         <div className="flex-1" />
         <button
+          type="button"
           onClick={handleNewWebhook}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90"
+          disabled={webhooksLocked}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
         >
           {t.newWebhook}
         </button>
       </div>
 
       {/* New Webhook Form */}
-      {showNewWebhook && (
+      {showNewWebhook && canUseWebhooks && (
         <div className="space-y-6 rounded-lg border border-stroke bg-white p-6 shadow-sm dark:border-dark-3 dark:bg-dark-2">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold text-dark dark:text-white">
@@ -249,7 +306,7 @@ export function WebhooksPageContent() {
       )}
 
       {/* Webhooks Table */}
-      {webhooks.length > 0 && (
+      {canUseWebhooks && webhooks.length > 0 && (
         <div className="overflow-hidden rounded-lg border border-stroke bg-white shadow-sm dark:border-dark-3 dark:bg-dark-2">
           <Table>
             <TableHeader>
@@ -287,7 +344,7 @@ export function WebhooksPageContent() {
       )}
 
       {/* Empty State */}
-      {webhooks.length === 0 && !showNewWebhook && (
+      {canUseWebhooks && webhooks.length === 0 && !showNewWebhook && (
         <div className="rounded-lg border border-stroke bg-white p-12 text-center shadow-sm dark:border-dark-3 dark:bg-dark-2">
           <p className="text-dark-6 dark:text-dark-6">
             {t.empty.message}

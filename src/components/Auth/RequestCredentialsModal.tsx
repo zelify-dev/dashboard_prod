@@ -94,7 +94,7 @@ const COUNTRIES = [
 export default function RequestCredentialsModal({
   isOpen,
   onClose,
-  language = "en",
+  language = "es",
 }: RequestCredentialsModalProps) {
   const t = MODAL_TRANSLATIONS[language];
 

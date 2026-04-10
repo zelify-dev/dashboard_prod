@@ -6,7 +6,7 @@ import { parseFx, parseMoney } from "./international-transfers-utils";
 
 function getLocale(): string {
   if (typeof window === "undefined") return "en-US";
-  return localStorage.getItem("preferredLanguage") === "es" ? "es-ES" : "en-US";
+  return localStorage.getItem("zelify-language") === "en" ? "en-US" : "es-ES";
 }
 
 function formatMoney(amount: number, currency?: string): string {
