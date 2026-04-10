@@ -29,165 +29,8 @@ interface Log {
   response: string;
 }
 
-// Datos de ejemplo (en producción vendrían de una API)
-const MOCK_LOGS: Log[] = [
-  {
-    id: "1",
-    type: "API request",
-    description: "Transaction completed successfully",
-    institution: "Bank of America",
-    environment: "Production",
-    timestamp: "2024-10-15 14:30:25",
-    responseCode: "200 OK",
-    response: '{"status": "success", "transaction_id": "txn_123456789", "amount": 1500.00}',
-  },
-  {
-    id: "2",
-    type: "API request",
-    description: "Authentication error - insufficient credentials",
-    institution: "Chase Bank",
-    environment: "Sandbox",
-    timestamp: "2024-10-15 14:28:12",
-    responseCode: "401 Unauthorized",
-    errorCodes: "INSUFFICIENT_CREDENTIALS",
-    response: '{"error": "Invalid credentials", "code": "INSUFFICIENT_CREDENTIALS", "message": "The provided credentials are not valid"}',
-  },
-  {
-    id: "3",
-    type: "Webhook",
-    description: "Account update notification received",
-    institution: "Wells Fargo",
-    environment: "Production",
-    timestamp: "2024-10-15 14:25:45",
-    responseCode: "200",
-    response: '{"event": "ACCOUNT_UPDATE", "account_id": "acc_987654321", "timestamp": "2024-10-15T14:25:45Z"}',
-  },
-  {
-    id: "4",
-    type: "Link event",
-    description: "User successfully linked bank account",
-    institution: "Citibank",
-    environment: "Production",
-    timestamp: "2024-10-15 14:20:33",
-    responseCode: "200 OK",
-    response: '{"status": "success", "link_id": "link_abc123", "institution": "Citibank", "accounts": 2}',
-  },
-  {
-    id: "5",
-    type: "API request",
-    description: "Endpoint not found",
-    institution: "Bank of America",
-    environment: "Sandbox",
-    timestamp: "2024-10-15 14:15:08",
-    responseCode: "404 Not Found",
-    errorCodes: "ENDPOINT_NOT_FOUND",
-    response: '{"error": "Endpoint not found", "code": "ENDPOINT_NOT_FOUND", "path": "/api/v1/invalid-endpoint"}',
-  },
-  {
-    id: "6",
-    type: "Webhook",
-    description: "Transaction failed - insufficient funds",
-    institution: "Chase Bank",
-    environment: "Production",
-    timestamp: "2024-10-15 14:10:22",
-    responseCode: "500 Server Error",
-    errorCodes: "INSUFFICIENT_FUNDS",
-    response: '{"error": "Transaction failed", "code": "INSUFFICIENT_FUNDS", "account_balance": 45.50, "requested_amount": 200.00}',
-  },
-  {
-    id: "7",
-    type: "Link event",
-    description: "User exited link flow",
-    institution: "Wells Fargo",
-    environment: "Sandbox",
-    timestamp: "2024-10-15 14:05:17",
-    responseCode: "200 OK",
-    response: '{"event": "EXIT", "link_session_id": "link_sess_xyz789", "exit_reason": "user_cancelled"}',
-  },
-  {
-    id: "8",
-    type: "API request",
-    description: "Balance inquiry successful",
-    institution: "Citibank",
-    environment: "Production",
-    timestamp: "2024-10-15 14:00:55",
-    responseCode: "200 OK",
-    response: '{"status": "success", "account_id": "acc_456789", "balance": {"available": 5000.00, "current": 5000.00}}',
-  },
-  {
-    id: "9",
-    type: "Webhook",
-    description: "Identity verification completed",
-    institution: "Bank of America",
-    environment: "Production",
-    timestamp: "2024-10-15 13:55:40",
-    responseCode: "200",
-    response: '{"event": "IDENTITY_VERIFIED", "user_id": "user_123", "verification_status": "verified", "timestamp": "2024-10-15T13:55:40Z"}',
-  },
-  {
-    id: "10",
-    type: "Link event",
-    description: "Error during account linking - access not granted",
-    institution: "Chase Bank",
-    environment: "Production",
-    timestamp: "2024-10-15 13:50:15",
-    responseCode: "401 Unauthorized",
-    errorCodes: "ACCESS_NOT_GRANTED",
-    response: '{"error": "Access not granted", "code": "ACCESS_NOT_GRANTED", "message": "User did not grant necessary permissions"}',
-  },
-  {
-    id: "11",
-    type: "API request",
-    description: "Transaction history retrieved",
-    institution: "Wells Fargo",
-    environment: "Sandbox",
-    timestamp: "2024-10-15 13:45:30",
-    responseCode: "200 OK",
-    response: '{"status": "success", "transactions": [{"id": "txn_001", "amount": -50.00}, {"id": "txn_002", "amount": 100.00}], "count": 2}',
-  },
-  {
-    id: "12",
-    type: "Webhook",
-    description: "Server error processing webhook",
-    institution: "Citibank",
-    environment: "Production",
-    timestamp: "2024-10-15 13:40:18",
-    responseCode: "500 Server Error",
-    errorCodes: "INTERNAL_SERVER_ERROR",
-    response: '{"error": "Internal server error", "code": "INTERNAL_SERVER_ERROR", "message": "An unexpected error occurred"}',
-  },
-  {
-    id: "13",
-    type: "API request",
-    description: "Account information retrieved successfully",
-    institution: "Bank of America",
-    environment: "Production",
-    timestamp: "2024-10-15 13:35:42",
-    responseCode: "200 OK",
-    response: '{"status": "success", "account": {"id": "acc_789", "name": "Checking Account", "type": "depository", "subtype": "checking"}}',
-  },
-  {
-    id: "14",
-    type: "Link event",
-    description: "Handoff event - user redirected to institution",
-    institution: "Chase Bank",
-    environment: "Sandbox",
-    timestamp: "2024-10-15 13:30:05",
-    responseCode: "200 OK",
-    response: '{"event": "HANDOFF", "link_session_id": "link_sess_handoff123", "institution_id": "ins_109508"}',
-  },
-  {
-    id: "15",
-    type: "API request",
-    description: "Invalid request parameters",
-    institution: "Wells Fargo",
-    environment: "Production",
-    timestamp: "2024-10-15 13:25:50",
-    responseCode: "400",
-    errorCodes: "INVALID_REQUEST",
-    response: '{"error": "Invalid request parameters", "code": "INVALID_REQUEST", "details": "Missing required field: account_id"}',
-  },
-];
+// En producción esto debería venir de una API. Por ahora se deja vacío para evitar logs "pegados".
+const MOCK_LOGS: Log[] = [];
 
 const LOG_TYPES: LogType[] = ["API request", "Webhook", "Link event"];
 const ENVIRONMENTS: Environment[] = ["Production", "Sandbox"];
@@ -223,7 +66,6 @@ export function LogsPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     type: "",
-    institution: "",
     environment: "",
     responseCode: "",
     errorCodes: "",
@@ -249,9 +91,6 @@ export function LogsPageContent() {
 
     // Filtro por tipo
     if (filters.type && log.type !== filters.type) return false;
-
-    // Filtro por institución
-    if (filters.institution && log.institution !== filters.institution) return false;
 
     // Filtro por ambiente
     if (filters.environment && log.environment !== filters.environment) return false;
@@ -280,7 +119,6 @@ export function LogsPageContent() {
   const handleResetFilters = () => {
     setFilters({
       type: "",
-      institution: "",
       environment: "",
       responseCode: "",
       errorCodes: "",
@@ -372,19 +210,6 @@ export function LogsPageContent() {
 
         <SimpleSelect
           options={[
-            { value: "", label: t.filters.institution },
-            { value: "Bank of America", label: "Bank of America" },
-            { value: "Chase Bank", label: "Chase Bank" },
-            { value: "Wells Fargo", label: "Wells Fargo" },
-            { value: "Citibank", label: "Citibank" },
-          ]}
-            value={filters.institution}
-          onChange={(value) => { setFilters({ ...filters, institution: value }); setCurrentPage(1); }}
-          className="min-w-[120px] sm:min-w-[140px]"
-        />
-
-        <SimpleSelect
-          options={[
             { value: "", label: t.filters.environment },
             ...ENVIRONMENTS.map((env) => ({ value: env, label: environmentLabel(env) })),
           ]}
@@ -428,7 +253,6 @@ export function LogsPageContent() {
               <TableRow className="sticky top-0 z-10 bg-gray-1/90 backdrop-blur dark:bg-dark-3/90 [&>th]:py-2 [&>th]:text-xs [&>th]:font-semibold [&>th]:text-dark [&>th]:dark:text-white">
                 <TableHead className="w-20 px-2">{t.table.type}</TableHead>
                 <TableHead className="min-w-[120px] px-2">{t.table.description}</TableHead>
-                <TableHead className="hidden sm:table-cell w-24 px-2">{t.table.institution}</TableHead>
                 <TableHead className="hidden md:table-cell w-20 px-2">{t.table.env}</TableHead>
                 <TableHead className="w-28 px-2">{t.table.timestamp}</TableHead>
                 <TableHead className="w-20 px-2">{t.table.response}</TableHead>
@@ -439,7 +263,7 @@ export function LogsPageContent() {
             <TableBody>
               {paginatedLogs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-8 text-center">
+                  <TableCell colSpan={6} className="py-8 text-center">
                     <div className="mx-auto max-w-md">
                       <p className="mb-1 text-xs font-semibold text-dark dark:text-white sm:text-sm">
                         {t.table.emptyTitle}
@@ -458,9 +282,6 @@ export function LogsPageContent() {
                     </TableCell>
                     <TableCell className="px-2 py-1.5 max-w-[120px] truncate" title={log.description}>
                       {log.description}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell px-2 py-1.5 truncate" title={log.institution}>
-                      {log.institution}
                     </TableCell>
                     <TableCell className="hidden md:table-cell px-2 py-1.5">
                       {log.environment === "Production" ? t.table.prodShort : t.table.sandboxShort}

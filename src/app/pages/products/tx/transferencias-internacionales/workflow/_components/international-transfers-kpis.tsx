@@ -50,6 +50,7 @@ export function InternationalTransfersKpis(props: {
 
   const sentSum = props.items.reduce((acc, it) => acc + parseMoney(it.sent_amount), 0);
   const receivedSum = props.items.reduce((acc, it) => acc + parseMoney(it.received_amount), 0);
+  const avgTicket = count > 0 ? sentSum / count : 0;
 
   const fxValues = props.items.map((it) => parseFx(it.fx_rate)).filter((n): n is number => typeof n === "number");
   const fxAvg = fxValues.length ? fxValues.reduce((a, b) => a + b, 0) / fxValues.length : null;
@@ -71,11 +72,16 @@ export function InternationalTransfersKpis(props: {
         hint="Total sin normalizar por moneda"
       />
       <KpiCard
-        label="Top destino"
-        value={`${topCountry?.key ?? "—"}`}
-        hint={topBank ? `Banco más frecuente: ${topBank.key} (${topBank.count})` : undefined}
+        label="Ticket promedio"
+        value={count > 0 ? formatMoney(avgTicket, props.currencyForSums) : "—"}
+        hint={
+          count > 0
+            ? `Sumatoria: ${formatMoney(sentSum, props.currencyForSums)} / ${compactFormat(count)} tx`
+            : topBank
+              ? `Banco más frecuente: ${topBank.key} (${topBank.count}) · País: ${topCountry?.key ?? "—"}`
+              : undefined
+        }
       />
     </div>
   );
 }
-

@@ -45,8 +45,8 @@ function topByCount<T>(items: T[], keyFn: (i: T) => string | undefined) {
 export function InternalTransfersKpis(props: { items: InternalTransferItem[]; currencyForSums?: string }) {
   const count = props.items.length;
   const sum = props.items.reduce((acc, it) => acc + parseMoney(it.amount), 0);
+  const avgTicket = count > 0 ? sum / count : 0;
   const topCategory = topByCount(props.items, (i) => i.category?.trim().toLowerCase());
-  const topSender = topByCount(props.items, (i) => i.from_user?.full_name ?? i.from_user_id);
   return (
     <div className="grid gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4 2xl:gap-7.5">
       <KpiCard label="Internas: total" value={compactFormat(count)} />
@@ -61,9 +61,9 @@ export function InternalTransfersKpis(props: { items: InternalTransferItem[]; cu
         hint={topCategory ? `${topCategory.count} transferencias` : undefined}
       />
       <KpiCard
-        label="Internas: top emisor"
-        value={topSender?.key ?? "—"}
-        hint={topSender ? `${topSender.count} transferencias` : undefined}
+        label="Internas: ticket promedio"
+        value={count > 0 ? formatMoney(avgTicket, props.currencyForSums) : "—"}
+        hint={count > 0 ? `Sumatoria: ${formatMoney(sum, props.currencyForSums)} / ${compactFormat(count)} tx` : undefined}
       />
     </div>
   );
@@ -72,6 +72,7 @@ export function InternalTransfersKpis(props: { items: InternalTransferItem[]; cu
 export function InterbankTransfersKpis(props: { items: InterbankTransferItem[]; currencyForSums?: string }) {
   const count = props.items.length;
   const sum = props.items.reduce((acc, it) => acc + parseMoney(it.amount), 0);
+  const avgTicket = count > 0 ? sum / count : 0;
   const commissionSum = props.items.reduce((acc, it) => acc + parseMoney(it.commission), 0);
   const byStatus = props.items.reduce((acc, it) => {
     const s = (it.status ?? "—").toUpperCase();
@@ -91,11 +92,16 @@ export function InterbankTransfersKpis(props: { items: InterbankTransferItem[]; 
       />
       <KpiCard label="Interbancarias: comisiones" value={formatMoney(commissionSum, props.currencyForSums)} />
       <KpiCard
-        label="Interbancarias: status / institución"
-        value={`${statusTop?.[0] ?? "—"} · ${topInstitution?.key ?? "—"}`}
-        hint={statusTop ? `Status top: ${statusTop[1]}` : undefined}
+        label="Interbancarias: ticket promedio"
+        value={count > 0 ? formatMoney(avgTicket, props.currencyForSums) : "—"}
+        hint={
+          count > 0
+            ? `Sumatoria: ${formatMoney(sum, props.currencyForSums)} / ${compactFormat(count)} tx`
+            : statusTop
+              ? `Status top: ${statusTop[0]} (${statusTop[1]}) · Institución: ${topInstitution?.key ?? "—"}`
+              : undefined
+        }
       />
     </div>
   );
 }
-
