@@ -213,10 +213,9 @@ export function getNavData(
   }
 
   return [
-    {
-      label: translations.sidebar.products,
-      items: productsSectionItems,
-    },
+    ...(productsSectionItems.length > 0
+      ? [{ label: translations.sidebar.products, items: productsSectionItems }]
+      : []),
     {
       label: translations.sidebar.mainMenu,
       items: [

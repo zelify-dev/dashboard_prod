@@ -543,6 +543,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         response: "Response",
         payload: "Payload",
         emptyTitle: "No logs found, try another set of filters",
+        emptySubtitle: "We only keep logs from the last 14 days. Try different filters.",
         prodShort: "Prod",
         sandboxShort: "Sandbox",
       },

@@ -2,6 +2,9 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
+/** En `false` se oculta el tour (botón en header, modal y overlay). Pasa a `true` para volver a activarlo. */
+export const TOUR_FEATURE_ENABLED = false;
+
 export type TourStep = {
   id: string;
   target: string;

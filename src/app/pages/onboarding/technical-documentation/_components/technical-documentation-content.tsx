@@ -3,6 +3,13 @@
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Button } from "@/components/ui-elements/button";
 import { useState } from "react";
+import { AuthError } from "@/lib/auth-api";
+import {
+  getCurrentOrganizationId,
+  notifyOnboardingStatusUpdated,
+  postTechnicalDocumentation,
+  putDevelopmentEnvironments,
+} from "@/lib/onboarding-api";
 
 function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -207,18 +214,82 @@ export function TechnicalDocumentationPageContent() {
   const [sandboxUrls, setSandboxUrls] = useState("");
   const [apiKeys, setApiKeys] = useState("");
 
-  const handleSaveSandbox = () => {
-    console.log("Saving sandbox info:", { sandboxUrls, apiKeys });
-    // Add logic to save
+  const [savingDev, setSavingDev] = useState(false);
+  const [submittingDocs, setSubmittingDocs] = useState(false);
+  const [errorDev, setErrorDev] = useState<string | null>(null);
+  const [errorDocs, setErrorDocs] = useState<string | null>(null);
+  const [successDev, setSuccessDev] = useState(false);
+  const [successDocs, setSuccessDocs] = useState(false);
+
+  const handleSaveSandbox = async () => {
+    const orgId = getCurrentOrganizationId();
+    if (!orgId) {
+      setErrorDev("No hay organización en sesión.");
+      return;
+    }
+    const urls = sandboxUrls.trim();
+    const keys = apiKeys.trim();
+    if (!urls && !keys) {
+      setErrorDev("Indica al menos URLs de desarrollo o API keys.");
+      return;
+    }
+    setSavingDev(true);
+    setErrorDev(null);
+    setSuccessDev(false);
+    try {
+      await putDevelopmentEnvironments(orgId, {
+        development_urls: urls,
+        api_keys: keys,
+      });
+      setSuccessDev(true);
+      notifyOnboardingStatusUpdated();
+    } catch (e) {
+      const msg =
+        e instanceof AuthError
+          ? e.message
+          : e instanceof Error
+            ? e.message
+            : "No se pudo guardar";
+      setErrorDev(msg);
+    } finally {
+      setSavingDev(false);
+    }
   };
 
-  const hasAllFiles = diagramFile; // Note: requirement "allow saving sandbox info" implies we might not need ALL files to save sandbox, but "Enviar" probably needs everything.
-  // The user prompt says "once something is modified, allow saving sandbox info".
-  // But for the final button "Enviar documentación técnica", it usually requires the docs.
-  // I will assume the bottom button requires files.
+  const handleSubmitTechnical = async () => {
+    const orgId = getCurrentOrganizationId();
+    if (!orgId) {
+      setErrorDocs("No hay organización en sesión.");
+      return;
+    }
+    if (!canSubmit) return;
+    setSubmittingDocs(true);
+    setErrorDocs(null);
+    setSuccessDocs(false);
+    try {
+      await postTechnicalDocumentation(orgId, {
+        diagram: diagramFile,
+        securityPolicy: securityFile,
+        certifications: certificationFile,
+        processDocumentation: processFile,
+      });
+      setSuccessDocs(true);
+      notifyOnboardingStatusUpdated();
+    } catch (e) {
+      const msg =
+        e instanceof AuthError
+          ? e.message
+          : e instanceof Error
+            ? e.message
+            : "No se pudo enviar la documentación";
+      setErrorDocs(msg);
+    } finally {
+      setSubmittingDocs(false);
+    }
+  };
 
   const canSubmit =
-    diagramFile || securityFile || certificationFile || processFile; // Just basics for now
+    Boolean(diagramFile || securityFile || certificationFile || processFile);
 
   return (
     <div className="mx-auto w-full max-w-[1080px]">
@@ -306,12 +377,24 @@ export function TechnicalDocumentationPageContent() {
           ></textarea>
         </div>
 
+        {errorDev && (
+          <p className="mb-2 text-sm text-red-600 dark:text-red-400" role="alert">
+            {errorDev}
+          </p>
+        )}
+        {successDev && (
+          <p className="mb-2 text-sm text-green-600 dark:text-green-400">
+            Información de desarrollo guardada.
+          </p>
+        )}
+
         <div className="mb-8">
           <Button
-            label="Guardar información de desarrollo"
+            label={savingDev ? "Guardando…" : "Guardar información de desarrollo"}
             variant="primary"
             onClick={handleSaveSandbox}
-            className="w-full sm:w-auto !bg-[#004196] hover:!bg-[#004196]/90"
+            disabled={savingDev}
+            className="w-full sm:w-auto !bg-[#004196] hover:!bg-[#004196]/90 disabled:opacity-60"
             shape="rounded"
           />
         </div>
@@ -353,17 +436,29 @@ export function TechnicalDocumentationPageContent() {
           />
         </div>
 
+        {errorDocs && (
+          <p className="mt-4 text-sm text-red-600 dark:text-red-400" role="alert">
+            {errorDocs}
+          </p>
+        )}
+        {successDocs && (
+          <p className="mt-4 text-sm text-green-600 dark:text-green-400">
+            Documentación técnica enviada correctamente.
+          </p>
+        )}
+
         {/* Bottom Button */}
         <div className="mt-8">
           <Button
-            label="Enviar documentación técnica"
+            label={submittingDocs ? "Enviando…" : "Enviar documentación técnica"}
             variant="primary"
+            onClick={handleSubmitTechnical}
             className={`w-full sm:w-auto ${
-              !canSubmit
+              !canSubmit || submittingDocs
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
                 : "!bg-[#004196] hover:!bg-[#004196]/90"
             }`}
-            disabled={!canSubmit}
+            disabled={!canSubmit || submittingDocs}
             shape="rounded"
           />
         </div>

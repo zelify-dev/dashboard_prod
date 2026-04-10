@@ -21,6 +21,8 @@ import {
   setStoredOrganizationScopes,
 } from "@/lib/auth-api";
 import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
+import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
+import { onboardingPercentForPath } from "@/lib/onboarding-api";
 
 /** Tipo mínimo para ítems del menú (getNavData devuelve items: unknown[]). */
 interface NavSubItem {
@@ -35,6 +37,7 @@ export function Sidebar() {
   const { setIsOpen, isOpen, isMobile, toggleSidebar, isCollapsed, toggleCollapse } = useSidebarContext();
   const translations = useUiTranslations();
   const { isTourActive, currentStep, steps } = useTour();
+  const { percents: onboardingPercents } = useOnboardingStatus();
 
   const [organizationScopes, setOrganizationScopes] = useState<string[] | null>(() =>
     getStoredOrganizationScopes()
@@ -880,6 +883,12 @@ export function Sidebar() {
                                 href.startsWith("mailto:") ||
                                 href.startsWith("tel:") ||
                                 href.startsWith("sms:");
+                              const onboardingPercent =
+                                isSectionOnboarding &&
+                                !isSupportContactLink &&
+                                typeof href === "string"
+                                  ? onboardingPercentForPath(href, onboardingPercents)
+                                  : null;
                               const isDisabled =
                                 isSectionOnboarding &&
                                 !isOnboardingEnabled &&
@@ -898,11 +907,13 @@ export function Sidebar() {
                                       aria-hidden="true"
                                     />
 
-                                    <span className={cn(
-                                      "flex-1 text-left line-clamp-1 transition-opacity duration-300",
-                                      isCollapsed && !isMobile ? "hidden" : "block"
-                                    )}>
-                                      {item.title}
+                                    <span
+                                      className={cn(
+                                        "flex min-w-0 flex-1 items-center justify-between gap-2 text-left line-clamp-1 transition-opacity duration-300",
+                                        isCollapsed && !isMobile ? "hidden" : "flex",
+                                      )}
+                                    >
+                                      <span className="truncate">{item.title}</span>
                                     </span>
 
                                     <div
@@ -963,11 +974,18 @@ export function Sidebar() {
                                     aria-hidden="true"
                                   />
 
-                                  <span className={cn(
-                                    "text-left flex-1 transition-opacity duration-300",
-                                    isCollapsed && !isMobile ? "hidden" : "block"
-                                  )}>
-                                    {item.title}
+                                  <span
+                                    className={cn(
+                                      "flex min-w-0 flex-1 items-center justify-between gap-2 text-left transition-opacity duration-300",
+                                      isCollapsed && !isMobile ? "hidden" : "flex",
+                                    )}
+                                  >
+                                    <span className="truncate">{item.title}</span>
+                                    {onboardingPercent != null && (
+                                      <span className="shrink-0 text-[10px] font-semibold tabular-nums text-primary dark:text-primary/90">
+                                        {onboardingPercent}%
+                                      </span>
+                                    )}
                                   </span>
                                 </MenuItem>
                               );

@@ -6,6 +6,7 @@ import { Sidebar } from "./sidebar";
 import { Header } from "./header";
 import { TourModal } from "@/components/Tour/TourModal";
 import { TourOverlay } from "@/components/Tour/TourOverlay";
+import { TOUR_FEATURE_ENABLED } from "@/contexts/tour-context";
 import { ScopesLoader } from "@/components/ScopesLoader";
 import { ZendeskWidget } from "@/components/ZendeskWidget";
 
@@ -54,8 +55,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-      <TourModal />
-      <TourOverlay />
+      {TOUR_FEATURE_ENABLED && (
+        <>
+          <TourModal />
+          <TourOverlay />
+        </>
+      )}
     </div>
   );
 }
