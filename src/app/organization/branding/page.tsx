@@ -205,10 +205,12 @@ export default function OrganizationBrandingPage() {
                   className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
                 />
               </div>
-              <div className="rounded-lg border border-stroke bg-gray-2/40 p-4 dark:border-dark-3 dark:bg-dark-3/40">
+              <div className="rounded-lg border border-stroke bg-slate-600/18 p-4 dark:border-dark-3 dark:bg-slate-500/12">
                 <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo oscuro</p>
                 {branding?.url_log_dark ? (
-                  <img src={branding.url_log_dark} alt="Logo dark" className="mb-3 h-20 w-20 object-contain" />
+                  <div className="mb-3 inline-flex rounded-lg border border-slate-400/25 bg-slate-700/55 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                    <img src={branding.url_log_dark} alt="Logo dark" className="h-20 w-20 object-contain" />
+                  </div>
                 ) : (
                   <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
                 )}
