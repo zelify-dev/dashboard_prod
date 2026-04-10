@@ -510,8 +510,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
     },
     logsPage: {
       search: {
-        label: "Client User ID",
-        placeholder: "Search by the client_user_id configured on the link_token",
+        label: "Search",
+        placeholder: "Search in logs",
         ariaLabel: "Search",
       },
       filters: {
@@ -530,7 +530,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         },
         environments: {
           production: "Production",
-          sandbox: "Development",
+          sandbox: "Sandbox",
         },
       },
       table: {
@@ -542,9 +542,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         response: "Response",
         payload: "Payload",
         emptyTitle: "No logs found, try another set of filters",
-        emptySubtitle: "We only store logs for the last 14 days. Try different filters.",
         prodShort: "Prod",
-        sandboxShort: "Dev",
+        sandboxShort: "Sandbox",
       },
       pagination: {
         firstPage: "First page",
@@ -907,8 +906,8 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
     },
     logsPage: {
       search: {
-        label: "ID de usuario cliente",
-        placeholder: "Busca por el client_user_id configurado en el link_token",
+        label: "Buscar",
+        placeholder: "Buscar en logs",
         ariaLabel: "Buscar",
       },
       filters: {
@@ -927,7 +926,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         },
         environments: {
           production: "Producción",
-          sandbox: "Desarrollo",
+          sandbox: "Sandbox",
         },
       },
       table: {
@@ -941,7 +940,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         emptyTitle: "No se encontraron logs, prueba con otros filtros",
         emptySubtitle: "Solo guardamos logs de los últimos 14 días. Prueba filtros diferentes.",
         prodShort: "Prod",
-        sandboxShort: "Dev",
+        sandboxShort: "Sandbox",
       },
       pagination: {
         firstPage: "Primera página",
