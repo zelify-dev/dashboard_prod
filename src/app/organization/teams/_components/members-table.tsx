@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
+import { createPortal } from "react-dom";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import type { OrgUserListItem, OrgUserStatus } from "@/lib/organization-users-api";
 
@@ -42,6 +43,20 @@ export function MembersTable({
   const t = useUiTranslations();
   const m = t.membersManagement;
   const [openActionsId, setOpenActionsId] = useState<string | null>(null);
+  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (!openActionsId) return;
+
+    const closeMenu = () => setOpenActionsId(null);
+    window.addEventListener("resize", closeMenu);
+    window.addEventListener("scroll", closeMenu, true);
+
+    return () => {
+      window.removeEventListener("resize", closeMenu);
+      window.removeEventListener("scroll", closeMenu, true);
+    };
+  }, [openActionsId]);
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
@@ -57,6 +72,28 @@ export function MembersTable({
     }
     return "—";
   };
+
+  const toggleActions = (userId: string, event: MouseEvent<HTMLButtonElement>) => {
+    if (openActionsId === userId) {
+      setOpenActionsId(null);
+      setMenuPosition(null);
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + 8,
+      left: Math.max(12, rect.right - 192),
+    });
+    setOpenActionsId(userId);
+  };
+
+  const closeActions = () => {
+    setOpenActionsId(null);
+    setMenuPosition(null);
+  };
+
+  const activeUser = items.find((user) => user.id === openActionsId) ?? null;
 
   return (
     <div className="space-y-4">
@@ -80,7 +117,8 @@ export function MembersTable({
         </select>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-stroke dark:border-dark-3">
+      <div className="relative overflow-visible rounded-xl border border-stroke dark:border-dark-3">
+        <div className="relative overflow-x-auto overflow-y-visible">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-stroke bg-gray-2/60 dark:border-dark-3 dark:bg-dark-2/80">
@@ -140,7 +178,7 @@ export function MembersTable({
                   <td className="relative px-4 py-3">
                     <button
                       type="button"
-                      onClick={() => setOpenActionsId(openActionsId === user.id ? null : user.id)}
+                      onClick={(event) => toggleActions(user.id, event)}
                       className="rounded p-1 hover:bg-gray-100 dark:hover:bg-dark-3"
                       aria-label="Actions"
                     >
@@ -148,76 +186,13 @@ export function MembersTable({
                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                       </svg>
                     </button>
-                    {openActionsId === user.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          aria-hidden
-                          onClick={() => setOpenActionsId(null)}
-                        />
-                        <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-stroke bg-white py-1 shadow-lg dark:border-dark-3 dark:bg-gray-dark">
-                          <button
-                            type="button"
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
-                            onClick={() => {
-                              onEdit(user);
-                              setOpenActionsId(null);
-                            }}
-                          >
-                            {m.edit}
-                          </button>
-                          <button
-                            type="button"
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
-                            onClick={() => {
-                              onEditRoles(user);
-                              setOpenActionsId(null);
-                            }}
-                          >
-                            {m.editRoles}
-                          </button>
-                          {user.status === "ACTIVE" ? (
-                            <button
-                              type="button"
-                              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
-                              onClick={() => {
-                                onDisable(user);
-                                setOpenActionsId(null);
-                              }}
-                            >
-                              {m.disable}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
-                              onClick={() => {
-                                onEnable(user);
-                                setOpenActionsId(null);
-                              }}
-                            >
-                              {m.enable}
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
-                            onClick={() => {
-                              onResetPassword(user);
-                              setOpenActionsId(null);
-                            }}
-                          >
-                            {m.resetPassword}
-                          </button>
-                        </div>
-                      </>
-                    )}
                   </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {totalPages > 1 && (
@@ -245,6 +220,73 @@ export function MembersTable({
           </div>
         </div>
       )}
+
+      {openActionsId && menuPosition && activeUser && typeof document !== "undefined"
+        ? createPortal(
+            <>
+              <div className="fixed inset-0 z-[9998]" aria-hidden onClick={closeActions} />
+              <div
+                className="fixed z-[9999] w-48 rounded-lg border border-stroke bg-white py-1 shadow-lg dark:border-dark-3 dark:bg-gray-dark"
+                style={{ top: menuPosition.top, left: menuPosition.left }}
+              >
+                <button
+                  type="button"
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                  onClick={() => {
+                    onEdit(activeUser);
+                    closeActions();
+                  }}
+                >
+                  {m.edit}
+                </button>
+                <button
+                  type="button"
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                  onClick={() => {
+                    onEditRoles(activeUser);
+                    closeActions();
+                  }}
+                >
+                  {m.editRoles}
+                </button>
+                {activeUser.status === "ACTIVE" ? (
+                  <button
+                    type="button"
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                    onClick={() => {
+                      onDisable(activeUser);
+                      closeActions();
+                    }}
+                  >
+                    {m.disable}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                    onClick={() => {
+                      onEnable(activeUser);
+                      closeActions();
+                    }}
+                  >
+                    {m.enable}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                  onClick={() => {
+                    onResetPassword(activeUser);
+                    closeActions();
+                  }}
+                >
+                  {m.resetPassword}
+                </button>
+              </div>
+            </>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
