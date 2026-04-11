@@ -8,6 +8,7 @@ const __dirname = path.dirname(__filename);
 const nextConfig = {
   // Evita que Next infiera el workspace root cuando hay múltiples lockfiles.
   outputFileTracingRoot: __dirname,
+  allowedDevOrigins: ["unexperiential-nontuned-eliana.ngrok-free.dev"],
   images: {
     remotePatterns: [
       {

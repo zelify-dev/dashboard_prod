@@ -73,6 +73,34 @@ export function MembersTable({
     return "—";
   };
 
+  const getStatusDisplay = (user: OrgUserListItem) => {
+    if (user.status === "DISABLED") {
+      return {
+        label: m.statusDisabled,
+        className: "text-dark-6 dark:text-dark-6",
+      };
+    }
+
+    if (user.must_change_password) {
+      return {
+        label: m.pendingBadge,
+        className: "text-amber-600 dark:text-amber-400",
+      };
+    }
+
+    if (user.status === "PENDING") {
+      return {
+        label: m.statusPending,
+        className: "text-amber-600 dark:text-amber-400",
+      };
+    }
+
+    return {
+      label: m.statusActive,
+      className: "text-green-600 dark:text-green-400",
+    };
+  };
+
   const toggleActions = (userId: string, event: MouseEvent<HTMLButtonElement>) => {
     if (openActionsId === userId) {
       setOpenActionsId(null);
@@ -152,28 +180,16 @@ export function MembersTable({
                   <td className="px-4 py-3 text-dark dark:text-white">{user.full_name}</td>
                   <td className="px-4 py-3">
                     <span className="text-dark dark:text-white">{getRoleDisplay(user)}</span>
-                    {user.must_change_password && (
-                      <span className="ml-2 rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
-                        {m.pendingBadge}
-                      </span>
-                    )}
                   </td>
                   <td className="px-4 py-3">
-                    <span
-                      className={
-                        user.status === "ACTIVE"
-                          ? "text-green-600 dark:text-green-400"
-                          : user.status === "PENDING"
-                            ? "text-amber-600 dark:text-amber-400"
-                            : "text-dark-6 dark:text-dark-6"
-                      }
-                    >
-                      {user.status === "ACTIVE"
-                        ? m.statusActive
-                        : user.status === "PENDING"
-                          ? m.statusPending
-                          : m.statusDisabled}
-                    </span>
+                    {(() => {
+                      const statusDisplay = getStatusDisplay(user);
+                      return (
+                        <span className={statusDisplay.className}>
+                          {statusDisplay.label}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="relative px-4 py-3">
                     <button

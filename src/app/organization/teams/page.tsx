@@ -11,7 +11,10 @@ import {
   getOrgUser,
   updateOrgUser,
   assignOrgUserRoles,
+  removeOrgUserRole,
   resetOrgUserPassword,
+  sendDashboardMemberInviteEmail,
+  sendDashboardMemberResetPasswordEmail,
   type OrgUserListItem,
   type OrgUser,
   type OrgUserStatus,
@@ -140,9 +143,8 @@ export default function TeamsPage() {
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState("");
   const [tempPasswordModal, setTempPasswordModal] = useState<{
+    userId: string;
     temporary_password: string;
-    invite_token: string | null;
-    recipientEmail?: string;
   } | null>(null);
 
   const [editUser, setEditUser] = useState<OrgUser | null>(null);
@@ -298,9 +300,8 @@ export default function TeamsPage() {
       });
       setAddModalOpen(false);
       setTempPasswordModal({
+        userId: res.user.id,
         temporary_password: res.temporary_password,
-        invite_token: res.invite_token ?? null,
-        recipientEmail: res.user?.email,
       });
       fetchMembers();
     } catch (err) {
@@ -330,7 +331,39 @@ export default function TeamsPage() {
 
   const handleEditRolesSave = async (roleCodes: string[]) => {
     if (!orgId || !editRolesUser) return;
-    await assignOrgUserRoles(orgId, editRolesUser.id, { role_codes: roleCodes });
+
+    const currentRoles = (editRolesUser.roles ?? [])
+      .map((role) => {
+        if (typeof role === "string") {
+          return { id: "", code: role };
+        }
+        return {
+          id: role.id ?? "",
+          code: role.code,
+        };
+      })
+      .filter((role) => typeof role.code === "string" && role.code.length > 0);
+
+    const currentCodes = new Set(currentRoles.map((role) => role.code));
+    const nextCodes = new Set(roleCodes);
+
+    const codesToAdd = roleCodes.filter((code) => !currentCodes.has(code));
+    const rolesToRemove = currentRoles.filter(
+      (role) => !nextCodes.has(role.code) && role.id
+    );
+
+    if (codesToAdd.length > 0) {
+      await assignOrgUserRoles(orgId, editRolesUser.id, { role_codes: codesToAdd });
+    }
+
+    if (rolesToRemove.length > 0) {
+      await Promise.all(
+        rolesToRemove.map((role) =>
+          removeOrgUserRole(orgId, editRolesUser.id, role.id)
+        )
+      );
+    }
+
     setEditRolesUser(null);
     fetchMembers();
   };
@@ -462,8 +495,11 @@ export default function TeamsPage() {
       {tempPasswordModal && (
         <TemporaryPasswordModal
           temporaryPassword={tempPasswordModal.temporary_password}
-          inviteToken={tempPasswordModal.invite_token}
-          recipientEmail={tempPasswordModal.recipientEmail}
+          onSendEmail={(temporaryPassword) =>
+            sendDashboardMemberInviteEmail(orgId, tempPasswordModal.userId, {
+              temporary_password: temporaryPassword,
+            }).then(() => undefined)
+          }
           onClose={() => setTempPasswordModal(null)}
         />
       )}
@@ -490,6 +526,11 @@ export default function TeamsPage() {
           user={resetUser}
           onClose={() => setResetUser(null)}
           onReset={handleResetPassword}
+          onSendEmail={(userId, temporaryPassword) =>
+            sendDashboardMemberResetPasswordEmail(orgId, userId, {
+              temporary_password: temporaryPassword,
+            }).then(() => undefined)
+          }
         />
       )}
     </div>
