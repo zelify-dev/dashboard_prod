@@ -20,9 +20,20 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
+      // Degradar a payload vacío para no romper el editor si el upstream está caído.
       return NextResponse.json(
-        { error: `Failed to fetch template by name (${response.status})` },
-        { status: response.status },
+        {
+          templateId: null,
+          id: null,
+          name: templateName,
+          template: null,
+          subject: null,
+          from: null,
+          updatedAt: null,
+          active: false,
+          error: `upstream_status_${response.status}`,
+        },
+        { status: 200, headers: { "x-upstream-status": String(response.status) } },
       );
     }
 
@@ -30,6 +41,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error fetching template by name", error);
-    return NextResponse.json({ error: "internal-error" }, { status: 500 });
+    // Degradar a payload vacío para evitar 500s en la UI.
+    return NextResponse.json(
+      {
+        templateId: null,
+        id: null,
+        name: templateName,
+        template: null,
+        subject: null,
+        from: null,
+        updatedAt: null,
+        active: false,
+        error: "fetch_failed",
+      },
+      { status: 200, headers: { "x-upstream-error": "fetch_failed" } },
+    );
   }
 }

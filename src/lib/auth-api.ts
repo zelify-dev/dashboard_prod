@@ -133,6 +133,11 @@ export type OrganizationDetails = {
 export function isOrganizationOnboardingVerified(
   org: OrganizationDetails | null | undefined
 ): boolean {
+  // Override manual (solo si se configura explícitamente en el entorno).
+  // Útil para ambientes de desarrollo / QA cuando necesitas habilitar features bloqueadas por onboarding.
+  if (process.env.NEXT_PUBLIC_FORCE_ONBOARDING_VERIFIED?.toLowerCase() === "true") {
+    return true;
+  }
   if (!org) return false;
   if (org.onboarding_verified === true) return true;
   if (org.onboarding_completed === true) return true;

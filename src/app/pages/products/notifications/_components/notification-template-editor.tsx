@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { useLanguage, type Language } from "@/contexts/language-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { useOrganizationCountry } from "@/hooks/use-organization-country";
-import { isOrganizationOnboardingVerified } from "@/lib/auth-api";
+import { fetchWithAuth, getStoredOrganization, isOrganizationOnboardingVerified } from "@/lib/auth-api";
 import {
   DEFAULT_NOTIFICATION_TEMPLATES,
   DEFAULT_TEMPLATE_GROUPS,
@@ -28,6 +28,19 @@ import {
 import { SyntaxHighlightTextarea } from "./syntax-highlight-textarea";
 
 const ACTIVATION_ENDPOINT = "/api/notifications/activate-template";
+const BRANDING_REQUIRED_VARIABLES = ["${primaryColor}", "${secondaryColor}", "${logoUrl}", "${companyName}"] as const;
+
+const normalizeBrandingVariables = (html: string) => {
+  return html
+    .replace(/\$\{primarycolor\}/gi, "${primaryColor}")
+    .replace(/\$\{secondarycolor\}/gi, "${secondaryColor}")
+    .replace(/\$\{logourl\}/gi, "${logoUrl}")
+    .replace(/\$\{companyname\}/gi, "${companyName}");
+};
+
+const findMissingBrandingVariables = (html: string) => {
+  return BRANDING_REQUIRED_VARIABLES.filter((variable) => !html.includes(variable));
+};
 
 interface NotificationTemplateEditorProps {
   templateId: string;
@@ -194,7 +207,6 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
         if (!response.ok) {
           console.warn(`Failed to fetch template by name (${response.status})`);
           setRemoteTemplateError(t.remoteTemplateFetchError);
-          setRemoteTemplateLoading(false);
           return;
         }
         const data = (await response.json().catch(() => null)) as
@@ -212,7 +224,6 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
         if (!data) {
           setRemoteTemplateId(null);
           setRemoteTemplateError(t.remoteTemplateNotFound);
-          setRemoteTemplateLoading(false);
           return;
         }
         setRemoteTemplateId(data.templateId ?? data.id ?? null);
@@ -233,7 +244,6 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
           };
         });
         setIsActive(Boolean(data.active));
-        const templateHtml = data.template ?? templateData.html[editorLanguage];
         setCodeByLanguage({
           en: data.template ?? templateData.html.en,
           es: data.template ?? templateData.html.es,
@@ -251,7 +261,13 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
 
     fetchTemplate();
     return () => controller.abort();
-  }, [templateName, editorLanguage, templateData.html.en, templateData.html.es]);
+  }, [templateName, editorLanguage, templateData.html.en, templateData.html.es, t.remoteTemplateFetchError, t.remoteTemplateNotFound]);
+
+  const categoryForRequest = useMemo(() => {
+    const prefix = `${templateData.channelGroup}-`;
+    const raw = templateData.groupId.startsWith(prefix) ? templateData.groupId.slice(prefix.length) : templateData.groupId;
+    return raw.replace(/-/g, "_").toLowerCase();
+  }, [templateData.channelGroup, templateData.groupId]);
 
   useEffect(() => {
     setPreviewFrom(templateData.from ?? "notifications@zelify.com");
@@ -274,16 +290,28 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
   const handleSave = async () => {
     setIsSaving(true);
     setSaveMessage(null);
+    const normalizedCode = normalizeBrandingVariables(codeByLanguage[editorLanguage]);
+    if (normalizedCode !== codeByLanguage[editorLanguage]) {
+      setCodeByLanguage((prev) => ({ ...prev, [editorLanguage]: normalizedCode }));
+    }
+    const missingBranding = findMissingBrandingVariables(normalizedCode);
+    if (missingBranding.length > 0) {
+      setSaveMessage(translations.validation.brandingMissingRequiredVars);
+      setIsSaving(false);
+      return;
+    }
+    const organizationId = getStoredOrganization()?.id ?? "";
     const updatePayload = {
-      name: templateName,
-      template: codeByLanguage[editorLanguage],
-      from: previewFrom.trim(),
-      subject: previewSubject.trim() || templateName,
+      organization_id: organizationId,
+      category: categoryForRequest,
+      template: normalizedCode,
+      isActive: Boolean(isActive),
+      sender_email: previewFrom.trim() || "notifications@zelify.com",
     };
-    console.log("[notifications] Updating template payload", JSON.stringify(updatePayload, null, 2));
+    console.log("[notifications] Patching template payload", JSON.stringify(updatePayload, null, 2));
     try {
-      const response = await fetch("/api/templates/update", {
-        method: "POST",
+      const response = await fetchWithAuth(`/api/templates/${encodeURIComponent(templateId)}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -295,9 +323,11 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
         console.warn("Template update failed", errorText);
         return;
       }
-      const rawResult = await response.text().catch(() => null);
-      const normalizedResult = normalizeApiResult(rawResult);
-      if (normalizedResult !== "success") {
+      const json = (await response.json().catch(() => null)) as
+        | { status: "success"; data: unknown }
+        | { status?: string; message?: string }
+        | null;
+      if (!json || (typeof json === "object" && "status" in json && json.status !== "success")) {
         setSaveMessage(t.saveError);
         return;
       }
@@ -335,15 +365,17 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
   const handleActivate = async () => {
     setIsActivating(true);
     setSaveMessage(null);
-    const payload = {
-      channel: templateData.channelGroup,
-      category: templateGroup?.name ?? templateData.groupId,
-      name: templateName,
-      active: true,
-    };
     try {
-      const response = await fetch("/api/templates/active", {
-        method: "POST",
+      const organizationId = getStoredOrganization()?.id ?? "";
+      const payload = {
+        organization_id: organizationId,
+        category: categoryForRequest,
+        template: normalizeBrandingVariables(codeByLanguage[editorLanguage]),
+        isActive: true,
+        sender_email: previewFrom.trim() || "notifications@zelify.com",
+      };
+      const response = await fetchWithAuth(`/api/templates/${encodeURIComponent(templateId)}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
@@ -355,9 +387,11 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
         console.warn("Activation request failed", errorText);
         return;
       }
-      const rawResult = await response.text().catch(() => null);
-      const normalizedResult = normalizeApiResult(rawResult);
-      if (normalizedResult && normalizedResult !== "success") {
+      const json = (await response.json().catch(() => null)) as
+        | { status: "success"; data: unknown }
+        | { status?: string; message?: string }
+        | null;
+      if (!json || (typeof json === "object" && "status" in json && json.status !== "success")) {
         setSaveMessage(t.activateError);
         return;
       }
@@ -373,7 +407,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
       });
       await sendActivationEvent({
         canales: templateData.channelGroup,
-        categoria: templateGroup?.name ?? templateData.groupId,
+        categoria: categoryForRequest,
         plantilla: codeByLanguage,
         companyId: "",
         templateId: templateData.id,
@@ -390,24 +424,19 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
   const handleDelete = async () => {
     setIsDeleting(true);
     setSaveMessage(null);
-    if (!remoteTemplateId) {
-      setSaveMessage(t.remoteIdMissing);
-      setIsDeleting(false);
-      return;
-    }
     try {
-      const response = await fetch(`/api/templates/${encodeURIComponent(remoteTemplateId)}`, {
-        method: "DELETE",
-      });
+      const response = await fetchWithAuth(`/api/templates/${encodeURIComponent(templateId)}`, { method: "DELETE" });
       if (!response.ok) {
         const errorText = await response.text().catch(() => "request failed");
         console.warn("Template delete failed", errorText);
         setSaveMessage(t.deleteError);
         return;
       }
-      const rawResult = await response.text().catch(() => null);
-      const normalizedResult = normalizeApiResult(rawResult);
-      if (normalizedResult !== "success") {
+      const json = (await response.json().catch(() => null)) as
+        | { status: "success" }
+        | { status?: string; message?: string }
+        | null;
+      if (!json || (typeof json === "object" && "status" in json && json.status !== "success")) {
         setSaveMessage(t.deleteError);
         return;
       }

@@ -58,6 +58,17 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error fetching active template HTML", error);
-    return NextResponse.json({ error: "Failed to fetch active template HTML" }, { status: 500 });
+    // Degradar a payload vacío para evitar 500s en la UI.
+    return NextResponse.json(
+      {
+        channel,
+        category,
+        name: null,
+        template: null,
+        updatedAt: null,
+        message: "Upstream unavailable. No active template could be resolved.",
+      },
+      { status: 200, headers: { "x-upstream-error": "fetch_failed" } },
+    );
   }
 }

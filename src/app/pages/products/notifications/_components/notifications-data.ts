@@ -50,7 +50,12 @@ export interface NotificationTemplate {
   variables?: TemplateVariable[];
 }
 
-export const DEFAULT_TEMPLATE_GROUPS: TemplateGroup[] = [
+// Nota: Los grupos/plantillas hardcodeados eran demo y generaban categorías "falsas" en la UI.
+// Para evitar confusión, el dashboard arranca sin categorías por defecto y espera data real del servicio,
+// o que el usuario cree categorías manualmente desde la UI.
+export const DEFAULT_TEMPLATE_GROUPS: TemplateGroup[] = [];
+
+const DEMO_TEMPLATE_GROUPS: TemplateGroup[] = [
   {
     id: "otp-flows",
     name: "OTP",
@@ -107,7 +112,9 @@ export const DEFAULT_TEMPLATE_GROUPS: TemplateGroup[] = [
   },
 ];
 
-export const DEFAULT_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
+export const DEFAULT_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [];
+
+const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
   {
     id: "tpl_mail_otp_delivery",
     key: "otpCode",

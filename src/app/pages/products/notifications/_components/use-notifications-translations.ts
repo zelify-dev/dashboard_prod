@@ -51,38 +51,44 @@ type NotificationsTranslations = {
     };
     empty: string;
   };
-  createTemplate: {
-    badge: string;
-    title: (category: string) => string;
-    titleFallback: string;
-    subtitle: string;
-    templateNameLabel: string;
-    templateNamePlaceholder: string;
+	  createTemplate: {
+	    badge: string;
+	    title: (category: string) => string;
+	    editTitle: (category: string) => string;
+	    titleFallback: string;
+	    noCategory: string;
+	    subtitle: string;
+	    templateNameLabel: string;
+	    templateNamePlaceholder: string;
     htmlLabel: string;
     fromLabel: string;
+    senderEmailLabel: string;
     subjectLabel: string;
-    subjectPlaceholder: string;
-    saving: string;
-    createButton: string;
-    otpOnlyVariablesHint: string;
-    otpVariablesInlineHint: string;
-    previewFallbackTitle: string;
-    previewFallbackBody: string;
-  };
+	    subjectPlaceholder: string;
+	    saving: string;
+	    createButton: string;
+	    updateButton: string;
+	    otpOnlyVariablesHint: string;
+	    otpVariablesInlineHint: string;
+	    previewFallbackTitle: string;
+	    previewFallbackBody: string;
+	  };
   remote: {
     remoteTemplateName: string;
     remoteTemplateDescription: string;
     noRemoteTemplates: string;
   };
-  validation: {
-    completeNameAndHtml: string;
-    templateNameRequired: string;
-    templateHtmlRequired: string;
-    otpMissingRequiredVars: string;
-    otpMissingRequiredVarsField: string;
-    otpOnlyAllowedVars: string;
-    otpRemoveDisallowedVars: (vars: string) => string;
-    templateNameUnique: string;
+	  validation: {
+	    completeNameAndHtml: string;
+	    templateNameRequired: string;
+	    templateHtmlRequired: string;
+	    brandingMissingRequiredVars: string;
+	    brandingMissingRequiredVarsField: (vars: string) => string;
+	    otpMissingRequiredVars: string;
+	    otpMissingRequiredVarsField: string;
+	    otpOnlyAllowedVars: string;
+	    otpRemoveDisallowedVars: (vars: string) => string;
+	    templateNameUnique: string;
     templateNameDuplicate: string;
     createdSuccess: string;
     createdError: string;
@@ -217,45 +223,53 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
       },
       empty: "Aún no hay categorías para este canal.",
     },
-    createTemplate: {
-      badge: "Nueva plantilla",
-      title: (category) => `Crear plantilla en ${category}`,
-      titleFallback: "Crear plantilla en esta categoría",
-      subtitle: "Los cambios se enviarán al endpoint externo y veremos si fue exitoso.",
-      templateNameLabel: "Nombre de la plantilla",
+	    createTemplate: {
+	      badge: "Nueva plantilla",
+	      title: (category) => `Crear plantilla en ${category}`,
+	      editTitle: (category) => `Modificar plantilla en ${category}`,
+	      titleFallback: "Crear plantilla en esta categoría",
+	      noCategory: "Primero crea una categoría para habilitar la creación de plantillas.",
+	      subtitle: "Los cambios se enviarán al endpoint externo y veremos si fue exitoso.",
+	      templateNameLabel: "Nombre de la plantilla",
       templateNamePlaceholder: "Recordatorio Cash-in",
       htmlLabel: "HTML",
       fromLabel: "From",
-      subjectLabel: "Subject",
-      subjectPlaceholder: "Tu código sigue activo",
-      saving: "Guardando...",
-      createButton: "Crear plantilla",
-      otpOnlyVariablesHint: "Solo se permiten las variables ${safeName} y ${code} en el HTML.",
-      otpVariablesInlineHint: "Solo se permiten las variables",
-      previewFallbackTitle: "Vista previa",
-      previewFallbackBody: "Pega tu HTML para verlo aquí.",
-    },
+      senderEmailLabel: "Correo remitente",
+	      subjectLabel: "Subject",
+	      subjectPlaceholder: "Tu código sigue activo",
+	      saving: "Guardando...",
+	      createButton: "Crear plantilla",
+	      updateButton: "Modificar plantilla",
+		      otpOnlyVariablesHint:
+		        "Solo se permiten las variables ${safeName}, ${code}, ${primaryColor}, ${secondaryColor}, ${logoUrl}, ${companyName} y ${year} en el HTML.",
+		      otpVariablesInlineHint: "Solo se permiten las variables",
+		      previewFallbackTitle: "Vista previa",
+	      previewFallbackBody: "Pega tu HTML para verlo aquí.",
+	    },
     remote: {
       remoteTemplateName: "Plantilla remota",
       remoteTemplateDescription: "Plantilla sincronizada desde el endpoint remoto.",
       noRemoteTemplates:
         "Aún no existen plantillas registradas para este canal/categoría en el servicio remoto. Crea una plantilla y publícala para sincronizarla.",
     },
-    validation: {
-      completeNameAndHtml: "Completa el nombre y código HTML.",
-      templateNameRequired: "El nombre de la plantilla es obligatorio.",
-      templateHtmlRequired: "El HTML es obligatorio.",
-      otpMissingRequiredVars: "El HTML debe incluir las variables obligatorias ${safeName} y ${code}.",
-      otpMissingRequiredVarsField: "Incluye ${safeName} y ${code} en el HTML.",
-      otpOnlyAllowedVars: "Solo se permiten las variables ${safeName} y ${code} en OTP.",
-      otpRemoveDisallowedVars: (vars) => `Elimina variables no permitidas como ${vars}.`,
-      templateNameUnique: "El nombre de la plantilla debe ser único.",
+	    validation: {
+	      completeNameAndHtml: "Completa el nombre y código HTML.",
+	      templateNameRequired: "El nombre de la plantilla es obligatorio.",
+	      templateHtmlRequired: "El HTML es obligatorio.",
+	      brandingMissingRequiredVars:
+	        "El HTML debe incluir las variables obligatorias ${primaryColor}, ${secondaryColor}, ${logoUrl} y ${companyName}.",
+	      brandingMissingRequiredVarsField: (vars) => `Incluye las variables obligatorias: ${vars}.`,
+	      otpMissingRequiredVars: "El HTML debe incluir las variables obligatorias ${safeName} y ${code}.",
+	      otpMissingRequiredVarsField: "Incluye ${safeName} y ${code} en el HTML.",
+	      otpOnlyAllowedVars: "Solo se permiten las variables ${safeName} y ${code} en OTP.",
+	      otpRemoveDisallowedVars: (vars) => `Elimina variables no permitidas como ${vars}.`,
+	      templateNameUnique: "El nombre de la plantilla debe ser único.",
       templateNameDuplicate: "Ya existe una plantilla con este nombre.",
       createdSuccess: "Plantilla creada correctamente.",
       createdError: "No se pudo crear la plantilla.",
     },
     templateList: {
-      title: "Previsualizaciones",
+      title: "Plantillas",
       lastUsed: "Último uso",
       selectCategory: "Selecciona una categoría",
       ctr: "CTR",
@@ -451,45 +465,53 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
       },
       empty: "No categories yet for this channel.",
     },
-    createTemplate: {
-      badge: "New template",
-      title: (category) => `Create template in ${category}`,
-      titleFallback: "Create template in this category",
-      subtitle: "Changes will be sent to the external endpoint and we will confirm whether it was successful.",
-      templateNameLabel: "Template name",
+	    createTemplate: {
+	      badge: "New template",
+	      title: (category) => `Create template in ${category}`,
+	      editTitle: (category) => `Update template in ${category}`,
+	      titleFallback: "Create template in this category",
+	      noCategory: "Create a category first to enable template creation.",
+	      subtitle: "Changes will be sent to the external endpoint and we will confirm whether it was successful.",
+	      templateNameLabel: "Template name",
       templateNamePlaceholder: "Cash-in reminder",
       htmlLabel: "HTML",
       fromLabel: "From",
-      subjectLabel: "Subject",
-      subjectPlaceholder: "Your code is still valid",
-      saving: "Saving...",
-      createButton: "Create template",
-      otpOnlyVariablesHint: "Only ${safeName} and ${code} variables are allowed in the HTML.",
-      otpVariablesInlineHint: "Only variables",
-      previewFallbackTitle: "Preview",
-      previewFallbackBody: "Paste your HTML to see it here.",
-    },
+      senderEmailLabel: "Sender email",
+	      subjectLabel: "Subject",
+	      subjectPlaceholder: "Your code is still valid",
+	      saving: "Saving...",
+	      createButton: "Create template",
+	      updateButton: "Update template",
+		      otpOnlyVariablesHint:
+		        "Only ${safeName}, ${code}, ${primaryColor}, ${secondaryColor}, ${logoUrl}, ${companyName}, and ${year} variables are allowed in the HTML.",
+	      otpVariablesInlineHint: "Only variables",
+	      previewFallbackTitle: "Preview",
+	      previewFallbackBody: "Paste your HTML to see it here.",
+	    },
     remote: {
       remoteTemplateName: "Remote template",
       remoteTemplateDescription: "Template synced from the remote endpoint.",
       noRemoteTemplates:
         "No templates exist yet for this channel/category on the remote service. Create one and publish it to sync.",
     },
-    validation: {
-      completeNameAndHtml: "Fill in the name and HTML code.",
-      templateNameRequired: "Template name is required.",
-      templateHtmlRequired: "HTML is required.",
-      otpMissingRequiredVars: "HTML must include the required variables ${safeName} and ${code}.",
-      otpMissingRequiredVarsField: "Include ${safeName} and ${code} in the HTML.",
-      otpOnlyAllowedVars: "Only ${safeName} and ${code} variables are allowed for OTP.",
-      otpRemoveDisallowedVars: (vars) => `Remove disallowed variables such as ${vars}.`,
-      templateNameUnique: "Template name must be unique.",
+	    validation: {
+	      completeNameAndHtml: "Fill in the name and HTML code.",
+	      templateNameRequired: "Template name is required.",
+	      templateHtmlRequired: "HTML is required.",
+	      brandingMissingRequiredVars:
+	        "HTML must include the required variables ${primaryColor}, ${secondaryColor}, ${logoUrl}, and ${companyName}.",
+	      brandingMissingRequiredVarsField: (vars) => `Include the required variables: ${vars}.`,
+	      otpMissingRequiredVars: "HTML must include the required variables ${safeName} and ${code}.",
+	      otpMissingRequiredVarsField: "Include ${safeName} and ${code} in the HTML.",
+	      otpOnlyAllowedVars: "Only ${safeName} and ${code} variables are allowed for OTP.",
+	      otpRemoveDisallowedVars: (vars) => `Remove disallowed variables such as ${vars}.`,
+	      templateNameUnique: "Template name must be unique.",
       templateNameDuplicate: "A template with this name already exists.",
       createdSuccess: "Template created successfully.",
       createdError: "Could not create template.",
     },
     templateList: {
-      title: "Preview gallery",
+      title: "Templates",
       lastUsed: "Last triggered",
       selectCategory: "Select a category",
       ctr: "CTR",

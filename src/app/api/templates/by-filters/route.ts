@@ -18,16 +18,26 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      return NextResponse.json(
-        { error: `Upstream request failed with status ${response.status}` },
-        { status: response.status },
-      );
+      // Degradar a lista vacía para no romper el dashboard si el upstream está caído o responde error.
+      // El cliente de la UI espera un array; una respuesta no-200 termina en error en consola.
+      return NextResponse.json([], {
+        status: 200,
+        headers: {
+          "x-upstream-status": String(response.status),
+        },
+      });
     }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error proxying template filters", error);
-    return NextResponse.json({ error: "Failed to fetch remote templates" }, { status: 500 });
+    // Degradar a lista vacía para evitar 500s en la UI.
+    return NextResponse.json([], {
+      status: 200,
+      headers: {
+        "x-upstream-error": "fetch_failed",
+      },
+    });
   }
 }
