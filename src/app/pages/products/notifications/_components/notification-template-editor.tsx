@@ -29,7 +29,7 @@ import {
 import { SyntaxHighlightTextarea } from "./syntax-highlight-textarea";
 
 const ACTIVATION_ENDPOINT = "/api/notifications/activate-template";
-const BRANDING_REQUIRED_VARIABLES = ["${primaryColor}", "${secondaryColor}", "${logoUrl}", "${companyName}"] as const;
+const BRANDING_REQUIRED_VARIABLES = ["${logoUrl}", "${companyName}"] as const;
 
 const normalizeBrandingVariables = (html: string) => {
   return html
@@ -303,10 +303,12 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
       return;
     }
     const organizationId = getStoredOrganization()?.id ?? "";
+    const subject = previewSubject.trim() || templateName;
     const updatePayload = {
       organization_id: organizationId,
       category: categoryForRequest,
       template: normalizedCode,
+      subject,
       isActive: Boolean(isActive),
       sender_email: previewFrom.trim() || "notifications@zelify.com",
     };
@@ -343,7 +345,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
             ...codeByLanguage,
           },
           updatedAt,
-          subject: previewSubject.trim() || templateName,
+          subject,
           from: previewFrom.trim(),
         };
       });
@@ -351,7 +353,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
         html: codeByLanguage,
         updatedAt,
         name: templateName,
-        subject: previewSubject.trim() || templateName,
+        subject,
         from: previewFrom.trim(),
         description: templateData.description,
       });
@@ -369,10 +371,12 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
     setSaveMessage(null);
     try {
       const organizationId = getStoredOrganization()?.id ?? "";
+      const subject = previewSubject.trim() || templateName;
       const payload = {
         organization_id: organizationId,
         category: categoryForRequest,
         template: normalizeBrandingVariables(codeByLanguage[editorLanguage]),
+        subject,
         isActive: true,
         sender_email: previewFrom.trim() || "notifications@zelify.com",
       };

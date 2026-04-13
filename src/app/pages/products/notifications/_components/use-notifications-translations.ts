@@ -58,6 +58,7 @@ type NotificationsTranslations = {
 	    titleFallback: string;
 	    noCategory: string;
 	    subtitle: string;
+	    newButton: string;
 	    templateNameLabel: string;
 	    templateNamePlaceholder: string;
     htmlLabel: string;
@@ -75,7 +76,6 @@ type NotificationsTranslations = {
 	  };
   remote: {
     remoteTemplateName: string;
-    remoteTemplateDescription: string;
     noRemoteTemplates: string;
   };
 	  validation: {
@@ -251,6 +251,7 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
 	      titleFallback: "Crear plantilla en esta categoría",
 	      noCategory: "Primero crea una categoría para habilitar la creación de plantillas.",
 	      subtitle: "Los cambios se enviarán al endpoint externo y veremos si fue exitoso.",
+	      newButton: "Nueva plantilla",
 	      templateNameLabel: "Nombre de la plantilla",
       templateNamePlaceholder: "Recordatorio Cash-in",
       htmlLabel: "HTML",
@@ -269,7 +270,6 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
 	    },
     remote: {
       remoteTemplateName: "Plantilla remota",
-      remoteTemplateDescription: "Plantilla sincronizada desde el endpoint remoto.",
       noRemoteTemplates:
         "Aún no existen plantillas registradas para este canal/categoría en el servicio remoto. Crea una plantilla y publícala para sincronizarla.",
     },
@@ -278,7 +278,7 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
 	      templateNameRequired: "El nombre de la plantilla es obligatorio.",
 	      templateHtmlRequired: "El HTML es obligatorio.",
 	      brandingMissingRequiredVars:
-	        "El HTML debe incluir las variables obligatorias ${primaryColor}, ${secondaryColor}, ${logoUrl} y ${companyName}.",
+	        "El HTML debe incluir las variables obligatorias ${logoUrl} y ${companyName}.",
 	      brandingMissingRequiredVarsField: (vars) => `Incluye las variables obligatorias: ${vars}.`,
 	      otpMissingRequiredVars: "El HTML debe incluir las variables obligatorias ${safeName} y ${code}.",
 	      otpMissingRequiredVarsField: "Incluye ${safeName} y ${code} en el HTML.",
@@ -515,6 +515,7 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
 	      titleFallback: "Create template in this category",
 	      noCategory: "Create a category first to enable template creation.",
 	      subtitle: "Changes will be sent to the external endpoint and we will confirm whether it was successful.",
+	      newButton: "New template",
 	      templateNameLabel: "Template name",
       templateNamePlaceholder: "Cash-in reminder",
       htmlLabel: "HTML",
@@ -533,7 +534,6 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
 	    },
     remote: {
       remoteTemplateName: "Remote template",
-      remoteTemplateDescription: "Template synced from the remote endpoint.",
       noRemoteTemplates:
         "No templates exist yet for this channel/category on the remote service. Create one and publish it to sync.",
     },
@@ -542,7 +542,7 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
 	      templateNameRequired: "Template name is required.",
 	      templateHtmlRequired: "HTML is required.",
 	      brandingMissingRequiredVars:
-	        "HTML must include the required variables ${primaryColor}, ${secondaryColor}, ${logoUrl}, and ${companyName}.",
+	        "HTML must include the required variables ${logoUrl} and ${companyName}.",
 	      brandingMissingRequiredVarsField: (vars) => `Include the required variables: ${vars}.`,
 	      otpMissingRequiredVars: "HTML must include the required variables ${safeName} and ${code}.",
 	      otpMissingRequiredVarsField: "Include ${safeName} and ${code} in the HTML.",

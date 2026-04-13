@@ -43,6 +43,7 @@ type RemoteTemplateListItem = {
   organization_id: string;
   category: string;
   template: string;
+  subject?: string | null;
   isActive: boolean;
   sender_email?: string | null;
 };
@@ -55,6 +56,7 @@ type CreateTemplateResponse =
         organization_id: string;
         category: string;
         template: string;
+        subject?: string | null;
         isActive: boolean;
         sender_email?: string | null;
       };
@@ -77,13 +79,25 @@ const parseRemoteActive = (value: boolean | string | undefined): boolean => {
   return false;
 };
 
+const isRemoteTemplateListItem = (value: unknown): value is RemoteTemplateListItem => {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Partial<Record<keyof RemoteTemplateListItem, unknown>>;
+  return (
+    typeof item.id === "string" &&
+    typeof item.organization_id === "string" &&
+    typeof item.category === "string" &&
+    typeof item.template === "string" &&
+    typeof item.isActive === "boolean"
+  );
+};
+
 const CATEGORY_PRESETS = [
   { name: "OTP", description: "Códigos de un solo uso (OTP)." },
   { name: "Transacciones", description: "Notificaciones transaccionales." },
   { name: "resetear contraseña", description: "Recuperación y reseteo de contraseña." },
 ] as const;
 
-const BRANDING_REQUIRED_VARIABLES = ["${primaryColor}", "${secondaryColor}", "${logoUrl}", "${companyName}"] as const;
+const BRANDING_REQUIRED_VARIABLES = ["${logoUrl}", "${companyName}"] as const;
 
 // findTemplateVariables() lowercases all matches, so this set must contain lowercase variants.
 const OTP_ALLOWED_VARIABLES = new Set([
@@ -249,6 +263,7 @@ export function NotificationsPageContent() {
   const autoSelectedActiveRef = useRef(false);
   const newTemplateHtmlDirtyRef = useRef(false);
   const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
+  const [forceCreateMode, setForceCreateMode] = useState(false);
   const renderedTemplateHtml = useMemo(() => {
     if (newTemplateHtml.trim()) return newTemplateHtml;
     return `<html><body style="font-family: Arial, sans-serif; padding: 40px; background: #f4f6fb;">
@@ -453,6 +468,17 @@ export function NotificationsPageContent() {
   const hasOrganizationTemplates = (remoteTemplatesList?.length ?? 0) > 0;
   const isEditingTemplate = Boolean(editingTemplateId);
 
+  const applyRemoteTemplateUpdate = useCallback((updated: RemoteTemplateListItem) => {
+    setRemoteTemplatesList((prev) => {
+      if (!prev) return prev;
+      return prev.map((item) => {
+        if (item.id === updated.id) return { ...item, ...updated };
+        if (updated.isActive && item.category === updated.category) return { ...item, isActive: false };
+        return item;
+      });
+    });
+  }, []);
+
   const remoteTemplatesForSelectedGroup = useMemo(() => {
     if (!selectedGroup || !remoteTemplatesList) return [];
     const category = toBackendCategory(selectedGroup.name);
@@ -473,25 +499,37 @@ export function NotificationsPageContent() {
     // When a category is selected and there is an active template, show its HTML in the editor
     // unless the user already started typing a new template.
     if (!selectedGroup) return;
+    if (forceCreateMode) return;
     if (!activeTemplateHtmlForSelectedGroup) return;
     if (newTemplateHtmlDirtyRef.current) return;
     setNewTemplateHtml(activeTemplateHtmlForSelectedGroup);
-  }, [activeTemplateHtmlForSelectedGroup, selectedGroup]);
+  }, [activeTemplateHtmlForSelectedGroup, forceCreateMode, selectedGroup]);
 
   useEffect(() => {
     if (!selectedGroup) return;
     if (newTemplateHtmlDirtyRef.current) return;
+    if (forceCreateMode) {
+      setEditingTemplateId(null);
+      const baseName = humanizeCategory(selectedGroup.name);
+      const nextIndex = (remoteTemplatesForSelectedGroup?.length ?? 0) + 1;
+      setNewTemplateName(nextIndex > 1 ? `${baseName} #${nextIndex}` : baseName);
+      setPreviewFrom("notifications@zelify.com");
+      setPreviewSubject("");
+      return;
+    }
     const active = remoteTemplatesForSelectedGroup.find((item) => item.isActive) ?? null;
     if (active) {
       setEditingTemplateId(active.id);
       setNewTemplateName(humanizeCategory(active.category));
       setPreviewFrom(active.sender_email?.trim() || "notifications@zelify.com");
+      setPreviewSubject(active.subject?.trim() || "");
       return;
     }
     setEditingTemplateId(null);
     setNewTemplateName(humanizeCategory(selectedGroup.name));
     setPreviewFrom("notifications@zelify.com");
-  }, [remoteTemplatesForSelectedGroup, selectedGroup]);
+    setPreviewSubject("");
+  }, [forceCreateMode, remoteTemplatesForSelectedGroup, selectedGroup]);
 
   const previewSrcDoc = useMemo(() => {
     if (newTemplateHtml.trim()) return renderedTemplateHtml;
@@ -530,6 +568,7 @@ export function NotificationsPageContent() {
     return sorted.map((remote, index) => {
       const name = total > 1 ? `${baseName} #${index + 1}` : baseName;
       const senderEmail = remote.sender_email?.trim() || "notifications@zelify.com";
+      const subject = remote.subject?.trim() || name;
       return {
         id: remote.id,
         key: remote.id,
@@ -544,8 +583,8 @@ export function NotificationsPageContent() {
           ctr: 0,
         },
         name,
-        subject: name,
-        description: translations.remote.remoteTemplateDescription,
+        subject,
+        description: "",
         html: {
           en: remote.template ?? "",
           es: remote.template ?? "",
@@ -557,7 +596,6 @@ export function NotificationsPageContent() {
   }, [
     selectedGroup,
     remoteTemplatesForSelectedGroup,
-    translations.remote.remoteTemplateDescription,
   ]);
 
   const remoteStatusForGroup = selectedGroup ? remoteStatuses[selectedGroup.id] : undefined;
@@ -616,12 +654,31 @@ export function NotificationsPageContent() {
   const statusLabel = (status: "active" | "inactive" | "draft") => translations.templateList.status[status];
 
   const handleOpenTemplate = (template: NotificationTemplate) => {
+    setForceCreateMode(false);
     const remote = remoteTemplatesForSelectedGroup.find((item) => item.id === template.id) ?? null;
     setEditingTemplateId(template.id);
     newTemplateHtmlDirtyRef.current = false;
     setNewTemplateHtml(remote?.template ?? template.html?.es ?? template.html?.en ?? "");
     setNewTemplateName(template.name ?? humanizeCategory(remote?.category ?? selectedGroup?.name ?? ""));
     setPreviewFrom(remote?.sender_email?.trim() || template.from?.trim() || "notifications@zelify.com");
+    setPreviewSubject(remote?.subject?.trim() || template.subject?.trim() || "");
+  };
+
+  const handleStartNewTemplate = () => {
+    if (!selectedGroup) return;
+    setForceCreateMode(true);
+    setEditingTemplateId(null);
+    const baseName = humanizeCategory(selectedGroup.name);
+    const nextIndex = remoteTemplatesForSelectedGroup.length + 1;
+    setNewTemplateName(nextIndex > 1 ? `${baseName} #${nextIndex}` : baseName);
+    setNewTemplateHtml("");
+    setNewTemplateHtmlError(null);
+    setNewTemplateNameError(null);
+    setTemplateSubmitStatus("idle");
+    setTemplateSubmitMessage(null);
+    setPreviewFrom("notifications@zelify.com");
+    setPreviewSubject("");
+    newTemplateHtmlDirtyRef.current = true;
   };
 
   const handleCreateTemplate = async () => {
@@ -688,12 +745,14 @@ export function NotificationsPageContent() {
     const remoteCategory = editingRemoteTemplate?.category ?? category;
     const remoteIsActive = editingRemoteTemplate?.isActive ?? false;
     const senderEmail = previewFrom.trim() || "notifications@zelify.com";
+    const subject = previewSubject.trim() || finalSubject;
 
     if (isEditing && editingTemplateId) {
       const payload = {
         organization_id: organizationId,
         category: remoteCategory,
         template: normalizedHtml,
+        subject,
         isActive: remoteIsActive,
         sender_email: senderEmail,
       };
@@ -711,19 +770,19 @@ export function NotificationsPageContent() {
         if (!response.ok) {
           throw new Error("request failed");
         }
-        const result = (await response.json().catch(() => null)) as { status?: string } | null;
-        if (!result || result.status !== "success") {
+        const result = (await response.json().catch(() => null)) as
+          | { status: "success"; data: unknown }
+          | { status?: string; data?: unknown }
+          | null;
+        const data = result && typeof result === "object" && "data" in result ? (result as { data?: unknown }).data : null;
+        if (!result || result.status !== "success" || !isRemoteTemplateListItem(data)) {
           throw new Error("failed");
         }
-        setRemoteTemplatesList((prev) => {
-          if (!prev) return prev;
-          return prev.map((item) =>
-            item.id === editingTemplateId ? { ...item, template: normalizedHtml, sender_email: senderEmail } : item,
-          );
-        });
+        applyRemoteTemplateUpdate(data);
         setTemplateSubmitStatus("success");
         setTemplateSubmitMessage(translations.alerts.saved);
         newTemplateHtmlDirtyRef.current = false;
+        setForceCreateMode(false);
         return;
       } catch (error) {
         console.error("Error updating template", error);
@@ -737,6 +796,7 @@ export function NotificationsPageContent() {
       organization_id: organizationId,
       category,
       template: normalizedHtml,
+      subject,
       isActive: false,
       sender_email: senderEmail,
     };
@@ -778,7 +838,7 @@ export function NotificationsPageContent() {
         },
         from: senderEmail,
         name: newTemplateName.trim(),
-        subject: previewSubject.trim() || finalSubject,
+        subject,
         description: translations.templateList.customTemplateFallback,
         html: {
           en: newTemplateHtml,
@@ -806,6 +866,7 @@ export function NotificationsPageContent() {
       setNewTemplateHtmlError(null);
       setNewTemplateCompanyId("");
       setPreviewFrom("notifications@zelify.com");
+      setForceCreateMode(false);
       router.refresh();
     } catch (error) {
       console.error("Error creating template", error);
@@ -830,6 +891,50 @@ export function NotificationsPageContent() {
       }
     } catch (error) {
       console.warn("Failed to delete template", error);
+    }
+  };
+
+  const handleActivateRemoteTemplate = async (templateId: string) => {
+    try {
+      const organizationId = organization?.id ?? getStoredOrganization()?.id ?? "";
+      if (!organizationId || !remoteTemplatesList) return;
+      const current = remoteTemplatesList.find((item) => item.id === templateId);
+      if (!current) return;
+
+      const payload = {
+        organization_id: organizationId,
+        category: current.category,
+        template: normalizeBrandingVariables(current.template ?? ""),
+        subject: current.subject ?? "",
+        sender_email: current.sender_email ?? "notifications@zelify.com",
+        isActive: true,
+      };
+
+      const response = await fetchWithAuth(`/api/templates/${encodeURIComponent(templateId)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("request_failed");
+      const json = (await response.json().catch(() => null)) as
+        | { status: "success"; data: unknown }
+        | { status?: string; data?: unknown }
+        | null;
+      const data = json && typeof json === "object" && "data" in json ? (json as { data?: unknown }).data : null;
+      if (!json || json.status !== "success" || !isRemoteTemplateListItem(data)) throw new Error("activate_failed");
+      applyRemoteTemplateUpdate(data);
+
+      setForceCreateMode(false);
+      setEditingTemplateId(templateId);
+      newTemplateHtmlDirtyRef.current = false;
+      setNewTemplateHtml(current.template ?? "");
+      setNewTemplateName(humanizeCategory(current.category));
+      setPreviewFrom(current.sender_email?.trim() || "notifications@zelify.com");
+      setPreviewSubject(current.subject?.trim() || "");
+      setTemplateSubmitStatus("success");
+      setTemplateSubmitMessage(translations.alerts.activated);
+    } catch (error) {
+      console.warn("Failed to activate template", error);
     }
   };
 
@@ -1062,10 +1167,8 @@ export function NotificationsPageContent() {
                     role="button"
                     tabIndex={0}
                     className={cn(
-                      "group relative flex min-h-[240px] cursor-pointer flex-col overflow-hidden rounded-3xl border bg-white p-5 text-left transition hover:-translate-y-1 hover:shadow-xl dark:bg-dark-2",
-                      derivedStatus === "active"
-                        ? "border-emerald-400/80 ring-4 ring-emerald-400/20 dark:border-emerald-300/60 dark:ring-emerald-300/15"
-                        : "border-stroke hover:border-primary dark:border-dark-3",
+                      "group relative flex min-h-[200px] cursor-pointer flex-col overflow-hidden rounded-3xl border bg-white p-4 text-left shadow-sm transition hover:shadow-md dark:bg-dark-2",
+                      derivedStatus === "active" ? "border-emerald-300/80 dark:border-emerald-300/50" : "border-stroke dark:border-dark-3",
                     )}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -1085,6 +1188,23 @@ export function NotificationsPageContent() {
                         <p className="text-xs text-dark-6 dark:text-dark-6">
                           {translations.templateList.lastUsed}: {formatLocalDateTime(template.lastUsed)}
                         </p>
+                        {derivedStatus !== "active" ? (
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              void handleActivateRemoteTemplate(template.id);
+                            }}
+                            className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/20"
+                          >
+                            {translations.previewPanel.activate}
+                          </button>
+                        ) : (
+                          <span className="invisible rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold">
+                            {translations.previewPanel.activate}
+                          </span>
+                        )}
                         <button
                           type="button"
                           onClick={(event) => {
@@ -1098,21 +1218,10 @@ export function NotificationsPageContent() {
                         </button>
                       </div>
                     </div>
-                    <h3 className="mt-4 text-xl font-semibold text-dark dark:text-white">{copy.name}</h3>
-                    <p className="mt-2 flex-1 text-sm text-dark-5 dark:text-dark-6">
+                    <h3 className="mt-5 text-lg font-semibold text-dark dark:text-white">{copy.name}</h3>
+                    <p className="mt-1 flex-1 text-sm text-dark-5 dark:text-dark-6">
                       {copy.subject ?? template.subject}
                     </p>
-                    <div className="mt-4 rounded-2xl border border-dashed border-stroke bg-slate-50/70 p-4 text-left text-xs text-dark-5 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6">
-                      <p className="font-semibold text-dark dark:text-white/80">
-                        {translations.templateList.ctr} {template.metrics.ctr}%
-                      </p>
-                      <p>
-                        {translations.templateList.openRate} {template.metrics.openRate}%
-                      </p>
-                      <p className="mt-2 line-clamp-2">
-                        {copy.description ?? template.description ?? translations.templateList.customTemplateFallback}
-                      </p>
-                    </div>
                   </div>
                 );
               })}
@@ -1139,6 +1248,15 @@ export function NotificationsPageContent() {
                 </h3>
                 <p className="text-sm text-dark-5 dark:text-dark-6">{translations.createTemplate.subtitle}</p>
               </div>
+              {remoteTemplatesForSelectedGroup.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleStartNewTemplate}
+                  className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
+                >
+                  {translations.createTemplate.newButton}
+                </button>
+              )}
             </div>
             <div className="grid gap-4 md:grid-cols-3">
               <div className="space-y-2">
@@ -1336,10 +1454,10 @@ export function NotificationsPageContent() {
                   key={template.id}
                   onClick={() => handleOpenTemplate(template)}
                   className={cn(
-                    "group relative flex min-h-[240px] flex-col overflow-hidden rounded-3xl border bg-white p-5 text-left transition hover:-translate-y-1 hover:shadow-xl dark:bg-dark-2",
+                    "group relative flex min-h-[200px] flex-col overflow-hidden rounded-3xl border bg-white p-4 text-left shadow-sm transition hover:shadow-md dark:bg-dark-2",
                     derivedStatus === "active"
-                      ? "border-emerald-400/80 ring-4 ring-emerald-400/20 dark:border-emerald-300/60 dark:ring-emerald-300/15"
-                      : "border-stroke hover:border-primary dark:border-dark-3",
+                      ? "border-emerald-300/80 dark:border-emerald-300/50"
+                      : "border-stroke dark:border-dark-3",
                   )}
                 >
                   <div className="flex items-start justify-between">
@@ -1359,21 +1477,10 @@ export function NotificationsPageContent() {
                       {translations.templateList.lastUsed}: {formatLocalDateTime(template.lastUsed)}
                     </p>
                   </div>
-                  <h3 className="mt-4 text-xl font-semibold text-dark dark:text-white">{copy.name}</h3>
-                  <p className="mt-2 flex-1 text-sm text-dark-5 dark:text-dark-6">
+                  <h3 className="mt-5 text-lg font-semibold text-dark dark:text-white">{copy.name}</h3>
+                  <p className="mt-1 flex-1 text-sm text-dark-5 dark:text-dark-6">
                     {copy.subject ?? template.subject}
                   </p>
-                  <div className="mt-4 rounded-2xl border border-dashed border-stroke bg-slate-50/70 p-4 text-left text-xs text-dark-5 dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6">
-                    <p className="font-semibold text-dark dark:text-white/80">
-                      {translations.templateList.ctr} {template.metrics.ctr}%
-                    </p>
-                    <p>
-                      {translations.templateList.openRate} {template.metrics.openRate}%
-                    </p>
-                    <p className="mt-2 line-clamp-2">
-                      {copy.description ?? template.description ?? translations.templateList.customTemplateFallback}
-                    </p>
-                  </div>
                 </button>
               );
             })}
