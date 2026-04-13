@@ -278,9 +278,14 @@ export function TechnicalDocumentationPageContent() {
     setErrorDev(null);
     setSuccessDev(false);
     try {
+      const parsedUrls = urls
+        .split(/\r?\n|,/)
+        .map((value) => value.trim())
+        .filter(Boolean);
+
       await putDevelopmentEnvironments(orgId, {
-        development_urls: urls,
-        api_keys: keys,
+        development_urls: parsedUrls,
+        development_api_keys: keys,
       });
       setSuccessDev(true);
       notifyOnboardingStatusUpdated();

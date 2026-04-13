@@ -444,8 +444,8 @@ export async function postTechnicalDocumentation(
 }
 
 export type DevelopmentEnvironmentsPayload = {
-  /** Texto del formulario: una URL por línea (el cliente lo convierte al shape del API) */
-  development_urls?: string;
+  /** Texto del formulario o array normalizado */
+  development_urls?: string | string[];
   /** Texto libre (líneas o bloque) */
   api_keys?: string;
   development_api_keys?: string;
@@ -454,36 +454,43 @@ export type DevelopmentEnvironmentsPayload = {
 /**
  * Convierte el payload del formulario al JSON que acepta el backend.
  *
- * - Por defecto (Nest/class-validator típico desplegado): `development_urls` es **array** de strings
- *   y solo `development_api_keys` (no enviar `api_keys` → evita "should not exist").
- * - Si `NEXT_PUBLIC_ONBOARDING_DEV_ENV_STRING_BODY=true`: cuerpo nuevo con `development_urls` string
- *   y `api_keys` (texto).
+ * Contrato actual del backend:
+ * - `development_urls` debe ser **array** de strings
+ * - enviar solo `development_api_keys`
  */
 export function buildDevelopmentEnvironmentsRequestBody(
   payload: DevelopmentEnvironmentsPayload
 ): Record<string, unknown> {
-  const useStringBody =
-    typeof process !== "undefined" &&
-    process.env.NEXT_PUBLIC_ONBOARDING_DEV_ENV_STRING_BODY === "true";
-
-  const urlsText =
-    typeof payload.development_urls === "string" ? payload.development_urls : "";
+  const rawUrls = payload.development_urls;
   const keysText = (payload.development_api_keys ?? payload.api_keys ?? "").trim();
-
-  if (useStringBody) {
-    const body: Record<string, unknown> = {};
-    if (urlsText.trim() !== "") body.development_urls = urlsText;
-    if (keysText !== "") body.api_keys = keysText;
-    return body;
-  }
-
-  const lines = urlsText
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0);
+  const lines = Array.isArray(rawUrls)
+    ? rawUrls.map((url) => url.trim()).filter((url) => url.length > 0)
+    : typeof rawUrls === "string"
+      ? rawUrls
+          .split(/\r?\n|,/)
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0)
+      : [];
 
   const body: Record<string, unknown> = {};
   if (lines.length > 0) body.development_urls = lines;
+  if (keysText !== "") body.development_api_keys = keysText;
+  return body;
+}
+
+function buildDevelopmentEnvironmentsStringFallbackBody(
+  payload: DevelopmentEnvironmentsPayload
+): Record<string, unknown> {
+  const rawUrls = payload.development_urls;
+  const keysText = (payload.development_api_keys ?? payload.api_keys ?? "").trim();
+  const urlsText = Array.isArray(rawUrls)
+    ? rawUrls.map((url) => url.trim()).filter(Boolean).join("\n")
+    : typeof rawUrls === "string"
+      ? rawUrls.trim()
+      : "";
+
+  const body: Record<string, unknown> = {};
+  if (urlsText !== "") body.development_urls = urlsText;
   if (keysText !== "") body.development_api_keys = keysText;
   return body;
 }
@@ -493,15 +500,33 @@ export async function putDevelopmentEnvironments(
   organizationId: string,
   payload: DevelopmentEnvironmentsPayload
 ): Promise<unknown> {
-  const res = await fetchWithAuth(`${onboardingBase(organizationId)}/development-environments`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "x-org-id": organizationId,
-    },
-    body: JSON.stringify(buildDevelopmentEnvironmentsRequestBody(payload)),
-  });
-  const data = await res.json().catch(() => ({}));
+  const request = async (bodyPayload: Record<string, unknown>) => {
+    const res = await fetchWithAuth(`${onboardingBase(organizationId)}/development-environments`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "x-org-id": organizationId,
+      },
+      body: JSON.stringify(bodyPayload),
+    });
+    const data = await res.json().catch(() => ({}));
+    return { res, data };
+  };
+
+  const primaryBody = buildDevelopmentEnvironmentsRequestBody(payload);
+  let { res, data } = await request(primaryBody);
+
+  const messageText: string = Array.isArray((data as { message?: unknown }).message)
+    ? ((data as { message?: unknown[] }).message?.join(" ") ?? "")
+    : typeof (data as { message?: unknown }).message === "string"
+      ? String((data as { message?: unknown }).message)
+      : "";
+
+  if (!res.ok && res.status === 400 && messageText.includes("development_urls must be a string")) {
+    const fallbackBody = buildDevelopmentEnvironmentsStringFallbackBody(payload);
+    ({ res, data } = await request(fallbackBody));
+  }
+
   if (!res.ok) {
     throw new AuthError(
       (data as { message?: string }).message ?? "Error al guardar ambientes de desarrollo",
