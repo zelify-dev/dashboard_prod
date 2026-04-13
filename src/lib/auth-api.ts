@@ -83,6 +83,7 @@ export type AuthUser = {
   status: string;
   photo?: string | null;
   must_change_password?: boolean;
+  merchant_id?: string | null;
 };
 
 export type AuthOrganization = {
@@ -143,6 +144,19 @@ export function isOrganizationOnboardingVerified(
   if (org.onboarding_completed === true) return true;
   if (org.kyb_verified === true) return true;
   return false;
+}
+
+/**
+ * Webhooks, notificaciones, dominios, logs (cuando apliquen), sandbox de API keys:
+ * habilitados si la org tiene **al menos un scope** en sesión (GET …/scopes).
+ * Si no hay scopes (lista vacía o aún null), se mantiene el criterio anterior por **onboarding verificado**.
+ */
+export function canUseOrganizationIntegrations(
+  org: OrganizationDetails | null | undefined,
+  scopesFromSession: string[] | null
+): boolean {
+  if (scopesFromSession != null && scopesFromSession.length > 0) return true;
+  return isOrganizationOnboardingVerified(org);
 }
 
 export type AuthSuccessResponse = {

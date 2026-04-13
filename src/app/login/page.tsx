@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe, type AuthSuccessResponse } from "@/lib/auth-api";
 import { getAuthErrorMessage } from "@/lib/auth-error-messages";
+import { getDefaultDashboardPath } from "@/lib/dashboard-routing";
 
 // ============================================================================
 // TRANSLATIONS
@@ -388,7 +389,7 @@ export default function LoginPage() {
               /* mantener datos del response */
             }
             setLoading(false);
-            window.location.href = "/";
+            window.location.href = getDefaultDashboardPath(authResult.roles);
             return;
           }
         }
@@ -436,7 +437,7 @@ export default function LoginPage() {
             /* mantener datos del response */
           }
           setLoading(false);
-          window.location.href = "/";
+          window.location.href = getDefaultDashboardPath(result.roles);
           return;
         }
 

@@ -96,6 +96,7 @@ export function Sidebar() {
     isOwner: isOwnerUser,
     canSeeBranding,
     organizationScopes,
+    roles,
   });
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
 
@@ -290,7 +291,7 @@ export function Sidebar() {
 
   // Scroll automático al elemento del sidebar cuando cambia el paso del tour
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     if (isTourActive && steps.length > 0 && sidebarScrollRef.current) {
       const currentStepData = steps[currentStep];
@@ -599,7 +600,7 @@ export function Sidebar() {
                                 title={item.title}
                                 onClick={() => isCollapsed ? toggleCollapse() : toggleExpanded(itemKey)}
                               >
-                                {item.title.toUpperCase().includes("AI") || item.title.toUpperCase().includes("IA") ? (
+                                {item.title === translations.sidebar.menuItems.ai ? (
                                   <img
                                     src="/images/iconAlaiza.svg"
                                     alt={item.title}

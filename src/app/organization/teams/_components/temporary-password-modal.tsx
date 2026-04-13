@@ -2,24 +2,20 @@
 
 import { useState } from "react";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
-import { sendEmail } from "@/lib/auth-api";
 
 type TemporaryPasswordModalProps = {
   temporaryPassword: string;
-  inviteToken?: string | null;
-  recipientEmail?: string;
+  onSendEmail?: (temporaryPassword: string) => Promise<void>;
   onClose: () => void;
 };
 
 export function TemporaryPasswordModal({
   temporaryPassword,
-  inviteToken,
-  recipientEmail,
+  onSendEmail,
   onClose,
 }: TemporaryPasswordModalProps) {
   const t = useUiTranslations();
   const [copied, setCopied] = useState(false);
-  const [inviteCopied, setInviteCopied] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [emailMessage, setEmailMessage] = useState<"success" | "error" | null>(null);
   const m = t.membersManagement;
@@ -34,35 +30,12 @@ export function TemporaryPasswordModal({
     }
   };
 
-  const handleCopyInvite = async () => {
-    if (!inviteToken) return;
-    try {
-      await navigator.clipboard.writeText(inviteToken);
-      setInviteCopied(true);
-      setTimeout(() => setInviteCopied(false), 2000);
-    } catch {
-      // fallback
-    }
-  };
-
   const handleSendEmail = async () => {
-    if (!recipientEmail) return;
+    if (!onSendEmail) return;
     setSendingEmail(true);
     setEmailMessage(null);
     try {
-      const passwordToSend = inviteToken ?? temporaryPassword;
-      await sendEmail({
-        recipient: recipientEmail,
-        purpose: "Invitación al equipo",
-        message: [
-          "Has sido añadido/a al equipo.",
-          "",
-          `Email de acceso: ${recipientEmail}`,
-          `Contraseña temporal: ${passwordToSend}`,
-          "",
-          "Debes cambiar la contraseña en tu primer inicio de sesión.",
-        ].join("\n"),
-      });
+      await onSendEmail(temporaryPassword);
       setEmailMessage("success");
     } catch {
       setEmailMessage("error");
@@ -92,26 +65,7 @@ export function TemporaryPasswordModal({
             {copied ? m.tempPasswordCopied : m.tempPasswordCopy}
           </button>
         </div>
-        {inviteToken && (
-          <div className="mt-3">
-            <p className="mb-1.5 text-xs font-medium text-dark-6 dark:text-dark-6">
-              {m.inviteTokenLabel ?? "Invite token (if send_invite was used)"}
-            </p>
-            <div className="flex items-center gap-2 rounded-lg border border-stroke bg-gray-2/50 p-3 dark:border-dark-3 dark:bg-dark-2">
-              <code className="min-w-0 flex-1 truncate font-mono text-sm text-dark dark:text-white">
-                {inviteToken}
-              </code>
-              <button
-                type="button"
-                onClick={handleCopyInvite}
-                className="shrink-0 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-              >
-                {inviteCopied ? m.tempPasswordCopied : m.tempPasswordCopy}
-              </button>
-            </div>
-          </div>
-        )}
-        {recipientEmail && (
+        {onSendEmail && (
           <div className="mt-4">
             <button
               type="button"

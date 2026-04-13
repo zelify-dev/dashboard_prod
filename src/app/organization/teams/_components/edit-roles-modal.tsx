@@ -21,7 +21,9 @@ export function EditRolesModal({ user, roleOptions, onClose, onSave }: EditRoles
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const codes = user.roles?.map((r) => r.code) ?? [];
+    const codes = (user.roles ?? [])
+      .map((role) => (typeof role === "string" ? role : role.code))
+      .filter((code): code is string => typeof code === "string" && code.length > 0);
     setSelected(new Set(codes));
   }, [user]);
 

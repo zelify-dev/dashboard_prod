@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { useOrganizationCountry } from "@/hooks/use-organization-country";
-import { fetchWithAuth, getStoredOrganization, isOrganizationOnboardingVerified } from "@/lib/auth-api";
+import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
+import { canUseOrganizationIntegrations, fetchWithAuth, getStoredOrganization } from "@/lib/auth-api";
 import {
   DEFAULT_NOTIFICATION_TEMPLATES,
   DEFAULT_TEMPLATE_GROUPS,
@@ -215,7 +216,8 @@ export function NotificationsPageContent() {
   const translations = useNotificationsTranslations();
   const ui = useUiTranslations();
   const { organization, loading: orgLoading } = useOrganizationCountry();
-  const canUseWebhooks = isOrganizationOnboardingVerified(organization);
+  const scopes = useOrganizationScopes();
+  const canUseWebhooks = canUseOrganizationIntegrations(organization, scopes);
   const locked = orgLoading || !canUseWebhooks;
 
   const [templates, setTemplates] = useState<NotificationTemplate[]>(DEFAULT_NOTIFICATION_TEMPLATES);

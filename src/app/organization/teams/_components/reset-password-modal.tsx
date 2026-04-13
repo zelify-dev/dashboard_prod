@@ -9,9 +9,10 @@ type ResetPasswordModalProps = {
   user: OrgUserListItem;
   onClose: () => void;
   onReset: (userId: string) => Promise<{ temporary_password: string }>;
+  onSendEmail?: (userId: string, temporaryPassword: string) => Promise<void>;
 };
 
-export function ResetPasswordModal({ user, onClose, onReset }: ResetPasswordModalProps) {
+export function ResetPasswordModal({ user, onClose, onReset, onSendEmail }: ResetPasswordModalProps) {
   const t = useUiTranslations();
   const m = t.membersManagement;
   const [step, setStep] = useState<"confirm" | "password">("confirm");
@@ -37,6 +38,11 @@ export function ResetPasswordModal({ user, onClose, onReset }: ResetPasswordModa
     return (
       <TemporaryPasswordModal
         temporaryPassword={tempPassword}
+        onSendEmail={
+          onSendEmail
+            ? (temporaryPassword) => onSendEmail(user.id, temporaryPassword)
+            : undefined
+        }
         onClose={onClose}
       />
     );

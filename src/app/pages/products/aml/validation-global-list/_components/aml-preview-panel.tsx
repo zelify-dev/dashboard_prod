@@ -283,8 +283,8 @@ export function AMLPreviewPanel({ config, isActive = true }: AMLPreviewPanelProp
 
     // Ciclo de fases y animación de progreso
     useEffect(() => {
-        let timeoutId: NodeJS.Timeout;
-        let progressInterval: NodeJS.Timeout;
+        let timeoutId: ReturnType<typeof setTimeout>;
+        let progressInterval: ReturnType<typeof setInterval> | undefined;
 
         if (scanPhase === 'scanning') {
             // Fase de escaneo (4 segundos)

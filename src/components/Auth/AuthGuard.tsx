@@ -2,8 +2,9 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { AuthError, clearAuthSession, getAccessToken, getMe, getStoredUser } from "@/lib/auth-api";
+import { AuthError, clearAuthSession, getAccessToken, getMe, getStoredRoles, getStoredUser } from "@/lib/auth-api";
 import { ChangePasswordModal } from "@/components/Auth/ChangePasswordModal";
+import { getDefaultDashboardPath } from "@/lib/dashboard-routing";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -103,7 +104,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
           // Si está autenticado y está en login o register, redirigir al home
           if (pathname === "/login" || pathname === "/register") {
-            router.replace("/");
+            router.replace(getDefaultDashboardPath(getStoredRoles()));
           } else {
             void validateActiveSession(true);
           }

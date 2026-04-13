@@ -16,9 +16,10 @@ import { formatLocalDateTime } from "@/lib/date-utils";
 import {
   getStoredOrganization,
   getOrganization,
-  isOrganizationOnboardingVerified,
+  canUseOrganizationIntegrations,
   type OrganizationDetails,
 } from "@/lib/auth-api";
+import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
 
 interface Webhook {
   id: string;
@@ -51,6 +52,7 @@ const MOCK_WEBHOOKS: Webhook[] = [
 export function WebhooksPageContent() {
   const { language } = useLanguage();
   const t = useUiTranslations().webhooksPage;
+  const scopes = useOrganizationScopes();
   const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
   const [orgLoading, setOrgLoading] = useState(true);
   const demoSeeded = useRef(false);
@@ -68,7 +70,7 @@ export function WebhooksPageContent() {
       .finally(() => setOrgLoading(false));
   }, []);
 
-  const canUseWebhooks = isOrganizationOnboardingVerified(orgDetails);
+  const canUseWebhooks = canUseOrganizationIntegrations(orgDetails, scopes);
 
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [showNewWebhook, setShowNewWebhook] = useState(false);
@@ -94,7 +96,7 @@ export function WebhooksPageContent() {
       demoSeeded.current = true;
       setWebhooks(MOCK_WEBHOOKS);
     }
-  }, [orgLoading, canUseWebhooks]);
+  }, [orgLoading, canUseWebhooks, scopes]);
 
   const locale = language === "es" ? "es-ES" : "en-US";
   const webhooksLocked = orgLoading || !canUseWebhooks;

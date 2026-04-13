@@ -8,7 +8,9 @@ import {
   maskApiKey,
   type ApiKeyItem,
 } from "@/lib/organization-api-keys";
-import { getStoredOrganization } from "@/lib/auth-api";
+import { canUseOrganizationIntegrations, getStoredOrganization } from "@/lib/auth-api";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
 import { useZelifyKeysTranslations } from "./use-zelifykeys-translations";
 import { useZelifyKeysData } from "./zelify-keys-data-context";
 import { useLanguage } from "@/contexts/language-context";
@@ -118,7 +120,13 @@ function ZelifySecretsSandboxDisabled() {
 }
 
 export function ZelifySecretsSandbox() {
-  if (!ZELIFY_SANDBOX_SECRETS_ENABLED) {
+  const { organization } = useOrganizationCountry();
+  const scopes = useOrganizationScopes();
+  const allowSandbox =
+    ZELIFY_SANDBOX_SECRETS_ENABLED ||
+    canUseOrganizationIntegrations(organization, scopes);
+
+  if (!allowSandbox) {
     return <ZelifySecretsSandboxDisabled />;
   }
   return <ZelifySecretsSandboxContent />;
