@@ -79,6 +79,11 @@ export type UiTranslations = {
         insuranceAssistance: string;
         quoteInsurance: string;
         discounts: string;
+        generalPanel: string;
+        programSummary: string;
+        merchants: string;
+        claims: string;
+        reports: string;
       };
       lockedTooltip: string;
     };
@@ -477,6 +482,11 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           insuranceAssistance: "Insurance Assistance",
           quoteInsurance: "Quote Insurance",
           discounts: "Discounts",
+          generalPanel: "General Panel",
+          programSummary: "Program summary",
+          merchants: "Merchants",
+          claims: "Claims",
+          reports: "Reports",
         },
         lockedTooltip:
           "This section is disabled for the user until the onboarding section is completed",
@@ -878,6 +888,11 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           insuranceAssistance: "Asistencia de Seguros",
           quoteInsurance: "Cotización de Seguros",
           discounts: "Descuentos",
+          generalPanel: "Panel General",
+          programSummary: "Resumen del programa",
+          merchants: "Comercios",
+          claims: "Claims",
+          reports: "Reportes",
         },
         lockedTooltip:
           "Esta sección está deshabilitada para el usuario cuando complete la sección de onboarding",

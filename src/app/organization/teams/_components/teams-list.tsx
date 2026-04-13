@@ -7,9 +7,11 @@ import type { Team } from "../page";
 type TeamsListProps = {
   teams: Team[];
   onAddMember: (teamId: string) => void;
+  canAddMembers?: boolean;
+  currentUserId?: string;
 };
 
-export function TeamsList({ teams, onAddMember }: TeamsListProps) {
+export function TeamsList({ teams, onAddMember, canAddMembers = true, currentUserId }: TeamsListProps) {
   const translations = useUiTranslations();
 
   if (teams.length === 0) {
@@ -66,12 +68,14 @@ export function TeamsList({ teams, onAddMember }: TeamsListProps) {
                     team.members.length
                   )}
                 </h3>
-                <button
-                  onClick={() => onAddMember(team.id)}
-                  className="rounded-lg border border-stroke px-4 py-2 text-body-sm font-medium text-dark hover:bg-gray-100 dark:border-dark-3 dark:text-white dark:hover:bg-dark-3"
-                >
-                  {translations.organizationTeams.actions.addMember}
-                </button>
+                {canAddMembers ? (
+                  <button
+                    onClick={() => onAddMember(team.id)}
+                    className="rounded-lg border border-stroke px-4 py-2 text-body-sm font-medium text-dark hover:bg-gray-100 dark:border-dark-3 dark:text-white dark:hover:bg-dark-3"
+                  >
+                    {translations.organizationTeams.actions.addMember}
+                  </button>
+                ) : null}
               </div>
 
               <div className="space-y-2">
@@ -85,6 +89,11 @@ export function TeamsList({ teams, onAddMember }: TeamsListProps) {
                         <span className="font-medium text-dark dark:text-white">
                           {member.fullName}
                         </span>
+                        {currentUserId && member.id === currentUserId && (
+                          <span className="rounded bg-emerald-100 px-2 py-0.5 text-body-xs text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                            Esta cuenta
+                          </span>
+                        )}
                         {member.role === "admin" && (
                           <span className="rounded bg-primary/10 px-2 py-0.5 text-body-xs text-primary dark:bg-primary/20">
                             {translations.organizationTeams.badges.admin}
@@ -105,8 +114,6 @@ export function TeamsList({ teams, onAddMember }: TeamsListProps) {
     </div>
   );
 }
-
-
 
 
 

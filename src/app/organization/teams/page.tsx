@@ -2,7 +2,7 @@
 
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { getStoredUser, getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
 import { userHasRole, TEAM_ROLE, getRoleByTeamId, getAssignableRoles, isOwner, isOrgAdminRole, toRoleCodes } from "./_constants/team-roles";
 import {
@@ -11,7 +11,10 @@ import {
   getOrgUser,
   updateOrgUser,
   assignOrgUserRoles,
+  removeOrgUserRole,
   resetOrgUserPassword,
+  sendDashboardMemberInviteEmail,
+  sendDashboardMemberResetPasswordEmail,
   type OrgUserListItem,
   type OrgUser,
   type OrgUserStatus,
@@ -51,7 +54,7 @@ const DEFAULT_TEAMS = (
     description: t.teamDescription,
     products: [],
     members: [],
-    createdAt: new Date().toISOString(),
+    createdAt: "",
   },
   {
     id: "2",
@@ -59,7 +62,7 @@ const DEFAULT_TEAMS = (
     description: "",
     products: [],
     members: [],
-    createdAt: new Date().toISOString(),
+    createdAt: "",
   },
   {
     id: "3",
@@ -67,7 +70,7 @@ const DEFAULT_TEAMS = (
     description: "",
     products: [],
     members: [],
-    createdAt: new Date().toISOString(),
+    createdAt: "",
   },
 ];
 
@@ -81,7 +84,6 @@ export default function TeamsPage() {
   const rawRoles = (Array.isArray(storedRoles) && storedRoles.length > 0 ? storedRoles : (Array.isArray(userRoles) ? userRoles : [])) as string[] | Array<{ code: string }>;
   const roles = toRoleCodes(rawRoles);
 
-  const [teams, setTeams] = useState<Team[]>(() => DEFAULT_TEAMS(translations.organizationTeams.defaults));
   const [members, setMembers] = useState<OrgUserListItem[]>([]);
   const [membersTotal, setMembersTotal] = useState(0);
   const [membersPage, setMembersPage] = useState(1);
@@ -103,7 +105,10 @@ export default function TeamsPage() {
 
   const isOrgAdmin = isOrgAdminRole(rolesToUse);
   const isOwnerUser = isOwner(rolesToUse);
+  const isBusinessUser = userHasRole(rolesToUse, TEAM_ROLE.BUSINESS);
+  const isDeveloperUser = userHasRole(rolesToUse, TEAM_ROLE.DEVELOPER);
   const canManageMembers = isOwnerUser || isOrgAdmin;
+  const canViewMembers = canManageMembers || isBusinessUser || isDeveloperUser;
   const orgId = org?.id ?? "";
 
   const assignableRoleCodes = getAssignableRoles(rolesToUse);
@@ -138,9 +143,8 @@ export default function TeamsPage() {
   const [addLoading, setAddLoading] = useState(false);
   const [addError, setAddError] = useState("");
   const [tempPasswordModal, setTempPasswordModal] = useState<{
+    userId: string;
     temporary_password: string;
-    invite_token: string | null;
-    recipientEmail?: string;
   } | null>(null);
 
   const [editUser, setEditUser] = useState<OrgUser | null>(null);
@@ -154,14 +158,21 @@ export default function TeamsPage() {
   };
 
   const fetchMembers = useCallback(async () => {
-    if (!orgId) return;
+    if (!orgId || !canViewMembers) return;
     setMembersLoading(true);
     try {
+      const roleCodeFilter =
+        !canManageMembers && isBusinessUser && !isDeveloperUser
+          ? TEAM_ROLE.BUSINESS
+          : !canManageMembers && isDeveloperUser && !isBusinessUser
+            ? TEAM_ROLE.DEVELOPER
+            : undefined;
       const res = await listDashboardMembers(orgId, {
         page: membersPage,
         limit: membersLimit,
         search: membersSearch || undefined,
         status: membersStatus || undefined,
+        role_code: roleCodeFilter,
       });
       const withoutAppUsers = res.items.filter((u) => !hasAppUserRole(u));
       setMembers(withoutAppUsers);
@@ -172,50 +183,103 @@ export default function TeamsPage() {
     } finally {
       setMembersLoading(false);
     }
-  }, [orgId, membersPage, membersLimit, membersSearch, membersStatus]);
-
-  useEffect(() => {
-    if (canManageMembers && orgId) fetchMembers();
-  }, [canManageMembers, orgId, fetchMembers]);
-
-  useEffect(() => {
-    const t = translations.organizationTeams.defaults;
-    setTeams((prev) =>
-      prev.map((team) => {
-        if (team.id === "1") return { ...team, name: t.teamName, description: t.teamDescription };
-        if (team.id === "2") return { ...team, name: t.teamNameBusiness };
-        if (team.id === "3") return { ...team, name: t.teamNameDevelopers };
-        return team;
-      })
-    );
   }, [
+    canManageMembers,
+    canViewMembers,
+    isBusinessUser,
+    isDeveloperUser,
+    membersLimit,
+    membersPage,
+    membersSearch,
+    membersStatus,
+    orgId,
+  ]);
+
+  useEffect(() => {
+    if (canViewMembers && orgId) fetchMembers();
+  }, [canViewMembers, orgId, fetchMembers]);
+
+  const visibleTeams = useMemo(() => {
+    const t = translations.organizationTeams.defaults;
+    const businessMembers: TeamMember[] = members
+      .filter((member) =>
+        (member.roles ?? []).some((role) => {
+          const code = typeof role === "string" ? role : role.code;
+          return code?.toUpperCase() === TEAM_ROLE.BUSINESS;
+        })
+      )
+      .map((member) => ({
+        id: member.id,
+        fullName: member.full_name,
+        email: member.email,
+        role: "member" as const,
+      }));
+
+    const developerMembers: TeamMember[] = members
+      .filter((member) =>
+        (member.roles ?? []).some((role) => {
+          const code = typeof role === "string" ? role : role.code;
+          return code?.toUpperCase() === TEAM_ROLE.DEVELOPER;
+        })
+      )
+      .map((member) => ({
+        id: member.id,
+        fullName: member.full_name,
+        email: member.email,
+        role: "member" as const,
+      }));
+
+    const fallbackCurrentMember = currentUser
+      ? {
+          id: currentUser.id,
+          fullName: currentUser.full_name,
+          email: currentUser.email,
+          role: "member" as const,
+        }
+      : null;
+
+    const resolvedBusinessMembers =
+      businessMembers.length === 0 && isBusinessUser && fallbackCurrentMember
+        ? [fallbackCurrentMember]
+        : businessMembers;
+
+    const resolvedDeveloperMembers =
+      developerMembers.length === 0 && isDeveloperUser && fallbackCurrentMember
+        ? [fallbackCurrentMember]
+        : developerMembers;
+
+    const next = DEFAULT_TEAMS(t).map((team) => {
+      if (team.id === "2") return { ...team, members: resolvedBusinessMembers };
+      if (team.id === "3") return { ...team, members: resolvedDeveloperMembers };
+      return team;
+    });
+
+    if (canManageMembers) {
+      return next;
+    }
+
+    if (isBusinessUser && !isDeveloperUser) {
+      return next.filter((team) => team.id === "2");
+    }
+
+    if (isDeveloperUser && !isBusinessUser) {
+      return next.filter((team) => team.id === "3");
+    }
+
+    return next.filter((team) => team.id === "2" || team.id === "3");
+  }, [
+    canManageMembers,
+    currentUser?.email,
+    currentUser?.full_name,
+    currentUser?.id,
+    isBusinessUser,
+    isDeveloperUser,
+    members,
     translations.organizationTeams.defaults.teamName,
     translations.organizationTeams.defaults.teamDescription,
     translations.organizationTeams.defaults.teamNameBusiness,
     translations.organizationTeams.defaults.teamNameDevelopers,
   ]);
-
-  useEffect(() => {
-    if (!currentUser || !isOrgAdmin) return;
-    setTeams((prev) =>
-      prev.map((team) => {
-        if (team.id !== "1") return team;
-        const hasAdmin = team.members.some((m) => m.role === "admin");
-        if (hasAdmin) return team;
-        return {
-          ...team,
-          members: [
-            {
-              id: currentUser.id,
-              fullName: currentUser.full_name,
-              email: currentUser.email,
-              role: "admin",
-            },
-          ],
-        };
-      })
-    );
-  }, [currentUser?.id, isOrgAdmin]);
 
   const openAddForTeam = (teamId: string) => {
     const role = getRoleByTeamId(teamId);
@@ -236,9 +300,8 @@ export default function TeamsPage() {
       });
       setAddModalOpen(false);
       setTempPasswordModal({
+        userId: res.user.id,
         temporary_password: res.temporary_password,
-        invite_token: res.invite_token ?? null,
-        recipientEmail: res.user?.email,
       });
       fetchMembers();
     } catch (err) {
@@ -268,7 +331,39 @@ export default function TeamsPage() {
 
   const handleEditRolesSave = async (roleCodes: string[]) => {
     if (!orgId || !editRolesUser) return;
-    await assignOrgUserRoles(orgId, editRolesUser.id, { role_codes: roleCodes });
+
+    const currentRoles = (editRolesUser.roles ?? [])
+      .map((role) => {
+        if (typeof role === "string") {
+          return { id: "", code: role };
+        }
+        return {
+          id: role.id ?? "",
+          code: role.code,
+        };
+      })
+      .filter((role) => typeof role.code === "string" && role.code.length > 0);
+
+    const currentCodes = new Set(currentRoles.map((role) => role.code));
+    const nextCodes = new Set(roleCodes);
+
+    const codesToAdd = roleCodes.filter((code) => !currentCodes.has(code));
+    const rolesToRemove = currentRoles.filter(
+      (role) => !nextCodes.has(role.code) && role.id
+    );
+
+    if (codesToAdd.length > 0) {
+      await assignOrgUserRoles(orgId, editRolesUser.id, { role_codes: codesToAdd });
+    }
+
+    if (rolesToRemove.length > 0) {
+      await Promise.all(
+        rolesToRemove.map((role) =>
+          removeOrgUserRole(orgId, editRolesUser.id, role.id)
+        )
+      );
+    }
+
     setEditRolesUser(null);
     fetchMembers();
   };
@@ -370,16 +465,20 @@ export default function TeamsPage() {
             />
           </ShowcaseSection>
         </>
-      ) : (
+      ) : canViewMembers ? (
         <>
           {!canManageMembers && (
             <p className="mb-4 text-sm text-dark-6 dark:text-dark-6">{m.noPermission}</p>
           )}
           <TeamsList
-            teams={teams}
-            onAddMember={canManageMembers && orgId ? openAddForTeam : () => {}}
+            teams={visibleTeams}
+            onAddMember={() => {}}
+            canAddMembers={false}
+            currentUserId={currentUser?.id}
           />
         </>
+      ) : (
+        <p className="mb-4 text-sm text-dark-6 dark:text-dark-6">{m.noPermission}</p>
       )}
 
       {addModalOpen && (
@@ -396,8 +495,11 @@ export default function TeamsPage() {
       {tempPasswordModal && (
         <TemporaryPasswordModal
           temporaryPassword={tempPasswordModal.temporary_password}
-          inviteToken={tempPasswordModal.invite_token}
-          recipientEmail={tempPasswordModal.recipientEmail}
+          onSendEmail={(temporaryPassword) =>
+            sendDashboardMemberInviteEmail(orgId, tempPasswordModal.userId, {
+              temporary_password: temporaryPassword,
+            }).then(() => undefined)
+          }
           onClose={() => setTempPasswordModal(null)}
         />
       )}
@@ -424,6 +526,11 @@ export default function TeamsPage() {
           user={resetUser}
           onClose={() => setResetUser(null)}
           onReset={handleResetPassword}
+          onSendEmail={(userId, temporaryPassword) =>
+            sendDashboardMemberResetPasswordEmail(orgId, userId, {
+              temporary_password: temporaryPassword,
+            }).then(() => undefined)
+          }
         />
       )}
     </div>

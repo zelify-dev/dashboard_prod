@@ -79,6 +79,10 @@ export type CreateDashboardMemberResponse = {
   invite_token: string | null;
 };
 
+export type SendTemporaryPasswordEmailBody = {
+  temporary_password: string;
+};
+
 /**
  * POST /api/organizations/{id}/dashboard/members — crear miembro (ORG_ADMIN).
  * Headers: Authorization: Bearer <access_token>, x-org-id: orgId.
@@ -111,6 +115,31 @@ export async function createDashboardMember(
     throw new AuthError(message, res.status, data);
   }
   return data as CreateDashboardMemberResponse;
+}
+
+/** POST /api/organizations/{orgId}/dashboard/members/{userId}/send-invite-email */
+export async function sendDashboardMemberInviteEmail(
+  orgId: string,
+  userId: string,
+  body: SendTemporaryPasswordEmailBody
+): Promise<{ ok: boolean; message?: string }> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/dashboard/members/${encodeURIComponent(userId)}/send-invite-email`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al enviar correo de invitacion",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean; message?: string };
 }
 
 export type UpdateOrgUserBody = {
@@ -324,4 +353,29 @@ export async function resetOrgUserPassword(
     );
   }
   return data as { ok: boolean; temporary_password: string };
+}
+
+/** POST /api/organizations/{orgId}/dashboard/members/{userId}/send-reset-password-email */
+export async function sendDashboardMemberResetPasswordEmail(
+  orgId: string,
+  userId: string,
+  body: SendTemporaryPasswordEmailBody
+): Promise<{ ok: boolean; message?: string }> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/dashboard/members/${encodeURIComponent(userId)}/send-reset-password-email`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al enviar correo de restablecimiento",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean; message?: string };
 }
