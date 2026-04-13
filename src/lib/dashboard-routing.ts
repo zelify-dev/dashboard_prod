@@ -51,12 +51,6 @@ export function getDashboardActorFromRoles(
 export function getDefaultDashboardPath(
   roles: string[] | undefined | null
 ): string {
-  const actor = getDashboardActorFromRoles(roles);
-
-  if (actor === "owner") return "/owner";
-  if (actor === "merchant") return "/merchant";
-  if (actor === "organization") return "/organization";
-
   return "/";
 }
 
