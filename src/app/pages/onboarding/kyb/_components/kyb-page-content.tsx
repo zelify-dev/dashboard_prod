@@ -8,8 +8,8 @@ import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
 import { cn } from "@/lib/utils";
 import { getCurrentOrganizationId, notifyOnboardingStatusUpdated, postKybFiles } from "@/lib/onboarding-api";
 
-/** Subida KYB desde esta pantalla desactivada (p. ej. canal Docsend). Pasar a `true` para permitir envío. */
-const KYB_DASHBOARD_UPLOAD_ENABLED = false;
+/** Subida KYB desde esta pantalla habilitada. */
+const KYB_DASHBOARD_UPLOAD_ENABLED = true;
 
 function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
