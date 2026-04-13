@@ -7,6 +7,9 @@ type DiscountEditorProps = {
   discount: MerchantDiscount;
   isSaving?: boolean;
   onCancel: () => void;
+  title?: string;
+  descriptionText?: string;
+  submitLabel?: string;
   onSave: (payload: {
     name: string;
     description?: string;
@@ -49,7 +52,15 @@ function isoToLocalDateTime(value?: string | null): string {
   return `${y}-${m}-${d}T${hh}:${mm}`;
 }
 
-export function DiscountEditor({ discount, onCancel, onSave, isSaving = false }: DiscountEditorProps) {
+export function DiscountEditor({
+  discount,
+  onCancel,
+  onSave,
+  isSaving = false,
+  title = "Editar descuento seleccionado",
+  descriptionText = "Actualiza la configuracion de la oferta antes de crear el nuevo cupon.",
+  submitLabel = "Guardar descuento",
+}: DiscountEditorProps) {
   const initialDays = useMemo(() => {
     const rows = (discount as MerchantDiscount & { available_days?: string[] }).available_days;
     return Array.isArray(rows) ? rows : [];
@@ -87,9 +98,9 @@ export function DiscountEditor({ discount, onCancel, onSave, isSaving = false }:
   return (
     <div className="mt-4 rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
       <div className="mb-3">
-        <h4 className="text-sm font-semibold text-dark dark:text-white">Editar descuento seleccionado</h4>
+        <h4 className="text-sm font-semibold text-dark dark:text-white">{title}</h4>
         <p className="mt-1 text-xs text-dark-6 dark:text-dark-6">
-          Actualiza la configuracion de la oferta antes de crear el nuevo cupon.
+          {descriptionText}
         </p>
       </div>
 
@@ -293,7 +304,7 @@ export function DiscountEditor({ discount, onCancel, onSave, isSaving = false }:
             disabled={isSaving}
             className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSaving ? "Guardando..." : "Guardar descuento"}
+            {isSaving ? "Guardando..." : submitLabel}
           </button>
         </div>
       </form>

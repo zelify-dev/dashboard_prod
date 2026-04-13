@@ -1,6 +1,7 @@
 import * as Icons from "../icons";
 import type { UiTranslations } from "@/hooks/use-ui-translations";
 import { ZENDESK_SUPPORT_MENU_HREF } from "@/lib/zendesk-widget";
+import { getDashboardActorFromRoles } from "@/lib/dashboard-routing";
 
 /** Verifica si al menos un scope de la org coincide con el prefijo (o con alguno de los prefijos). */
 function hasScope(scopePrefix: string | string[], scopeStrings: string[]): boolean {
@@ -10,11 +11,12 @@ function hasScope(scopePrefix: string | string[], scopeStrings: string[]): boole
 
 export function getNavData(
   translations: UiTranslations,
-  options?: { isOwner?: boolean; canSeeBranding?: boolean; organizationScopes?: string[] | null }
+  options?: { isOwner?: boolean; canSeeBranding?: boolean; organizationScopes?: string[] | null; roles?: string[] }
 ) {
   const isOwner = options?.isOwner ?? false;
   const canSeeBranding = options?.canSeeBranding ?? false;
   const organizationScopes = options?.organizationScopes;
+  const actor = getDashboardActorFromRoles(options?.roles);
 
   if (typeof window !== "undefined") {
     console.log("[getNavData] organizationScopes recibido:", organizationScopes == null ? "null" : `array(${organizationScopes?.length})`, organizationScopes ?? "(no aplica filtro, se muestran todos)");
@@ -174,32 +176,100 @@ export function getNavData(
       scopePrefix: "discounts_coupons.",
       title: translations.sidebar.menuItems.discountsCoupons,
       icon: Icons.DiscountsIcon,
-          items: [
-            {
-              title: translations.sidebar.menuItems.subItems.discounts,
-              url: "/pages/products/discounts-coupons/discounts",
-            },
-            {
-              title: translations.sidebar.menuItems.subItems.coupons,
-              url: "/pages/products/discounts-coupons",
-            },
-            {
-              title: translations.sidebar.menuItems.subItems.createCoupon,
-              url: "/pages/products/discounts-coupons/create",
-            },
-            {
-              title: translations.sidebar.menuItems.subItems.analyticsUsage,
-              url: "/pages/products/discounts-coupons/analytics",
-            },
-          ],
+      items:
+        actor === "organization"
+          ? [
+              {
+                title: translations.sidebar.menuItems.subItems.programSummary,
+                url: "/organization",
+              },
+              {
+                title: translations.sidebar.menuItems.subItems.merchants,
+                url: "/organization/merchants",
+              },
+              {
+                title: translations.sidebar.menuItems.subItems.discounts,
+                url: "/organization/discounts",
+              },
+              {
+                title: translations.sidebar.menuItems.subItems.claims,
+                url: "/organization/claims",
+              },
+              {
+                title: translations.sidebar.menuItems.subItems.reports,
+                url: "/organization/reports",
+              },
+            ]
+          : [
+              {
+                title: translations.sidebar.menuItems.subItems.discounts,
+                url: "/pages/products/discounts-coupons/discounts",
+              },
+              {
+                title: translations.sidebar.menuItems.subItems.coupons,
+                url: "/pages/products/discounts-coupons",
+              },
+              {
+                title: translations.sidebar.menuItems.subItems.createCoupon,
+                url: "/pages/products/discounts-coupons/create",
+              },
+              {
+                title: translations.sidebar.menuItems.subItems.analyticsUsage,
+                url: "/pages/products/discounts-coupons/analytics",
+              },
+            ],
     },
   ];
 
+  const shouldShowProductsSection =
+    actor === "owner" || actor === "unknown" || actor === "organization";
   const filteredProductItems =
-    organizationScopes != null && Array.isArray(organizationScopes)
+    shouldShowProductsSection && organizationScopes != null && Array.isArray(organizationScopes)
       ? productItems.filter((item) => hasScope(item.scopePrefix, organizationScopes))
-      : productItems;
+      : shouldShowProductsSection
+        ? productItems
+        : [];
   const productsSectionItems = filteredProductItems.map(({ scopePrefix: _p, ...item }) => item);
+
+  const actorDashboardItems =
+    actor === "owner"
+      ? [
+          {
+            title: translations.sidebar.menuItems.subItems.generalPanel,
+            url: "/",
+          },
+          { title: "Overview", url: "/owner" },
+          { title: "Merchants", url: "/owner/merchants" },
+          { title: "Visibility", url: "/owner/visibility" },
+        ]
+      : actor === "merchant"
+        ? [
+            {
+              title: translations.sidebar.menuItems.subItems.generalPanel,
+              url: "/",
+            },
+            { title: "Overview", url: "/merchant" },
+            { title: "Profile", url: "/merchant/profile" },
+            { title: "Branches", url: "/merchant/branches" },
+            { title: "Categories", url: "/merchant/categories" },
+            { title: "Products", url: "/merchant/products" },
+            { title: "Discounts", url: "/merchant/discounts" },
+            { title: "Coupons", url: "/merchant/coupons" },
+            { title: "Create Coupon", url: "/merchant/coupons/create" },
+          ]
+        : actor === "organization"
+          ? [
+              {
+                title: translations.sidebar.menuItems.subItems.generalPanel,
+                url: "/",
+              },
+            ]
+          : [
+              {
+                title: translations.sidebar.menuItems.subItems.generalPanel,
+                url: "/",
+              },
+            ];
 
   if (typeof window !== "undefined") {
     console.log(
@@ -222,12 +292,7 @@ export function getNavData(
         {
           title: translations.sidebar.menuItems.dashboard,
           icon: Icons.HomeIcon,
-          items: [
-            {
-              title: translations.sidebar.menuItems.subItems.ecommerce,
-              url: "/",
-            },
-          ],
+          items: actorDashboardItems,
         },
         // {
         //   title: translations.sidebar.menuItems.calendar,

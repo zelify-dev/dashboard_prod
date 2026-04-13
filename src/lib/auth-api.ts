@@ -83,6 +83,7 @@ export type AuthUser = {
   status: string;
   photo?: string | null;
   must_change_password?: boolean;
+  merchant_id?: string | null;
 };
 
 export type AuthOrganization = {

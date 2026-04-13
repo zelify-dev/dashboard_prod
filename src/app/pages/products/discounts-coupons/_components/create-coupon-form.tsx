@@ -8,9 +8,15 @@ interface CreateCouponFormProps {
   onSave: (data: any) => Promise<void> | void;
   mode?: "new" | "existing";
   submitDisabled?: boolean;
+  cancelHref?: string;
 }
 
-export function CreateCouponForm({ onSave, mode = "new", submitDisabled = false }: CreateCouponFormProps) {
+export function CreateCouponForm({
+  onSave,
+  mode = "new",
+  submitDisabled = false,
+  cancelHref = "/pages/products/discounts-coupons",
+}: CreateCouponFormProps) {
   const translations = useDiscountsCouponsTranslations();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -344,7 +350,7 @@ export function CreateCouponForm({ onSave, mode = "new", submitDisabled = false 
           <button
             type="button"
             disabled={isSubmitting}
-            onClick={() => router.push("/pages/products/discounts-coupons")}
+            onClick={() => router.push(cancelHref)}
             className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-dark-3 dark:bg-dark-3 dark:text-white dark:hover:bg-dark-2"
           >
             {translations.create.cancel}
@@ -365,5 +371,4 @@ export function CreateCouponForm({ onSave, mode = "new", submitDisabled = false 
     </div>
   );
 }
-
 

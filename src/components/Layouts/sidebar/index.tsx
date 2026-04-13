@@ -96,6 +96,7 @@ export function Sidebar() {
     isOwner: isOwnerUser,
     canSeeBranding,
     organizationScopes,
+    roles,
   });
   const sidebarScrollRef = useRef<HTMLDivElement>(null);
 
