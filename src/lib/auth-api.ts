@@ -140,6 +140,19 @@ export function isOrganizationOnboardingVerified(
   return false;
 }
 
+/**
+ * Webhooks, notificaciones, dominios, logs (cuando apliquen), sandbox de API keys:
+ * habilitados si la org tiene **al menos un scope** en sesión (GET …/scopes).
+ * Si no hay scopes (lista vacía o aún null), se mantiene el criterio anterior por **onboarding verificado**.
+ */
+export function canUseOrganizationIntegrations(
+  org: OrganizationDetails | null | undefined,
+  scopesFromSession: string[] | null
+): boolean {
+  if (scopesFromSession != null && scopesFromSession.length > 0) return true;
+  return isOrganizationOnboardingVerified(org);
+}
+
 export type AuthSuccessResponse = {
   access_token: string;
   refresh_token: string;

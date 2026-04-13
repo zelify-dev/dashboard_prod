@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/table";
 import { SimpleSelect } from "@/components/FormElements/simple-select";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
+import { canUseOrganizationIntegrations } from "@/lib/auth-api";
+import { cn } from "@/lib/utils";
 
 // Tipos de datos
 type LogType = "API request" | "Webhook" | "Link event";
@@ -37,7 +41,13 @@ const ENVIRONMENTS: Environment[] = ["Production", "Sandbox"];
 const RESPONSE_CODES: ResponseCode[] = ["200", "400", "401", "404", "500"];
 
 export function LogsPageContent() {
-  const t = useUiTranslations().logsPage;
+  const ui = useUiTranslations();
+  const t = ui.logsPage;
+  const webhooksUi = ui.webhooksPage;
+  const { organization, loading: orgLoading } = useOrganizationCountry();
+  const scopes = useOrganizationScopes();
+  const canUseLogs = canUseOrganizationIntegrations(organization, scopes);
+  const logsLocked = orgLoading || !canUseLogs;
 
   const logTypeLabel = (type: LogType) => {
     switch (type) {
@@ -168,7 +178,26 @@ export function LogsPageContent() {
   };
 
   return (
-    <div className="space-y-4 min-w-0">
+    <div className="min-w-0 space-y-4">
+      {orgLoading && (
+        <p className="text-sm text-dark-6 dark:text-dark-6">{webhooksUi.loadingAccess}</p>
+      )}
+      {!orgLoading && !canUseLogs && (
+        <div
+          role="status"
+          className="rounded-lg border border-primary/25 bg-primary/10 px-4 py-3 text-sm text-dark dark:text-white/90 dark:border-primary/40 dark:bg-primary/15"
+        >
+          {webhooksUi.lockedUntilOnboarding}
+        </div>
+      )}
+
+      <fieldset
+        disabled={logsLocked}
+        className={cn(
+          "m-0 min-w-0 space-y-4 border-0 p-0",
+          logsLocked && "disabled:cursor-not-allowed disabled:opacity-[0.88]",
+        )}
+      >
       <div className="flex gap-2">
         <div className="relative flex-1 min-w-0">
           <div className="absolute left-0 top-0 z-10 flex h-full items-center rounded-l-lg border border-r-0 border-stroke bg-gray-1 px-2 text-xs font-semibold text-dark dark:border-dark-3 dark:bg-dark-3 dark:text-white sm:px-3 sm:text-sm">
@@ -368,6 +397,7 @@ export function LogsPageContent() {
           </button>
         </div>
       )}
+      </fieldset>
     </div>
   );
 }

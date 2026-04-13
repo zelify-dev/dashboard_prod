@@ -146,31 +146,52 @@ type NotificationsTranslations = {
     addDomainButton: string;
     domainSubdomainLabel: string;
     domainSubdomainPlaceholder: string;
-    defaultSenderLabel: string;
     domainLabel: string;
-    senderLabel: string;
-    lastSyncLabel: string;
     dnsTitle: string;
-    dnsRevalidate: string;
-    smtpLabel: string;
-    smtpTitle: string;
-    smtpHost: string;
-    smtpPort: string;
-    smtpEncryption: string;
-    smtpUsername: string;
-    smtpFromName: string;
-    smtpFallbackLabel: string;
-    smtpSaving: string;
-    smtpSave: string;
-    smtpTest: string;
-    smtpSavedPrefix: string;
-    lastSyncedUnverified: string;
-    defaultFromName: string;
+    verifyDnsButton: string;
+    verifyDnsLoading: string;
+    loadingSettings: string;
+    refreshFromServer: string;
+    createdLabel: string;
+    updatedLabel: string;
+    emptyTitle: string;
+    emptyDescription: string;
+    modalTitle: string;
+    modalHint: string;
+    modalCancel: string;
+    modalCreate: string;
+    modalCreating: string;
+    orgMissing: string;
+    loadError: string;
+    create409: string;
+    create404: string;
+    createError: string;
+    dnsRecordsTableTitle: string;
+    dnsPublicTableTitle: string;
+    tableCategory: string;
+    tableType: string;
+    tableName: string;
+    tableValue: string;
+    tableTtl: string;
+    tablePriority: string;
+    tableStatus: string;
+    publicLookupFqdn: string;
+    publicMatch: string;
+    publicExpected: string;
+    publicObserved: string;
+    publicError: string;
+    allRecordsMatch: string;
+    partialRecordsMatch: string;
+    checkedAt: string;
+    copyValue: string;
+    copied: string;
     status: {
       verified: string;
       pending: string;
       failed: string;
       dnsWarning: string;
+      yes: string;
+      no: string;
     };
   };
   groups: Record<string, { name: string; description: string }>;
@@ -307,38 +328,60 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
       remoteIdMissing: "No se pudo obtener el identificador remoto de la plantilla.",
     },
     domains: {
-      pageTitle: "Dominios y configuración SMTP",
+      pageTitle: "Dominio y envío de correo",
       pageSubtitle:
-        "Verifica tus dominios remitentes, publica registros DNS y guarda credenciales SMTP seguras para enviar.",
+        "Un dominio por organización. Publica los registros DNS que indica la plataforma y verifica contra DNS público cuando lo necesites.",
       domainsLabel: "Dominios",
-      addDomainButton: "Agregar dominio",
-      domainSubdomainLabel: "Dominio / subdominio",
-      domainSubdomainPlaceholder: "emails.midominio.com",
-      defaultSenderLabel: "Remitente por defecto",
-      domainLabel: "Dominio",
-      senderLabel: "Remitente",
-      lastSyncLabel: "Última sincronización",
-      dnsTitle: "Verificación DNS",
-      dnsRevalidate: "Re-validar ahora",
-      smtpLabel: "SMTP",
-      smtpTitle: "Credenciales de envío",
-      smtpHost: "Host",
-      smtpPort: "Puerto",
-      smtpEncryption: "Cifrado",
-      smtpUsername: "Usuario",
-      smtpFromName: "Nombre remitente",
-      smtpFallbackLabel: "Usar credenciales como fallback global",
-      smtpSaving: "Guardando...",
-      smtpSave: "Guardar credenciales",
-      smtpTest: "Enviar correo de prueba",
-      smtpSavedPrefix: "Configuración guardada para",
-      lastSyncedUnverified: "Sin verificar",
-      defaultFromName: "Equipo de notificaciones",
+      addDomainButton: "Configurar dominio",
+      domainSubdomainLabel: "Dominio o subdominio",
+      domainSubdomainPlaceholder: "mail.empresa.com",
+      domainLabel: "Dominio configurado",
+      dnsTitle: "Registros DNS esperados",
+      verifyDnsButton: "Verificar DNS público",
+      verifyDnsLoading: "Consultando DNS…",
+      loadingSettings: "Cargando configuración…",
+      refreshFromServer: "Actualizar datos",
+      createdLabel: "Creado",
+      updatedLabel: "Actualizado",
+      emptyTitle: "Aún no hay dominio de envío",
+      emptyDescription:
+        "Crea la configuración con el dominio o subdominio desde el que enviarás correo (por ejemplo mail.tuempresa.com). Solo puede existir una configuración por organización.",
+      modalTitle: "Nuevo dominio de envío",
+      modalHint: "Debe coincidir con el host que usarás en los registros (FQDN tipo nombre.dominio).",
+      modalCancel: "Cancelar",
+      modalCreate: "Crear configuración",
+      modalCreating: "Creando…",
+      orgMissing: "No hay organización en sesión; no se puede cargar la configuración.",
+      loadError: "No se pudo cargar la configuración de dominio.",
+      create409: "Esta organización ya tiene un dominio configurado. Solo se permite uno.",
+      create404: "La organización no existe o no tienes acceso.",
+      createError: "No se pudo crear la configuración.",
+      dnsRecordsTableTitle: "Registros a publicar",
+      dnsPublicTableTitle: "Resultado de verificación DNS",
+      tableCategory: "Categoría",
+      tableType: "Tipo",
+      tableName: "Nombre",
+      tableValue: "Valor",
+      tableTtl: "TTL",
+      tablePriority: "Prioridad",
+      tableStatus: "Estado",
+      publicLookupFqdn: "FQDN consultado",
+      publicMatch: "Coincide",
+      publicExpected: "Valor esperado",
+      publicObserved: "Observado",
+      publicError: "Error de consulta",
+      allRecordsMatch: "Todos los registros coinciden con la configuración esperada.",
+      partialRecordsMatch: "Al menos un registro no coincide o no se pudo resolver.",
+      checkedAt: "Verificado el",
+      copyValue: "Copiar",
+      copied: "Copiado",
       status: {
         verified: "Verificado",
         pending: "Pendiente",
         failed: "Error",
         dnsWarning: "Revisar",
+        yes: "Sí",
+        no: "No",
       },
     },
     groups: {
@@ -541,37 +584,60 @@ const NOTIFICATIONS_TRANSLATIONS: Record<Language, NotificationsTranslations> = 
       remoteIdMissing: "Could not get remote template id.",
     },
     domains: {
-      pageTitle: "Domains & SMTP configuration",
-      pageSubtitle: "Verify sender domains, publish DNS records and store SMTP credentials securely for sending.",
+      pageTitle: "Sending domain & email",
+      pageSubtitle:
+        "One domain per organization. Publish the DNS records shown here and run a public DNS check when you need confirmation.",
       domainsLabel: "Domains",
-      addDomainButton: "Add domain",
-      domainSubdomainLabel: "Domain / subdomain",
-      domainSubdomainPlaceholder: "emails.yourdomain.com",
-      defaultSenderLabel: "Default sender",
-      domainLabel: "Domain",
-      senderLabel: "Sender",
-      lastSyncLabel: "Last sync",
-      dnsTitle: "DNS verification",
-      dnsRevalidate: "Re-validate now",
-      smtpLabel: "SMTP",
-      smtpTitle: "Sending credentials",
-      smtpHost: "Host",
-      smtpPort: "Port",
-      smtpEncryption: "Encryption",
-      smtpUsername: "Username",
-      smtpFromName: "From name",
-      smtpFallbackLabel: "Use credentials as global fallback",
-      smtpSaving: "Saving...",
-      smtpSave: "Save credentials",
-      smtpTest: "Send test email",
-      smtpSavedPrefix: "Configuration saved for",
-      lastSyncedUnverified: "Unverified",
-      defaultFromName: "Notifications team",
+      addDomainButton: "Set up domain",
+      domainSubdomainLabel: "Domain or subdomain",
+      domainSubdomainPlaceholder: "mail.company.com",
+      domainLabel: "Configured domain",
+      dnsTitle: "Expected DNS records",
+      verifyDnsButton: "Verify public DNS",
+      verifyDnsLoading: "Resolving DNS…",
+      loadingSettings: "Loading settings…",
+      refreshFromServer: "Refresh data",
+      createdLabel: "Created",
+      updatedLabel: "Updated",
+      emptyTitle: "No sending domain yet",
+      emptyDescription:
+        "Create a setting with the domain or subdomain you send from (e.g. mail.yourcompany.com). Only one configuration is allowed per organization.",
+      modalTitle: "New sending domain",
+      modalHint: "Use the host you will publish in DNS (FQDN like name.domain).",
+      modalCancel: "Cancel",
+      modalCreate: "Create configuration",
+      modalCreating: "Creating…",
+      orgMissing: "No organization in session; cannot load settings.",
+      loadError: "Could not load domain settings.",
+      create409: "This organization already has a domain configured. Only one is allowed.",
+      create404: "Organization not found or you do not have access.",
+      createError: "Could not create the configuration.",
+      dnsRecordsTableTitle: "Records to publish",
+      dnsPublicTableTitle: "Public DNS verification",
+      tableCategory: "Category",
+      tableType: "Type",
+      tableName: "Name",
+      tableValue: "Value",
+      tableTtl: "TTL",
+      tablePriority: "Priority",
+      tableStatus: "Status",
+      publicLookupFqdn: "Lookup FQDN",
+      publicMatch: "Matches",
+      publicExpected: "Expected value",
+      publicObserved: "Observed",
+      publicError: "Lookup error",
+      allRecordsMatch: "All records match the expected configuration.",
+      partialRecordsMatch: "At least one record does not match or could not be resolved.",
+      checkedAt: "Checked at",
+      copyValue: "Copy",
+      copied: "Copied",
       status: {
         verified: "Verified",
         pending: "Pending",
         failed: "Error",
         dnsWarning: "Review",
+        yes: "Yes",
+        no: "No",
       },
     },
     groups: {

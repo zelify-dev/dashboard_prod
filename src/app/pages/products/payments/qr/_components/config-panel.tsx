@@ -6,7 +6,8 @@ import { QRConfig, WebhookEvent } from "./qr-config";
 import { cn } from "@/lib/utils";
 import { useQRTranslations } from "./use-qr-translations";
 import { useOrganizationCountry } from "@/hooks/use-organization-country";
-import { isOrganizationOnboardingVerified } from "@/lib/auth-api";
+import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
+import { canUseOrganizationIntegrations } from "@/lib/auth-api";
 
 interface ConfigPanelProps {
   config: QRConfig;
@@ -34,7 +35,9 @@ function ChevronDownIcon(props: React.SVGProps<SVGSVGElement>) {
 export function ConfigPanel({ config, updateConfig }: ConfigPanelProps) {
   const translations = useQRTranslations();
   const { organization, loading: orgLoading } = useOrganizationCountry();
-  const webhooksUnlocked = !orgLoading && isOrganizationOnboardingVerified(organization);
+  const scopes = useOrganizationScopes();
+  const webhooksUnlocked =
+    !orgLoading && canUseOrganizationIntegrations(organization, scopes);
   const { webhookUrl, webhookEvents } = config;
   type OpenSection = "webhooks" | "branding";
   const [openSection, setOpenSection] = useState<OpenSection>("webhooks");

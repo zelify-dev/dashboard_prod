@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import { useLanguage, type Language } from "@/contexts/language-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { useOrganizationCountry } from "@/hooks/use-organization-country";
-import { isOrganizationOnboardingVerified } from "@/lib/auth-api";
+import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
+import { canUseOrganizationIntegrations } from "@/lib/auth-api";
 import {
   DEFAULT_NOTIFICATION_TEMPLATES,
   DEFAULT_TEMPLATE_GROUPS,
@@ -37,7 +38,8 @@ export function NotificationTemplateEditor({ templateId }: NotificationTemplateE
   const translations = useNotificationsTranslations();
   const ui = useUiTranslations();
   const { organization, loading: orgLoading } = useOrganizationCountry();
-  const canUseWebhooks = isOrganizationOnboardingVerified(organization);
+  const scopes = useOrganizationScopes();
+  const canUseWebhooks = canUseOrganizationIntegrations(organization, scopes);
 
   if (orgLoading) {
     return (
