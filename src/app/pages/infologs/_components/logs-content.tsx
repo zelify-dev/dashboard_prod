@@ -129,7 +129,7 @@ export function LogsPageContent() {
       case "API request": return <XStack alignItems="center" gap="$1.5"><Zap className="w-3.5 h-3.5 text-orange-500" /> <Text fontSize="$2" color="$color11">{t.values.logTypes.apiRequest}</Text></XStack>;
       case "Webhook": return <XStack alignItems="center" gap="$1.5"><Zap className="w-3.5 h-3.5 text-blue-500" /> <Text fontSize="$2" color="$color11">{t.values.logTypes.webhook}</Text></XStack>;
       case "Link event": return <XStack alignItems="center" gap="$1.5"><Zap className="w-3.5 h-3.5 text-green-500" /> <Text fontSize="$2" color="$color11">{t.values.logTypes.linkEvent}</Text></XStack>;
-      default: return <Text fontSize="$2" color="$color11" fontWeight="500">{service}</Text>;
+      default: return <Text fontSize="$2" color="$color11" fontWeight="500" numberOfLines={1}>{service}</Text>;
     }
   };
 
@@ -283,7 +283,7 @@ export function LogsPageContent() {
         className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-dark-3 dark:bg-dark-2 ring-1 ring-slate-900/5 max-w-full"
       >
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <YStack minWidth={850} flex={1}>
+          <YStack minWidth={1000} flex={1}>
             
             {/* Header Row */}
             <XStack 
@@ -292,14 +292,15 @@ export function LogsPageContent() {
               height={44}
               alignItems="center"
               paddingHorizontal="$4"
+              gap="$3"
             >
-              <Text flex={1} maxWidth={100} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">ID Trace</Text>
-              <Text flex={1} maxWidth={130} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.type}</Text>
-              <Text flex={2} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Event Detail</Text>
-              <Text flex={1} maxWidth={130} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.env}</Text>
-              <Text flex={1} maxWidth={110} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.response}</Text>
-              <Text flex={1.5} maxWidth={160} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Date & Time</Text>
-              <Text flex={1} maxWidth={100} textAlign="center" fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Metadata</Text>
+              <Text width={100} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">ID Trace</Text>
+              <Text width={170} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.type}</Text>
+              <Text flex={1} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Event Detail</Text>
+              <Text width={110} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.env}</Text>
+              <Text width={110} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.response}</Text>
+              <Text width={150} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Date & Time</Text>
+              <Text width={90} textAlign="center" fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Metadata</Text>
             </XStack>
 
             {/* Body Rows */}
@@ -332,37 +333,38 @@ export function LogsPageContent() {
                   minHeight={50}
                   alignItems="center"
                   paddingHorizontal="$4"
+                  gap="$3"
                   hoverStyle={{ backgroundColor: "$color3" }}
                 >
-                  <Text flex={1} maxWidth={100} fontFamily="$mono" fontSize="$2" color="$gray10" numberOfLines={1}>
+                  <Text width={100} fontFamily="$mono" fontSize="$2" color="$gray10" numberOfLines={1}>
                     {log.id.slice(0, 8)}...
                   </Text>
                   
-                  <YStack flex={1} maxWidth={130}>
+                  <YStack width={170} overflow="hidden">
                     {logServiceLabel(log.type || log.service)}
                   </YStack>
                   
-                  <YStack flex={2} paddingRight="$4">
-                    <XStack backgroundColor="$gray3" className="dark:bg-dark-3/50 px-2 py-0.5 rounded" alignSelf="flex-start">
+                  <YStack flex={1} overflow="hidden" paddingRight="$4">
+                    <XStack backgroundColor="$gray3" className="dark:bg-dark-3/50 px-2 py-0.5 rounded" alignSelf="flex-start" maxWidth="100%">
                       <Text fontSize="$2" color="$color11" fontWeight="500" numberOfLines={1}>
                         {log.operation}
                       </Text>
                     </XStack>
                   </YStack>
 
-                  <YStack flex={1} maxWidth={130}>
+                  <YStack width={110}>
                     {getEnvBadge(log.environment)}
                   </YStack>
 
-                  <YStack flex={1} maxWidth={110}>
+                  <YStack width={110}>
                     {getResponseCodeBadge(log.status_code)}
                   </YStack>
 
-                  <Text flex={1.5} maxWidth={160} fontSize="$2" color="$gray10" numberOfLines={1}>
+                  <Text width={150} fontSize="$2" color="$gray10" numberOfLines={1}>
                     {formatTimestamp(log.created_at)}
                   </Text>
 
-                  <YStack flex={1} maxWidth={100} alignItems="center">
+                  <YStack width={90} alignItems="center">
                     {log.metadata && Object.keys(log.metadata).length > 0 ? (
                       <Button
                         size="$2"
