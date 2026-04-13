@@ -15,6 +15,8 @@
     "@fingerprintjs/fingerprintjs-pro-server-api": "^6.10.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.0",
+    "@tamagui/config": "^2.0.0-rc.40",
+    "@tamagui/next-plugin": "^2.0.0-rc.40",
     "@types/leaflet": "^1.9.21",
     "apexcharts": "^4.5.0",
     "class-variance-authority": "^0.7.1",
@@ -33,8 +35,10 @@
     "react-country-flag": "^3.1.0",
     "react-dom": "19.0.0",
     "react-leaflet": "^5.0.0",
+    "react-native-web": "^0.21.2",
     "react-select": "^5.10.2",
     "tailwind-merge": "^2.6.0",
+    "tamagui": "^2.0.0-rc.40",
     "three": "^0.181.1"
   },
   "devDependencies": {
@@ -48,7 +52,8 @@
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^3.4.16",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack": "^5.106.1"
   },
   "overrides": {
     "camera-controls": "3.1.0",

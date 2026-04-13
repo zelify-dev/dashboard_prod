@@ -4,7 +4,10 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ActorRouteGuard } from "@/components/Dashboard/actor-route-guard";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { TemporaryPasswordModal } from "@/app/organization/teams/_components/temporary-password-modal";
-import { MerchantOnboardingModal } from "@/app/owner/_components/merchant-onboarding-modal";
+import {
+  MerchantOnboardingModal,
+  type MerchantOnboardingData,
+} from "@/app/owner/_components/merchant-onboarding-modal";
 import {
   listNetworkDiscountMerchants,
   onboardDiscountMerchant,
@@ -51,12 +54,37 @@ export default function OwnerMerchantsPage() {
     );
   }, [merchants, search]);
 
-  const handleOnboardMerchant = async (data: Parameters<typeof onboardDiscountMerchant>[0]) => {
+  const buildOnboardingPayload = (data: MerchantOnboardingData): Parameters<typeof onboardDiscountMerchant>[0] => {
+    const optionalEntries = Object.entries({
+      merchant_description: data.merchant_description,
+      merchant_logo_url: data.merchant_logo_url,
+      merchant_type: data.merchant_type,
+      organization_name: data.organization_name,
+      fiscal_id: data.fiscal_id,
+      company_legal_name: data.company_legal_name,
+      website: data.website,
+      industry: data.industry,
+      admin_phone: data.admin_phone,
+      admin_username: data.admin_username,
+      admin_password: data.admin_password,
+    }).filter(([, value]) => typeof value === "string" && value.trim().length > 0);
+
+    return {
+      country_code: data.country_code.trim().toUpperCase(),
+      merchant_name: data.merchant_name.trim(),
+      merchant_slug: data.merchant_slug.trim(),
+      admin_full_name: data.admin_full_name.trim(),
+      admin_email: data.admin_email.trim(),
+      ...Object.fromEntries(optionalEntries.map(([key, value]) => [key, value?.trim()])),
+    };
+  };
+
+  const handleOnboardMerchant = async (data: MerchantOnboardingData) => {
     setCreatingMerchant(true);
     setOnboardingError("");
     setSuccessMessage("");
     try {
-      const response = await onboardDiscountMerchant(data);
+      const response = await onboardDiscountMerchant(buildOnboardingPayload(data));
       if (response.merchant) {
         setMerchants((current) => [response.merchant as DiscountMerchant, ...current]);
       }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
-type MerchantOnboardingData = {
+export type MerchantOnboardingData = {
   country_code: string;
   merchant_name: string;
   merchant_slug: string;
@@ -11,6 +11,10 @@ type MerchantOnboardingData = {
   merchant_logo_url?: string;
   merchant_type?: string;
   organization_name?: string;
+  fiscal_id?: string;
+  company_legal_name?: string;
+  website?: string;
+  industry?: string;
   admin_full_name: string;
   admin_email: string;
   admin_phone?: string;
@@ -50,6 +54,10 @@ export function MerchantOnboardingModal({
     merchant_logo_url: "",
     merchant_type: "RESTAURANT",
     organization_name: "",
+    fiscal_id: "",
+    company_legal_name: "",
+    website: "",
+    industry: "",
     admin_full_name: "",
     admin_email: "",
     admin_phone: "",
@@ -156,6 +164,55 @@ export function MerchantOnboardingModal({
                   onChange={(e) => setForm((prev) => ({ ...prev, organization_name: e.target.value }))}
                   className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 />
+              </div>
+
+              <div className="rounded-xl border border-stroke bg-gray-1/50 p-4 dark:border-dark-3 dark:bg-dark-2/60">
+                <h4 className="mb-3 text-sm font-semibold text-dark dark:text-white">Merchant organization info</h4>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-dark dark:text-white">Fiscal ID</label>
+                    <input
+                      type="text"
+                      value={form.fiscal_id}
+                      onChange={(e) => setForm((prev) => ({ ...prev, fiscal_id: e.target.value }))}
+                      className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                      placeholder="Opcional"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-dark dark:text-white">Company legal name</label>
+                    <input
+                      type="text"
+                      value={form.company_legal_name}
+                      onChange={(e) => setForm((prev) => ({ ...prev, company_legal_name: e.target.value }))}
+                      className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                      placeholder="Opcional"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-dark dark:text-white">Website</label>
+                    <input
+                      type="url"
+                      value={form.website}
+                      onChange={(e) => setForm((prev) => ({ ...prev, website: e.target.value }))}
+                      className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                      placeholder="https://..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-dark dark:text-white">Industry</label>
+                    <input
+                      type="text"
+                      value={form.industry}
+                      onChange={(e) => setForm((prev) => ({ ...prev, industry: e.target.value }))}
+                      className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                      placeholder="Opcional"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 

@@ -265,6 +265,10 @@ export type MerchantOnboardingPayload = {
   merchant_logo_url?: string;
   merchant_type?: string;
   organization_name?: string;
+  fiscal_id?: string;
+  company_legal_name?: string;
+  website?: string;
+  industry?: string;
   admin_full_name: string;
   admin_email: string;
   admin_phone?: string;
@@ -277,12 +281,23 @@ export type MerchantOnboardingResponse = {
   organization?: {
     id: string;
     name: string;
+    organization_type?: string;
     status?: string;
   };
   user?: {
     id: string;
     email: string;
     full_name?: string;
+  };
+  admin_user?: {
+    id: string;
+    email: string;
+    full_name?: string;
+    username?: string;
+    phone?: string | null;
+    status?: string;
+    must_change_password?: boolean;
+    roles?: string[];
   };
   temporary_password?: string;
   admin_password?: string;

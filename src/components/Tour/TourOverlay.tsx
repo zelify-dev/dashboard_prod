@@ -30,9 +30,9 @@ export function TourOverlay() {
   } | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const resultsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const resultsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const highlightedElementRef = useRef<HTMLElement | null>(null);
-  const updatePositionDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const updatePositionDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const updatePositionRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -1097,7 +1097,7 @@ export function TourOverlay() {
     };
 
     // Intentar inmediatamente
-    let intervalId: NodeJS.Timeout | null = null;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
     if (!tryFindAndApply()) {
       // Si no se encuentra, intentar varias veces con delay
       intervalId = setInterval(() => {

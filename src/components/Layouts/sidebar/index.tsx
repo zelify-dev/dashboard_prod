@@ -291,7 +291,7 @@ export function Sidebar() {
 
   // Scroll automático al elemento del sidebar cuando cambia el paso del tour
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     if (isTourActive && steps.length > 0 && sidebarScrollRef.current) {
       const currentStepData = steps[currentStep];

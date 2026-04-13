@@ -179,7 +179,7 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
   const [isTransferred, setIsTransferred] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const typingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const formatTime = () => {
     const now = new Date();

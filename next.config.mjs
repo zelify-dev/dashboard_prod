@@ -10,6 +10,7 @@ const nextConfig = {
   outputFileTracingRoot: __dirname,
   allowedDevOrigins: ["unexperiential-nontuned-eliana.ngrok-free.dev"],
   images: {
+    qualities: [75, 90, 100],
     remotePatterns: [
       {
         protocol: "https",
@@ -29,6 +30,11 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "pub-b7fd9c30cdbf439183b75041f5f71b92.r2.dev",
+        port: ""
+      },
+      {
+        protocol: "https",
+        hostname: "assets-zelify.s3.us-east-1.amazonaws.com",
         port: ""
       }
     ]
