@@ -50,6 +50,8 @@ export async function getLogs(
 ): Promise<GetLogsResponse> {
   const query = new URLSearchParams();
   
+  query.set("organization_id", organizationId);
+  
   if (params.page !== undefined) query.set("page", params.page.toString());
   if (params.limit !== undefined) query.set("limit", params.limit.toString());
   else query.set("limit", "50"); // Default limit from contract

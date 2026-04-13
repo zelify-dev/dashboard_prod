@@ -187,6 +187,37 @@ export type OrganizationDiscountSummary = {
   total_redemptions: number;
 };
 
+export type VisibilityOrganizationRelation = {
+  id: string;
+  status: string;
+  organization: {
+    id: string;
+    name: string;
+    organization_type?: string;
+    status?: string;
+  };
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type MerchantVisibilityRelation = {
+  id: string;
+  organization_id: string;
+  merchant_id: string;
+  status: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type DiscountVisibilityRelation = {
+  id: string;
+  organization_id: string;
+  discount_id: string;
+  status: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export type AdminDiscountsDashboard = {
   overview_cards?: {
     total_merchants?: number;
@@ -684,7 +715,46 @@ export async function listOrganizationVisibleDiscounts(orgId: string): Promise<M
   return Array.isArray(discounts) ? discounts : [];
 }
 
-export async function assignMerchantToOrganization(orgId: string, merchantId: string): Promise<{ ok: boolean; message?: string }> {
+export async function listMerchantVisibilityOrganizations(
+  merchantId: string
+): Promise<VisibilityOrganizationRelation[]> {
+  const res = await fetchWithAuth(
+    `/api/discounts/merchants/${encodeURIComponent(merchantId)}/organizations`
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al listar visibilidad del merchant",
+      res.status,
+      data
+    );
+  }
+  const organizations = (data as { organizations?: VisibilityOrganizationRelation[] }).organizations;
+  return Array.isArray(organizations) ? organizations : [];
+}
+
+export async function listDiscountVisibilityOrganizations(
+  discountId: string
+): Promise<VisibilityOrganizationRelation[]> {
+  const res = await fetchWithAuth(
+    `/api/discounts/discounts/${encodeURIComponent(discountId)}/organizations`
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al listar visibilidad del discount",
+      res.status,
+      data
+    );
+  }
+  const organizations = (data as { organizations?: VisibilityOrganizationRelation[] }).organizations;
+  return Array.isArray(organizations) ? organizations : [];
+}
+
+export async function assignMerchantToOrganization(
+  orgId: string,
+  merchantId: string
+): Promise<MerchantVisibilityRelation> {
   const res = await fetchWithAuth(
     `/api/organizations/${encodeURIComponent(orgId)}/discounts/merchants/${encodeURIComponent(merchantId)}`,
     { method: "POST" }
@@ -697,10 +767,56 @@ export async function assignMerchantToOrganization(orgId: string, merchantId: st
       data
     );
   }
-  return data as { ok: boolean; message?: string };
+  return data as MerchantVisibilityRelation;
 }
 
-export async function assignDiscountToOrganization(orgId: string, discountId: string): Promise<{ ok: boolean; message?: string }> {
+export async function updateMerchantVisibility(
+  orgId: string,
+  merchantId: string,
+  status: "ACTIVE" | "INACTIVE"
+): Promise<MerchantVisibilityRelation> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/discounts/merchants/${encodeURIComponent(merchantId)}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al actualizar visibilidad del merchant",
+      res.status,
+      data
+    );
+  }
+  return data as MerchantVisibilityRelation;
+}
+
+export async function removeMerchantVisibility(
+  orgId: string,
+  merchantId: string
+): Promise<{ ok: boolean }> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/discounts/merchants/${encodeURIComponent(merchantId)}`,
+    { method: "DELETE" }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al eliminar visibilidad del merchant",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean };
+}
+
+export async function assignDiscountToOrganization(
+  orgId: string,
+  discountId: string
+): Promise<DiscountVisibilityRelation> {
   const res = await fetchWithAuth(
     `/api/organizations/${encodeURIComponent(orgId)}/discounts/discounts/${encodeURIComponent(discountId)}`,
     { method: "POST" }
@@ -713,7 +829,50 @@ export async function assignDiscountToOrganization(orgId: string, discountId: st
       data
     );
   }
-  return data as { ok: boolean; message?: string };
+  return data as DiscountVisibilityRelation;
+}
+
+export async function updateDiscountVisibility(
+  orgId: string,
+  discountId: string,
+  status: "ACTIVE" | "INACTIVE"
+): Promise<DiscountVisibilityRelation> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/discounts/discounts/${encodeURIComponent(discountId)}`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al actualizar visibilidad del discount",
+      res.status,
+      data
+    );
+  }
+  return data as DiscountVisibilityRelation;
+}
+
+export async function removeDiscountVisibility(
+  orgId: string,
+  discountId: string
+): Promise<{ ok: boolean }> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/discounts/discounts/${encodeURIComponent(discountId)}`,
+    { method: "DELETE" }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al eliminar visibilidad del discount",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean };
 }
 
 export async function onboardDiscountMerchant(

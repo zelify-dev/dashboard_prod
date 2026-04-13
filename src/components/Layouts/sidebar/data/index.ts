@@ -230,6 +230,8 @@ export function getNavData(
         ? productItems
         : [];
   const productsSectionItems = filteredProductItems.map(({ scopePrefix: _p, ...item }) => item);
+  const hasAnyScopes = Array.isArray(organizationScopes) && organizationScopes.length > 0;
+  const shouldPinOnboardingToTop = actor === "organization" && Array.isArray(organizationScopes) && !hasAnyScopes;
 
   const actorDashboardItems =
     actor === "owner"
@@ -282,11 +284,7 @@ export function getNavData(
     );
   }
 
-  return [
-    ...(productsSectionItems.length > 0
-      ? [{ label: translations.sidebar.products, items: productsSectionItems }]
-      : []),
-    {
+  const mainSection = {
       label: translations.sidebar.mainMenu,
       items: [
         {
@@ -369,16 +367,11 @@ export function getNavData(
           ],
         },
       ],
-    },
-    {
+    };
+
+  const onboardingSection = {
       label: translations.sidebar.onboarding,
       items: [
-        {
-          title: translations.sidebar.menuItems.integrationSupport,
-          icon: Icons.ChatSupportIcon,
-          url: ZENDESK_SUPPORT_MENU_HREF,
-          items: [],
-        },
         {
           title: translations.sidebar.menuItems.kyb,
           icon: Icons.DocumentTextIcon,
@@ -397,7 +390,25 @@ export function getNavData(
           url: "/pages/onboarding/technical-documentation",
           items: [],
         },
+        {
+          title: translations.sidebar.menuItems.integrationSupport,
+          icon: Icons.ChatSupportIcon,
+          url: ZENDESK_SUPPORT_MENU_HREF,
+          items: [],
+        },
       ],
-    },
+    };
+
+  const sections = [
+    ...(productsSectionItems.length > 0
+      ? [{ label: translations.sidebar.products, items: productsSectionItems }]
+      : []),
+    mainSection,
   ];
+
+  if (shouldPinOnboardingToTop) {
+    return [onboardingSection, ...sections];
+  }
+
+  return [...sections, onboardingSection];
 }
