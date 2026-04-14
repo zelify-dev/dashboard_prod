@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe, type AuthSuccessResponse } from "@/lib/auth-api";
-import { getAuthErrorMessage } from "@/lib/auth-error-messages";
+import { getLoginAuthErrorDisplay } from "@/lib/auth-error-messages";
 import { getDefaultDashboardPath } from "@/lib/dashboard-routing";
 
 // ============================================================================
@@ -471,7 +471,7 @@ export default function LoginPage() {
     console.error("Auth error:", err);
     setLoading(false);
     if (err instanceof AuthError) {
-      setError(getAuthErrorMessage(err.statusCode, step === 1 ? "login" : "verify-otp", language) || err.message);
+      setError(getLoginAuthErrorDisplay(err, step, language));
     } else {
       setError(
         err instanceof Error

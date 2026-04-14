@@ -398,7 +398,23 @@ export async function login(
   }
 
   if (!res.ok) {
-    const msg = data.message || (res.status === 401 ? "Email o contraseña incorrectos." : res.status === 403 ? "Usuario u organización deshabilitados." : res.status === 423 ? "Usuario bloqueado temporalmente." : res.status >= 500 ? "Algo falló. Intenta de nuevo." : "Error en el inicio de sesión");
+    const apiMsg =
+      typeof (data as { message?: string }).message === "string"
+        ? (data as { message: string }).message.trim()
+        : "";
+    let msg = apiMsg;
+    if (!msg) {
+      if (res.status === 401) msg = "Email o contraseña incorrectos.";
+      else if (res.status === 403) msg = "Usuario u organización deshabilitados.";
+      else if (res.status === 423)
+        msg =
+          "Cuenta bloqueada temporalmente por seguridad. Inténtalo de nuevo en unos minutos.";
+      else if (res.status === 429)
+        msg =
+          "Demasiados intentos de inicio de sesión. Espera unos minutos e inténtalo de nuevo.";
+      else if (res.status >= 500) msg = "Algo falló. Intenta de nuevo.";
+      else msg = "Error en el inicio de sesión";
+    }
     throw new AuthError(msg, res.status, data);
   }
   return data as LoginStep1Response;
@@ -418,7 +434,21 @@ export async function verifyDashboardOtp(payload: {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const msg = data.message || "Código OTP inválido o expirado.";
+    const apiMsg =
+      typeof (data as { message?: string }).message === "string"
+        ? (data as { message: string }).message.trim()
+        : "";
+    let msg = apiMsg;
+    if (!msg) {
+      if (res.status === 401) msg = "Código OTP inválido o expirado.";
+      else if (res.status === 423)
+        msg =
+          "Cuenta bloqueada temporalmente por seguridad. Inténtalo de nuevo en unos minutos.";
+      else if (res.status === 429)
+        msg =
+          "Demasiados intentos. Espera unos minutos e inténtalo de nuevo.";
+      else msg = "Código OTP inválido o expirado.";
+    }
     throw new AuthError(msg, res.status, data);
   }
   return data as AuthSuccessResponse;
