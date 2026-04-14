@@ -406,6 +406,14 @@ export type UiTranslations = {
     step: string;
     of: string;
   };
+  merchantRedemption: {
+    redeemTitle: string;
+    redeemSubtitle: string;
+    redeemPlaceholder: string;
+    redeemBtn: string;
+    redeemSuccess: string;
+    redeemError: string;
+  };
 };
 
 const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
@@ -415,6 +423,14 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       searchPlaceholder: "Search",
       toggleSidebar: "Toggle Sidebar",
       breadcrumbRoot: "Dashboard",
+    },
+    merchantRedemption: {
+      redeemTitle: "Direct Redemption",
+      redeemSubtitle: "Enter customer code to validate.",
+      redeemPlaceholder: "Ex: BCWALL3B",
+      redeemBtn: "Validate Coupon",
+      redeemSuccess: "Coupon redeemed successfully.",
+      redeemError: "Error: Code is invalid or already used.",
     },
     languageToggle: {
       switchToSpanish: "Switch language to Spanish",
@@ -826,6 +842,14 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       searchPlaceholder: "Buscar",
       toggleSidebar: "Alternar barra lateral",
       breadcrumbRoot: "Panel",
+    },
+    merchantRedemption: {
+      redeemTitle: "Canje Directo",
+      redeemSubtitle: "Introduce el código del cliente para validarlo.",
+      redeemPlaceholder: "Ej: BCWALL3B",
+      redeemBtn: "Validar Cupón",
+      redeemSuccess: "Cupón canjeado con éxito.",
+      redeemError: "Error: El código no es válido o ya fue utilizado.",
     },
     languageToggle: {
       switchToSpanish: "Cambiar idioma a español",

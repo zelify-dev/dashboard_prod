@@ -17,6 +17,7 @@ import {
 import { DASHBOARD_ROLE } from "@/lib/dashboard-routing";
 import { MerchantPicker } from "@/app/pages/products/discounts-coupons/_components/merchant-picker";
 import { useLanguage } from "@/contexts/language-context";
+import { CouponValidator } from "@/components/Dashboard/coupon-validator";
 
 const LABELS = {
   es: {
@@ -115,6 +116,23 @@ export default function MerchantDashboardPage() {
     };
     void run();
   }, [countryCode, sessionMerchantId, t.errorNoMerchant, t.errorRelation]);
+
+  const refreshAnalytics = async () => {
+    if (!selectedMerchantId) return;
+    setAnalyticsLoading(true);
+    try {
+      setAnalytics(
+        await getMerchantAnalytics(selectedMerchantId, {
+          from: from || undefined,
+          to: to || undefined,
+        })
+      );
+    } catch (err) {
+      console.error("Failed to refresh analytics:", err);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const run = async () => {
@@ -222,30 +240,38 @@ export default function MerchantDashboardPage() {
 
         {error ? <div className="rounded-xl bg-red-50 p-4 text-sm font-bold text-red-600 border border-red-100">{error}</div> : null}
 
-        <ShowcaseSection title={t.topDiscounts} className="!p-6">
-          {analyticsLoading ? (
-            <div className="py-20 text-center text-dark-6 animate-pulse">{t.loading}</div>
-          ) : (analytics?.top_discounts?.length ?? 0) > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {analytics?.top_discounts?.map((item) => (
-                <div key={item.discount_id} className="flex items-center justify-between rounded-xl border border-stroke p-5 transition hover:shadow-md hover:border-primary/30 dark:border-dark-3 bg-gray-1/20">
-                  <div>
-                    <p className="text-sm font-bold text-dark dark:text-white leading-tight">{item.discount_name}</p>
-                    <p className="mt-1 text-[10px] font-mono text-dark-6 opacity-60 tracking-tighter">{item.discount_id}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-black text-primary">{item.total_redemptions.toLocaleString()}</p>
-                    <p className="text-[10px] font-bold uppercase text-dark-6">{t.redemptions}</p>
-                  </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <ShowcaseSection title={t.topDiscounts} className="h-full !p-6">
+              {analyticsLoading ? (
+                <div className="py-20 text-center text-dark-6 animate-pulse">{t.loading}</div>
+              ) : (analytics?.top_discounts?.length ?? 0) > 0 ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {analytics?.top_discounts?.map((item) => (
+                    <div key={item.discount_id} className="flex items-center justify-between rounded-xl border border-stroke p-5 transition hover:shadow-md hover:border-primary/30 dark:border-dark-3 bg-gray-1/20">
+                      <div>
+                        <p className="text-sm font-bold text-dark dark:text-white leading-tight">{item.discount_name}</p>
+                        <p className="mt-1 text-[10px] font-mono text-dark-6 opacity-60 tracking-tighter">{item.discount_id}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-black text-primary">{item.total_redemptions.toLocaleString()}</p>
+                        <p className="text-[10px] font-bold uppercase text-dark-6">{t.redemptions}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-20 text-center text-dark-6 bg-gray-1/30 rounded-2xl border border-dashed border-stroke">
-              <p className="text-sm font-medium">{t.noAnalytics}</p>
-            </div>
-          )}
-        </ShowcaseSection>
+              ) : (
+                <div className="py-20 text-center text-dark-6 bg-gray-1/30 rounded-2xl border border-dashed border-stroke">
+                  <p className="text-sm font-medium">{t.noAnalytics}</p>
+                </div>
+              )}
+            </ShowcaseSection>
+          </div>
+
+          <div className="lg:col-span-1">
+             <CouponValidator onSuccess={refreshAnalytics} className="h-full" />
+          </div>
+        </div>
       </div>
     </ActorRouteGuard>
   );

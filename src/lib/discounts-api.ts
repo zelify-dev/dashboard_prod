@@ -1234,7 +1234,7 @@ export async function listAdminVisibilityRelations(
  * POST /api/discounts/coupons/confirm-use
  * Marca un claim como REDEEMED (Pasos 25, 31 del QA).
  */
-export async function confirmCouponUse(payload: { claim_code: string }): Promise<{ ok: boolean; status: string }> {
+export async function confirmCouponUse(payload: { code: string }): Promise<{ ok: boolean; status: string; success?: boolean; message?: string; claim_id?: string; redeemed_at?: string }> {
   const res = await fetchWithAuth("/api/discounts/coupons/confirm-use", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
