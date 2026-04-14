@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ActorRouteGuard } from "@/components/Dashboard/actor-route-guard";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
@@ -8,7 +10,9 @@ import { CouponsList, type Coupon } from "@/app/pages/products/discounts-coupons
 import { CouponDetail } from "@/app/pages/products/discounts-coupons/_components/coupon-detail";
 import { useOrganizationCountry } from "@/hooks/use-organization-country";
 import { getStoredRoles, getStoredUser } from "@/lib/auth-api";
-import { canManageMerchantActor } from "@/lib/dashboard-routing";
+import { canManageMerchantActor, DASHBOARD_ROLE } from "@/lib/dashboard-routing";
+import { useMerchantId } from "@/hooks/use-merchant-id";
+import { useLanguage } from "@/contexts/language-context";
 import {
   deactivateCoupon,
   listDiscountCoupons,
@@ -18,8 +22,41 @@ import {
   type MerchantCoupon,
   type MerchantDiscount,
 } from "@/lib/discounts-api";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+
+const LABELS = {
+  es: {
+    breadcrumb: "Comercio / Cupones",
+    heroTitle: "Gestión de Cupones",
+    heroSubtitle: "Administra y rastrea el uso de tus códigos promocionales activos.",
+    totalCoupons: "Cupones emitidos",
+    btnNew: "Emitir Cupón",
+    selectDiscount: "Filtrar por Descuento",
+    noCoupons: "No hay cupones emitidos para este descuento.",
+    loading: "Cargando cupones...",
+    errorMerchants: "Error al cargar datos del merchant.",
+    errorCoupons: "No se pudieron cargar los cupones.",
+    msgDeactivated: "Cupón desactivado correctamente.",
+    viewOnly: "Este rol puede revisar los cupones, pero no emitir nuevos.",
+    activeMerchant: "Comercio activo",
+    discountDetails: "Detalles del descuento",
+  },
+  en: {
+    breadcrumb: "Merchant / Coupons",
+    heroTitle: "Coupon Management",
+    heroSubtitle: "Manage and track the usage of your active promo codes.",
+    totalCoupons: "Issued coupons",
+    btnNew: "Issue Coupon",
+    selectDiscount: "Filter by Discount",
+    noCoupons: "No coupons issued for this discount.",
+    loading: "Loading coupons...",
+    errorMerchants: "Error loading merchant data.",
+    errorCoupons: "Failed to load coupons.",
+    msgDeactivated: "Coupon deactivated successfully.",
+    viewOnly: "This role can view coupons but cannot issue new ones.",
+    activeMerchant: "Active Merchant",
+    discountDetails: "Discount details",
+  }
+};
 
 function toLocalDiscountType(discountType: string): "percentage" | "fixed" {
   return discountType?.toUpperCase() === "FIXED_AMOUNT" ? "fixed" : "percentage";
@@ -33,7 +70,8 @@ function toLocalStatus(
 ): Coupon["status"] {
   const normalized = status?.toUpperCase();
   if (normalized === "INACTIVE") return "inactive";
-  if (validUntil && new Date(validUntil).getTime() < Date.now()) return "expired";
+  const now = Date.now();
+  if (validUntil && new Date(validUntil).getTime() < now) return "expired";
   if (normalized === "EXPIRED") return "expired";
   if (normalized === "LIMIT_REACHED" || redemptionsCount >= maxRedemptions) return "limit_reached";
   return "active";
@@ -41,13 +79,8 @@ function toLocalStatus(
 
 function toLocalDay(day: string): string {
   const map: Record<string, string> = {
-    MONDAY: "monday",
-    TUESDAY: "tuesday",
-    WEDNESDAY: "wednesday",
-    THURSDAY: "thursday",
-    FRIDAY: "friday",
-    SATURDAY: "saturday",
-    SUNDAY: "sunday",
+    MONDAY: "monday", TUESDAY: "tuesday", WEDNESDAY: "wednesday",
+    THURSDAY: "thursday", FRIDAY: "friday", SATURDAY: "saturday", SUNDAY: "sunday",
   };
   return map[day] || day.toLowerCase();
 }
@@ -68,31 +101,25 @@ function mapApiCouponToUiCoupon(discount: MerchantDiscount, coupon: MerchantCoup
     usedCount: coupon.redemptions_count,
     validFrom: discount.valid_from || coupon.created_at || new Date().toISOString(),
     validUntil: discount.valid_until || coupon.updated_at || coupon.created_at || new Date().toISOString(),
-    minPurchase:
-      discount.min_purchase !== undefined && discount.min_purchase !== null
-        ? Number(discount.min_purchase)
-        : undefined,
+    minPurchase: discount.min_purchase != null ? Number(discount.min_purchase) : undefined,
     maxUsesTotal: discount.max_uses_total ?? undefined,
     maxUsesPerUser: discount.max_uses_per_user ?? undefined,
     availability: {
-      days: Array.isArray(discount.available_days)
-        ? discount.available_days.map((day) => toLocalDay(day))
-        : [],
-      hours: discount.restrict_by_hours
-        ? {
-            start: discount.available_hours_start || "00:00",
-            end: discount.available_hours_end || "23:59",
-          }
-        : null,
+      days: Array.isArray(discount.available_days) ? discount.available_days.map((day) => toLocalDay(day)) : [],
+      hours: discount.restrict_by_hours ? { start: discount.available_hours_start || "00:00", end: discount.available_hours_end || "23:59" } : null,
     },
     createdAt: coupon.created_at || discount.created_at || new Date().toISOString(),
   };
 }
 
 export default function MerchantCouponsPage() {
+  const { language } = useLanguage();
+  const t = LABELS[language];
+
   const { countryCode } = useOrganizationCountry();
-  const sessionMerchantId = getStoredUser()?.merchant_id ?? null;
+  const { merchantId: resolvedMerchantId, loading: resolving } = useMerchantId();
   const canManage = canManageMerchantActor(getStoredRoles());
+  
   const [merchants, setMerchants] = useState<DiscountMerchant[]>([]);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
   const [discounts, setDiscounts] = useState<MerchantDiscount[]>([]);
@@ -105,18 +132,25 @@ export default function MerchantCouponsPage() {
 
   useEffect(() => {
     const run = async () => {
-      const list = await listNetworkDiscountMerchants(
-        sessionMerchantId ? undefined : { countryCode: countryCode ?? "EC" }
-      );
-      setMerchants(list);
-      setSelectedMerchantId(sessionMerchantId ?? list[0]?.id ?? null);
+      if (resolving) return;
+      const roles = getStoredRoles();
+      const isAdmin = roles.includes(DASHBOARD_ROLE.OWNER) || roles.includes(DASHBOARD_ROLE.ZELIFY_TEAM);
+      try {
+        if (isAdmin) {
+          const list = await listNetworkDiscountMerchants({ countryCode: countryCode ?? "EC" });
+          setMerchants(list);
+          setSelectedMerchantId(resolvedMerchantId ?? list[0]?.id ?? null);
+        } else if (resolvedMerchantId) {
+          const list = await listNetworkDiscountMerchants({ search: resolvedMerchantId });
+          setMerchants(list);
+          setSelectedMerchantId(resolvedMerchantId);
+        }
+      } catch (err) {
+        setError(t.errorMerchants);
+      }
     };
-
-    void run().catch(() => {
-      setMerchants([]);
-      setSelectedMerchantId(null);
-    });
-  }, [countryCode, sessionMerchantId]);
+    void run();
+  }, [resolvedMerchantId, resolving, countryCode, t.errorMerchants]);
 
   useEffect(() => {
     const run = async () => {
@@ -125,20 +159,13 @@ export default function MerchantCouponsPage() {
         setSelectedDiscountId("");
         return;
       }
-
       const nextDiscounts = await listMerchantDiscounts(selectedMerchantId);
       setDiscounts(nextDiscounts);
       setSelectedDiscountId((current) =>
-        nextDiscounts.some((discount) => discount.id === current)
-          ? current
-          : nextDiscounts[0]?.id ?? ""
+        nextDiscounts.some((discount) => discount.id === current) ? current : nextDiscounts[0]?.id ?? ""
       );
     };
-
-    void run().catch(() => {
-      setDiscounts([]);
-      setSelectedDiscountId("");
-    });
+    void run().catch(() => { setDiscounts([]); setSelectedDiscountId(""); });
   }, [selectedMerchantId]);
 
   useEffect(() => {
@@ -147,7 +174,6 @@ export default function MerchantCouponsPage() {
         setCoupons([]);
         return;
       }
-
       setLoadingCoupons(true);
       try {
         const selectedDiscount = discounts.find((discount) => discount.id === selectedDiscountId);
@@ -155,19 +181,17 @@ export default function MerchantCouponsPage() {
           setCoupons([]);
           return;
         }
-
         const rows = await listDiscountCoupons(selectedDiscountId);
         setCoupons(rows.map((coupon) => mapApiCouponToUiCoupon(selectedDiscount, coupon)));
       } catch (err) {
         setCoupons([]);
-        setError(err instanceof Error ? err.message : "No se pudieron cargar los coupons");
+        setError(t.errorCoupons);
       } finally {
         setLoadingCoupons(false);
       }
     };
-
     void run().catch(() => setCoupons([]));
-  }, [discounts, selectedDiscountId]);
+  }, [discounts, selectedDiscountId, t.errorCoupons]);
 
   const selectedDiscount = useMemo(
     () => discounts.find((discount) => discount.id === selectedDiscountId) ?? null,
@@ -185,14 +209,10 @@ export default function MerchantCouponsPage() {
     try {
       const updated = await deactivateCoupon(coupon.couponId || coupon.id);
       const nextStatus = updated.status?.toUpperCase() === "INACTIVE" ? "inactive" : coupon.status;
-      setCoupons((current) =>
-        current.map((item) => (item.id === coupon.id ? { ...item, status: nextStatus } : item))
-      );
-      setSelectedCoupon((current) =>
-        current && current.id === coupon.id ? { ...current, status: nextStatus } : current
-      );
+      setCoupons((current) => current.map((item) => (item.id === coupon.id ? { ...item, status: nextStatus } : item)));
+      setSelectedCoupon((current) => current && current.id === coupon.id ? { ...current, status: nextStatus } : current);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo desactivar el coupon");
+      setError(err instanceof Error ? err.message : "Error deactivating coupon");
     } finally {
       setIsDeactivatingCoupon(false);
     }
@@ -200,10 +220,32 @@ export default function MerchantCouponsPage() {
 
   return (
     <ActorRouteGuard actor="merchant">
-      <div className="mx-auto w-full max-w-[1400px] space-y-6">
-        <Breadcrumb pageName="Merchant / Coupons" />
+      <div className="mx-auto w-full max-w-[1200px] space-y-6">
+        <Breadcrumb pageName={t.breadcrumb as string} />
 
-        {sessionMerchantId ? null : (
+        {/* Hero Section */}
+        <div className="relative overflow-hidden rounded-2xl border border-stroke bg-white p-6 shadow-sm dark:border-dark-3 dark:bg-dark-2">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className="text-center md:text-left">
+              <h1 className="text-2xl font-bold text-dark dark:text-white">{t.heroTitle}</h1>
+              <p className="mt-1 text-sm text-dark-6">{t.heroSubtitle}</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="hidden rounded-xl bg-gray-2 px-4 py-2 text-center dark:bg-dark-3 sm:block">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-dark-6">{t.totalCoupons}</p>
+                <p className="text-xl font-bold text-primary">{coupons.length}</p>
+              </div>
+              {canManage && (
+                <Link href="/merchant/coupons/create" className="rounded-xl bg-primary px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90">
+                  {t.btnNew}
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Picker if Admin/Owner */}
+        {(merchants.length > 1 || !resolvedMerchantId) && (
           <MerchantPicker
             merchants={merchants}
             selectedMerchantId={selectedMerchantId}
@@ -212,69 +254,62 @@ export default function MerchantCouponsPage() {
           />
         )}
 
-        <ShowcaseSection title="Coupons por discount" className="!p-6">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm text-dark-6 dark:text-dark-6">
-                {selectedMerchant ? `Merchant activo: ${selectedMerchant.name}` : "Selecciona un merchant y un discount para operar cupones."}
-              </p>
-              {error ? <p className="mt-2 text-sm text-red-700 dark:text-red-400">{error}</p> : null}
-            </div>
-            {canManage ? (
-              <Link
-                href="/merchant/coupons/create"
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90"
-              >
-                Crear coupon
-              </Link>
-            ) : null}
+        <ShowcaseSection title={(t.breadcrumb.split("/").pop() || "Coupons").trim()} className="!p-6">
+          <div className="grid gap-6 md:grid-cols-3">
+             <div className="md:col-span-1">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-dark-6">{t.selectDiscount}</label>
+                <select
+                  value={selectedDiscountId}
+                  onChange={(event) => setSelectedDiscountId(event.target.value)}
+                  className="w-full rounded-xl border border-stroke bg-white px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white focus:border-primary"
+                >
+                  {discounts.map((discount) => (
+                    <option key={discount.id} value={discount.id}>{discount.name}</option>
+                  ))}
+                </select>
+                
+                {selectedMerchant && (
+                  <div className="mt-6 rounded-xl bg-gray-1 p-4 dark:bg-dark-3/30 border border-stroke dark:border-dark-3">
+                     <p className="text-[10px] uppercase font-bold text-dark-6 tracking-wide">{t.activeMerchant}</p>
+                     <p className="mt-1 text-sm font-bold text-dark dark:text-white">{selectedMerchant.name}</p>
+                  </div>
+                )}
+             </div>
+
+             <div className="md:col-span-2">
+                {!canManage && <div className="mb-6 rounded-xl bg-gray-1 p-4 text-xs font-medium text-dark-6">{t.viewOnly}</div>}
+                
+                {selectedDiscount && (
+                  <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+                    <p className="text-[10px] uppercase font-bold text-primary tracking-widest mb-1">{t.discountDetails}</p>
+                    <h3 className="text-lg font-black text-dark dark:text-white">{selectedDiscount.name}</h3>
+                    <p className="mt-1 text-xs text-dark-6 leading-relaxed">
+                      {selectedDiscount.description || "—"} • <span className="font-bold text-primary">{selectedDiscount.discount_type} {selectedDiscount.discount_value}</span>
+                    </p>
+                  </div>
+                )}
+
+                {loadingCoupons ? (
+                  <div className="py-20 text-center text-dark-6 animate-pulse">{t.loading}</div>
+                ) : coupons.length > 0 ? (
+                  <CouponsList coupons={coupons} onCouponClick={setSelectedCoupon} />
+                ) : (
+                  <div className="py-20 text-center text-dark-6 border border-dashed border-stroke rounded-2xl">
+                     <p className="text-sm font-medium">{t.noCoupons}</p>
+                  </div>
+                )}
+             </div>
           </div>
-
-          <div className="mb-4 max-w-sm">
-            <label className="mb-2 block text-sm font-medium text-dark dark:text-white">Discount</label>
-            <select
-              value={selectedDiscountId}
-              onChange={(event) => setSelectedDiscountId(event.target.value)}
-              className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-            >
-              {discounts.map((discount) => (
-                <option key={discount.id} value={discount.id}>
-                  {discount.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {selectedDiscount ? (
-            <div className="mb-4 rounded-xl border border-stroke bg-gray-1/60 p-4 dark:border-dark-3 dark:bg-dark-3/30">
-              <p className="text-sm font-semibold text-dark dark:text-white">{selectedDiscount.name}</p>
-              <p className="mt-1 text-xs text-dark-6 dark:text-dark-6">
-                {selectedDiscount.description || "Sin descripción"} • {selectedDiscount.discount_type} • {selectedDiscount.discount_value}
-              </p>
-            </div>
-          ) : null}
-
-          {loadingCoupons ? (
-            <div className="rounded-xl border border-stroke px-4 py-10 text-center text-sm text-dark-6 dark:border-dark-3 dark:text-dark-6">
-              Cargando coupons...
-            </div>
-          ) : coupons.length > 0 ? (
-            <CouponsList coupons={coupons} onCouponClick={setSelectedCoupon} />
-          ) : (
-            <div className="rounded-xl border border-stroke px-4 py-10 text-center text-sm text-dark-6 dark:border-dark-3 dark:text-dark-6">
-              No hay coupons para este discount.
-            </div>
-          )}
         </ShowcaseSection>
 
-        {selectedCoupon ? (
+        {selectedCoupon && (
           <CouponDetail
             coupon={selectedCoupon}
             onClose={() => setSelectedCoupon(null)}
             onDeactivate={canManage ? handleDeactivateCoupon : undefined}
             isDeactivating={canManage ? isDeactivatingCoupon : false}
           />
-        ) : null}
+        )}
       </div>
     </ActorRouteGuard>
   );

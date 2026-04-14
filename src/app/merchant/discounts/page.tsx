@@ -1,13 +1,17 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ActorRouteGuard } from "@/components/Dashboard/actor-route-guard";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { MerchantPicker } from "@/app/pages/products/discounts-coupons/_components/merchant-picker";
 import { DiscountEditor } from "@/app/pages/products/discounts-coupons/_components/discount-editor";
 import { useOrganizationCountry } from "@/hooks/use-organization-country";
-import { getStoredRoles, getStoredUser } from "@/lib/auth-api";
-import { canManageMerchantActor } from "@/lib/dashboard-routing";
+import { getStoredRoles } from "@/lib/auth-api";
+import { canManageMerchantActor, DASHBOARD_ROLE } from "@/lib/dashboard-routing";
+import { useMerchantId } from "@/hooks/use-merchant-id";
+import { useLanguage } from "@/contexts/language-context";
 import {
   createMerchantDiscount,
   getDiscountAnalytics,
@@ -18,33 +22,86 @@ import {
   type DiscountMerchant,
   type MerchantDiscount,
 } from "@/lib/discounts-api";
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 
-const EMPTY_DISCOUNT: MerchantDiscount = {
-  id: "new",
-  merchant_id: "",
-  name: "",
-  description: "",
-  discount_type: "PERCENTAGE",
-  discount_value: 0,
-  min_purchase: 0,
-  max_uses_total: 1,
-  max_uses_per_user: 1,
-  valid_from: null,
-  valid_until: null,
-  available_days: [],
-  restrict_by_hours: false,
-  available_hours_start: "08:00",
-  available_hours_end: "18:00",
-  timezone: "America/Guayaquil",
-  status: "ACTIVE",
+const LABELS = {
+  es: {
+    breadcrumb: "Comercio / Descuentos",
+    heroTitle: "Gestión de Descuentos",
+    heroSubtitle: "Crea y administra las reglas comerciales, ofertas y campañas de tu comercio.",
+    totalCampaigns: "Campañas activas",
+    btnNew: "Nuevo Descuento",
+    btnCreateCoupon: "Crear Cupón",
+    btnHide: "Ocultar formulario",
+    btnEdit: "Editar",
+    btnAnalytics: "Ver analytics",
+    tableDiscount: "Descuento",
+    tableType: "Tipo",
+    tableValue: "Valor",
+    tableValidity: "Vigencia",
+    tableStatus: "Estado",
+    tableActions: "Acciones",
+    statusActive: "ACTIVO",
+    statusInactive: "INACTIVO",
+    loading: "Cargando descuentos...",
+    noDiscounts: "No hay descuentos para este comercio.",
+    analyticsTitle: "Analytics del Descuento",
+    analyticsLoading: "Cargando métricas...",
+    analyticsCoupons: "Cupones",
+    analyticsClaims: "Reclamos",
+    analyticsRedemptions: "Redenciones",
+    analyticsRate: "Tasa de uso",
+    topOrgs: "Top Organizaciones",
+    noAnalytics: "No hay analytics disponibles.",
+    viewOnly: "Este rol puede revisar analytics y estado, pero no administrar descuentos.",
+    msgCreated: "Descuento creado correctamente.",
+    msgUpdated: "Descuento actualizado correctamente.",
+    formCreateTitle: "Crear nuevo descuento",
+    formCreateDesc: "Configura una nueva regla comercial para este comercio.",
+  },
+  en: {
+    breadcrumb: "Merchant / Discounts",
+    heroTitle: "Discount Management",
+    heroSubtitle: "Create and manage business rules, offers, and campaigns for your merchant.",
+    totalCampaigns: "Active campaigns",
+    btnNew: "New Discount",
+    btnCreateCoupon: "Create Coupon",
+    btnHide: "Hide form",
+    btnEdit: "Edit",
+    btnAnalytics: "View analytics",
+    tableDiscount: "Discount",
+    tableType: "Type",
+    tableValue: "Value",
+    tableValidity: "Validity",
+    tableStatus: "Status",
+    tableActions: "Actions",
+    statusActive: "ACTIVE",
+    statusInactive: "INACTIVE",
+    loading: "Loading discounts...",
+    noDiscounts: "No discounts found for this merchant.",
+    analyticsTitle: "Discount Analytics",
+    analyticsLoading: "Loading metrics...",
+    analyticsCoupons: "Coupons",
+    analyticsClaims: "Claims",
+    analyticsRedemptions: "Redemptions",
+    analyticsRate: "Usage Rate",
+    topOrgs: "Top Organizations",
+    noAnalytics: "No analytics available.",
+    viewOnly: "This role can view analytics but cannot manage discounts.",
+    msgCreated: "Discount created successfully.",
+    msgUpdated: "Discount updated successfully.",
+    formCreateTitle: "Create new discount",
+    formCreateDesc: "Set up a new commercial rule for this merchant.",
+  }
 };
 
 export default function MerchantDiscountsPage() {
+  const { language } = useLanguage();
+  const t = LABELS[language];
+
   const { countryCode } = useOrganizationCountry();
-  const sessionMerchantId = getStoredUser()?.merchant_id ?? null;
+  const { merchantId: resolvedMerchantId, loading: resolving } = useMerchantId();
   const canManage = canManageMerchantActor(getStoredRoles());
+  
   const [merchants, setMerchants] = useState<DiscountMerchant[]>([]);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
   const [discounts, setDiscounts] = useState<MerchantDiscount[]>([]);
@@ -62,20 +119,28 @@ export default function MerchantDiscountsPage() {
 
   useEffect(() => {
     const run = async () => {
+      if (resolving) return;
+      const roles = getStoredRoles();
+      const isAdmin = roles.includes(DASHBOARD_ROLE.OWNER) || roles.includes(DASHBOARD_ROLE.ZELIFY_TEAM);
       setLoadingMerchants(true);
       try {
-        const list = await listNetworkDiscountMerchants(
-          sessionMerchantId ? undefined : { countryCode: countryCode ?? "EC" }
-        );
-        setMerchants(list);
-        setSelectedMerchantId(sessionMerchantId ?? list[0]?.id ?? null);
+        if (isAdmin) {
+          const list = await listNetworkDiscountMerchants({ countryCode: countryCode ?? "EC" });
+          setMerchants(list);
+          setSelectedMerchantId(resolvedMerchantId ?? list[0]?.id ?? null);
+        } else if (resolvedMerchantId) {
+          const list = await listNetworkDiscountMerchants({ search: resolvedMerchantId });
+          setMerchants(list);
+          setSelectedMerchantId(resolvedMerchantId);
+        }
+      } catch (err) {
+        setError("Error loading merchants list");
       } finally {
         setLoadingMerchants(false);
       }
     };
-
     void run();
-  }, [countryCode, sessionMerchantId]);
+  }, [resolvedMerchantId, resolving, countryCode]);
 
   useEffect(() => {
     const run = async () => {
@@ -90,7 +155,6 @@ export default function MerchantDiscountsPage() {
         setLoadingDiscounts(false);
       }
     };
-
     void run();
   }, [selectedMerchantId]);
 
@@ -102,14 +166,6 @@ export default function MerchantDiscountsPage() {
   const editingDiscount = useMemo(
     () => discounts.find((discount) => discount.id === editingDiscountId) ?? null,
     [discounts, editingDiscountId]
-  );
-
-  const createDiscountTemplate = useMemo<MerchantDiscount>(
-    () => ({
-      ...EMPTY_DISCOUNT,
-      merchant_id: selectedMerchantId ?? "",
-    }),
-    [selectedMerchantId]
   );
 
   useEffect(() => {
@@ -132,47 +188,46 @@ export default function MerchantDiscountsPage() {
         setAnalyticsLoading(false);
       }
     };
-
     void run();
   }, [analyticsFrom, analyticsTo, editingDiscountId]);
 
-  const handleCreateDiscount = async (payload: Parameters<typeof updateDiscount>[1]) => {
+  const handleCreateDiscount = async (payload: any) => {
     if (!selectedMerchantId) return;
     setIsSavingDiscount(true);
     setError(null);
     setMessage(null);
     try {
+      // CLEAN PAYLOAD: Strictly follow the "Blinded" payload contract for POST
+      // Exclude technical/restricted fields that cause 400 errors or validation failures
+      const { 
+        status: _s, 
+        id: _i, 
+        merchant_id: _m, 
+        created_at: _c, 
+        updated_at: _u, 
+        ...businessPayload 
+      } = payload;
+      
       const created = await createMerchantDiscount(selectedMerchantId, {
+        ...businessPayload,
         name: payload.name ?? "",
-        description: payload.description,
-        discount_type: payload.discount_type ?? "PERCENTAGE",
-        discount_value: payload.discount_value ?? 0,
-        min_purchase: payload.min_purchase,
-        max_uses_total: payload.max_uses_total,
-        max_uses_per_user: payload.max_uses_per_user,
-        valid_from: payload.valid_from ?? new Date().toISOString(),
-        valid_until:
-          payload.valid_until ??
-          new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
-        available_days: payload.available_days,
-        restrict_by_hours: payload.restrict_by_hours,
-        available_hours_start: payload.available_hours_start ?? undefined,
-        available_hours_end: payload.available_hours_end ?? undefined,
-        timezone: payload.timezone ?? "America/Guayaquil",
-        applicable_category_ids: [],
-        applicable_product_ids: [],
+        valid_from: payload.valid_from || new Date().toISOString(),
+        valid_until: payload.valid_until || new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+        applicable_category_ids: payload.applicable_category_ids || [],
+        applicable_product_ids: payload.applicable_product_ids || [],
       });
+
       setDiscounts((current) => [created, ...current]);
       setIsCreating(false);
-      setMessage("Discount creado correctamente.");
+      setMessage(t.msgCreated);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo crear el discount");
+      setError(err instanceof Error ? err.message : "Creation failed");
     } finally {
       setIsSavingDiscount(false);
     }
   };
 
-  const handleUpdateDiscount = async (payload: Parameters<typeof updateDiscount>[1]) => {
+  const handleUpdateDiscount = async (payload: any) => {
     if (!editingDiscountId) return;
     setIsSavingDiscount(true);
     setError(null);
@@ -183,9 +238,9 @@ export default function MerchantDiscountsPage() {
         current.map((discount) => (discount.id === updated.id ? { ...discount, ...updated } : discount))
       );
       setEditingDiscountId(null);
-      setMessage("Discount actualizado correctamente.");
+      setMessage(t.msgUpdated);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "No se pudo actualizar el discount");
+      setError(err instanceof Error ? err.message : "Update failed");
     } finally {
       setIsSavingDiscount(false);
     }
@@ -193,10 +248,37 @@ export default function MerchantDiscountsPage() {
 
   return (
     <ActorRouteGuard actor="merchant">
-      <div className="mx-auto w-full max-w-[1400px] space-y-6">
-        <Breadcrumb pageName="Merchant / Discounts" />
+      <div className="mx-auto w-full max-w-[1200px] space-y-6">
+        <Breadcrumb pageName={t.breadcrumb as string} />
 
-        {sessionMerchantId ? null : (
+        {/* Hero Section */}
+        <div className="relative overflow-hidden rounded-2xl border border-stroke bg-white p-6 shadow-sm dark:border-dark-3 dark:bg-dark-2">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className="text-center md:text-left">
+              <h1 className="text-2xl font-bold text-dark dark:text-white">{t.heroTitle}</h1>
+              <p className="mt-1 text-sm text-dark-6">{t.heroSubtitle}</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="hidden rounded-xl bg-gray-2 px-4 py-2 text-center dark:bg-dark-3 sm:block">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-dark-6">{t.totalCampaigns}</p>
+                <p className="text-xl font-bold text-primary">{discounts.filter(d => d.status === 'ACTIVE').length}</p>
+              </div>
+              {canManage && (
+                <div className="flex gap-2">
+                  <button onClick={() => { setIsCreating(!isCreating); setEditingDiscountId(null); }} className="rounded-xl bg-primary px-6 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90">
+                    {isCreating ? t.btnHide : t.btnNew}
+                  </button>
+                  <Link href="/merchant/coupons/create" className="rounded-xl border border-stroke bg-white px-6 py-3 text-sm font-bold text-dark transition hover:bg-gray-1 dark:border-dark-3 dark:bg-dark-3 dark:text-white">
+                    {t.btnCreateCoupon}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Picker if applicable */}
+        {(merchants.length > 1 || !resolvedMerchantId) && (
           <MerchantPicker
             merchants={merchants}
             selectedMerchantId={selectedMerchantId}
@@ -206,205 +288,159 @@ export default function MerchantDiscountsPage() {
           />
         )}
 
-        <ShowcaseSection title={`Discounts ${selectedMerchant ? `de ${selectedMerchant.name}` : ""}`} className="!p-6">
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-sm text-dark-6 dark:text-dark-6">
-                Gestiona las reglas comerciales del merchant desde esta vista.
-              </p>
-              {message ? <p className="mt-2 text-sm text-green-700 dark:text-green-400">{message}</p> : null}
-              {error ? <p className="mt-2 text-sm text-red-700 dark:text-red-400">{error}</p> : null}
-            </div>
-            {canManage ? (
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsCreating((current) => !current);
-                    setEditingDiscountId(null);
-                    setError(null);
-                    setMessage(null);
-                  }}
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90"
-                >
-                  {isCreating ? "Ocultar formulario" : "Nuevo discount"}
-                </button>
-                <Link
-                  href="/merchant/coupons/create"
-                  className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                >
-                  Crear coupon
-                </Link>
-              </div>
-            ) : (
-              <p className="text-sm text-dark-6 dark:text-dark-6">
-                Este rol puede revisar analytics y estado de discounts, pero no administrarlos.
-              </p>
-            )}
+        {/* Feedback Messages */}
+        {(message || error) && (
+          <div className={`rounded-xl p-4 text-sm font-medium ${message ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+             {message || error}
           </div>
+        )}
 
-          {canManage && isCreating ? (
-            <div className="mb-6">
-              <DiscountEditor
-                discount={createDiscountTemplate}
-                isSaving={isSavingDiscount}
-                onCancel={() => setIsCreating(false)}
-                onSave={handleCreateDiscount}
-                title="Crear nuevo discount"
-                descriptionText="Configura una nueva oferta comercial para este merchant."
-                submitLabel="Crear discount"
-              />
-            </div>
-          ) : null}
+        {/* Form Editor */}
+        {canManage && isCreating && (
+          <DiscountEditor
+            discount={{ id: "new", merchant_id: selectedMerchantId || "", status: "ACTIVE" } as any}
+            isSaving={isSavingDiscount}
+            onCancel={() => setIsCreating(false)}
+            onSave={handleCreateDiscount}
+            title={t.formCreateTitle}
+            descriptionText={t.formCreateDesc}
+          />
+        )}
 
-          {editingDiscount ? (
-            <div className="mb-6">
-              <DiscountEditor
-                discount={editingDiscount}
-                isSaving={isSavingDiscount}
-                onCancel={() => setEditingDiscountId(null)}
-                onSave={handleUpdateDiscount}
-              />
-              <div className="mt-4 rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
-                <div className="mb-4 flex flex-wrap gap-3">
-                  <input
-                    type="date"
-                    value={analyticsFrom}
-                    onChange={(e) => setAnalyticsFrom(e.target.value)}
-                    className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
-                  />
-                  <input
-                    type="date"
-                    value={analyticsTo}
-                    onChange={(e) => setAnalyticsTo(e.target.value)}
-                    className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
-                  />
+        {/* Analytics & Editing */}
+        {editingDiscount && (
+          <div className="space-y-6">
+            <DiscountEditor
+              discount={editingDiscount}
+              isSaving={isSavingDiscount}
+              onCancel={() => setEditingDiscountId(null)}
+              onSave={handleUpdateDiscount}
+              title={canManage ? t.btnEdit : t.btnAnalytics}
+            />
+            
+            <ShowcaseSection title={t.analyticsTitle} className="!p-6">
+               <div className="mb-6 flex flex-wrap gap-4 items-end">
+                  <div>
+                    <label className="mb-2 block text-[10px] font-bold uppercase text-dark-6">From</label>
+                    <input type="date" value={analyticsFrom} onChange={(e) => setAnalyticsFrom(e.target.value)} className="rounded-xl border border-stroke bg-white px-4 py-2 text-sm dark:border-dark-3 dark:bg-dark-2" />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-[10px] font-bold uppercase text-dark-6">To</label>
+                    <input type="date" value={analyticsTo} onChange={(e) => setAnalyticsTo(e.target.value)} className="rounded-xl border border-stroke bg-white px-4 py-2 text-sm dark:border-dark-3 dark:bg-dark-2" />
+                  </div>
+               </div>
+
+               {analyticsLoading ? (
+                 <div className="py-10 text-center text-dark-6">{t.analyticsLoading}</div>
+               ) : discountAnalytics ? (
+                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    {[
+                      { label: t.analyticsCoupons, val: discountAnalytics.total_coupons, sub: `Active: ${discountAnalytics.active_coupons}` },
+                      { label: t.analyticsClaims, val: discountAnalytics.total_claims, sub: `Pending: ${discountAnalytics.pending_claims}` },
+                      { label: t.analyticsRedemptions, val: discountAnalytics.total_redemptions, sub: `Users: ${discountAnalytics.unique_users}` },
+                      { label: t.analyticsRate, val: `${discountAnalytics.conversion_rate ?? discountAnalytics.coupon_usage_rate ?? 0}%`, sub: `Status: ${discountAnalytics.status}` }
+                    ].map((card, i) => (
+                      <div key={i} className="rounded-2xl border border-stroke p-5 dark:border-dark-3 bg-gray-1/30">
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-dark-6">{card.label}</p>
+                        <p className="mt-2 text-2xl font-black text-dark dark:text-white">{card.val}</p>
+                        <p className="mt-1 text-xs text-primary font-medium">{card.sub}</p>
+                      </div>
+                    ))}
+                    
+                    <div className="md:col-span-2 lg:col-span-4 mt-4">
+                       <h5 className="mb-4 text-sm font-bold text-dark dark:text-white">{t.topOrgs}</h5>
+                       {discountAnalytics.top_organizations?.length ? (
+                         <div className="grid gap-3 md:grid-cols-2">
+                            {discountAnalytics.top_organizations.map((org) => (
+                              <div key={org.organization_id} className="flex items-center justify-between rounded-xl border border-stroke p-4 dark:border-dark-3">
+                                 <div>
+                                    <p className="text-sm font-bold text-dark dark:text-white">{org.organization_name}</p>
+                                    <p className="text-[10px] text-dark-6 opacity-60 font-mono">{org.organization_id}</p>
+                                 </div>
+                                 <div className="text-right">
+                                    <p className="text-lg font-bold text-primary">{org.total_redemptions}</p>
+                                    <p className="text-[10px] text-dark-6 uppercase font-bold">Redemptions</p>
+                                 </div>
+                              </div>
+                            ))}
+                         </div>
+                       ) : (
+                         <div className="rounded-xl bg-gray-1 p-8 text-center text-sm text-dark-6">{t.noAnalytics}</div>
+                       )}
+                    </div>
+                 </div>
+               ) : (
+                 <div className="py-20 text-center text-dark-6">{t.noAnalytics}</div>
+               )}
+            </ShowcaseSection>
+          </div>
+        )}
+
+        {/* Main Table */}
+        {!isCreating && !editingDiscount && (
+          <ShowcaseSection title={(t.breadcrumb.split("/").pop() || "Discounts").trim()} className="!p-6">
+            {!canManage && <div className="mb-6 rounded-xl bg-gray-1 p-4 text-xs text-dark-6 font-medium">{t.viewOnly}</div>}
+            
+            <div className="overflow-x-auto">
+              <div className="min-w-[900px]">
+                <div className="grid grid-cols-6 border-b border-stroke pb-4 text-xs font-bold uppercase tracking-widest text-dark-6 dark:border-dark-3">
+                  <div className="col-span-2 px-4">{t.tableDiscount}</div>
+                  <div className="px-4 text-center">{t.tableType}</div>
+                  <div className="px-4 text-center">{t.tableValue}</div>
+                  <div className="px-4 text-center">{t.tableValidity}</div>
+                  <div className="px-4 text-right">{t.tableActions}</div>
                 </div>
 
-                {analyticsLoading ? (
-                  <p className="text-sm text-dark-6 dark:text-dark-6">Cargando analytics del discount...</p>
-                ) : discountAnalytics ? (
-                  <div className="space-y-4">
-                    <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-4">
-                      <div className="rounded-xl border border-stroke px-4 py-3 dark:border-dark-3">
-                        <p className="text-xs text-dark-6 dark:text-dark-6">Coupons</p>
-                        <p className="mt-1 text-lg font-semibold text-dark dark:text-white">{discountAnalytics.total_coupons}</p>
-                        <p className="text-xs text-dark-6 dark:text-dark-6">Activos: {discountAnalytics.active_coupons}</p>
-                      </div>
-                      <div className="rounded-xl border border-stroke px-4 py-3 dark:border-dark-3">
-                        <p className="text-xs text-dark-6 dark:text-dark-6">Claims</p>
-                        <p className="mt-1 text-lg font-semibold text-dark dark:text-white">{discountAnalytics.total_claims}</p>
-                        <p className="text-xs text-dark-6 dark:text-dark-6">Pendientes: {discountAnalytics.pending_claims}</p>
-                      </div>
-                      <div className="rounded-xl border border-stroke px-4 py-3 dark:border-dark-3">
-                        <p className="text-xs text-dark-6 dark:text-dark-6">Redemptions</p>
-                        <p className="mt-1 text-lg font-semibold text-dark dark:text-white">{discountAnalytics.total_redemptions}</p>
-                        <p className="text-xs text-dark-6 dark:text-dark-6">Users únicos: {discountAnalytics.unique_users}</p>
-                      </div>
-                      <div className="rounded-xl border border-stroke px-4 py-3 dark:border-dark-3">
-                        <p className="text-xs text-dark-6 dark:text-dark-6">Usage rate</p>
-                        <p className="mt-1 text-lg font-semibold text-dark dark:text-white">{discountAnalytics.coupon_usage_rate.toLocaleString("es-EC")} %</p>
-                        <p className="text-xs text-dark-6 dark:text-dark-6">Estado: {discountAnalytics.status}</p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="mb-3 text-sm font-semibold text-dark dark:text-white">Top organizations</p>
-                      {discountAnalytics.top_organizations?.length ? (
-                        <div className="space-y-2">
-                          {discountAnalytics.top_organizations.map((org) => (
-                            <div key={org.organization_id} className="flex items-center justify-between rounded-xl border border-stroke px-4 py-3 dark:border-dark-3">
-                              <div>
-                                <p className="text-sm font-medium text-dark dark:text-white">{org.organization_name}</p>
-                                <p className="text-xs text-dark-6 dark:text-dark-6">{org.organization_id}</p>
-                              </div>
-                              <span className="text-sm font-semibold text-dark dark:text-white">{org.total_redemptions.toLocaleString("es-EC")}</span>
-                            </div>
-                          ))}
+                <div className="divide-y divide-stroke dark:divide-dark-3">
+                  {loadingDiscounts ? (
+                    <div className="py-20 text-center text-dark-6">{t.loading}</div>
+                  ) : discounts.length > 0 ? (
+                    discounts.map((discount) => {
+                      const isActive = discount.status === "ACTIVE";
+                      return (
+                        <div key={discount.id} className="grid grid-cols-6 items-center py-5 text-sm transition hover:bg-gray-1/30 dark:hover:bg-dark-3/10">
+                          <div className="col-span-2 px-4">
+                            <p className="font-bold text-dark dark:text-white">{discount.name}</p>
+                            <p className="mt-0.5 text-[10px] text-dark-6 line-clamp-1 opacity-70">{discount.description || "—"}</p>
+                          </div>
+                          <div className="px-4 text-center">
+                            <span className="rounded-lg bg-gray-2 px-2.5 py-1 text-[10px] font-bold text-dark-6 dark:bg-dark-3 uppercase tracking-tight">
+                               {discount.discount_type}
+                            </span>
+                          </div>
+                          <div className="px-4 text-center font-black text-primary text-base">
+                             {discount.discount_value}
+                             <span className="ml-0.5 text-[10px] opacity-60">
+                               {discount.discount_type === 'PERCENTAGE' ? '%' : ''}
+                             </span>
+                          </div>
+                          <div className="px-4 text-center">
+                            <p className="text-[10px] font-bold text-dark-6 uppercase">{discount.valid_from?.split('T')[0] || '—'}</p>
+                            <p className="text-[10px] font-medium text-dark-6 opacity-40">to</p>
+                            <p className="text-[10px] font-bold text-dark-6 uppercase">{discount.valid_until?.split('T')[0] || '—'}</p>
+                          </div>
+                          <div className="flex justify-end gap-2 px-4">
+                             <span className={`mr-2 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                                {isActive ? t.statusActive : t.statusInactive}
+                             </span>
+                             <button
+                               onClick={() => { setEditingDiscountId(discount.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                               className="rounded-lg border border-stroke p-2 text-dark-6 transition hover:border-primary hover:text-primary dark:border-dark-3 dark:bg-dark-2"
+                             >
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                             </button>
+                          </div>
                         </div>
-                      ) : (
-                        <p className="text-sm text-dark-6 dark:text-dark-6">No hay organizations destacadas para este discount.</p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-dark-6 dark:text-dark-6">No hay analytics disponibles para este discount.</p>
-                )}
+                      )
+                    })
+                  ) : (
+                    <div className="py-20 text-center text-dark-6">{t.noDiscounts}</div>
+                  )}
+                </div>
               </div>
             </div>
-          ) : null}
-
-          <div className="overflow-x-auto rounded-xl border border-stroke dark:border-dark-3">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-stroke bg-gray-2/60 dark:border-dark-3 dark:bg-dark-2/80">
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Discount</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Tipo</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Valor</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Vigencia</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loadingDiscounts ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">Cargando discounts...</td>
-                  </tr>
-                ) : discounts.length > 0 ? (
-                  discounts.map((discount) => (
-                    <tr key={discount.id} className="border-b border-stroke dark:border-dark-3 dark:bg-dark-2/40">
-                      <td className="px-4 py-3 text-dark dark:text-white">
-                        <p className="font-medium">{discount.name}</p>
-                        <p className="text-xs text-dark-6 dark:text-dark-6">{discount.description ?? "Sin descripción"}</p>
-                      </td>
-                      <td className="px-4 py-3 text-dark dark:text-white">{discount.discount_type}</td>
-                      <td className="px-4 py-3 text-dark dark:text-white">{discount.discount_value}</td>
-                      <td className="px-4 py-3 text-dark dark:text-white">
-                        {discount.valid_from ?? "—"} → {discount.valid_until ?? "—"}
-                      </td>
-                      <td className="px-4 py-3 text-dark dark:text-white">{discount.status}</td>
-                      <td className="px-4 py-3">
-                        {canManage ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingDiscountId(discount.id);
-                              setIsCreating(false);
-                              setError(null);
-                              setMessage(null);
-                            }}
-                            className="rounded-lg border border-stroke bg-white px-3 py-1.5 text-xs font-medium text-dark transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                          >
-                            Editar
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingDiscountId(discount.id);
-                              setError(null);
-                              setMessage(null);
-                            }}
-                            className="rounded-lg border border-stroke bg-white px-3 py-1.5 text-xs font-medium text-dark transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                          >
-                            Ver analytics
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">
-                      No hay discounts para este merchant.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </ShowcaseSection>
+          </ShowcaseSection>
+        )}
       </div>
     </ActorRouteGuard>
   );

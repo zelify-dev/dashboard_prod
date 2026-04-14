@@ -54,7 +54,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     const now = Date.now();
-    if (!force && now - lastValidationRef.current < 15_000) {
+    if (!force && now - lastValidationRef.current < 30_000) {
       return;
     }
 
@@ -137,7 +137,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const handleWindowFocus = () => {
       if (pathname !== "/login" && pathname !== "/register") {
-        void validateActiveSession(true);
+        void validateActiveSession();
       }
     };
 

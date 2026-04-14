@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { MerchantDiscount } from "@/lib/discounts-api";
+import { useLanguage } from "@/contexts/language-context";
 
 type DiscountEditorProps = {
   discount: MerchantDiscount;
@@ -29,15 +30,52 @@ type DiscountEditorProps = {
   }) => Promise<void>;
 };
 
-const DAYS = [
-  { id: "MONDAY", label: "Lun" },
-  { id: "TUESDAY", label: "Mar" },
-  { id: "WEDNESDAY", label: "Mie" },
-  { id: "THURSDAY", label: "Jue" },
-  { id: "FRIDAY", label: "Vie" },
-  { id: "SATURDAY", label: "Sab" },
-  { id: "SUNDAY", label: "Dom" },
-];
+const LABELS = {
+  es: {
+    formName: "Nombre de la oferta",
+    formStatus: "Estado",
+    formDescription: "Descripción",
+    formType: "Tipo de descuento",
+    formValue: "Valor",
+    formMinPurchase: "Compra mínima",
+    formTotalUses: "Usos totales",
+    formUsesPerUser: "Usos por usuario",
+    formValidFrom: "Válido desde",
+    formValidUntil: "Válido hasta",
+    formTimezone: "Zona horaria (Timezone)",
+    formDays: "Días disponibles",
+    formHours: "Restringir por horario",
+    formStart: "Hora inicio",
+    formEnd: "Hora fin",
+    btnCancel: "Cancelar",
+    btnSave: "Guardar configuración",
+    loading: "Guardando...",
+    days: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+  },
+  en: {
+    formName: "Offer Name",
+    formStatus: "Status",
+    formDescription: "Description",
+    formType: "Discount Type",
+    formValue: "Value",
+    formMinPurchase: "Minimum Purchase",
+    formTotalUses: "Total Uses",
+    formUsesPerUser: "Uses per User",
+    formValidFrom: "Valid From",
+    formValidUntil: "Valid Until",
+    formTimezone: "Timezone",
+    formDays: "Available Days",
+    formHours: "Restrict by Hours",
+    formStart: "Start Time",
+    formEnd: "End Time",
+    btnCancel: "Cancel",
+    btnSave: "Save Configuration",
+    loading: "Saving...",
+    days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  }
+};
+
+const DAY_IDS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
 function isoToLocalDateTime(value?: string | null): string {
   if (!value) return "";
@@ -57,10 +95,13 @@ export function DiscountEditor({
   onCancel,
   onSave,
   isSaving = false,
-  title = "Editar descuento seleccionado",
-  descriptionText = "Actualiza la configuracion de la oferta antes de crear el nuevo cupon.",
-  submitLabel = "Guardar descuento",
+  title,
+  descriptionText,
+  submitLabel,
 }: DiscountEditorProps) {
+  const { language } = useLanguage();
+  const t = LABELS[language];
+
   const initialDays = useMemo(() => {
     const rows = (discount as MerchantDiscount & { available_days?: string[] }).available_days;
     return Array.isArray(rows) ? rows : [];
@@ -74,7 +115,7 @@ export function DiscountEditor({
       | "FIXED_AMOUNT",
     discount_value: Number(discount.discount_value) || 0,
     min_purchase: Number(discount.min_purchase) || 0,
-    max_uses_total: Number(discount.max_uses_total) || 1,
+    max_uses_total: Number(discount.max_uses_total) || null, // null = unlimited
     max_uses_per_user: Number(discount.max_uses_per_user) || 1,
     valid_from: isoToLocalDateTime(discount.valid_from),
     valid_until: isoToLocalDateTime(discount.valid_until),
@@ -96,215 +137,211 @@ export function DiscountEditor({
   };
 
   return (
-    <div className="mt-4 rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
-      <div className="mb-3">
-        <h4 className="text-sm font-semibold text-dark dark:text-white">{title}</h4>
-        <p className="mt-1 text-xs text-dark-6 dark:text-dark-6">
-          {descriptionText}
-        </p>
+    <div className="rounded-2xl border border-stroke bg-white p-6 shadow-sm dark:border-dark-3 dark:bg-dark-2">
+      <div className="mb-6">
+        <h4 className="text-lg font-bold text-dark dark:text-white">{title || t.btnSave}</h4>
+        {descriptionText && (
+          <p className="mt-1 text-sm text-dark-6 opacity-80">
+            {descriptionText}
+          </p>
+        )}
       </div>
 
       <form
         onSubmit={async (e) => {
           e.preventDefault();
           await onSave({
-            name: form.name,
-            description: form.description || undefined,
-            discount_type: form.discount_type,
+            ...form,
             discount_value: Number(form.discount_value) || 0,
             min_purchase: Number(form.min_purchase) || 0,
-            max_uses_total: Number(form.max_uses_total) || 1,
+            max_uses_total: form.max_uses_total != null ? Number(form.max_uses_total) : undefined,
             max_uses_per_user: Number(form.max_uses_per_user) || 1,
             valid_from: form.valid_from ? new Date(form.valid_from).toISOString() : undefined,
             valid_until: form.valid_until ? new Date(form.valid_until).toISOString() : undefined,
-            available_days: form.available_days,
-            restrict_by_hours: form.restrict_by_hours,
+            description: form.description || undefined,
             available_hours_start: form.restrict_by_hours ? form.available_hours_start : null,
             available_hours_end: form.restrict_by_hours ? form.available_hours_end : null,
-            timezone: form.timezone || "America/Guayaquil",
-            status: form.status,
           });
         }}
-        className="space-y-4"
+        className="space-y-6"
       >
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Nombre</label>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formName}</label>
             <input
               type="text"
               required
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Estado</label>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formStatus}</label>
             <select
               value={form.status}
               onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value as "ACTIVE" | "INACTIVE" }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             >
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="INACTIVE">INACTIVE</option>
+              <option value="ACTIVE">{language === "es" ? "ACTIVO" : "ACTIVE"}</option>
+              <option value="INACTIVE">{language === "es" ? "INACTIVO" : "INACTIVE"}</option>
             </select>
           </div>
-          <div className="sm:col-span-2">
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Descripcion</label>
+          <div className="md:col-span-3">
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formDescription}</label>
             <textarea
               rows={2}
               value={form.description}
               onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Tipo</label>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formType}</label>
             <select
               value={form.discount_type}
               onChange={(e) => setForm((prev) => ({ ...prev, discount_type: e.target.value as "PERCENTAGE" | "FIXED_AMOUNT" }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             >
               <option value="PERCENTAGE">PERCENTAGE</option>
               <option value="FIXED_AMOUNT">FIXED_AMOUNT</option>
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Valor</label>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formValue}</label>
             <input
               type="number"
               min="0"
-              step="0.01"
+              step="any"
               value={form.discount_value}
               onChange={(e) => setForm((prev) => ({ ...prev, discount_value: Number(e.target.value) || 0 }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Compra minima</label>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formMinPurchase}</label>
             <input
               type="number"
               min="0"
-              step="0.01"
+              step="any"
               value={form.min_purchase}
               onChange={(e) => setForm((prev) => ({ ...prev, min_purchase: Number(e.target.value) || 0 }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Usos totales</label>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formTotalUses}</label>
             <input
               type="number"
               min="1"
-              value={form.max_uses_total}
-              onChange={(e) => setForm((prev) => ({ ...prev, max_uses_total: Number(e.target.value) || 1 }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              value={form.max_uses_total || ""}
+              onChange={(e) => setForm((prev) => ({ ...prev, max_uses_total: e.target.value ? Number(e.target.value) : null }))}
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              placeholder="Unlimited"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Usos por usuario</label>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formUsesPerUser}</label>
             <input
               type="number"
               min="1"
               value={form.max_uses_per_user}
               onChange={(e) => setForm((prev) => ({ ...prev, max_uses_per_user: Number(e.target.value) || 1 }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Valido desde</label>
-            <input
-              type="datetime-local"
-              value={form.valid_from}
-              onChange={(e) => setForm((prev) => ({ ...prev, valid_from: e.target.value }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Valido hasta</label>
-            <input
-              type="datetime-local"
-              value={form.valid_until}
-              onChange={(e) => setForm((prev) => ({ ...prev, valid_until: e.target.value }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
-            />
-          </div>
-          <div>
-            <label className="mb-1 block text-xs font-medium text-dark dark:text-white">Timezone</label>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formTimezone}</label>
             <input
               type="text"
               value={form.timezone}
               onChange={(e) => setForm((prev) => ({ ...prev, timezone: e.target.value }))}
-              className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
+          </div>
+          <div>
+             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formValidFrom}</label>
+             <input type="datetime-local" value={form.valid_from} onChange={(e) => setForm((p) => ({ ...p, valid_from: e.target.value }))} className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white" />
+          </div>
+          <div>
+             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formValidUntil}</label>
+             <input type="datetime-local" value={form.valid_until} onChange={(e) => setForm((p) => ({ ...p, valid_until: e.target.value }))} className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white" />
           </div>
         </div>
 
-        <div>
-          <p className="mb-1 text-xs font-medium text-dark dark:text-white">Dias disponibles</p>
+        <div className="rounded-xl border border-stroke p-5 dark:border-dark-3">
+          <p className="mb-4 text-xs font-bold uppercase tracking-wide text-dark-5">{t.formDays}</p>
           <div className="flex flex-wrap gap-2">
-            {DAYS.map((day) => {
-              const selected = form.available_days.includes(day.id);
+            {DAY_IDS.map((dayId, idx) => {
+              const selected = form.available_days.includes(dayId);
               return (
                 <button
-                  key={day.id}
+                  key={dayId}
                   type="button"
-                  onClick={() => toggleDay(day.id)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                  onClick={() => toggleDay(dayId)}
+                  className={`rounded-xl border px-4 py-2.5 text-xs font-bold transition ${
                     selected
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-stroke bg-white text-dark dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+                      ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
+                      : "border-stroke bg-white text-dark hover:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
                   }`}
                 >
-                  {day.label}
+                  {t.days[idx]}
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="rounded-lg border border-stroke p-3 dark:border-dark-3">
-          <label className="mb-2 flex items-center gap-2 text-sm text-dark dark:text-white">
+        <div className="rounded-xl border border-stroke p-5 dark:border-dark-3">
+          <label className="mb-4 flex items-center gap-3 text-sm font-bold text-dark dark:text-white cursor-pointer group">
             <input
               type="checkbox"
               checked={form.restrict_by_hours}
               onChange={(e) => setForm((prev) => ({ ...prev, restrict_by_hours: e.target.checked }))}
+              className="h-5 w-5 rounded-md border-stroke text-primary focus:ring-primary"
             />
-            Restringir por horario
+            <span className="group-hover:text-primary transition-colors">{t.formHours}</span>
           </label>
-          {form.restrict_by_hours ? (
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="time"
-                value={form.available_hours_start}
-                onChange={(e) => setForm((prev) => ({ ...prev, available_hours_start: e.target.value }))}
-                className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
-              />
-              <input
-                type="time"
-                value={form.available_hours_end}
-                onChange={(e) => setForm((prev) => ({ ...prev, available_hours_end: e.target.value }))}
-                className="w-full rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
-              />
+          
+          {form.restrict_by_hours && (
+            <div className="mt-4 grid grid-cols-2 gap-5 animate-fadeIn">
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase text-dark-6">{t.formStart}</label>
+                <input
+                  type="time"
+                  value={form.available_hours_start}
+                  onChange={(e) => setForm((prev) => ({ ...prev, available_hours_start: e.target.value }))}
+                  className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="mb-2 block text-[10px] font-bold uppercase text-dark-6">{t.formEnd}</label>
+                <input
+                  type="time"
+                  value={form.available_hours_end}
+                  onChange={(e) => setForm((prev) => ({ ...prev, available_hours_end: e.target.value }))}
+                  className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+                />
+              </div>
             </div>
-          ) : null}
+          )}
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-3 pt-6 border-t border-stroke dark:border-dark-3 text-right">
           <button
             type="button"
             onClick={onCancel}
             disabled={isSaving}
-            className="rounded-lg border border-stroke bg-white px-3 py-2 text-sm text-dark transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+            className="rounded-xl border border-stroke bg-white px-8 py-3 text-sm font-bold text-dark transition hover:bg-gray-1 dark:border-dark-3 dark:bg-dark-3 dark:text-white"
           >
-            Cancelar
+            {t.btnCancel}
           </button>
           <button
             type="submit"
             disabled={isSaving}
-            className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-xl bg-primary px-10 py-3 text-sm font-bold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-70"
           >
-            {isSaving ? "Guardando..." : submitLabel}
+            {isSaving ? t.loading : (submitLabel || t.btnSave)}
           </button>
         </div>
       </form>

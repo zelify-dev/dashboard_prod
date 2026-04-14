@@ -4,9 +4,20 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ActorRouteGuard } from "@/components/Dashboard/actor-route-guard";
 import { MetricCard } from "@/components/Dashboard/metric-card";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
-import { getAdminDiscountsDashboard, listNetworkDiscountMerchants, type AdminDiscountsDashboard, type DiscountMerchant } from "@/lib/discounts-api";
+import {
+  getAdminDiscountsDashboard,
+  getMerchantAnalytics,
+  listNetworkDiscountMerchants,
+  type AdminDiscountsDashboard,
+  type DiscountMerchant,
+  type MerchantAnalytics
+} from "@/lib/discounts-api";
 import { listOrganizations, type OrganizationAdmin } from "@/lib/organizations-admin-api";
-import { useEffect, useState } from "react";
+import { MerchantPicker } from "@/app/pages/products/discounts-coupons/_components/merchant-picker";
+import { useOrganizationCountry } from "@/hooks/use-organization-country";
+import { getStoredRoles } from "@/lib/auth-api";
+import { DASHBOARD_ROLE } from "@/lib/dashboard-routing";
+import { useEffect, useState, useMemo } from "react";
 
 function formatMetric(value: number | undefined, suffix = "") {
   if (typeof value !== "number" || Number.isNaN(value)) return "0";
@@ -14,10 +25,14 @@ function formatMetric(value: number | undefined, suffix = "") {
 }
 
 export default function OwnerDashboardPage() {
+  const { countryCode } = useOrganizationCountry();
   const [dashboard, setDashboard] = useState<AdminDiscountsDashboard | null>(null);
   const [merchants, setMerchants] = useState<DiscountMerchant[]>([]);
   const [organizations, setOrganizations] = useState<OrganizationAdmin[]>([]);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
+  const [merchantAnalytics, setMerchantAnalytics] = useState<MerchantAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMerchant, setLoadingMerchant] = useState(false);
   const [error, setError] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -26,6 +41,10 @@ export default function OwnerDashboardPage() {
     const run = async () => {
       setLoading(true);
       setError("");
+      
+      const roles = getStoredRoles();
+      const isOwner = roles.includes(DASHBOARD_ROLE.OWNER) || roles.includes(DASHBOARD_ROLE.ZELIFY_TEAM);
+
       try {
         const [analyticsData, merchantsData, organizationsData] = await Promise.all([
           getAdminDiscountsDashboard({
@@ -33,7 +52,8 @@ export default function OwnerDashboardPage() {
             to: to || undefined,
             limit: 10,
           }),
-          listNetworkDiscountMerchants({ countryCode: "EC" }),
+          // Si es Owner, mandamos countryCode undefined para obtener toda la red (Global)
+          listNetworkDiscountMerchants({ countryCode: isOwner ? undefined : (countryCode ?? undefined) }),
           listOrganizations(),
         ]);
         setDashboard(analyticsData);
@@ -47,7 +67,30 @@ export default function OwnerDashboardPage() {
     };
 
     void run();
-  }, [from, to]);
+  }, [from, to, countryCode]);
+
+  useEffect(() => {
+    const run = async () => {
+      if (!selectedMerchantId) {
+        setMerchantAnalytics(null);
+        return;
+      }
+      setLoadingMerchant(true);
+      try {
+        const data = await getMerchantAnalytics(selectedMerchantId, {
+          from: from || undefined,
+          to: to || undefined,
+        });
+        setMerchantAnalytics(data);
+      } catch (err) {
+        console.error("Error loading merchant analytics:", err);
+      } finally {
+        setLoadingMerchant(false);
+      }
+    };
+
+    void run();
+  }, [selectedMerchantId, from, to]);
 
   const cards = dashboard?.overview_cards;
   const recentActivity = dashboard?.recent_activity ?? [];
@@ -79,6 +122,14 @@ export default function OwnerDashboardPage() {
       <div className="mx-auto w-full max-w-[1400px] space-y-6">
         <Breadcrumb pageName="Owner Dashboard" />
 
+        <MerchantPicker
+          merchants={merchants}
+          selectedMerchantId={selectedMerchantId}
+          onSelect={setSelectedMerchantId}
+          loading={loading}
+          countryCode={countryCode}
+        />
+
         <div className="flex flex-wrap gap-3">
           <input
             type="date"
@@ -95,11 +146,23 @@ export default function OwnerDashboardPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <MetricCard label="Merchants en la red" value={cards?.total_merchants ?? merchants.length} helper={`Activos: ${formatMetric(cards?.active_merchants)}`} />
-          <MetricCard label="Organizations cliente" value={cards?.total_client_organizations ?? organizations.length} helper={`Merchant orgs: ${formatMetric(cards?.total_merchant_organizations)}`} />
-          <MetricCard label="Discounts" value={cards?.total_discounts ?? 0} helper={`Activos: ${formatMetric(cards?.active_discounts)} · Coupons: ${formatMetric(cards?.total_coupons)}`} />
-          <MetricCard label="Claims" value={formatMetric(cards?.total_claims)} helper={`Pendientes: ${formatMetric(cards?.pending_claims)} · Redimidos: ${formatMetric(cards?.redeemed_claims)}`} />
-          <MetricCard label="Conversion rate" value={formatMetric(cards?.conversion_rate, "%")} helper={`Redemptions: ${formatMetric(cards?.total_redemptions)} · Users: ${formatMetric(cards?.unique_users)}`} />
+          {selectedMerchantId && merchantAnalytics ? (
+            <>
+              <MetricCard label="Merchant Activo" value={merchants.find(m => m.id === selectedMerchantId)?.name ?? "Seleccionado"} helper="Vista de detalle activo" />
+              <MetricCard label="Discounts" value={merchantAnalytics.total_discounts ?? 0} helper={`Activos: ${merchantAnalytics.active_discounts ?? 0}`} />
+              <MetricCard label="Coupons" value={merchantAnalytics.total_coupons ?? 0} helper={`Activos: ${merchantAnalytics.active_coupons ?? 0}`} />
+              <MetricCard label="Claims" value={(merchantAnalytics.total_claims ?? 0).toLocaleString()} helper={`Pendientes: ${merchantAnalytics.pending_claims ?? 0}`} />
+              <MetricCard label="Usage Rate" value={formatMetric(merchantAnalytics.coupon_usage_rate, "%")} helper={`Users: ${formatMetric(merchantAnalytics.unique_users)}`} />
+            </>
+          ) : (
+            <>
+              <MetricCard label="Merchants en la red" value={cards?.total_merchants ?? merchants.length} helper={`Activos: ${formatMetric(cards?.active_merchants)}`} />
+              <MetricCard label="Organizations cliente" value={cards?.total_client_organizations ?? organizations.length} helper={`Merchant orgs: ${formatMetric(cards?.total_merchant_organizations)}`} />
+              <MetricCard label="Discounts en red" value={cards?.total_discounts ?? 0} helper={`Activos: ${formatMetric(cards?.active_discounts)} · Coupons: ${formatMetric(cards?.total_coupons)}`} />
+              <MetricCard label="Claims totales" value={formatMetric(cards?.total_claims)} helper={`Pendientes: ${formatMetric(cards?.pending_claims)} · Redimidos: ${formatMetric(cards?.redeemed_claims)}`} />
+              <MetricCard label="Conversion rate" value={formatMetric(cards?.conversion_rate, "%")} helper={`Redemptions: ${formatMetric(cards?.total_redemptions)} · Users: ${formatMetric(cards?.unique_users)}`} />
+            </>
+          )}
         </div>
 
         {error ? (

@@ -84,6 +84,10 @@ export type UiTranslations = {
         merchants: string;
         claims: string;
         reports: string;
+        branches: string;
+        categories: string;
+        products: string;
+        overview: string;
       };
       lockedTooltip: string;
     };
@@ -487,6 +491,10 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           merchants: "Merchants",
           claims: "Claims",
           reports: "Reports",
+          branches: "Branches",
+          categories: "Categories",
+          products: "Products",
+          overview: "Overview",
         },
         lockedTooltip:
           "This section is disabled for the user until the onboarding section is completed",
@@ -893,6 +901,10 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           merchants: "Comercios",
           claims: "Claims",
           reports: "Reportes",
+          branches: "Sucursales",
+          categories: "Categorías",
+          products: "Productos",
+          overview: "Resumen",
         },
         lockedTooltip:
           "Esta sección está deshabilitada para el usuario cuando complete la sección de onboarding",

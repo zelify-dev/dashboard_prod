@@ -250,14 +250,38 @@ export function getNavData(
               title: translations.sidebar.menuItems.subItems.generalPanel,
               url: "/",
             },
-            { title: "Overview", url: "/merchant" },
-            { title: "Profile", url: "/merchant/profile" },
-            { title: "Branches", url: "/merchant/branches" },
-            { title: "Categories", url: "/merchant/categories" },
-            { title: "Products", url: "/merchant/products" },
-            { title: "Discounts", url: "/merchant/discounts" },
-            { title: "Coupons", url: "/merchant/coupons" },
-            { title: "Create Coupon", url: "/merchant/coupons/create" },
+            {
+              title: translations.sidebar.menuItems.subItems.overview,
+              url: "/merchant",
+            },
+            {
+              title: translations.sidebar.menuItems.subItems.profile,
+              url: "/merchant/profile",
+            },
+            {
+              title: translations.sidebar.menuItems.subItems.branches,
+              url: "/merchant/branches",
+            },
+            {
+              title: translations.sidebar.menuItems.subItems.categories,
+              url: "/merchant/categories",
+            },
+            {
+              title: translations.sidebar.menuItems.subItems.products,
+              url: "/merchant/products",
+            },
+            {
+              title: translations.sidebar.menuItems.subItems.discounts,
+              url: "/merchant/discounts",
+            },
+            {
+              title: translations.sidebar.menuItems.subItems.coupons,
+              url: "/merchant/coupons",
+            },
+            {
+              title: translations.sidebar.menuItems.subItems.createCoupon,
+              url: "/merchant/coupons/create",
+            },
           ]
         : actor === "organization"
           ? [

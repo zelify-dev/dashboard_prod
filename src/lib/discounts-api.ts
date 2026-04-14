@@ -158,7 +158,8 @@ export type MerchantAnalytics = {
   pending_claims: number;
   total_redemptions: number;
   unique_users: number;
-  coupon_usage_rate: number;
+  conversion_rate?: number;
+  coupon_usage_rate?: number;
   top_discounts?: MerchantDiscountSummary[];
 };
 
@@ -173,7 +174,8 @@ export type DiscountAnalytics = {
   pending_claims: number;
   total_redemptions: number;
   unique_users: number;
-  coupon_usage_rate: number;
+  conversion_rate?: number;
+  coupon_usage_rate?: number; // Keep for backward compatibility if needed temporarily
   top_organizations?: Array<{
     organization_id: string;
     organization_name: string;
@@ -422,9 +424,9 @@ export async function updateDiscount(
     available_hours_start?: string | null;
     available_hours_end?: string | null;
     timezone?: string;
-    status?: "ACTIVE" | "INACTIVE";
     applicable_category_ids?: string[];
     applicable_product_ids?: string[];
+    status?: "ACTIVE" | "INACTIVE";
   }
 ): Promise<MerchantDiscount> {
   const res = await fetchWithAuth(`/api/discounts/discounts/${encodeURIComponent(discountId)}`, {
@@ -1182,4 +1184,154 @@ export async function listOrganizationRedemptions(
   }
   const redemptions = (data as { redemptions?: OrganizationRedemption[] }).redemptions;
   return Array.isArray(redemptions) ? redemptions : [];
+}
+
+export type GlobalVisibilityRelation = {
+  merchant_id: string;
+  merchant_name: string;
+  organization_id: string;
+  organization_name: string;
+  status: string;
+};
+
+export type GlobalVisibilityResponse = {
+  relations: GlobalVisibilityRelation[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+};
+
+export async function listAdminVisibilityRelations(
+  page = 1, 
+  limit = 50, 
+  search?: string, 
+  status?: string
+): Promise<GlobalVisibilityResponse> {
+  const query = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (search) query.set("search", search);
+  if (status) query.set("status", status);
+  
+  const res = await fetchWithAuth(`/api/discounts/admin/visibility-relations?${query.toString()}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al listar relaciones globales de visibilidad",
+      res.status,
+      data
+    );
+  }
+  
+  return {
+    relations: Array.isArray(data?.relations) ? data.relations : [],
+    meta: data?.meta || { total: 0, page: 1, limit: 50, pages: 0 }
+  };
+}
+
+/** 
+ * POST /api/discounts/coupons/confirm-use
+ * Marca un claim como REDEEMED (Pasos 25, 31 del QA).
+ */
+export async function confirmCouponUse(payload: { claim_code: string }): Promise<{ ok: boolean; status: string }> {
+  const res = await fetchWithAuth("/api/discounts/coupons/confirm-use", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError((data as { message?: string }).message ?? "Error al confirmar uso de cupón", res.status, data);
+  }
+  return data;
+}
+
+/** 
+ * GET /api/discounts/merchants/nearby
+ * Búsqueda por geocercas (Fase 5 del QA).
+ */
+export async function listNearbyMerchants(params: { 
+  lat: number; 
+  lng: number; 
+  radius_km?: number; 
+  country_code?: string;
+}): Promise<any[]> {
+  const query = new URLSearchParams({
+    lat: String(params.lat),
+    lng: String(params.lng),
+  });
+  if (params.radius_km) query.set("radius_km", String(params.radius_km));
+  if (params.country_code) query.set("country_code", params.country_code);
+
+  const res = await fetchWithAuth(`/api/discounts/merchants/nearby?${query.toString()}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError((data as { message?: string }).message ?? "Error al buscar comercios cercanos", res.status, data);
+  }
+  return Array.isArray(data) ? data : data.merchants || [];
+}
+
+/** 
+ * GET /api/discounts/admin/analytics/overview
+ */
+export async function getAdminAnalyticsOverview(): Promise<any> {
+  const res = await fetchWithAuth("/api/discounts/admin/analytics/overview");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError((data as { message?: string }).message ?? "Error al obtener analytics", res.status, data);
+  }
+  return data;
+}
+
+/** 
+ * GET /api/discounts/admin/analytics/top-merchants
+ */
+export async function getAdminTopMerchants(): Promise<any[]> {
+  const res = await fetchWithAuth("/api/discounts/admin/analytics/top-merchants");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError((data as { message?: string }).message ?? "Error al obtener ranking", res.status, data);
+  }
+  return Array.isArray(data) ? data : data.rankings || [];
+}
+
+/** 
+ * GET /api/discounts/merchants/me/resolve-merchant
+ * Resolución automática del ID del comercio para el usuario actual.
+ */
+export async function resolveMyMerchant(): Promise<{ merchant_id: string | null }> {
+  const res = await fetchWithAuth("/api/discounts/merchants/me/resolve-merchant");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // Si falla, devolvemos null en lugar de lanzar error para que el UI maneje el "unassigned"
+    return { merchant_id: null };
+  }
+  return { merchant_id: data.merchant_id ?? null };
+}
+
+
+
+export async function uploadMerchantLogo(
+  merchantId: string,
+  file: File
+): Promise<Partial<DiscountMerchant>> {
+  const formData = new FormData();
+  formData.append("logo", file);
+
+  const res = await fetchWithAuth(`/api/discounts/merchants/${encodeURIComponent(merchantId)}/logo`, {
+    method: "POST",
+    // Importante: No ponemos Content-Type. El navegador lo pondrá automáticamente con el 'boundary' correcto.
+    body: formData,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al subir el logo",
+      res.status,
+      data
+    );
+  }
+  return data as Partial<DiscountMerchant>;
 }

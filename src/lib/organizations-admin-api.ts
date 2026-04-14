@@ -21,6 +21,7 @@ export type OrganizationAdmin = {
   created_at?: string;
   updated_at?: string;
   scopes?: string[];
+  organization_type?: string;
 };
 
 export type ListOrganizationsResponse = {
