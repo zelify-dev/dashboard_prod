@@ -255,6 +255,10 @@ export function getNavData(
               url: "/merchant",
             },
             {
+              title: translations.sidebar.menuItems.subItems.terminal,
+              url: "/merchant/terminal",
+            },
+            {
               title: translations.sidebar.menuItems.subItems.profile,
               url: "/merchant/profile",
             },

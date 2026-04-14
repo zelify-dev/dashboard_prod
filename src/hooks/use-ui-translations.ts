@@ -88,6 +88,7 @@ export type UiTranslations = {
         categories: string;
         products: string;
         overview: string;
+        terminal: string;
       };
       lockedTooltip: string;
     };
@@ -413,6 +414,23 @@ export type UiTranslations = {
     redeemBtn: string;
     redeemSuccess: string;
     redeemError: string;
+    redeemErrorNotFound: string;
+    redeemErrorBadRequest: string;
+    redeemErrorForbidden: string;
+    redeemErrorGeneric: string;
+    selectCategories: string;
+    selectProducts: string;
+    searchPlaceholder: string;
+    allSelected: string;
+    noneSelected: string;
+  };
+  terminalPage: {
+    breadcrumb: string;
+    title: string;
+    subtitle: string;
+    activityLog: string;
+    noActivity: string;
+    claimCodeHint: string;
   };
 };
 
@@ -425,12 +443,33 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       breadcrumbRoot: "Dashboard",
     },
     merchantRedemption: {
-      redeemTitle: "Direct Redemption",
-      redeemSubtitle: "Enter customer code to validate.",
-      redeemPlaceholder: "Ex: BCWALL3B",
-      redeemBtn: "Validate Coupon",
-      redeemSuccess: "Coupon redeemed successfully.",
+      redeemTitle: "In-store redemption",
+      redeemSubtitle:
+        "Enter the short claim code the customer sees in the app after tapping “use coupon”. This is not the promotional campaign code.",
+      redeemPlaceholder: "e.g. XJ92K801",
+      redeemBtn: "Confirm use",
+      redeemSuccess: "Redemption confirmed. The claim is marked as used.",
       redeemError: "Error: Code is invalid or already used.",
+      redeemErrorNotFound:
+        "Code not found. Make sure the customer shows the app claim code, not the campaign promotional code.",
+      redeemErrorBadRequest:
+        "This code cannot be used (already redeemed, cancelled, expired, or outside allowed schedule/limits).",
+      redeemErrorForbidden: "This claim does not belong to your merchant.",
+      redeemErrorGeneric: "Could not confirm redemption. Try again or contact support.",
+      selectCategories: "Applicable Categories",
+      selectProducts: "Applicable Products",
+      searchPlaceholder: "Search...",
+      allSelected: "All items selected",
+      noneSelected: "No items selected",
+    },
+    terminalPage: {
+      breadcrumb: "Merchant / Redemption",
+      title: "Redemption Center",
+      subtitle: "Professional interface for benefit validation and claim processing.",
+      activityLog: "Session Activity",
+      noActivity: "No redemptions in this session.",
+      claimCodeHint:
+        "Redemptions are audited in real time. The customer must enter the exact short code shown in the app after claiming the offer—not the promotional code.",
     },
     languageToggle: {
       switchToSpanish: "Switch language to Spanish",
@@ -511,6 +550,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           categories: "Categories",
           products: "Products",
           overview: "Overview",
+          terminal: "Redemption",
         },
         lockedTooltip:
           "This section is disabled for the user until the onboarding section is completed",
@@ -844,12 +884,33 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
       breadcrumbRoot: "Panel",
     },
     merchantRedemption: {
-      redeemTitle: "Canje Directo",
-      redeemSubtitle: "Introduce el código del cliente para validarlo.",
-      redeemPlaceholder: "Ej: BCWALL3B",
-      redeemBtn: "Validar Cupón",
-      redeemSuccess: "Cupón canjeado con éxito.",
+      redeemTitle: "Canje en tienda",
+      redeemSubtitle:
+        "Introduce el código corto (claim) que la app muestra al cliente tras «usar cupón». No es el código promocional de la campaña.",
+      redeemPlaceholder: "Ej: XJ92K801",
+      redeemBtn: "Confirmar uso",
+      redeemSuccess: "Canje registrado. El reclamo quedó como usado.",
       redeemError: "Error: El código no es válido o ya fue utilizado.",
+      redeemErrorNotFound:
+        "Código no encontrado. Verifica que el cliente muestre el código de la app (claim), no el código promocional de la campaña.",
+      redeemErrorBadRequest:
+        "No se puede usar este código (ya canjeado, cancelado, expirado o fuera de horario/límites permitidos).",
+      redeemErrorForbidden: "Este reclamo no pertenece a tu comercio.",
+      redeemErrorGeneric: "No se pudo confirmar el canje. Inténtalo de nuevo o contacta a soporte.",
+      selectCategories: "Categorías aplicables",
+      selectProducts: "Productos aplicables",
+      searchPlaceholder: "Buscar...",
+      allSelected: "Todos seleccionados",
+      noneSelected: "Ninguno seleccionado",
+    },
+    terminalPage: {
+      breadcrumb: "Comercio / Canje",
+      title: "Centro de Canje",
+      subtitle: "Interfaz profesional para validación de beneficios y procesamiento de reclamos.",
+      activityLog: "Actividad de la Sesión",
+      noActivity: "Sin canjes en esta sesión.",
+      claimCodeHint:
+        "Los canjes quedan auditados en tiempo real. El cliente debe introducir exactamente el código corto que muestra la app tras reclamar la oferta; no el código promocional de la campaña.",
     },
     languageToggle: {
       switchToSpanish: "Cambiar idioma a español",
@@ -929,6 +990,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           categories: "Categorías",
           products: "Productos",
           overview: "Resumen",
+          terminal: "Canje",
         },
         lockedTooltip:
           "Esta sección está deshabilitada para el usuario cuando complete la sección de onboarding",

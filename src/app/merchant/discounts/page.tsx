@@ -15,12 +15,16 @@ import { useLanguage } from "@/contexts/language-context";
 import {
   createMerchantDiscount,
   getDiscountAnalytics,
+  listMerchantCategories,
   listMerchantDiscounts,
+  listMerchantProducts,
   listNetworkDiscountMerchants,
   updateDiscount,
   type DiscountAnalytics,
   type DiscountMerchant,
+  type MerchantCategory,
   type MerchantDiscount,
+  type MerchantProduct,
 } from "@/lib/discounts-api";
 
 const LABELS = {
@@ -105,6 +109,8 @@ export default function MerchantDiscountsPage() {
   const [merchants, setMerchants] = useState<DiscountMerchant[]>([]);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
   const [discounts, setDiscounts] = useState<MerchantDiscount[]>([]);
+  const [categories, setCategories] = useState<MerchantCategory[]>([]);
+  const [products, setProducts] = useState<MerchantProduct[]>([]);
   const [loadingMerchants, setLoadingMerchants] = useState(true);
   const [loadingDiscounts, setLoadingDiscounts] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -146,11 +152,20 @@ export default function MerchantDiscountsPage() {
     const run = async () => {
       if (!selectedMerchantId) {
         setDiscounts([]);
+        setCategories([]);
+        setProducts([]);
         return;
       }
       setLoadingDiscounts(true);
       try {
-        setDiscounts(await listMerchantDiscounts(selectedMerchantId));
+        const [nextDiscounts, nextCategories, nextProducts] = await Promise.all([
+          listMerchantDiscounts(selectedMerchantId),
+          listMerchantCategories(selectedMerchantId),
+          listMerchantProducts(selectedMerchantId),
+        ]);
+        setDiscounts(nextDiscounts);
+        setCategories(nextCategories);
+        setProducts(nextProducts);
       } finally {
         setLoadingDiscounts(false);
       }
@@ -295,10 +310,11 @@ export default function MerchantDiscountsPage() {
           </div>
         )}
 
-        {/* Form Editor */}
         {canManage && isCreating && (
           <DiscountEditor
             discount={{ id: "new", merchant_id: selectedMerchantId || "", status: "ACTIVE" } as any}
+            categories={categories}
+            products={products}
             isSaving={isSavingDiscount}
             onCancel={() => setIsCreating(false)}
             onSave={handleCreateDiscount}
@@ -312,6 +328,8 @@ export default function MerchantDiscountsPage() {
           <div className="space-y-6">
             <DiscountEditor
               discount={editingDiscount}
+              categories={categories}
+              products={products}
               isSaving={isSavingDiscount}
               onCancel={() => setEditingDiscountId(null)}
               onSave={handleUpdateDiscount}

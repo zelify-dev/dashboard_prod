@@ -43,6 +43,7 @@ const TRANSLATIONS = {
     organizationIdHelp: "This email belongs to multiple organizations. Enter the organization ID to continue.",
     showPasswordAria: "Show password",
     hidePasswordAria: "Hide password",
+    sessionExpiredInfo: "Your session has expired. Please sign in again.",
   },
   es: {
     welcome: "Bienvenido de nuevo",
@@ -74,6 +75,7 @@ const TRANSLATIONS = {
     organizationIdHelp: "Este correo existe en múltiples organizaciones. Ingresa el ID de la organización para continuar.",
     showPasswordAria: "Mostrar contraseña",
     hidePasswordAria: "Ocultar contraseña",
+    sessionExpiredInfo: "Tu sesión ha expirado. Inicia sesión de nuevo.",
   },
 };
 
@@ -248,6 +250,7 @@ export default function LoginPage() {
   });
   const [requiresOrganizationId, setRequiresOrganizationId] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [sessionExpiredInfo, setSessionExpiredInfo] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -289,6 +292,21 @@ export default function LoginPage() {
     });
 
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("reason") === "session_expired") {
+      setSessionExpiredInfo(true);
+      params.delete("reason");
+      const q = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        `${window.location.pathname}${q ? `?${q}` : ""}`,
+      );
+    }
   }, []);
 
   // Agregar estilos de animación
@@ -535,6 +553,14 @@ export default function LoginPage() {
           }}
         >
           <div className="w-full p-4 sm:p-10">
+                {sessionExpiredInfo ? (
+                  <div
+                    className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100"
+                    role="status"
+                  >
+                    {t.sessionExpiredInfo}
+                  </div>
+                ) : null}
                 {/* Logo + título centrados */}
                 <div className="mb-10 flex justify-center">
                   <Link href="/" className="inline-block">

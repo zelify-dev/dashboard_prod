@@ -2,8 +2,19 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { AuthError, clearAuthSession, getAccessToken, getMe, getStoredRoles, getStoredUser } from "@/lib/auth-api";
+import {
+  AuthError,
+  clearAuthSession,
+  clearSessionExpiredFlash,
+  getAccessToken,
+  getMe,
+  getStoredRoles,
+  getStoredUser,
+  markSessionExpiredFlash,
+  peekSessionExpiredFlash,
+} from "@/lib/auth-api";
 import { ChangePasswordModal } from "@/components/Auth/ChangePasswordModal";
+import { SessionExpiredModal } from "@/components/Auth/SessionExpiredModal";
 import { getDefaultDashboardPath } from "@/lib/dashboard-routing";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -11,6 +22,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [sessionExpiredModal, setSessionExpiredModal] = useState(false);
   const isValidatingRef = useRef(false);
   const lastValidationRef = useRef(0);
 
@@ -48,7 +60,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       setIsAuthenticated(false);
       setIsMounted(true);
       if (pathname !== "/login" && pathname !== "/register") {
-        router.replace("/login");
+        if (peekSessionExpiredFlash()) {
+          setSessionExpiredModal(true);
+        } else {
+          router.replace("/login");
+        }
       }
       return;
     }
@@ -66,10 +82,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
       setIsMounted(true);
     } catch (err) {
       if (err instanceof AuthError && (err.statusCode === 401 || err.statusCode === 403)) {
+        markSessionExpiredFlash();
         clearAuthSession();
         setIsAuthenticated(false);
         setIsMounted(true);
-        router.replace("/login");
+        setSessionExpiredModal(true);
         return;
       }
 
@@ -113,9 +130,13 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           setIsAuthenticated(false);
           setIsMounted(true);
 
-          // Si no está autenticado y no está en login ni register, redirigir a login
+          // Si no está autenticado y no está en login ni register, redirigir a login (o modal si la API marcó sesión expirada)
           if (pathname !== "/login" && pathname !== "/register") {
-            router.replace("/login");
+            if (peekSessionExpiredFlash()) {
+              setSessionExpiredModal(true);
+            } else {
+              router.replace("/login");
+            }
           }
         }
       }
@@ -164,6 +185,21 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   // Esto debe ir ANTES de verificar isMounted para evitar el spinner
   if (isLoginPage) {
     return <>{children}</>;
+  }
+
+  const showSessionExpired =
+    sessionExpiredModal || (isAuthenticated === false && peekSessionExpiredFlash());
+
+  if (showSessionExpired) {
+    return (
+      <SessionExpiredModal
+        onContinue={() => {
+          clearSessionExpiredFlash();
+          setSessionExpiredModal(false);
+          router.replace("/login?reason=session_expired");
+        }}
+      />
+    );
   }
 
   // Si aún no está montado y NO estamos en login, mostrar loading

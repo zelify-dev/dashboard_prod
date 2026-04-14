@@ -1,11 +1,12 @@
-"use client";
-
 import { useMemo, useState } from "react";
-import type { MerchantDiscount } from "@/lib/discounts-api";
+import type { MerchantCategory, MerchantDiscount, MerchantProduct } from "@/lib/discounts-api";
 import { useLanguage } from "@/contexts/language-context";
+import { useUiTranslations } from "@/hooks/use-ui-translations";
 
 type DiscountEditorProps = {
   discount: MerchantDiscount;
+  categories?: MerchantCategory[];
+  products?: MerchantProduct[];
   isSaving?: boolean;
   onCancel: () => void;
   title?: string;
@@ -27,6 +28,8 @@ type DiscountEditorProps = {
     available_hours_end?: string | null;
     timezone?: string;
     status?: "ACTIVE" | "INACTIVE";
+    applicable_category_ids?: string[];
+    applicable_product_ids?: string[];
   }) => Promise<void>;
 };
 
@@ -76,6 +79,7 @@ const LABELS = {
 };
 
 const DAY_IDS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+const TIMEZONES = ["America/Guayaquil", "America/Bogota", "America/Mexico_City", "America/Lima", "America/Santiago", "UTC"];
 
 function isoToLocalDateTime(value?: string | null): string {
   if (!value) return "";
@@ -92,6 +96,8 @@ function isoToLocalDateTime(value?: string | null): string {
 
 export function DiscountEditor({
   discount,
+  categories = [],
+  products = [],
   onCancel,
   onSave,
   isSaving = false,
@@ -101,9 +107,10 @@ export function DiscountEditor({
 }: DiscountEditorProps) {
   const { language } = useLanguage();
   const t = LABELS[language];
+  const tShared = useUiTranslations().merchantRedemption;
 
   const initialDays = useMemo(() => {
-    const rows = (discount as MerchantDiscount & { available_days?: string[] }).available_days;
+    const rows = (discount as any).available_days;
     return Array.isArray(rows) ? rows : [];
   }, [discount]);
 
@@ -115,7 +122,7 @@ export function DiscountEditor({
       | "FIXED_AMOUNT",
     discount_value: Number(discount.discount_value) || 0,
     min_purchase: Number(discount.min_purchase) || 0,
-    max_uses_total: Number(discount.max_uses_total) || null, // null = unlimited
+    max_uses_total: Number(discount.max_uses_total) || null,
     max_uses_per_user: Number(discount.max_uses_per_user) || 1,
     valid_from: isoToLocalDateTime(discount.valid_from),
     valid_until: isoToLocalDateTime(discount.valid_until),
@@ -125,7 +132,22 @@ export function DiscountEditor({
     available_hours_end: (discount as any).available_hours_end || "18:00",
     timezone: (discount as any).timezone || "America/Guayaquil",
     status: (discount.status?.toUpperCase() === "INACTIVE" ? "INACTIVE" : "ACTIVE") as "ACTIVE" | "INACTIVE",
+    applicable_category_ids: (discount as any).applicable_category_ids || [],
+    applicable_product_ids: (discount as any).applicable_product_ids || [],
   });
+
+  const [catSearch, setCatSearch] = useState("");
+  const [prodSearch, setProdSearch] = useState("");
+
+  const filteredCategories = useMemo(() => 
+    categories.filter(c => c.name.toLowerCase().includes(catSearch.toLowerCase())),
+    [categories, catSearch]
+  );
+  
+  const filteredProducts = useMemo(() => 
+    products.filter(p => p.name.toLowerCase().includes(prodSearch.toLowerCase())),
+    [products, prodSearch]
+  );
 
   const toggleDay = (dayId: string) => {
     setForm((prev) => ({
@@ -133,6 +155,13 @@ export function DiscountEditor({
       available_days: prev.available_days.includes(dayId)
         ? prev.available_days.filter((d) => d !== dayId)
         : [...prev.available_days, dayId],
+    }));
+  };
+
+  const toggleSelection = (key: 'applicable_category_ids' | 'applicable_product_ids', id: string) => {
+    setForm((prev) => ({
+      ...prev,
+      [key]: prev[key].includes(id) ? prev[key].filter((i: string) => i !== id) : [...prev[key], id]
     }));
   };
 
@@ -252,12 +281,13 @@ export function DiscountEditor({
           </div>
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formTimezone}</label>
-            <input
-              type="text"
+            <select
               value={form.timezone}
               onChange={(e) => setForm((prev) => ({ ...prev, timezone: e.target.value }))}
-              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
-            />
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+            >
+              {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
+            </select>
           </div>
           <div>
              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formValidFrom}</label>
@@ -266,6 +296,71 @@ export function DiscountEditor({
           <div>
              <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formValidUntil}</label>
              <input type="datetime-local" value={form.valid_until} onChange={(e) => setForm((p) => ({ ...p, valid_until: e.target.value }))} className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white" />
+          </div>
+        </div>
+
+        {/* Linker: Categorías */}
+        <div className="rounded-xl border border-stroke p-5 dark:border-dark-3">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wide text-dark-5">{tShared.selectCategories}</p>
+            <span className="text-[10px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full">
+              {form.applicable_category_ids.length > 0 ? `${form.applicable_category_ids.length} selected` : tShared.noneSelected}
+            </span>
+          </div>
+          <input 
+            type="text" 
+            placeholder={tShared.searchPlaceholder} 
+            value={catSearch} 
+            onChange={(e) => setCatSearch(e.target.value)} 
+            className="mb-4 w-full rounded-lg border border-stroke bg-gray-1 px-3 py-2 text-xs dark:border-dark-3 dark:bg-dark-3"
+          />
+          <div className="max-h-40 overflow-y-auto grid grid-cols-2 md:grid-cols-3 gap-2 pr-2 custom-scrollbar">
+            {filteredCategories.map(cat => (
+              <label key={cat.id} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition border ${form.applicable_category_ids.includes(cat.id) ? 'border-primary bg-primary/5' : 'border-transparent hover:bg-gray-1 dark:hover:bg-dark-3'}`}>
+                <input 
+                  type="checkbox" 
+                  checked={form.applicable_category_ids.includes(cat.id)} 
+                  onChange={() => toggleSelection('applicable_category_ids', cat.id)}
+                  className="rounded text-primary focus:ring-primary"
+                />
+                <span className="text-xs font-medium text-dark dark:text-white truncate">{cat.name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* Linker: Productos */}
+        <div className="rounded-xl border border-stroke p-5 dark:border-dark-3">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-xs font-bold uppercase tracking-wide text-dark-5">{tShared.selectProducts}</p>
+            <span className="text-[10px] font-bold text-primary px-2 py-0.5 bg-primary/10 rounded-full">
+               {form.applicable_product_ids.length > 0 ? `${form.applicable_product_ids.length} selected` : tShared.noneSelected}
+            </span>
+          </div>
+          <input 
+            type="text" 
+            placeholder={tShared.searchPlaceholder} 
+            value={prodSearch} 
+            onChange={(e) => setProdSearch(e.target.value)} 
+            className="mb-4 w-full rounded-lg border border-stroke bg-gray-1 px-3 py-2 text-xs dark:border-dark-3 dark:bg-dark-3"
+          />
+          <div className="max-h-48 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 pr-2 custom-scrollbar">
+            {filteredProducts.map(prod => (
+              <label key={prod.id} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition border ${form.applicable_product_ids.includes(prod.id) ? 'border-primary bg-primary/5' : 'border-transparent hover:bg-gray-1 dark:hover:bg-dark-3'}`}>
+                 <input 
+                  type="checkbox" 
+                  checked={form.applicable_product_ids.includes(prod.id)} 
+                  onChange={() => toggleSelection('applicable_product_ids', prod.id)}
+                  className="rounded text-primary focus:ring-primary"
+                />
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-dark dark:text-white truncate">{prod.name}</span>
+                  <span className="text-[9px] text-dark-6 opacity-60">
+                    {categories.find(c => c.id === prod.category_id)?.name || 'Misc'}
+                  </span>
+                </div>
+              </label>
+            ))}
           </div>
         </div>
 

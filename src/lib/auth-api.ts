@@ -65,6 +65,32 @@ export class AuthError extends Error {
 }
 
 /** Keys en sessionStorage para la sesión */
+/** Marca en sessionStorage que el siguiente flujo debe mostrar “sesión expirada” (no se borra en clearAuthSession). */
+const SESSION_EXPIRED_FLASH_KEY = "zelify_session_expired_notice";
+
+export function markSessionExpiredFlash(): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.setItem(SESSION_EXPIRED_FLASH_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+export function peekSessionExpiredFlash(): boolean {
+  if (typeof window === "undefined") return false;
+  return sessionStorage.getItem(SESSION_EXPIRED_FLASH_KEY) === "1";
+}
+
+export function clearSessionExpiredFlash(): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(SESSION_EXPIRED_FLASH_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export const AUTH_STORAGE_KEYS = {
   ACCESS_TOKEN: "access_token",
   REFRESH_TOKEN: "refresh_token",
@@ -290,9 +316,16 @@ export async function fetchWithAuth(
           res = await fetch(url, { ...options, headers });
         }
       } else {
+        markSessionExpiredFlash();
         clearAuthSession();
         throw new AuthError("Sesión expirada. Inicia sesión de nuevo.", 401);
       }
+    }
+    // Tras refresh, un 401 indica sesión inválida (p. ej. refresh rotado o revocado). No limpiar por 403: puede ser permiso real.
+    if (Boolean(token) && res.status === 401) {
+      markSessionExpiredFlash();
+      clearAuthSession();
+      throw new AuthError("Sesión expirada. Inicia sesión de nuevo.", 401);
     }
     return res;
   };
