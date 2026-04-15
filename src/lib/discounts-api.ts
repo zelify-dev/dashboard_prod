@@ -1,4 +1,17 @@
 import { fetchWithAuth, AuthError } from "@/lib/auth-api";
+import { messageFromApiErrorBody } from "@/lib/normalize-api-error-message";
+
+/**
+ * Cliente **v1**: `{NEXT_PUBLIC_AUTH_API_URL}/api/...` + `Authorization: Bearer`.
+ * Contrato fino: Swagger `{BASE}/docs`.
+ *
+ * **Redeem vs confirm-use:** `POST /api/discounts/coupons/redeem` usa **código del cupón** (campaña) + `user_id` + `organization_id` (o org en path).
+ * `POST /api/discounts/coupons/confirm-use` usa **claim_code** devuelto tras redeem (no el código promocional). Este repo solo llama confirm-use con Bearer comercio.
+ *
+ * **v2** (`/api/v2/discounts/...`, `x-api-key` / `x-api-secret` / `x-org-id`): el dashboard actual no usa estas rutas.
+ *
+ * **QA / huecos:** restricción por producto en canje y “dos cupones en un pedido” dependen de checkout/POS hasta que el API lo exponga; mensajes 400 de vigencia pueden no coincidir literalmente con el copy de QA.
+ */
 
 export type DiscountMerchant = {
   id: string;
@@ -290,6 +303,13 @@ export type AdminDiscountsDashboard = {
   executive_comparisons?: Record<string, unknown>;
 };
 
+/**
+ * Cuerpo del **POST** `/api/discounts/merchants/onboarding` (base: `NEXT_PUBLIC_AUTH_API_URL`).
+ * Pantalla: Owner → comercios (`onboardDiscountMerchant` desde `owner/merchants`).
+ * Validación UX en cliente: `validateMerchantOnboardingForm` + `merchant-onboarding-limits.ts`
+ * (slug 50, descripción 5000, país ISO2, `organization_name` 200, `admin_password` opcional 8–128 con letra+número).
+ * API: OnboardMerchantDto — 400 validación, 409 conflicto (p. ej. slug+país).
+ */
 export type MerchantOnboardingPayload = {
   country_code: string;
   merchant_name: string;
@@ -350,7 +370,7 @@ export async function listDiscountMerchants(params: {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar merchants",
+      messageFromApiErrorBody(data, "Error al listar merchants"),
       res.status,
       data
     );
@@ -375,7 +395,7 @@ export async function listNetworkDiscountMerchants(params?: {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar merchants",
+      messageFromApiErrorBody(data, "Error al listar merchants"),
       res.status,
       data
     );
@@ -399,7 +419,7 @@ export async function getAdminDiscountsDashboard(params?: {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al obtener analytics globales",
+      messageFromApiErrorBody(data, "Error al obtener analytics globales"),
       res.status,
       data
     );
@@ -407,6 +427,12 @@ export async function getAdminDiscountsDashboard(params?: {
   return data as AdminDiscountsDashboard;
 }
 
+/**
+ * Actualizar descuento (misma regla de negocio que al crear).
+ *
+ * **Endpoint:** `PATCH /api/discounts/discounts/:discountId` (base: `NEXT_PUBLIC_AUTH_API_URL`).
+ * **Back:** mismas reglas que el DTO Nest (valor &gt; 0, % ≤ 100, montos ≤ `COMMERCE_MAX_MONETARY_AMOUNT`, descripción ≤ 5000, fechas coherentes). **400** con `{ "message": "..." }` o array desde ValidationPipe.
+ */
 export async function updateDiscount(
   discountId: string,
   payload: {
@@ -437,7 +463,7 @@ export async function updateDiscount(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al editar descuento",
+      messageFromApiErrorBody(data, "Error al editar descuento"),
       res.status,
       data
     );
@@ -450,7 +476,7 @@ export async function listMerchantDiscounts(merchantId: string): Promise<Merchan
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar descuentos",
+      messageFromApiErrorBody(data, "Error al listar descuentos"),
       res.status,
       data
     );
@@ -465,7 +491,7 @@ export async function getDiscountMerchant(merchantId: string): Promise<DiscountM
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al obtener merchant",
+      messageFromApiErrorBody(data, "Error al obtener merchant"),
       res.status,
       data
     );
@@ -491,7 +517,7 @@ export async function updateDiscountMerchant(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al actualizar merchant",
+      messageFromApiErrorBody(data, "Error al actualizar merchant"),
       res.status,
       data
     );
@@ -506,7 +532,7 @@ export async function deactivateDiscountMerchant(merchantId: string): Promise<Di
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al desactivar merchant",
+      messageFromApiErrorBody(data, "Error al desactivar merchant"),
       res.status,
       data
     );
@@ -514,6 +540,12 @@ export async function deactivateDiscountMerchant(merchantId: string): Promise<Di
   return data as DiscountMerchant;
 }
 
+/**
+ * Crear descuento desde **Merchant** (`/merchant/discounts`, `DiscountEditor`).
+ *
+ * **Endpoint:** `POST /api/discounts/merchants/:merchantId/discounts` (base: `NEXT_PUBLIC_AUTH_API_URL`).
+ * **Back:** validación en DTO/servicio (valor &gt; 0, % ≤ 100, límites de monto y descripción, fechas). **400** + `message`.
+ */
 export async function createMerchantDiscount(
   merchantId: string,
   payload: {
@@ -543,7 +575,7 @@ export async function createMerchantDiscount(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al crear descuento",
+      messageFromApiErrorBody(data, "Error al crear descuento"),
       res.status,
       data
     );
@@ -556,7 +588,7 @@ export async function listDiscountCoupons(discountId: string): Promise<MerchantC
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar cupones",
+      messageFromApiErrorBody(data, "Error al listar cupones"),
       res.status,
       data
     );
@@ -581,7 +613,7 @@ export async function createDiscountCoupon(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al crear cupón",
+      messageFromApiErrorBody(data, "Error al crear cupón"),
       res.status,
       data
     );
@@ -596,7 +628,7 @@ export async function deactivateCoupon(couponId: string): Promise<MerchantCoupon
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al desactivar cupón",
+      messageFromApiErrorBody(data, "Error al desactivar cupón"),
       res.status,
       data
     );
@@ -609,7 +641,7 @@ export async function getCouponByCode(code: string): Promise<MerchantCoupon> {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al obtener cupón",
+      messageFromApiErrorBody(data, "Error al obtener cupón"),
       res.status,
       data
     );
@@ -622,7 +654,7 @@ export async function getMerchantReportsSummary(merchantId: string): Promise<Mer
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al obtener resumen",
+      messageFromApiErrorBody(data, "Error al obtener resumen"),
       res.status,
       data
     );
@@ -644,7 +676,7 @@ export async function getMerchantAnalytics(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al obtener analytics del merchant",
+      messageFromApiErrorBody(data, "Error al obtener analytics del merchant"),
       res.status,
       data
     );
@@ -664,7 +696,7 @@ export async function getDiscountAnalytics(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al obtener analytics del discount",
+      messageFromApiErrorBody(data, "Error al obtener analytics del discount"),
       res.status,
       data
     );
@@ -677,7 +709,7 @@ export async function getOrganizationReportsSummary(orgId: string): Promise<Orga
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al obtener resumen de organización",
+      messageFromApiErrorBody(data, "Error al obtener resumen de organización"),
       res.status,
       data
     );
@@ -692,7 +724,7 @@ export async function listOrganizationVisibleMerchants(orgId: string): Promise<D
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar merchants visibles",
+      messageFromApiErrorBody(data, "Error al listar merchants visibles"),
       res.status,
       data
     );
@@ -707,7 +739,7 @@ export async function listOrganizationVisibleDiscounts(orgId: string): Promise<M
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar descuentos visibles",
+      messageFromApiErrorBody(data, "Error al listar descuentos visibles"),
       res.status,
       data
     );
@@ -726,7 +758,7 @@ export async function listMerchantVisibilityOrganizations(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar visibilidad del merchant",
+      messageFromApiErrorBody(data, "Error al listar visibilidad del merchant"),
       res.status,
       data
     );
@@ -744,7 +776,7 @@ export async function listDiscountVisibilityOrganizations(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar visibilidad del discount",
+      messageFromApiErrorBody(data, "Error al listar visibilidad del discount"),
       res.status,
       data
     );
@@ -764,7 +796,7 @@ export async function assignMerchantToOrganization(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al asignar merchant",
+      messageFromApiErrorBody(data, "Error al asignar merchant"),
       res.status,
       data
     );
@@ -788,7 +820,7 @@ export async function updateMerchantVisibility(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al actualizar visibilidad del merchant",
+      messageFromApiErrorBody(data, "Error al actualizar visibilidad del merchant"),
       res.status,
       data
     );
@@ -807,7 +839,7 @@ export async function removeMerchantVisibility(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al eliminar visibilidad del merchant",
+      messageFromApiErrorBody(data, "Error al eliminar visibilidad del merchant"),
       res.status,
       data
     );
@@ -826,7 +858,7 @@ export async function assignDiscountToOrganization(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al asignar descuento",
+      messageFromApiErrorBody(data, "Error al asignar descuento"),
       res.status,
       data
     );
@@ -850,7 +882,7 @@ export async function updateDiscountVisibility(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al actualizar visibilidad del discount",
+      messageFromApiErrorBody(data, "Error al actualizar visibilidad del discount"),
       res.status,
       data
     );
@@ -869,7 +901,7 @@ export async function removeDiscountVisibility(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al eliminar visibilidad del discount",
+      messageFromApiErrorBody(data, "Error al eliminar visibilidad del discount"),
       res.status,
       data
     );
@@ -877,6 +909,15 @@ export async function removeDiscountVisibility(
   return data as { ok: boolean };
 }
 
+/**
+ * Alta de comercio (organization + merchant + admin) en una sola operación.
+ *
+ * **Ruta:** `POST /api/discounts/merchants/onboarding` (prefijo global `api`, sin v2 en el dashboard actual).
+ *
+ * **Back — revisar en creación:** `merchant_slug` (formato + `@MaxLength` alineado a `MERCHANT_SLUG_MAX_LEN`),
+ * `merchant_description` (`@MaxLength` ↔ `MERCHANT_DESCRIPTION_MAX_LEN`), `country_code`, emails, URLs,
+ * contraseña/admin si aplica, unicidad de slug por país u org, y mensajes 400 coherentes (`message` string o array ValidationPipe).
+ */
 export async function onboardDiscountMerchant(
   payload: MerchantOnboardingPayload
 ): Promise<MerchantOnboardingResponse> {
@@ -888,7 +929,7 @@ export async function onboardDiscountMerchant(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al crear merchant con onboarding",
+      messageFromApiErrorBody(data, "Error al crear merchant con onboarding"),
       res.status,
       data
     );
@@ -907,7 +948,7 @@ export async function listMerchantBranches(
   const res = await fetchWithAuth(`/api/discounts/merchants/${encodeURIComponent(merchantId)}/branches${suffix}`);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al listar sucursales", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al listar sucursales"), res.status, data);
   }
   const branches = (data as { branches?: MerchantBranch[] }).branches;
   return Array.isArray(branches) ? branches : [];
@@ -924,7 +965,7 @@ export async function createMerchantBranch(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al crear sucursal", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al crear sucursal"), res.status, data);
   }
   return data as MerchantBranch;
 }
@@ -944,7 +985,7 @@ export async function updateMerchantBranch(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al actualizar sucursal", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al actualizar sucursal"), res.status, data);
   }
   return data as MerchantBranch;
 }
@@ -964,7 +1005,7 @@ export async function updateMerchantBranchGeolocation(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al actualizar geolocalización", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al actualizar geolocalización"), res.status, data);
   }
   return data as MerchantBranch;
 }
@@ -976,7 +1017,7 @@ export async function deactivateMerchantBranch(merchantId: string, branchId: str
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al desactivar sucursal", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al desactivar sucursal"), res.status, data);
   }
   return data as MerchantBranch;
 }
@@ -985,7 +1026,7 @@ export async function listMerchantCategories(merchantId: string): Promise<Mercha
   const res = await fetchWithAuth(`/api/discounts/merchants/${encodeURIComponent(merchantId)}/categories`);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al listar categorías", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al listar categorías"), res.status, data);
   }
   const categories = (data as { categories?: MerchantCategory[] }).categories;
   return Array.isArray(categories) ? categories : [];
@@ -1002,7 +1043,7 @@ export async function createMerchantCategory(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al crear categoría", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al crear categoría"), res.status, data);
   }
   return data as MerchantCategory;
 }
@@ -1022,7 +1063,7 @@ export async function updateMerchantCategory(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al actualizar categoría", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al actualizar categoría"), res.status, data);
   }
   return data as MerchantCategory;
 }
@@ -1037,7 +1078,7 @@ export async function listMerchantProducts(
   const res = await fetchWithAuth(`/api/discounts/merchants/${encodeURIComponent(merchantId)}/products${suffix}`);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al listar productos", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al listar productos"), res.status, data);
   }
   const products = (data as { products?: MerchantProduct[] }).products;
   return Array.isArray(products) ? products : [];
@@ -1062,7 +1103,7 @@ export async function createMerchantProduct(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al crear producto", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al crear producto"), res.status, data);
   }
   return data as MerchantProduct;
 }
@@ -1091,7 +1132,7 @@ export async function updateMerchantProduct(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al actualizar producto", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al actualizar producto"), res.status, data);
   }
   return data as MerchantProduct;
 }
@@ -1103,7 +1144,7 @@ export async function activateMerchantProduct(merchantId: string, productId: str
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al activar producto", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al activar producto"), res.status, data);
   }
   return data as MerchantProduct;
 }
@@ -1115,7 +1156,7 @@ export async function deactivateMerchantProduct(merchantId: string, productId: s
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al desactivar producto", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al desactivar producto"), res.status, data);
   }
   return data as MerchantProduct;
 }
@@ -1127,7 +1168,7 @@ export async function deleteMerchantProduct(merchantId: string, productId: strin
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al eliminar producto", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al eliminar producto"), res.status, data);
   }
   return data as { ok: boolean };
 }
@@ -1138,7 +1179,7 @@ export async function listOrganizationClaims(orgId: string, userId: string): Pro
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al listar claims", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al listar claims"), res.status, data);
   }
   const claims = (data as { claims?: OrganizationClaim[] }).claims;
   return Array.isArray(claims) ? claims : [];
@@ -1155,7 +1196,7 @@ export async function cancelOrganizationClaim(
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al cancelar claim", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al cancelar claim"), res.status, data);
   }
   return data as Partial<OrganizationClaim> & { claim?: OrganizationClaim };
 }
@@ -1180,7 +1221,7 @@ export async function listOrganizationRedemptions(
   const res = await fetchWithAuth(`/api/organizations/${encodeURIComponent(orgId)}/discounts/reports/redemptions${suffix}`);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al listar redemptions", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al listar redemptions"), res.status, data);
   }
   const redemptions = (data as { redemptions?: OrganizationRedemption[] }).redemptions;
   return Array.isArray(redemptions) ? redemptions : [];
@@ -1218,7 +1259,7 @@ export async function listAdminVisibilityRelations(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al listar relaciones globales de visibilidad",
+      messageFromApiErrorBody(data, "Error al listar relaciones globales de visibilidad"),
       res.status,
       data
     );
@@ -1230,9 +1271,9 @@ export async function listAdminVisibilityRelations(
   };
 }
 
-/** 
- * POST /api/discounts/coupons/confirm-use
- * Marca un claim como REDEEMED (Pasos 25, 31 del QA).
+/**
+ * POST `/api/discounts/coupons/confirm-use` — Bearer (MERCHANT_*, OWNER, etc.).
+ * Body: `{ "code": "<claim_code>" }` (máx. ~20 chars en servidor; suele normalizarse a mayúsculas). No enviar el código de campaña del cupón.
  */
 export async function confirmCouponUse(payload: { code: string }): Promise<{ ok: boolean; status: string; success?: boolean; message?: string; claim_id?: string; redeemed_at?: string }> {
   const res = await fetchWithAuth("/api/discounts/coupons/confirm-use", {
@@ -1242,7 +1283,7 @@ export async function confirmCouponUse(payload: { code: string }): Promise<{ ok:
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al confirmar uso de cupón", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al confirmar uso de cupón"), res.status, data);
   }
   return data;
 }
@@ -1267,7 +1308,7 @@ export async function listNearbyMerchants(params: {
   const res = await fetchWithAuth(`/api/discounts/merchants/nearby?${query.toString()}`);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al buscar comercios cercanos", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al buscar comercios cercanos"), res.status, data);
   }
   return Array.isArray(data) ? data : data.merchants || [];
 }
@@ -1279,7 +1320,7 @@ export async function getAdminAnalyticsOverview(): Promise<any> {
   const res = await fetchWithAuth("/api/discounts/admin/analytics/overview");
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al obtener analytics", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al obtener analytics"), res.status, data);
   }
   return data;
 }
@@ -1291,7 +1332,7 @@ export async function getAdminTopMerchants(): Promise<any[]> {
   const res = await fetchWithAuth("/api/discounts/admin/analytics/top-merchants");
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new AuthError((data as { message?: string }).message ?? "Error al obtener ranking", res.status, data);
+    throw new AuthError(messageFromApiErrorBody(data, "Error al obtener ranking"), res.status, data);
   }
   return Array.isArray(data) ? data : data.rankings || [];
 }
@@ -1328,7 +1369,7 @@ export async function uploadMerchantLogo(
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
-      (data as { message?: string }).message ?? "Error al subir el logo",
+      messageFromApiErrorBody(data, "Error al subir el logo"),
       res.status,
       data
     );

@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
 import type { MerchantCategory, MerchantDiscount, MerchantProduct } from "@/lib/discounts-api";
+import {
+  COMMERCE_MAX_MONETARY_AMOUNT,
+  DISCOUNT_DESCRIPTION_MAX_LEN,
+} from "@/lib/commerce-input-limits";
+import { stripHtmlTagsFromPlainText } from "@/lib/strip-html-plain-text";
 import { useLanguage } from "@/contexts/language-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 
@@ -53,6 +58,16 @@ const LABELS = {
     btnCancel: "Cancelar",
     btnSave: "Guardar configuración",
     loading: "Guardando...",
+    validationDiscountValuePositive: "El valor del descuento debe ser mayor que 0.",
+    validationPercentageMax: "Porcentaje no puede superar 100.",
+    validationDescriptionMax: `La descripción admite como máximo ${DISCOUNT_DESCRIPTION_MAX_LEN} caracteres.`,
+    validationDateOrder: "La fecha de inicio debe ser anterior a la fecha fin.",
+    validationEndInPast: "La fecha y hora de fin no puede ser anterior al momento actual.",
+    validationMinPurchaseTooHigh: `La compra mínima no puede superar ${COMMERCE_MAX_MONETARY_AMOUNT.toLocaleString("es-EC")}.`,
+    validationDiscountValueTooHigh: `El valor (monto fijo) no puede superar ${COMMERCE_MAX_MONETARY_AMOUNT.toLocaleString("es-EC")}.`,
+    calendarHelp:
+      "Para definir la validez del descuento solo seleccione una fecha y una hora de inicio y fin para su descuento y luego pulse Enter o dé clic fuera del calendario; la información se actualizará siempre que la fecha y hora sean válidas.",
+    calendarHelpTitle: "Cómo usar el calendario",
     days: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
   },
   en: {
@@ -74,12 +89,63 @@ const LABELS = {
     btnCancel: "Cancel",
     btnSave: "Save Configuration",
     loading: "Saving...",
+    validationDiscountValuePositive: "The discount value must be greater than 0.",
+    validationPercentageMax: "Percentage cannot exceed 100.",
+    validationDescriptionMax: `Description may be at most ${DISCOUNT_DESCRIPTION_MAX_LEN} characters.`,
+    validationDateOrder: "Start date and time must be before end date and time.",
+    validationEndInPast: "End date and time cannot be in the past.",
+    validationMinPurchaseTooHigh: `Minimum purchase cannot exceed ${COMMERCE_MAX_MONETARY_AMOUNT.toLocaleString("en-US")}.`,
+    validationDiscountValueTooHigh: `Fixed amount cannot exceed ${COMMERCE_MAX_MONETARY_AMOUNT.toLocaleString("en-US")}.`,
+    calendarHelp:
+      "To set discount validity, pick start and end date and time, then press Enter or click outside the calendar; the values update when they are valid.",
+    calendarHelpTitle: "How to use the calendar",
     days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   }
 };
 
 const DAY_IDS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 const TIMEZONES = ["America/Guayaquil", "America/Bogota", "America/Mexico_City", "America/Lima", "America/Santiago", "UTC"];
+
+function discountValueStrFromDiscount(discount: MerchantDiscount): string {
+  const n = Number((discount as { discount_value?: unknown }).discount_value);
+  if (!Number.isFinite(n) || n <= 0) return "";
+  return String(n);
+}
+
+function minPurchaseStrFromDiscount(discount: MerchantDiscount): string {
+  const n = Number((discount as { min_purchase?: unknown }).min_purchase);
+  if (!Number.isFinite(n) || n <= 0) return "0";
+  return String(Math.trunc(n));
+}
+
+/** Valor / porcentaje con decimales; quita ceros a la izquierda del entero (p. ej. no "015"). */
+function normalizeDiscountValueString(raw: string): string {
+  let s = raw.replace(",", ".").replace(/[^\d.]/g, "");
+  const first = s.indexOf(".");
+  if (first !== -1) {
+    s = `${s.slice(0, first + 1)}${s.slice(first + 1).replace(/\./g, "")}`;
+  }
+  const dot = s.indexOf(".");
+  const intPart = dot === -1 ? s : s.slice(0, dot);
+  const frac = dot === -1 ? "" : s.slice(dot + 1);
+  let ip = intPart.replace(/^0+(?=\d)/, "");
+  if (ip === "" && frac.length > 0) ip = "0";
+  if (ip === "" && frac === "") return "";
+  return dot === -1 || !s.includes(".") ? ip : `${ip}.${frac}`;
+}
+
+/** Solo dígitos para compra mínima; sin "015". */
+function normalizeMinPurchaseString(raw: string): string {
+  return raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "") || "0";
+}
+
+/** Si el campo es solo ceros, al enfocar selecciona todo para que el siguiente dígito sustituya. */
+function selectAllIfZeroLikeNumericText(e: React.FocusEvent<HTMLInputElement>) {
+  const el = e.target;
+  if (el.value === "0" || el.value === "0." || /^0\.0+$/.test(el.value)) {
+    requestAnimationFrame(() => el.select());
+  }
+}
 
 function isoToLocalDateTime(value?: string | null): string {
   if (!value) return "";
@@ -120,8 +186,8 @@ export function DiscountEditor({
     discount_type: (discount.discount_type?.toUpperCase() === "FIXED_AMOUNT" ? "FIXED_AMOUNT" : "PERCENTAGE") as
       | "PERCENTAGE"
       | "FIXED_AMOUNT",
-    discount_value: Number(discount.discount_value) || 0,
-    min_purchase: Number(discount.min_purchase) || 0,
+    discount_value_str: discountValueStrFromDiscount(discount),
+    min_purchase_str: minPurchaseStrFromDiscount(discount),
     max_uses_total: Number(discount.max_uses_total) || null,
     max_uses_per_user: Number(discount.max_uses_per_user) || 1,
     valid_from: isoToLocalDateTime(discount.valid_from),
@@ -138,6 +204,7 @@ export function DiscountEditor({
 
   const [catSearch, setCatSearch] = useState("");
   const [prodSearch, setProdSearch] = useState("");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const filteredCategories = useMemo(() => 
     categories.filter(c => c.name.toLowerCase().includes(catSearch.toLowerCase())),
@@ -179,10 +246,55 @@ export function DiscountEditor({
       <form
         onSubmit={async (e) => {
           e.preventDefault();
+          if (form.description.length > DISCOUNT_DESCRIPTION_MAX_LEN) {
+            setSubmitError(t.validationDescriptionMax);
+            return;
+          }
+          const discountVal = parseFloat(form.discount_value_str.replace(",", "."));
+          if (!Number.isFinite(discountVal) || discountVal <= 0) {
+            setSubmitError(t.validationDiscountValuePositive);
+            return;
+          }
+          if (form.discount_type === "PERCENTAGE" && discountVal > 100) {
+            setSubmitError(t.validationPercentageMax);
+            return;
+          }
+          if (form.discount_type === "FIXED_AMOUNT" && discountVal > COMMERCE_MAX_MONETARY_AMOUNT) {
+            setSubmitError(t.validationDiscountValueTooHigh);
+            return;
+          }
+          const minPurchaseVal = parseInt(form.min_purchase_str.replace(/\D/g, "") || "0", 10);
+          const minPurchaseSafe = Number.isFinite(minPurchaseVal) ? Math.max(0, minPurchaseVal) : 0;
+          if (minPurchaseSafe > COMMERCE_MAX_MONETARY_AMOUNT) {
+            setSubmitError(t.validationMinPurchaseTooHigh);
+            return;
+          }
+          if (form.valid_from && form.valid_until) {
+            const fromMs = new Date(form.valid_from).getTime();
+            const untilMs = new Date(form.valid_until).getTime();
+            if (!Number.isFinite(fromMs) || !Number.isFinite(untilMs)) {
+              setSubmitError(t.validationDateOrder);
+              return;
+            }
+            if (fromMs >= untilMs) {
+              setSubmitError(t.validationDateOrder);
+              return;
+            }
+          }
+          /* Solo al crear: el PATCH puede omitir fechas sin cambios (promo caducada). */
+          if (discount.id === "new" && form.valid_until) {
+            const untilMs = new Date(form.valid_until).getTime();
+            if (Number.isFinite(untilMs) && untilMs < Date.now()) {
+              setSubmitError(t.validationEndInPast);
+              return;
+            }
+          }
+          setSubmitError(null);
+          const { discount_value_str: _dv, min_purchase_str: _mp, ...formRest } = form;
           await onSave({
-            ...form,
-            discount_value: Number(form.discount_value) || 0,
-            min_purchase: Number(form.min_purchase) || 0,
+            ...formRest,
+            discount_value: discountVal,
+            min_purchase: minPurchaseSafe,
             max_uses_total: form.max_uses_total != null ? Number(form.max_uses_total) : undefined,
             max_uses_per_user: Number(form.max_uses_per_user) || 1,
             valid_from: form.valid_from ? new Date(form.valid_from).toISOString() : undefined,
@@ -201,7 +313,12 @@ export function DiscountEditor({
               type="text"
               required
               value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  name: stripHtmlTagsFromPlainText(e.target.value),
+                }))
+              }
               className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
@@ -220,16 +337,28 @@ export function DiscountEditor({
             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formDescription}</label>
             <textarea
               rows={2}
+              maxLength={DISCOUNT_DESCRIPTION_MAX_LEN}
               value={form.description}
-              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  description: stripHtmlTagsFromPlainText(e.target.value).slice(0, DISCOUNT_DESCRIPTION_MAX_LEN),
+                }))
+              }
               className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
+            <p className="mt-1 text-[10px] text-dark-6">
+              {form.description.length}/{DISCOUNT_DESCRIPTION_MAX_LEN}
+            </p>
           </div>
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formType}</label>
             <select
               value={form.discount_type}
-              onChange={(e) => setForm((prev) => ({ ...prev, discount_type: e.target.value as "PERCENTAGE" | "FIXED_AMOUNT" }))}
+              onChange={(e) => {
+                setSubmitError(null);
+                setForm((prev) => ({ ...prev, discount_type: e.target.value as "PERCENTAGE" | "FIXED_AMOUNT" }));
+              }}
               className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             >
               <option value="PERCENTAGE">PERCENTAGE</option>
@@ -239,22 +368,36 @@ export function DiscountEditor({
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formValue}</label>
             <input
-              type="number"
-              min="0"
-              step="any"
-              value={form.discount_value}
-              onChange={(e) => setForm((prev) => ({ ...prev, discount_value: Number(e.target.value) || 0 }))}
+              type="text"
+              inputMode="decimal"
+              autoComplete="off"
+              value={form.discount_value_str}
+              onFocus={selectAllIfZeroLikeNumericText}
+              onChange={(e) => {
+                setSubmitError(null);
+                setForm((prev) => ({
+                  ...prev,
+                  discount_value_str: normalizeDiscountValueString(e.target.value),
+                }));
+              }}
               className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
           <div>
             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formMinPurchase}</label>
             <input
-              type="number"
-              min="0"
-              step="any"
-              value={form.min_purchase}
-              onChange={(e) => setForm((prev) => ({ ...prev, min_purchase: Number(e.target.value) || 0 }))}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              value={form.min_purchase_str}
+              onFocus={selectAllIfZeroLikeNumericText}
+              onChange={(e) => {
+                setSubmitError(null);
+                setForm((prev) => ({
+                  ...prev,
+                  min_purchase_str: normalizeMinPurchaseString(e.target.value),
+                }));
+              }}
               className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
@@ -275,7 +418,19 @@ export function DiscountEditor({
               type="number"
               min="1"
               value={form.max_uses_per_user}
-              onChange={(e) => setForm((prev) => ({ ...prev, max_uses_per_user: Number(e.target.value) || 1 }))}
+              onChange={(e) => {
+                const raw = e.target.value.trim();
+                if (raw === "") {
+                  setForm((prev) => ({ ...prev, max_uses_per_user: 1 }));
+                  return;
+                }
+                const cleaned = raw.replace(/^0+/, "") || "1";
+                const n = parseInt(cleaned, 10);
+                setForm((prev) => ({
+                  ...prev,
+                  max_uses_per_user: Number.isFinite(n) ? Math.max(1, n) : 1,
+                }));
+              }}
               className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
             />
           </div>
@@ -290,12 +445,54 @@ export function DiscountEditor({
             </select>
           </div>
           <div>
-             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formValidFrom}</label>
-             <input type="datetime-local" value={form.valid_from} onChange={(e) => setForm((p) => ({ ...p, valid_from: e.target.value }))} className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white" />
+            <div className="mb-2 flex items-center gap-2">
+              <label className="block text-xs font-bold uppercase tracking-wide text-dark-5" htmlFor="discount-valid-from">
+                {t.formValidFrom}
+              </label>
+              <button
+                type="button"
+                className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stroke text-[10px] font-bold text-dark-6 hover:border-primary hover:text-primary dark:border-dark-3"
+                title={t.calendarHelp}
+                aria-label={t.calendarHelpTitle}
+              >
+                ?
+              </button>
+            </div>
+            <input
+              id="discount-valid-from"
+              type="datetime-local"
+              value={form.valid_from}
+              onChange={(e) => {
+                setSubmitError(null);
+                setForm((p) => ({ ...p, valid_from: e.target.value }));
+              }}
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+            />
           </div>
           <div>
-             <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formValidUntil}</label>
-             <input type="datetime-local" value={form.valid_until} onChange={(e) => setForm((p) => ({ ...p, valid_until: e.target.value }))} className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white" />
+            <div className="mb-2 flex items-center gap-2">
+              <label className="block text-xs font-bold uppercase tracking-wide text-dark-5" htmlFor="discount-valid-until">
+                {t.formValidUntil}
+              </label>
+              <button
+                type="button"
+                className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-stroke text-[10px] font-bold text-dark-6 hover:border-primary hover:text-primary dark:border-dark-3"
+                title={t.calendarHelp}
+                aria-label={t.calendarHelpTitle}
+              >
+                ?
+              </button>
+            </div>
+            <input
+              id="discount-valid-until"
+              type="datetime-local"
+              value={form.valid_until}
+              onChange={(e) => {
+                setSubmitError(null);
+                setForm((p) => ({ ...p, valid_until: e.target.value }));
+              }}
+              className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-3 text-sm dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+            />
           </div>
         </div>
 
@@ -421,6 +618,12 @@ export function DiscountEditor({
             </div>
           )}
         </div>
+
+        {submitError ? (
+          <p className="text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+            {submitError}
+          </p>
+        ) : null}
 
         <div className="flex justify-end gap-3 pt-6 border-t border-stroke dark:border-dark-3 text-right">
           <button

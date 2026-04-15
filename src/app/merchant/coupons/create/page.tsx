@@ -13,6 +13,7 @@ import { useOrganizationCountry } from "@/hooks/use-organization-country";
 import { getStoredRoles, getStoredUser } from "@/lib/auth-api";
 import { canManageMerchantActor } from "@/lib/dashboard-routing";
 import { useLanguage } from "@/contexts/language-context";
+import { omitUnchangedDiscountDates } from "@/lib/omit-unchanged-discount-dates";
 import {
   createDiscountCoupon,
   createMerchantDiscount,
@@ -188,12 +189,13 @@ export default function MerchantCreateCouponPage() {
   };
 
   const handleEditDiscount = async (payload: any) => {
-    if (!selectedDiscountId) return;
+    if (!selectedDiscountId || !selectedDiscount) return;
     setIsSavingDiscount(true);
     setError(null);
     setDiscountEditMessage(null);
     try {
-      const updatedDiscount = await updateDiscount(selectedDiscountId, payload);
+      const body = omitUnchangedDiscountDates(payload, selectedDiscount);
+      const updatedDiscount = await updateDiscount(selectedDiscountId, body);
       setExistingDiscounts((current) =>
         current.map((discount) => (discount.id === updatedDiscount.id ? { ...discount, ...updatedDiscount } : discount))
       );
@@ -304,6 +306,7 @@ export default function MerchantCreateCouponPage() {
                 {isEditingDiscount && selectedDiscount && (
                   <div className="mt-6 border-t border-stroke pt-6 dark:border-dark-3">
                     <DiscountEditor
+                      key={selectedDiscount.id}
                       discount={selectedDiscount}
                       isSaving={isSavingDiscount}
                       onCancel={() => setIsEditingDiscount(false)}

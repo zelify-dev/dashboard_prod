@@ -12,6 +12,7 @@ import { getStoredRoles } from "@/lib/auth-api";
 import { canManageMerchantActor, DASHBOARD_ROLE } from "@/lib/dashboard-routing";
 import { useMerchantId } from "@/hooks/use-merchant-id";
 import { useLanguage } from "@/contexts/language-context";
+import { omitUnchangedDiscountDates } from "@/lib/omit-unchanged-discount-dates";
 import {
   createMerchantDiscount,
   getDiscountAnalytics,
@@ -243,12 +244,13 @@ export default function MerchantDiscountsPage() {
   };
 
   const handleUpdateDiscount = async (payload: any) => {
-    if (!editingDiscountId) return;
+    if (!editingDiscountId || !editingDiscount) return;
     setIsSavingDiscount(true);
     setError(null);
     setMessage(null);
     try {
-      const updated = await updateDiscount(editingDiscountId, payload);
+      const body = omitUnchangedDiscountDates(payload, editingDiscount);
+      const updated = await updateDiscount(editingDiscountId, body);
       setDiscounts((current) =>
         current.map((discount) => (discount.id === updated.id ? { ...discount, ...updated } : discount))
       );
@@ -312,6 +314,7 @@ export default function MerchantDiscountsPage() {
 
         {canManage && isCreating && (
           <DiscountEditor
+            key={`discount-new-${selectedMerchantId ?? "none"}`}
             discount={{ id: "new", merchant_id: selectedMerchantId || "", status: "ACTIVE" } as any}
             categories={categories}
             products={products}
@@ -327,6 +330,7 @@ export default function MerchantDiscountsPage() {
         {editingDiscount && (
           <div className="space-y-6">
             <DiscountEditor
+              key={editingDiscount.id}
               discount={editingDiscount}
               categories={categories}
               products={products}

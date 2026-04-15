@@ -13,16 +13,21 @@ import {
   onboardDiscountMerchant,
   type DiscountMerchant,
 } from "@/lib/discounts-api";
+import { getMerchantOnboardingErrorDisplay } from "@/lib/merchant-onboarding-errors";
+import { useLanguage } from "@/contexts/language-context";
 import { useEffect, useMemo, useState } from "react";
 
 export default function OwnerMerchantsPage() {
+  const { language } = useLanguage();
   const [merchants, setMerchants] = useState<DiscountMerchant[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [creatingMerchant, setCreatingMerchant] = useState(false);
-  const [onboardingError, setOnboardingError] = useState("");
+  const [onboardingApiError, setOnboardingApiError] = useState<
+    ReturnType<typeof getMerchantOnboardingErrorDisplay> | null
+  >(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [tempPasswordModal, setTempPasswordModal] = useState<{
     temporaryPassword: string;
@@ -81,7 +86,7 @@ export default function OwnerMerchantsPage() {
 
   const handleOnboardMerchant = async (data: MerchantOnboardingData) => {
     setCreatingMerchant(true);
-    setOnboardingError("");
+    setOnboardingApiError(null);
     setSuccessMessage("");
     try {
       const response = await onboardDiscountMerchant(buildOnboardingPayload(data));
@@ -95,7 +100,7 @@ export default function OwnerMerchantsPage() {
         setTempPasswordModal({ temporaryPassword });
       }
     } catch (err) {
-      setOnboardingError(err instanceof Error ? err.message : "No se pudo crear el merchant.");
+      setOnboardingApiError(getMerchantOnboardingErrorDisplay(err, language));
     } finally {
       setCreatingMerchant(false);
     }
@@ -119,7 +124,7 @@ export default function OwnerMerchantsPage() {
                 type="button"
                 onClick={() => {
                   setOnboardingOpen(true);
-                  setOnboardingError("");
+                  setOnboardingApiError(null);
                 }}
                 className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary/90"
               >
@@ -185,7 +190,8 @@ export default function OwnerMerchantsPage() {
             onClose={() => setOnboardingOpen(false)}
             onSubmit={handleOnboardMerchant}
             loading={creatingMerchant}
-            error={onboardingError}
+            apiError={onboardingApiError}
+            onClearApiError={() => setOnboardingApiError(null)}
           />
         ) : null}
 

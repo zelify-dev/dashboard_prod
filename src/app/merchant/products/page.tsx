@@ -9,6 +9,10 @@ import { canManageMerchantActor } from "@/lib/dashboard-routing";
 import { useMerchantId } from "@/hooks/use-merchant-id";
 import { useLanguage } from "@/contexts/language-context";
 import {
+  COMMERCE_MAX_MONETARY_AMOUNT,
+  COMMERCE_MAX_PRODUCT_DESCRIPTION_LENGTH,
+} from "@/lib/commerce-input-limits";
+import {
   activateMerchantProduct,
   createMerchantProduct,
   deactivateMerchantProduct,
@@ -60,6 +64,9 @@ const LABELS = {
     formDescription: "Descripción corta",
     viewOnly: "Este rol puede revisar productos, pero no modificar el catálogo.",
     saving: "Guardando...",
+    validationPricePositive: "El precio debe ser mayor que 0 para poder vender el producto.",
+    validationPriceTooHigh: `El precio no puede superar ${COMMERCE_MAX_MONETARY_AMOUNT.toLocaleString("es-EC")}.`,
+    validationDescriptionTooLong: `La descripción admite como máximo ${COMMERCE_MAX_PRODUCT_DESCRIPTION_LENGTH} caracteres.`,
   },
   en: {
     breadcrumb: "Merchant / Products",
@@ -100,6 +107,9 @@ const LABELS = {
     formDescription: "Short description",
     viewOnly: "This role can view products but cannot modify the catalog.",
     saving: "Saving...",
+    validationPricePositive: "Price must be greater than 0 to sell the product.",
+    validationPriceTooHigh: `Price cannot exceed ${COMMERCE_MAX_MONETARY_AMOUNT.toLocaleString("en-US")}.`,
+    validationDescriptionTooLong: `Description may be at most ${COMMERCE_MAX_PRODUCT_DESCRIPTION_LENGTH} characters.`,
   }
 };
 
@@ -177,10 +187,26 @@ export default function MerchantProductsPage() {
     setError("");
     setMessage("");
     try {
+      const priceNum = parseFloat(String(form.price).replace(",", "."));
+      if (!Number.isFinite(priceNum) || priceNum <= 0) {
+        setError(t.validationPricePositive);
+        setSaving(false);
+        return;
+      }
+      if (priceNum > COMMERCE_MAX_MONETARY_AMOUNT) {
+        setError(t.validationPriceTooHigh);
+        setSaving(false);
+        return;
+      }
+      if (form.description.length > COMMERCE_MAX_PRODUCT_DESCRIPTION_LENGTH) {
+        setError(t.validationDescriptionTooLong);
+        setSaving(false);
+        return;
+      }
       const payload = {
         name: form.name,
         description: form.description || undefined,
-        price: Number(form.price) || 0,
+        price: priceNum,
         currency: form.currency,
         category_id: form.category_id || undefined,
         image_url: form.image_url || undefined,
@@ -317,7 +343,21 @@ export default function MerchantProductsPage() {
               </div>
               <div className="md:col-span-3">
                 <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-dark-5">{t.formDescription}</label>
-                <textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-4 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3" rows={3} />
+                <textarea
+                  value={form.description}
+                  maxLength={COMMERCE_MAX_PRODUCT_DESCRIPTION_LENGTH}
+                  onChange={(e) =>
+                    setForm((p) => ({
+                      ...p,
+                      description: e.target.value.slice(0, COMMERCE_MAX_PRODUCT_DESCRIPTION_LENGTH),
+                    }))
+                  }
+                  className="w-full rounded-xl border border-stroke bg-gray-1 px-4 py-4 text-sm focus:border-primary dark:border-dark-3 dark:bg-dark-3"
+                  rows={3}
+                />
+                <p className="mt-1 text-[10px] text-dark-6">
+                  {form.description.length}/{COMMERCE_MAX_PRODUCT_DESCRIPTION_LENGTH}
+                </p>
               </div>
               <div className="md:col-span-3 flex justify-end gap-3 pt-4 border-t border-stroke dark:border-dark-3">
                 <button type="button" onClick={resetForm} className="rounded-xl border border-stroke px-6 py-3 text-sm font-semibold hover:bg-gray-1 dark:border-dark-3">{t.btnCancel}</button>

@@ -8,6 +8,7 @@ import { useOrganizationCountry } from "@/hooks/use-organization-country";
 import { MerchantPicker } from "./merchant-picker";
 import { DiscountPicker } from "./discount-picker";
 import { DiscountEditor } from "./discount-editor";
+import { omitUnchangedDiscountDates } from "@/lib/omit-unchanged-discount-dates";
 import {
   createDiscountCoupon,
   createMerchantDiscount,
@@ -171,14 +172,15 @@ export function CreateCouponPageContent() {
   };
 
   const handleEditDiscount = async (payload: Parameters<typeof updateDiscount>[1]) => {
-    if (!selectedDiscountId) return;
+    if (!selectedDiscountId || !selectedDiscount) return;
 
     setIsSavingDiscount(true);
     setError(null);
     setDiscountEditMessage(null);
 
     try {
-      const updatedDiscount = await updateDiscount(selectedDiscountId, payload);
+      const body = omitUnchangedDiscountDates(payload, selectedDiscount);
+      const updatedDiscount = await updateDiscount(selectedDiscountId, body);
       setExistingDiscounts((current) =>
         current.map((discount) => (discount.id === updatedDiscount.id ? { ...discount, ...updatedDiscount } : discount))
       );
@@ -286,6 +288,7 @@ export function CreateCouponPageContent() {
 
               {isEditingDiscount && selectedDiscount ? (
                 <DiscountEditor
+                  key={selectedDiscount.id}
                   discount={selectedDiscount}
                   isSaving={isSavingDiscount}
                   onCancel={() => setIsEditingDiscount(false)}
