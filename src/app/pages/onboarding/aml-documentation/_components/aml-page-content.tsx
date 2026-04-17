@@ -6,7 +6,12 @@ import { useState } from "react";
 import { AuthError } from "@/lib/auth-api";
 import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
 import { cn } from "@/lib/utils";
-import { getCurrentOrganizationId, notifyOnboardingStatusUpdated, postAmlFiles } from "@/lib/onboarding-api";
+import {
+  getCurrentOrganizationId,
+  isAmlOnboardingEnabled,
+  notifyOnboardingStatusUpdated,
+  postAmlFiles,
+} from "@/lib/onboarding-api";
 
 function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -49,6 +54,7 @@ function ShieldCheckIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export function AmlPageContent() {
   const { flags, loading: statusLoading, percents } = useOnboardingStatus();
+  const amlOnboardingEnabled = isAmlOnboardingEnabled();
   const locked = !statusLoading && flags.amlLocked;
 
   const [file, setFile] = useState<File | null>(null);
@@ -65,7 +71,7 @@ export function AmlPageContent() {
   };
 
   const handleSubmit = async () => {
-    if (locked) return;
+    if (!amlOnboardingEnabled || locked) return;
     const orgId = getCurrentOrganizationId();
     if (!orgId || !file) return;
     setSubmitting(true);
@@ -94,11 +100,23 @@ export function AmlPageContent() {
 
       <div className="mb-6">
         <p className="mt-2 text-base text-body-color dark:text-body-color-dark">
-          Cargue la documentación AML requerida
+          {amlOnboardingEnabled
+            ? "Cargue la documentación AML requerida"
+            : "La carga de documentación AML está deshabilitada temporalmente"}
         </p>
       </div>
 
       <div className="rounded-sm border border-stroke bg-white px-5 pb-8 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
+        {!amlOnboardingEnabled && (
+          <div
+            className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+            role="status"
+          >
+            Esta sección está deshabilitada para todas las organizaciones por el momento.
+            La lógica final de visibilidad se habilitará cuando integremos la configuración desde backend.
+          </div>
+        )}
+
         <div className="mb-6">
           <h3 className="mb-4 text-base font-medium text-blue-900 dark:text-white">
             Documentación AML
@@ -136,7 +154,7 @@ export function AmlPageContent() {
           <div
             className={cn(
               "relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 dark:border-strokedark",
-              locked
+              !amlOnboardingEnabled || locked
                 ? "cursor-not-allowed bg-gray-50/80 opacity-70 dark:bg-boxdark/50"
                 : "hover:bg-gray-50 dark:hover:bg-boxdark-2",
             )}
@@ -144,7 +162,7 @@ export function AmlPageContent() {
             <input
               type="file"
               onChange={handleFileChange}
-              disabled={locked}
+              disabled={!amlOnboardingEnabled || locked}
               className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
               accept=".pdf,.doc,.docx"
             />
@@ -201,11 +219,11 @@ export function AmlPageContent() {
             variant="primary"
             onClick={handleSubmit}
             className={`w-full sm:w-auto ${
-              !file || submitting
+              !amlOnboardingEnabled || !file || submitting
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
                 : "!bg-[#004196] hover:!bg-[#004196]/90"
             }`}
-            disabled={locked || !file || submitting}
+            disabled={!amlOnboardingEnabled || locked || !file || submitting}
             shape="rounded"
           />
         </div>

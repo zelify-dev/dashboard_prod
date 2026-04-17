@@ -2,6 +2,7 @@ import * as Icons from "../icons";
 import type { UiTranslations } from "@/hooks/use-ui-translations";
 import { ZENDESK_SUPPORT_MENU_HREF } from "@/lib/zendesk-widget";
 import { getDashboardActorFromRoles } from "@/lib/dashboard-routing";
+import { AML_ONBOARDING_ENABLED } from "@/lib/onboarding-api";
 
 /** Verifica si al menos un scope de la org coincide con el prefijo (o con alguno de los prefijos). */
 function hasScope(scopePrefix: string | string[], scopeStrings: string[]): boolean {
@@ -406,12 +407,16 @@ export function getNavData(
           url: "/pages/onboarding/kyb",
           items: [],
         },
-        {
-          title: translations.sidebar.menuItems.amlDocumentation,
-          icon: Icons.AMLIcon,
-          url: "/pages/onboarding/aml-documentation",
-          items: [],
-        },
+        ...(AML_ONBOARDING_ENABLED
+          ? [
+              {
+                title: translations.sidebar.menuItems.amlDocumentation,
+                icon: Icons.AMLIcon,
+                url: "/pages/onboarding/aml-documentation",
+                items: [],
+              },
+            ]
+          : []),
         {
           title: translations.sidebar.menuItems.technicalDocumentation,
           icon: Icons.CodeIcon,

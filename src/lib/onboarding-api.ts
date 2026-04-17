@@ -3,12 +3,22 @@
  */
 import { AuthError, fetchWithAuth, getStoredOrganization } from "@/lib/auth-api";
 
+/**
+ * Kill switch temporal para deshabilitar AML onboarding de forma global.
+ * Luego debe reemplazarse por visibilidad/configuración servida por backend.
+ */
+export const AML_ONBOARDING_ENABLED = false;
+
 function onboardingBase(organizationId: string): string {
   return `/api/organizations/${encodeURIComponent(organizationId)}/onboarding`;
 }
 
 export function getCurrentOrganizationId(): string | null {
   return getStoredOrganization()?.id ?? null;
+}
+
+export function isAmlOnboardingEnabled(): boolean {
+  return AML_ONBOARDING_ENABLED;
 }
 
 /** GET /api/organizations/:organizationId/onboarding/status */
@@ -405,6 +415,9 @@ export async function postKybFiles(organizationId: string, file: File): Promise<
 
 /** POST /api/organizations/:organizationId/onboarding/aml-files — multipart, campo `file` */
 export async function postAmlFiles(organizationId: string, file: File): Promise<unknown> {
+  if (!AML_ONBOARDING_ENABLED) {
+    throw new AuthError("La carga de documentación AML está deshabilitada temporalmente.", 403, {});
+  }
   const form = new FormData();
   form.append("file", file);
   const res = await fetchWithAuth(`${onboardingBase(organizationId)}/aml-files`, {
