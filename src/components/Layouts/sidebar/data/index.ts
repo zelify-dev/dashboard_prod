@@ -419,6 +419,12 @@ export function getNavData(
           items: [],
         },
         {
+          title: translations.sidebar.menuItems.businessPlan,
+          icon: Icons.DocumentTextIcon,
+          url: "/pages/onboarding/business-info",
+          items: [],
+        },
+        {
           title: translations.sidebar.menuItems.integrationSupport,
           icon: Icons.ChatSupportIcon,
           url: ZENDESK_SUPPORT_MENU_HREF,

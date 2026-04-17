@@ -163,8 +163,8 @@ export default function MerchantCreateCouponPage() {
               discount_type: couponData.discountType === "fixed" ? "FIXED_AMOUNT" : "PERCENTAGE",
               discount_value: Number(couponData.discountValue) || 0,
               min_purchase: Number(couponData.minPurchase) || 0,
-              max_uses_total: Number(couponData.usageLimit) || 1,
-              max_uses_per_user: Number(couponData.maxUsesPerUser) || 1,
+              max_uses_total: Math.floor(Number(couponData.usageLimit)),
+              max_uses_per_user: Math.floor(Number(couponData.maxUsesPerUser)),
               valid_from: new Date(couponData.validFrom).toISOString(),
               valid_until: new Date(couponData.validUntil).toISOString(),
               available_days: availableDays,
@@ -182,7 +182,7 @@ export default function MerchantCreateCouponPage() {
 
     await createDiscountCoupon(discountId, {
       ...(couponData.code?.trim() ? { code: couponData.code.trim() } : {}),
-      max_redemptions: Number(couponData.usageLimit) || 1,
+      max_redemptions: Math.floor(Number(couponData.usageLimit)),
     });
 
     router.push("/merchant/coupons");

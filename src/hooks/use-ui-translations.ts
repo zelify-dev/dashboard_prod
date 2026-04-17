@@ -43,6 +43,7 @@ export type UiTranslations = {
       kyb: string;
       amlDocumentation: string;
       technicalDocumentation: string;
+      businessPlan: string;
       subItems: {
         ecommerce: string;
         profile: string;
@@ -505,6 +506,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         kyb: "KYB",
         amlDocumentation: "AML Documentation",
         technicalDocumentation: "Technical Documentation",
+        businessPlan: "Business Plan",
         subItems: {
           ecommerce: "Panel",
           profile: "Company Profile",
@@ -945,6 +947,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         kyb: "KYB",
         amlDocumentation: "Documentación AML",
         technicalDocumentation: "Documentación técnica",
+        businessPlan: "Plan de negocio",
         subItems: {
           ecommerce: "Panel",
           profile: "Perfil de la empresa",

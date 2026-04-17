@@ -32,6 +32,7 @@ export type OnboardingSectionPercents = {
   kyb: number | null;
   aml: number | null;
   technical: number | null;
+  businessPlan: number | null;
 };
 
 function clampPercent(n: number): number {
@@ -127,6 +128,7 @@ export function parseOnboardingStatusPayload(data: Record<string, unknown>): Onb
     "documentation",
     "technical_percent",
   ]);
+  let businessPlan = pick(["business_plan", "business_plan_percent", "business_plan_completion_percent"]);
 
   const sections = data.sections;
   if (sections && typeof sections === "object") {
@@ -136,6 +138,9 @@ export function parseOnboardingStatusPayload(data: Record<string, unknown>): Onb
     technical =
       technical ??
       pick(["technical", "technical_documentation", "documentation", "development_environments"], s);
+    businessPlan =
+      businessPlan ??
+      pick(["business_plan", "business_plan_percent", "business_plan_completion_percent"], s);
   }
 
   /** Forma oficial: kyb_files / aml_files con uploaded. */
@@ -172,7 +177,15 @@ export function parseOnboardingStatusPayload(data: Record<string, unknown>): Onb
     }
   }
 
-  return { kyb, aml, technical };
+  /** Contrato backend: business_plan: { uploaded: boolean, ... } */
+  if (businessPlan == null) {
+    const bp = data.business_plan;
+    if (bp && typeof bp === "object") {
+      businessPlan = (bp as Record<string, unknown>).uploaded === true ? 100 : 0;
+    }
+  }
+
+  return { kyb, aml, technical, businessPlan };
 }
 
 /** Estado derivado de GET .../onboarding/status para deshabilitar campos ya completados tras recargar. */
@@ -360,6 +373,7 @@ export function onboardingPercentForPath(
   if (pathnameOrUrl.includes("/pages/onboarding/kyb")) return percents.kyb;
   if (pathnameOrUrl.includes("/pages/onboarding/aml-documentation")) return percents.aml;
   if (pathnameOrUrl.includes("/pages/onboarding/technical-documentation")) return percents.technical;
+  if (pathnameOrUrl.includes("/pages/onboarding/business-info")) return percents.businessPlan;
   return null;
 }
 
@@ -402,6 +416,45 @@ export async function postAmlFiles(organizationId: string, file: File): Promise<
   if (!res.ok) {
     throw new AuthError(
       (data as { message?: string }).message ?? "Error al subir la documentación AML",
+      res.status,
+      data
+    );
+  }
+  return data;
+}
+
+export type BusinessPlanStatus = {
+  uploaded: boolean;
+  s3_key?: string;
+  url?: string;
+};
+
+/** Lee el bloque `business_plan` de GET .../onboarding/status. */
+export function parseBusinessPlanStatus(data: Record<string, unknown>): BusinessPlanStatus {
+  const raw = data.business_plan;
+  if (!raw || typeof raw !== "object") {
+    return { uploaded: false };
+  }
+  const bp = raw as Record<string, unknown>;
+  const uploaded = bp.uploaded === true;
+  const s3Key = typeof bp.s3_key === "string" ? bp.s3_key : undefined;
+  const url = typeof bp.url === "string" ? bp.url : undefined;
+  return { uploaded, s3_key: s3Key, url };
+}
+
+/** POST /api/organizations/:organizationId/onboarding/business-plan — multipart, campo `file` */
+export async function postBusinessPlanFile(organizationId: string, file: File): Promise<unknown> {
+  const form = new FormData();
+  form.append("file", file);
+  const res = await fetchWithAuth(`${onboardingBase(organizationId)}/business-plan`, {
+    method: "POST",
+    body: form,
+    headers: { "x-org-id": organizationId },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al subir el Business Plan",
       res.status,
       data
     );

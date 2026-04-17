@@ -73,6 +73,10 @@ type DiscountsCouponsTranslations = {
     discountType: string;
     discountValue: string;
     usageLimit: string;
+    maxRedemptionsHelp: string;
+    maxUsesPerUserLabel: string;
+    validationMaxRedemptionsMin: string;
+    validationMaxUsesPerUserMin: string;
     validityPeriod: string;
     validFrom: string;
     validUntil: string;
@@ -186,7 +190,13 @@ const DISCOUNTS_COUPONS_TRANSLATIONS: Record<
       discountSettings: "Discount Settings",
       discountType: "Discount Type",
       discountValue: "Discount Value",
-      usageLimit: "Usage Limit",
+      usageLimit: "Max redemptions",
+      maxRedemptionsHelp: "Must be at least 1 — total times this coupon can be redeemed.",
+      maxUsesPerUserLabel: "Max uses per user",
+      validationMaxRedemptionsMin:
+        "Maximum redemptions must be at least 1. Enter how many times this code can be used in total.",
+      validationMaxUsesPerUserMin:
+        "Uses per user must be at least 1.",
       validityPeriod: "Validity Period",
       validFrom: "Valid From",
       validUntil: "Valid Until",
@@ -296,7 +306,14 @@ const DISCOUNTS_COUPONS_TRANSLATIONS: Record<
       discountSettings: "Configuración de Descuento",
       discountType: "Tipo de Descuento",
       discountValue: "Valor del Descuento",
-      usageLimit: "Límite de Uso",
+      usageLimit: "Máximo de redenciones",
+      maxRedemptionsHelp:
+        "Como mínimo 1: es el total de veces que se puede canjear este cupón.",
+      maxUsesPerUserLabel: "Límite por usuario",
+      validationMaxRedemptionsMin:
+        "El máximo de redenciones debe ser 1 o mayor. Indica cuántas veces en total se puede usar este código.",
+      validationMaxUsesPerUserMin:
+        "El límite por usuario debe ser 1 o mayor.",
       validityPeriod: "Período de Validez",
       validFrom: "Válido Desde",
       validUntil: "Válido Hasta",

@@ -11,6 +11,30 @@ interface CreateCouponFormProps {
   cancelHref?: string;
 }
 
+function friendlyCouponSaveError(
+  raw: string,
+  labels: {
+    validationMaxRedemptionsMin: string;
+    validationMaxUsesPerUserMin: string;
+  }
+): string {
+  const s = raw.trim();
+  if (!s) return labels.validationMaxRedemptionsMin;
+  const lower = s.toLowerCase();
+  if (
+    lower.includes("límite mínimo") ||
+    lower.includes("limite minimo") ||
+    (lower.includes("minimum") && lower.includes("1"))
+  ) {
+    if (/usuario|user|per.?user/i.test(s)) return labels.validationMaxUsesPerUserMin;
+    return labels.validationMaxRedemptionsMin;
+  }
+  if (/max_redemptions|max redemptions|redemptions/i.test(s) && /min|mínimo|minimum/i.test(s)) {
+    return labels.validationMaxRedemptionsMin;
+  }
+  return s;
+}
+
 export function CreateCouponForm({
   onSave,
   mode = "new",
@@ -20,6 +44,7 @@ export function CreateCouponForm({
   const translations = useDiscountsCouponsTranslations();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     code: "",
     name: "",
@@ -59,9 +84,26 @@ export function CreateCouponForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setSubmitError(null);
+
+    const usageLimitNum = Number(formData.usageLimit);
+    const maxUsesPerUserNum = Number(formData.maxUsesPerUser);
+
+    if (!Number.isFinite(usageLimitNum) || usageLimitNum < 1) {
+      setSubmitError(translations.create.validationMaxRedemptionsMin);
+      return;
+    }
+    if (mode === "new") {
+      if (!Number.isFinite(maxUsesPerUserNum) || maxUsesPerUserNum < 1) {
+        setSubmitError(translations.create.validationMaxUsesPerUserMin);
+        return;
+      }
+    }
+
     const couponData = {
       ...formData,
+      usageLimit: Math.floor(usageLimitNum),
+      maxUsesPerUser: Math.floor(maxUsesPerUserNum),
       availability: {
         days: formData.days,
         hours: formData.hoursEnabled
@@ -69,8 +111,18 @@ export function CreateCouponForm({
           : null,
       },
     };
+
+    setIsSubmitting(true);
     try {
       await onSave(couponData);
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : String(err);
+      setSubmitError(
+        friendlyCouponSaveError(raw, {
+          validationMaxRedemptionsMin: translations.create.validationMaxRedemptionsMin,
+          validationMaxUsesPerUserMin: translations.create.validationMaxUsesPerUserMin,
+        })
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -79,6 +131,14 @@ export function CreateCouponForm({
   return (
     <div className="rounded-lg border border-stroke bg-white p-8 shadow-sm dark:border-dark-3 dark:bg-dark-2">
       <form onSubmit={handleSubmit} className="space-y-6">
+        {submitError ? (
+          <div
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-200"
+          >
+            {submitError}
+          </div>
+        ) : null}
         {/* Basic Information */}
         <div>
           <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">
@@ -190,30 +250,41 @@ export function CreateCouponForm({
             )}
             <div>
               <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
-                {mode === "new" ? translations.create.usageLimit : "Maximo de redenciones"} *
+                {translations.create.usageLimit} *
               </label>
               <input
                 type="number"
                 required
-                min="1"
+                min={1}
                 value={formData.usageLimit}
-                onChange={(e) =>
-                  setFormData({ ...formData, usageLimit: parseInt(e.target.value) })
-                }
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  setFormData({
+                    ...formData,
+                    usageLimit: Number.isNaN(v) ? 0 : v,
+                  });
+                }}
                 className="w-full rounded-lg border border-stroke bg-white px-4 py-2 text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
               />
+              <p className="mt-1 text-xs text-dark-6 dark:text-dark-6">
+                {translations.create.maxRedemptionsHelp}
+              </p>
             </div>
             <div>
               <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
-                Limite por usuario
+                {translations.create.maxUsesPerUserLabel}
               </label>
               <input
                 type="number"
-                min="1"
+                min={1}
                 value={formData.maxUsesPerUser}
-                onChange={(e) =>
-                  setFormData({ ...formData, maxUsesPerUser: Number(e.target.value) || 1 })
-                }
+                onChange={(e) => {
+                  const v = parseInt(e.target.value, 10);
+                  setFormData({
+                    ...formData,
+                    maxUsesPerUser: Number.isNaN(v) ? 0 : v,
+                  });
+                }}
                 className="w-full rounded-lg border border-stroke bg-white px-4 py-2 text-dark focus:border-primary focus:outline-none dark:border-dark-3 dark:bg-dark-3 dark:text-white"
                 disabled={mode !== "new"}
               />
