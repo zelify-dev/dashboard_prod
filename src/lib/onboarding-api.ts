@@ -3,12 +3,6 @@
  */
 import { AuthError, fetchWithAuth, getStoredOrganization } from "@/lib/auth-api";
 
-/**
- * Kill switch temporal para deshabilitar AML onboarding de forma global.
- * Luego debe reemplazarse por visibilidad/configuración servida por backend.
- */
-export const AML_ONBOARDING_ENABLED = false;
-
 function onboardingBase(organizationId: string): string {
   return `/api/organizations/${encodeURIComponent(organizationId)}/onboarding`;
 }
@@ -17,9 +11,29 @@ export function getCurrentOrganizationId(): string | null {
   return getStoredOrganization()?.id ?? null;
 }
 
-export function isAmlOnboardingEnabled(): boolean {
-  return AML_ONBOARDING_ENABLED;
-}
+export type OnboardingVisibility = {
+  kyb: boolean;
+  amlDocumentation: boolean;
+  technicalDocumentation: boolean;
+  businessPlan: boolean;
+};
+
+export const DEFAULT_ONBOARDING_VISIBILITY: OnboardingVisibility = {
+  kyb: true,
+  amlDocumentation: true,
+  technicalDocumentation: true,
+  businessPlan: true,
+};
+
+type OnboardingVisibilityApiResponse = {
+  organization_id?: string;
+  onboarding_visibility?: {
+    kyb?: boolean;
+    aml_documentation?: boolean;
+    technical_documentation?: boolean;
+    business_plan?: boolean;
+  };
+};
 
 /** GET /api/organizations/:organizationId/onboarding/status */
 export async function getOnboardingStatus(organizationId: string): Promise<Record<string, unknown>> {
@@ -35,6 +49,32 @@ export async function getOnboardingStatus(organizationId: string): Promise<Recor
     );
   }
   return data as Record<string, unknown>;
+}
+
+/** GET /api/organizations/onboarding/visibility */
+export async function getOnboardingVisibility(organizationId: string): Promise<OnboardingVisibility> {
+  const res = await fetchWithAuth("/api/organizations/onboarding/visibility", {
+    headers: { "x-org-id": organizationId },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "No se pudo obtener la visibilidad de onboarding",
+      res.status,
+      data
+    );
+  }
+  return parseOnboardingVisibilityPayload(data);
+}
+
+export function parseOnboardingVisibilityPayload(data: unknown): OnboardingVisibility {
+  const raw = (data as OnboardingVisibilityApiResponse | null)?.onboarding_visibility;
+  return {
+    kyb: raw?.kyb !== false,
+    amlDocumentation: raw?.aml_documentation !== false,
+    technicalDocumentation: raw?.technical_documentation !== false,
+    businessPlan: raw?.business_plan !== false,
+  };
 }
 
 /** Porcentaje 0–100 o null si el backend no envía el dato. */
@@ -415,9 +455,6 @@ export async function postKybFiles(organizationId: string, file: File): Promise<
 
 /** POST /api/organizations/:organizationId/onboarding/aml-files — multipart, campo `file` */
 export async function postAmlFiles(organizationId: string, file: File): Promise<unknown> {
-  if (!AML_ONBOARDING_ENABLED) {
-    throw new AuthError("La carga de documentación AML está deshabilitada temporalmente.", 403, {});
-  }
   const form = new FormData();
   form.append("file", file);
   const res = await fetchWithAuth(`${onboardingBase(organizationId)}/aml-files`, {

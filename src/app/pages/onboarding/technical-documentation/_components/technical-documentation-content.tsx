@@ -232,7 +232,8 @@ function FileUploadArea({
 }
 
 export function TechnicalDocumentationPageContent() {
-  const { flags, loading: statusLoading, percents, developmentEnvironments } = useOnboardingStatus();
+  const { flags, loading: statusLoading, percents, developmentEnvironments, visibility } = useOnboardingStatus();
+  const technicalVisible = visibility.technicalDocumentation;
   const tf = flags.technical;
   const devEnvHydratedRef = useRef(false);
 
@@ -259,6 +260,10 @@ export function TechnicalDocumentationPageContent() {
   }, [statusLoading, developmentEnvironments]);
 
   const handleSaveSandbox = async () => {
+    if (!technicalVisible) {
+      setErrorDev("Esta sección está oculta para tu organización.");
+      return;
+    }
     if (!statusLoading && tf.developmentEnvironmentsLocked) {
       setErrorDev("Esta información ya fue guardada.");
       return;
@@ -303,6 +308,10 @@ export function TechnicalDocumentationPageContent() {
   };
 
   const handleSubmitTechnical = async () => {
+    if (!technicalVisible) {
+      setErrorDocs("Esta sección está oculta para tu organización.");
+      return;
+    }
     const orgId = getCurrentOrganizationId();
     if (!orgId) {
       setErrorDocs("No hay organización en sesión.");
@@ -352,6 +361,15 @@ export function TechnicalDocumentationPageContent() {
       </div>
 
       <div className="rounded-sm border border-stroke bg-white px-5 pb-8 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
+        {!technicalVisible && (
+          <div
+            className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+            role="status"
+          >
+            Esta sección está oculta para tu organización según la configuración de onboarding.
+          </div>
+        )}
+
         {/* Info Box */}
         <h2 className="text-xl font-bold leading-[30px] text-blue-700 dark:text-white">
           Documentación técnica
@@ -392,7 +410,7 @@ export function TechnicalDocumentationPageContent() {
             placeholder="Ingrese las URLs de los ambientes de desarrollo..."
             value={sandboxUrls}
             onChange={(e) => setSandboxUrls(e.target.value)}
-            disabled={!statusLoading && tf.developmentEnvironmentsLocked}
+            disabled={!technicalVisible || (!statusLoading && tf.developmentEnvironmentsLocked)}
             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:opacity-70 dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
           ></textarea>
         </div>
@@ -406,7 +424,7 @@ export function TechnicalDocumentationPageContent() {
             placeholder="Ingrese las API Keys de desarrollo..."
             value={apiKeys}
             onChange={(e) => setApiKeys(e.target.value)}
-            disabled={!statusLoading && tf.developmentEnvironmentsLocked}
+            disabled={!technicalVisible || (!statusLoading && tf.developmentEnvironmentsLocked)}
             className="w-full rounded border-[1.5px] border-stroke bg-transparent px-5 py-3 font-medium outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:opacity-70 dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary"
           ></textarea>
         </div>
@@ -427,7 +445,7 @@ export function TechnicalDocumentationPageContent() {
             label={savingDev ? "Guardando…" : "Guardar información de desarrollo"}
             variant="primary"
             onClick={handleSaveSandbox}
-            disabled={savingDev || (!statusLoading && tf.developmentEnvironmentsLocked)}
+            disabled={!technicalVisible || savingDev || (!statusLoading && tf.developmentEnvironmentsLocked)}
             className="w-full sm:w-auto !bg-[#004196] hover:!bg-[#004196]/90 disabled:opacity-60"
             shape="rounded"
           />
@@ -449,7 +467,7 @@ export function TechnicalDocumentationPageContent() {
           }
           file={diagramFile}
           onFileChange={setDiagramFile}
-          locked={!statusLoading && tf.diagram}
+          locked={!technicalVisible || (!statusLoading && tf.diagram)}
         />
 
         {/* Politica de seguridad */}
@@ -461,7 +479,7 @@ export function TechnicalDocumentationPageContent() {
           }
           file={securityFile}
           onFileChange={setSecurityFile}
-          locked={!statusLoading && tf.securityPolicy}
+          locked={!technicalVisible || (!statusLoading && tf.securityPolicy)}
         />
 
         <div className="my-8 border-t border-stroke dark:border-strokedark"></div>
@@ -479,7 +497,7 @@ export function TechnicalDocumentationPageContent() {
             }
             file={certificationFile}
             onFileChange={setCertificationFile}
-            locked={!statusLoading && tf.certifications}
+            locked={!technicalVisible || (!statusLoading && tf.certifications)}
           />
           <p className="text-sm text-[#6B7280] -mt-4 mb-4">
             Adjuntar certificaciones (Ejemplo: PCI DSS, etc.)
@@ -499,7 +517,7 @@ export function TechnicalDocumentationPageContent() {
             }
             file={processFile}
             onFileChange={setProcessFile}
-            locked={!statusLoading && tf.processDocumentation}
+            locked={!technicalVisible || (!statusLoading && tf.processDocumentation)}
           />
         </div>
 
@@ -521,11 +539,11 @@ export function TechnicalDocumentationPageContent() {
             variant="primary"
             onClick={handleSubmitTechnical}
             className={`w-full sm:w-auto ${
-              !canSubmit || submittingDocs
+              !technicalVisible || !canSubmit || submittingDocs
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
                 : "!bg-[#004196] hover:!bg-[#004196]/90"
             }`}
-            disabled={!canSubmit || submittingDocs || statusLoading}
+            disabled={!technicalVisible || !canSubmit || submittingDocs || statusLoading}
             shape="rounded"
           />
         </div>

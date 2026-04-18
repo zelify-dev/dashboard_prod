@@ -4,6 +4,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Button } from "@/components/ui-elements/button";
 import { useEffect, useMemo, useState } from "react";
 import { AuthError } from "@/lib/auth-api";
+import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
 import { cn } from "@/lib/utils";
 import {
   getCurrentOrganizationId,
@@ -47,6 +48,8 @@ function fileExt(name: string): string {
 }
 
 export function BusinessInfoContent() {
+  const { visibility } = useOnboardingStatus();
+  const businessPlanVisible = visibility.businessPlan;
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(true);
@@ -111,6 +114,10 @@ export function BusinessInfoContent() {
   };
 
   const onSubmit = async () => {
+    if (!businessPlanVisible) {
+      setError("Esta sección está oculta para tu organización.");
+      return;
+    }
     if (uploaded || uploading) return;
     const orgId = getCurrentOrganizationId();
     if (!orgId) {
@@ -157,6 +164,15 @@ export function BusinessInfoContent() {
       <Breadcrumb pageName="Business Plan" />
 
       <div className="rounded-sm border border-stroke bg-white px-5 pb-8 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
+        {!businessPlanVisible ? (
+          <div
+            className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+            role="status"
+          >
+            Esta sección está oculta para tu organización según la configuración de onboarding.
+          </div>
+        ) : null}
+
         <h3 className="mb-4 text-base font-medium text-black dark:text-white">Carga de Business Plan</h3>
 
         <div className="mb-6 flex items-start gap-3 rounded-lg bg-[#EBF5FF] px-4 py-3 text-[#1C64F2] dark:bg-blue-900/30 dark:text-blue-400">
@@ -182,13 +198,13 @@ export function BusinessInfoContent() {
         <div
           className={cn(
             "relative mb-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 dark:border-strokedark",
-            uploaded ? "cursor-not-allowed bg-gray-50/80 opacity-70 dark:bg-boxdark/50" : "hover:bg-gray-50 dark:hover:bg-boxdark-2",
+            uploaded || !businessPlanVisible ? "cursor-not-allowed bg-gray-50/80 opacity-70 dark:bg-boxdark/50" : "hover:bg-gray-50 dark:hover:bg-boxdark-2",
           )}
         >
           <input
             type="file"
             onChange={onFileChange}
-            disabled={uploaded || uploading || loadingStatus}
+            disabled={!businessPlanVisible || uploaded || uploading || loadingStatus}
             className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
             accept=".pdf,.doc,.docx"
           />
@@ -228,8 +244,8 @@ export function BusinessInfoContent() {
             label={uploading ? "Enviando..." : "Enviar Business Plan"}
             variant="primary"
             onClick={onSubmit}
-            className={`w-full sm:w-auto ${!file || uploading || uploaded || loadingStatus ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white" : "!bg-[#004196] hover:!bg-[#004196]/90"}`}
-            disabled={!file || uploading || uploaded || loadingStatus}
+            className={`w-full sm:w-auto ${!businessPlanVisible || !file || uploading || uploaded || loadingStatus ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white" : "!bg-[#004196] hover:!bg-[#004196]/90"}`}
+            disabled={!businessPlanVisible || !file || uploading || uploaded || loadingStatus}
             shape="rounded"
           />
         </div>

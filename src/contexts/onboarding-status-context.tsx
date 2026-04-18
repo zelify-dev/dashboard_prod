@@ -10,8 +10,11 @@ import {
   type ReactNode,
 } from "react";
 import {
+  DEFAULT_ONBOARDING_VISIBILITY,
   getCurrentOrganizationId,
+  getOnboardingVisibility,
   getOnboardingStatus,
+  type OnboardingVisibility,
   parseOnboardingStatusFull,
   type OnboardingModuleFlags,
   type OnboardingSectionPercents,
@@ -23,6 +26,7 @@ type OnboardingStatusContextValue = {
   flags: OnboardingModuleFlags;
   /** Texto de URLs y API keys desde GET status (strings); null si no hay bloque o sin org */
   developmentEnvironments: ParsedDevelopmentEnvironments | null;
+  visibility: OnboardingVisibility;
   loading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
@@ -57,6 +61,7 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
   const [developmentEnvironments, setDevelopmentEnvironments] = useState<ParsedDevelopmentEnvironments | null>(
     defaultDevelopmentEnvironments
   );
+  const [visibility, setVisibility] = useState<OnboardingVisibility>(DEFAULT_ONBOARDING_VISIBILITY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,6 +71,7 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
       setPercents(defaultPercents);
       setFlags(defaultFlags);
       setDevelopmentEnvironments(defaultDevelopmentEnvironments);
+      setVisibility(DEFAULT_ONBOARDING_VISIBILITY);
       setLoading(false);
       setError(null);
       return;
@@ -73,15 +79,32 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
     setLoading(true);
     setError(null);
     try {
-      const raw = await getOnboardingStatus(orgId);
-      const { percents: p, flags: f, developmentEnvironments: de } = parseOnboardingStatusFull(raw);
-      setPercents(p);
-      setFlags(f);
-      setDevelopmentEnvironments(de);
+      const [statusResult, visibilityResult] = await Promise.allSettled([
+        getOnboardingStatus(orgId),
+        getOnboardingVisibility(orgId),
+      ]);
+
+      if (statusResult.status === "fulfilled") {
+        const { percents: p, flags: f, developmentEnvironments: de } = parseOnboardingStatusFull(statusResult.value);
+        setPercents(p);
+        setFlags(f);
+        setDevelopmentEnvironments(de);
+      } else {
+        setPercents(defaultPercents);
+        setFlags(defaultFlags);
+        setDevelopmentEnvironments(defaultDevelopmentEnvironments);
+      }
+
+      if (visibilityResult.status === "fulfilled") {
+        setVisibility(visibilityResult.value);
+      } else {
+        setVisibility(DEFAULT_ONBOARDING_VISIBILITY);
+      }
     } catch {
       setPercents(defaultPercents);
       setFlags(defaultFlags);
       setDevelopmentEnvironments(defaultDevelopmentEnvironments);
+      setVisibility(DEFAULT_ONBOARDING_VISIBILITY);
       setError(null);
     } finally {
       setLoading(false);
@@ -101,8 +124,8 @@ export function OnboardingStatusProvider({ children }: { children: ReactNode }) 
   }, [refresh]);
 
   const value = useMemo(
-    () => ({ percents, flags, developmentEnvironments, loading, error, refresh }),
-    [percents, flags, developmentEnvironments, loading, error, refresh]
+    () => ({ percents, flags, developmentEnvironments, visibility, loading, error, refresh }),
+    [percents, flags, developmentEnvironments, visibility, loading, error, refresh]
   );
 
   return (
@@ -117,6 +140,7 @@ export function useOnboardingStatus(): OnboardingStatusContextValue {
       percents: defaultPercents,
       flags: defaultFlags,
       developmentEnvironments: defaultDevelopmentEnvironments,
+      visibility: DEFAULT_ONBOARDING_VISIBILITY,
       loading: false,
       error: null,
       refresh: async () => {},

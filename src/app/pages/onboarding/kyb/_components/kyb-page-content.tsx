@@ -133,7 +133,8 @@ function FileTextIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function KybPageContent() {
-  const { flags, loading: statusLoading, percents } = useOnboardingStatus();
+  const { flags, loading: statusLoading, percents, visibility } = useOnboardingStatus();
+  const kybVisible = visibility.kyb;
   const locked = !statusLoading && flags.kybLocked;
 
   const [file, setFile] = useState<File | null>(null);
@@ -150,7 +151,7 @@ export function KybPageContent() {
   };
 
   const handleSubmit = async () => {
-    if (!KYB_DASHBOARD_UPLOAD_ENABLED || locked) return;
+    if (!kybVisible || !KYB_DASHBOARD_UPLOAD_ENABLED || locked) return;
     const orgId = getCurrentOrganizationId();
     if (!orgId || !file) return;
     setSubmitting(true);
@@ -178,6 +179,15 @@ export function KybPageContent() {
       <Breadcrumb pageName="KYB" />
 
       <div className="rounded-sm border border-stroke bg-white px-5 pb-8 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
+        {!kybVisible && (
+          <div
+            className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+            role="status"
+          >
+            Esta sección está oculta para tu organización según la configuración de onboarding.
+          </div>
+        )}
+
         <div className="mb-6">
           <div className="mb-6 flex items-start gap-3 rounded-lg bg-[#EBF5FF] px-4 py-3 text-[#1C64F2] dark:bg-blue-900/30 dark:text-blue-400">
             <InfoIcon className="mt-0.5 shrink-0" />
@@ -281,7 +291,7 @@ export function KybPageContent() {
           <div
             className={cn(
               "relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 dark:border-strokedark",
-              locked || !KYB_DASHBOARD_UPLOAD_ENABLED
+              !kybVisible || locked || !KYB_DASHBOARD_UPLOAD_ENABLED
                 ? "cursor-not-allowed bg-gray-50/80 opacity-70 dark:bg-boxdark/50"
                 : "hover:bg-gray-50 dark:hover:bg-boxdark-2",
             )}
@@ -289,7 +299,7 @@ export function KybPageContent() {
             <input
               type="file"
               onChange={handleFileChange}
-              disabled={locked || !KYB_DASHBOARD_UPLOAD_ENABLED}
+              disabled={!kybVisible || locked || !KYB_DASHBOARD_UPLOAD_ENABLED}
               className="absolute inset-0 z-50 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
               accept=".zip,.rar,.7z"
             />
@@ -346,12 +356,12 @@ export function KybPageContent() {
             variant="primary"
             onClick={handleSubmit}
             className={`w-full sm:w-auto ${
-              !KYB_DASHBOARD_UPLOAD_ENABLED || !file || submitting
+              !kybVisible || !KYB_DASHBOARD_UPLOAD_ENABLED || !file || submitting
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
                 : "!bg-[#004196] hover:!bg-[#004196]/90"
             }`}
             disabled={
-              !KYB_DASHBOARD_UPLOAD_ENABLED || locked || !file || submitting
+              !kybVisible || !KYB_DASHBOARD_UPLOAD_ENABLED || locked || !file || submitting
             }
             shape="rounded"
           />

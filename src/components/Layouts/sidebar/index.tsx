@@ -37,7 +37,7 @@ export function Sidebar() {
   const { setIsOpen, isOpen, isMobile, toggleSidebar, isCollapsed, toggleCollapse } = useSidebarContext();
   const translations = useUiTranslations();
   const { isTourActive, currentStep, steps } = useTour();
-  const { percents: onboardingPercents } = useOnboardingStatus();
+  const { percents: onboardingPercents, visibility: onboardingVisibility } = useOnboardingStatus();
 
   const [organizationScopes, setOrganizationScopes] = useState<string[] | null>(() =>
     getStoredOrganizationScopes()
@@ -96,6 +96,7 @@ export function Sidebar() {
     isOwner: isOwnerUser,
     canSeeBranding,
     organizationScopes,
+    onboardingVisibility,
     roles,
   });
   const sidebarScrollRef = useRef<HTMLDivElement>(null);

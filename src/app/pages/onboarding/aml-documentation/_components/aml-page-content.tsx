@@ -6,12 +6,7 @@ import { useState } from "react";
 import { AuthError } from "@/lib/auth-api";
 import { useOnboardingStatus } from "@/contexts/onboarding-status-context";
 import { cn } from "@/lib/utils";
-import {
-  getCurrentOrganizationId,
-  isAmlOnboardingEnabled,
-  notifyOnboardingStatusUpdated,
-  postAmlFiles,
-} from "@/lib/onboarding-api";
+import { getCurrentOrganizationId, notifyOnboardingStatusUpdated, postAmlFiles } from "@/lib/onboarding-api";
 
 function InfoIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -53,8 +48,8 @@ function ShieldCheckIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function AmlPageContent() {
-  const { flags, loading: statusLoading, percents } = useOnboardingStatus();
-  const amlOnboardingEnabled = isAmlOnboardingEnabled();
+  const { flags, loading: statusLoading, percents, visibility } = useOnboardingStatus();
+  const amlOnboardingEnabled = visibility.amlDocumentation;
   const locked = !statusLoading && flags.amlLocked;
 
   const [file, setFile] = useState<File | null>(null);

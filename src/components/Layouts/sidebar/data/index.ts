@@ -2,7 +2,7 @@ import * as Icons from "../icons";
 import type { UiTranslations } from "@/hooks/use-ui-translations";
 import { ZENDESK_SUPPORT_MENU_HREF } from "@/lib/zendesk-widget";
 import { getDashboardActorFromRoles } from "@/lib/dashboard-routing";
-import { AML_ONBOARDING_ENABLED } from "@/lib/onboarding-api";
+import { DEFAULT_ONBOARDING_VISIBILITY, type OnboardingVisibility } from "@/lib/onboarding-api";
 
 /** Verifica si al menos un scope de la org coincide con el prefijo (o con alguno de los prefijos). */
 function hasScope(scopePrefix: string | string[], scopeStrings: string[]): boolean {
@@ -12,11 +12,18 @@ function hasScope(scopePrefix: string | string[], scopeStrings: string[]): boole
 
 export function getNavData(
   translations: UiTranslations,
-  options?: { isOwner?: boolean; canSeeBranding?: boolean; organizationScopes?: string[] | null; roles?: string[] }
+  options?: {
+    isOwner?: boolean;
+    canSeeBranding?: boolean;
+    organizationScopes?: string[] | null;
+    onboardingVisibility?: OnboardingVisibility;
+    roles?: string[];
+  }
 ) {
   const isOwner = options?.isOwner ?? false;
   const canSeeBranding = options?.canSeeBranding ?? false;
   const organizationScopes = options?.organizationScopes;
+  const onboardingVisibility = options?.onboardingVisibility ?? DEFAULT_ONBOARDING_VISIBILITY;
   const actor = getDashboardActorFromRoles(options?.roles);
 
   if (typeof window !== "undefined") {
@@ -401,13 +408,17 @@ export function getNavData(
   const onboardingSection = {
       label: translations.sidebar.onboarding,
       items: [
-        {
-          title: translations.sidebar.menuItems.kyb,
-          icon: Icons.DocumentTextIcon,
-          url: "/pages/onboarding/kyb",
-          items: [],
-        },
-        ...(AML_ONBOARDING_ENABLED
+        ...(onboardingVisibility.kyb
+          ? [
+              {
+                title: translations.sidebar.menuItems.kyb,
+                icon: Icons.DocumentTextIcon,
+                url: "/pages/onboarding/kyb",
+                items: [],
+              },
+            ]
+          : []),
+        ...(onboardingVisibility.amlDocumentation
           ? [
               {
                 title: translations.sidebar.menuItems.amlDocumentation,
@@ -417,18 +428,26 @@ export function getNavData(
               },
             ]
           : []),
-        {
-          title: translations.sidebar.menuItems.technicalDocumentation,
-          icon: Icons.CodeIcon,
-          url: "/pages/onboarding/technical-documentation",
-          items: [],
-        },
-        {
-          title: translations.sidebar.menuItems.businessPlan,
-          icon: Icons.DocumentTextIcon,
-          url: "/pages/onboarding/business-info",
-          items: [],
-        },
+        ...(onboardingVisibility.technicalDocumentation
+          ? [
+              {
+                title: translations.sidebar.menuItems.technicalDocumentation,
+                icon: Icons.CodeIcon,
+                url: "/pages/onboarding/technical-documentation",
+                items: [],
+              },
+            ]
+          : []),
+        ...(onboardingVisibility.businessPlan
+          ? [
+              {
+                title: translations.sidebar.menuItems.businessPlan,
+                icon: Icons.DocumentTextIcon,
+                url: "/pages/onboarding/business-info",
+                items: [],
+              },
+            ]
+          : []),
         {
           title: translations.sidebar.menuItems.integrationSupport,
           icon: Icons.ChatSupportIcon,
