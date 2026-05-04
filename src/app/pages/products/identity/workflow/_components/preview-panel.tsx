@@ -644,12 +644,10 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
     
     const video = videoRef.current;
     if (!video) {
-      console.log('Video ref not available yet, waiting...');
       // Wait a bit and retry
       const timeout = setTimeout(() => {
         const retryVideo = videoRef.current;
         if (retryVideo && cameraStream) {
-          console.log('Retrying to configure video after delay');
           retryVideo.srcObject = cameraStream;
           retryVideo.play().catch(console.error);
         }
@@ -661,12 +659,7 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
       // Verify that the stream is active and has active tracks
       const videoTracks = cameraStream.getVideoTracks();
       const activeTracks = videoTracks.filter(track => track.readyState === 'live');
-      
-      console.log('Setting video srcObject');
-      console.log('Total tracks:', videoTracks.length);
-      console.log('Active tracks:', activeTracks.length);
-      console.log('Stream active:', cameraStream.active);
-      
+
       if (activeTracks.length === 0) {
         console.warn('No active tracks in stream');
         // Check if the stream ended
@@ -689,22 +682,18 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
       video.srcObject = cameraStream;
       
       const handleLoadedMetadata = () => {
-        console.log('Video metadata loaded, attempting to play');
         video.play().catch(err => {
           console.error('Error playing video after loading metadata:', err);
         });
       };
       
       const handleCanPlay = () => {
-        console.log('Video can play');
         video.play().catch(err => {
           console.error('Error playing on canplay:', err);
         });
       };
       
-      const handlePlaying = () => {
-        console.log('Video is now playing');
-      };
+      const handlePlaying = () => {};
       
       const handleError = (e: Event) => {
         console.error('Error in video element:', e);
@@ -728,9 +717,7 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise
-          .then(() => {
-            console.log('Video playing successfully');
-          })
+          .then(() => {})
           .catch(err => {
             console.error('Error playing video immediately:', err);
             // Try again after a delay
@@ -752,7 +739,6 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
         });
       };
     } else {
-      console.log('No camera stream, cleaning video');
       if (video) {
       video.srcObject = null;
     }
@@ -785,7 +771,6 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
       
       // Stop any previous stream before requesting a new one
       if (cameraStream) {
-        console.log('Stopping previous stream before requesting a new one');
         cameraStream.getTracks().forEach(track => {
           if (track.readyState !== 'ended') {
             track.stop();
@@ -796,7 +781,6 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
       
-      console.log("Requesting camera access...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: 'user',
@@ -804,17 +788,9 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
           height: { ideal: 720 }
         }
       });
-      
-      console.log('Camera stream obtained:', stream);
-      console.log('Stream active:', stream.active);
-      console.log('Video tracks:', stream.getVideoTracks());
-      
+
       // Verify that tracks are active
       stream.getVideoTracks().forEach(track => {
-        console.log('Track state:', track.readyState, 'enabled:', track.enabled);
-        console.log('Track ID:', track.id);
-        console.log('Track label:', track.label);
-        
         // Set up listeners to monitor track state
         track.onended = () => {
           console.warn('Video track ended unexpectedly - ID:', track.id);
@@ -824,9 +800,7 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
           console.warn('Video track muted - ID:', track.id);
         };
         
-        track.onunmute = () => {
-          console.log('Video track unmuted - ID:', track.id);
-        };
+        track.onunmute = () => {};
       });
       
       // Verify that the stream is actually active before setting it
@@ -843,7 +817,6 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
         throw new Error('No active video tracks');
       }
       
-      console.log('Stream verified correctly, setting in state');
       setCameraStream(stream);
       return true;
     } catch (error: any) {
@@ -914,7 +887,6 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
               if (ctx && videoRef.current) {
                 ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
                 // The captured photo is in the canvas (you can save it or process it here)
-                console.log('Photo captured from Face ID scan');
               }
             } catch (error) {
               console.error('Error capturing photo:', error);

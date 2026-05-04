@@ -122,19 +122,6 @@ export default function TeamsPage() {
     label: translations.membersManagement.roleNames?.[code as keyof typeof translations.membersManagement.roleNames] ?? code,
   }));
 
-  if (typeof window !== "undefined" && canManageMembers) {
-    console.log("[Teams] Roles para opciones del dropdown", {
-      rolesFromMembersApi,
-      rolesFromSession: roles,
-      rolesToUse,
-      isOrgAdmin,
-      isOwnerUser,
-      assignableRoleCodes,
-      roleCodesForUi,
-      roleOptionsLabels: roleOptions.map((o) => o.label),
-    });
-  }
-
   const setSearchAndPage = (v: string) => { setMembersSearch(v); setMembersPage(1); };
   const setStatusAndPage = (v: OrgUserStatus | "") => { setMembersStatus(v); setMembersPage(1); };
 

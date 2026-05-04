@@ -26,10 +26,6 @@ export function getNavData(
   const onboardingVisibility = options?.onboardingVisibility ?? DEFAULT_ONBOARDING_VISIBILITY;
   const actor = getDashboardActorFromRoles(options?.roles);
 
-  if (typeof window !== "undefined") {
-    console.log("[getNavData] organizationScopes recibido:", organizationScopes == null ? "null" : `array(${organizationScopes?.length})`, organizationScopes ?? "(no aplica filtro, se muestran todos)");
-  }
-
   const productItems: Array<{
     scopePrefix: string | string[];
     title: string;
@@ -308,17 +304,6 @@ export function getNavData(
                 url: "/",
               },
             ];
-
-  if (typeof window !== "undefined") {
-    console.log(
-      "[getNavData] PRODUCTS filtrados:",
-      filteredProductItems.length,
-      "de",
-      productItems.length,
-      "— títulos:",
-      productsSectionItems.map((i) => (i as { title: string }).title)
-    );
-  }
 
   const mainSection = {
       label: translations.sidebar.mainMenu,

@@ -812,7 +812,6 @@ export function NotificationsPageContent() {
         },
         body: JSON.stringify(payload),
       });
-      console.log("[notifications] Creating template payload", JSON.stringify(payload, null, 2));
       if (!response.ok) {
         throw new Error("request failed");
       }

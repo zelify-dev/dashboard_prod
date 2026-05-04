@@ -298,7 +298,6 @@ export function PanelDashboard() {
                 setStoredOrganizationScopes(scopeStrings);
                 if (typeof window !== "undefined") {
                     window.dispatchEvent(new CustomEvent("organizationScopesUpdated", { detail: scopeStrings }));
-                    console.log("[panel-dashboard] GET /api/organizations/" + org.id + "/scopes OK:", scopeStrings.length, "scopes");
                 }
             })
             .catch((err) => {

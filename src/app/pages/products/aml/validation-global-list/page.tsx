@@ -104,7 +104,6 @@ export default function AMLValidationPage() {
   const fetchFullCatalog = async () => {
     try {
       setIsCatalogLoading(true);
-      console.log("🚀 [Catalog] Starting full recursive load...");
       let allMappedLists: AMLList[] = [];
       let pageToFetch = 1;
       let hasMore = true;
@@ -130,14 +129,11 @@ export default function AMLValidationPage() {
         allMappedLists = [...allMappedLists, ...mappedPage];
         hasMore = data.has_more && data.next_page !== null;
         pageToFetch = data.next_page || (pageToFetch + 1);
-        
-        console.log(`📥 [Catalog] Loaded page ${safetyCounter}. Total collected: ${allMappedLists.length}`);
-        
+
         if (!hasMore) break;
       }
       
       setFullCatalog(allMappedLists);
-      console.log(`✅ [Catalog] Full load complete: ${allMappedLists.length} lists.`);
     } catch (err) {
       console.error("❌ [Catalog] Error in recursive full load:", err);
     } finally {
@@ -162,7 +158,6 @@ export default function AMLValidationPage() {
         sources: g.sources,
         min_score: g.min_score
       }));
-      console.log("🔍 Organization AML Groups:", mappedGroups);
       setGroups(mappedGroups);
     } catch (err) {
       console.error("❌ Error fetching groups:", err);
@@ -321,7 +316,7 @@ export default function AMLValidationPage() {
           <AMLListConfig 
             lists={paginatedCatalog}
             groups={groups}
-            onToggleList={(id, enabled) => console.log("Global Toggle:", id, enabled)}
+            onToggleList={() => {}}
             onCreateGroup={handleCreateGroup}
             onUpdateGroup={handleUpdateGroup}
             onDeleteGroup={handleDeleteGroup}

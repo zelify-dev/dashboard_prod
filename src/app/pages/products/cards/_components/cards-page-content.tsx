@@ -20,9 +20,8 @@ export function CardsPageContent() {
     createDefaultCardDesignConfig({ cardholderName: currentUserName })
   );
 
-  const handleSaveDesign = (config: CardDesignConfig) => {
+  const handleSaveDesign = (_config: CardDesignConfig) => {
     // TODO: persist card design (API)
-    console.log("Saving card design:", config);
   };
 
   return (

@@ -581,7 +581,6 @@ export function PreviewPanel({ config, updateConfig }: PreviewPanelProps) {
 
     if (Object.keys(errors).length === 0) {
       // Aquí se completaría el registro
-      console.log("Registro completado", formData);
     } else {
       setValidationErrors(errors);
     }

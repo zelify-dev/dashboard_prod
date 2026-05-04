@@ -9,7 +9,6 @@ export async function POST(request: NextRequest) {
   if (!payload) {
     return NextResponse.json({ error: "invalid-payload" }, { status: 400 });
   }
-  console.log("[api/templates] Forwarding payload", JSON.stringify(payload));
   try {
     const response = await fetch(`${REMOTE_BASE_URL}/api/templates`, {
       method: "POST",

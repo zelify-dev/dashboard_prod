@@ -312,7 +312,6 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
       isActive: Boolean(isActive),
       sender_email: previewFrom.trim() || "notifications@zelify.com",
     };
-    console.log("[notifications] Patching template payload", JSON.stringify(updatePayload, null, 2));
     try {
       const response = await fetchWithAuth(`/api/templates/${encodeURIComponent(templateId)}`, {
         method: "PATCH",
@@ -641,7 +640,6 @@ type ActivationPayload = {
 
 async function sendActivationEvent(payload: ActivationPayload) {
   try {
-    console.log("[notifications] Activating template", payload.templateId);
     await fetch(ACTIVATION_ENDPOINT, {
       method: "POST",
       headers: {

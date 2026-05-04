@@ -55,19 +55,14 @@ export function Sidebar() {
   // Cargar scopes al montar (por si no estamos en la home y panel-dashboard no corre)
   useEffect(() => {
     const org = getStoredOrganization();
-    console.log("[Sidebar] useEffect scopes — org en storage:", org ? { id: org.id, name: org.name } : null);
     if (!org?.id) {
-      console.log("[Sidebar] No hay organización (org?.id). No se llama a GET /api/organizations/:id/scopes.");
       return;
     }
-    const url = `/api/organizations/${org.id}/scopes`;
-    console.log("[Sidebar] Llamando a GET", url, "…");
     getOrganizationScopes(org.id)
       .then((items) => {
         const scopeStrings = items.map((s) => s.scope);
         setStoredOrganizationScopes(scopeStrings);
         setOrganizationScopes(scopeStrings);
-        console.log("[Sidebar] GET scopes OK:", scopeStrings.length, "scopes", scopeStrings);
       })
       .catch((err) => {
         console.warn("[Sidebar] Error al cargar scopes:", err);

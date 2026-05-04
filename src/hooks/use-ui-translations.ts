@@ -193,6 +193,7 @@ export type UiTranslations = {
       endpoint: string;
       events: string;
       created: string;
+      signingSecret: string;
       actions: string;
       delete: string;
     };
@@ -205,16 +206,23 @@ export type UiTranslations = {
       cancel: string;
       delete: string;
     };
-    events: {
-      walletTransactionEvent: string;
-      bankIncomeRefreshUpdate: string;
-      bankIncomeRefreshComplete: string;
-      accountUpdate: string;
-      transactionUpdate: string;
-      identityVerificationComplete: string;
-      linkEvent: string;
-      paymentStatusUpdate: string;
+    /** Ayuda para webhook Usuario Creado (org. Damasco): POST + x-signature + cuerpo de ejemplo */
+    userCreatedHelp: {
+      buttonAria: string;
+      modalTitle: string;
+      modalIntro: string;
+      postLabel: string;
+      signatureHeaderLabel: string;
+      /** Dirección (URL) donde Zelify envía el POST */
+      destinationUrlLabel: string;
+      destinationUrlHint: string;
+      copyUrl: string;
+      exampleJsonTitle: string;
+      copyJson: string;
+      close: string;
     };
+    /** IDs de evento del API (p. ej. auth.user.created) → etiqueta localizada */
+    events: Record<string, string>;
     lockedUntilOnboarding: string;
     loadingAccess: string;
   };
@@ -658,6 +666,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         endpoint: "Endpoint",
         events: "Events",
         created: "Created",
+        signingSecret: "Signing secret",
         actions: "Actions",
         delete: "Disable",
       },
@@ -670,6 +679,20 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           "This action will only disable the webhook. If you want to delete it, you must contact a Zelify manager.",
         cancel: "Cancel",
         delete: "Confirm Disable",
+      },
+      userCreatedHelp: {
+        buttonAria: "How to handle this webhook",
+        modalTitle: "User Created webhook — how to verify",
+        modalIntro:
+          "Zelify calls your endpoint with an HTTP POST. Authenticate the request using the x-signature header (payload signature). The JSON body follows this structure (example for Damasco):",
+        postLabel: "Method: POST",
+        signatureHeaderLabel: "Authentication header: x-signature",
+        destinationUrlLabel: "Destination URL (where Zelify sends the webhook)",
+        destinationUrlHint: "Configure this exact HTTPS address on your server to receive POST requests.",
+        copyUrl: "Copy URL",
+        exampleJsonTitle: "Example JSON body",
+        copyJson: "Copy JSON",
+        close: "Close",
       },
       events: {
         'auth.user.created': "User Created",
@@ -1111,6 +1134,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         endpoint: "Endpoint",
         events: "Eventos",
         created: "Creado",
+        signingSecret: "Secreto de firma",
         actions: "Acciones",
         delete: "Deshabilitar",
       },
@@ -1123,6 +1147,21 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           "Esta acción solo deshabilitará al webhook, si quiere eliminarlo debe hablar con un encargado de Zelify.",
         cancel: "Cancelar",
         delete: "Confirmar Deshabilitación",
+      },
+      userCreatedHelp: {
+        buttonAria: "Cómo utilizar este webhook",
+        modalTitle: "Webhook Usuario Creado — cómo utilizarlo",
+        modalIntro:
+          "Zelify enviará un POST a tu URL. Debes validar la cabecera de autenticación x-signature (firma del cuerpo). El cuerpo JSON tendrá esta forma (ejemplo para la organización Damasco):",
+        postLabel: "Método: POST",
+        signatureHeaderLabel: "Cabecera de autenticación: x-signature",
+        destinationUrlLabel: "Dirección de envío (URL del webhook)",
+        destinationUrlHint:
+          "Zelify enviará el POST a esta dirección exacta. Debe coincidir con la URL que configuraste en el webhook.",
+        copyUrl: "Copiar URL",
+        exampleJsonTitle: "Ejemplo de cuerpo JSON",
+        copyJson: "Copiar JSON",
+        close: "Cerrar",
       },
       events: {
         'auth.user.created': "Usuario Creado",

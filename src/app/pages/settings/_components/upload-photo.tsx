@@ -28,13 +28,10 @@ export function UploadPhotoForm() {
       return;
     }
 
-    console.log("[UploadPhotoForm] Archivo seleccionado:", file.name, file.size, file.type);
     setIsUploading(true);
     setError(null);
     try {
-      console.log("[UploadPhotoForm] Iniciando subida...");
-      const result = await uploadProfilePhoto(file);
-      console.log("[UploadPhotoForm] Subida exitosa:", result);
+      await uploadProfilePhoto(file);
       await syncMe();
       setUser(getStoredUser());
       // Eliminamos el reload() ya que el sistema reactivo se encarga de actualizar el Header

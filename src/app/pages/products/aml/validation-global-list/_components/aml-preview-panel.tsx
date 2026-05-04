@@ -185,7 +185,6 @@ export function AMLPreviewPanel({ config, isActive = true }: AMLPreviewPanelProp
             // Stop any previous stream before requesting a new one
             // Estricta limpieza: Detener cualquier stream existente en la referencia antes de solicitar uno nuevo
             if (streamRef.current) {
-                console.log("Cleaning up previous stream before new request");
                 streamRef.current.getTracks().forEach(track => {
                     track.stop();
                     // Asegurar que el evento 'ended' se dispare si alguien lo escucha

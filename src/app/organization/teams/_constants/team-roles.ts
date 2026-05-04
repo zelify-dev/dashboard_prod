@@ -54,16 +54,12 @@ export function getAssignableRoles(currentUserRoles: string[] | Array<{ code: st
   let result: TeamRoleCode[];
   if (codes.includes(TEAM_ROLE.OWNER) && !hasOrgAdmin) {
     result = OWNER_ASSIGNABLE;
-    if (typeof window !== "undefined") console.log("[Teams getAssignableRoles] OWNER sin ORG_ADMIN → todos los roles", { codes, result });
   } else if (codes.includes(TEAM_ROLE.OWNER) && hasOrgAdmin) {
     result = OWNER_ASSIGNABLE.filter((c) => c !== TEAM_ROLE.USER_APP);
-    if (typeof window !== "undefined") console.log("[Teams getAssignableRoles] OWNER + ORG_ADMIN → sin USER_APP", { codes, result });
   } else if (hasOrgAdmin) {
     result = ORG_ADMIN_ASSIGNABLE;
-    if (typeof window !== "undefined") console.log("[Teams getAssignableRoles] solo ORG_ADMIN → ORG_ADMIN_ASSIGNABLE", { codes, result });
   } else {
     result = [];
-    if (typeof window !== "undefined") console.log("[Teams getAssignableRoles] sin OWNER ni ORG_ADMIN → []", { codes });
   }
   return result;
 }

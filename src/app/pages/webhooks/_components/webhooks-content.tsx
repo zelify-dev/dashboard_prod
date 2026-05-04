@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -30,7 +30,47 @@ import {
   type WebhookCategory, 
   type WebhookRecord 
 } from "@/lib/webhooks-api";
-import { Eye, EyeOff, Copy, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, Copy, RefreshCw, CircleHelp } from "lucide-react";
+
+/** Evento «Usuario Creado» (catálogo API / traducciones). */
+const USER_CREATED_WEBHOOK_EVENT_ID = "auth.user.created";
+
+const DAMASCO_USER_CREATED_JSON_EXAMPLE = `{
+  "organization": "damasco-org",
+  "data": {
+    "zelifyUser": "usr_9823749823",
+    "createdAt": "2026-05-04T14:24:58Z",
+    "name": "Juan",
+    "lastname": "Pérez",
+    "documentNumber": "1723456789",
+    "email": "juan.perez@email.com",
+    "phone": "+593987654321",
+    "address": "Av. Amazonas N45-123, Quito, Ecuador",
+    "kycProcess": "success",
+    "amlProcess": "success"
+  }
+}`;
+
+function textMentionsDamasco(...parts: (string | undefined | null)[]): boolean {
+  const blob = parts.filter(Boolean).join(" ").toLowerCase();
+  return blob.includes("damasco");
+}
+
+function isDamascoOrganization(org: OrganizationDetails | null): boolean {
+  if (!org) return false;
+  return textMentionsDamasco(org.name, org.company_legal_name, org.website, org.id);
+}
+
+function isUserCreatedWebhookEvent(eventId: string): boolean {
+  return eventId.trim().toLowerCase() === USER_CREATED_WEBHOOK_EVENT_ID;
+}
+
+function shouldShowUserCreatedHelp(
+  org: OrganizationDetails | null,
+  webhook: WebhookRecord
+): boolean {
+  return isDamascoOrganization(org) && isUserCreatedWebhookEvent(webhook.event);
+}
 
 export function WebhooksPageContent() {
   const { language } = useLanguage();
@@ -81,6 +121,7 @@ export function WebhooksPageContent() {
 
   const [showNewWebhook, setShowNewWebhook] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
+  const [userCreatedHelpWebhookId, setUserCreatedHelpWebhookId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     event: "",
     endpoint: "",
@@ -98,8 +139,8 @@ export function WebhooksPageContent() {
   };
 
   const eventLabel = (eventId: string) => {
-    if ((t.events as any)[eventId]) {
-      return (t.events as any)[eventId];
+    if (t.events[eventId]) {
+      return t.events[eventId];
     }
     for (const cat of categories) {
       const found = cat.events.find(e => e.id === eventId);
@@ -114,7 +155,7 @@ export function WebhooksPageContent() {
       label: cat.category,
       options: cat.events.map(evt => ({
         value: evt.id,
-        label: (t.events as any)[evt.id] || evt.name
+        label: t.events[evt.id] || evt.name
       }))
     }))
   ];
@@ -202,7 +243,8 @@ export function WebhooksPageContent() {
     });
   };
 
-  const handleCopySecret = (secret: string) => {
+  const handleCopySecret = (secret: string | undefined) => {
+    if (!secret) return;
     navigator.clipboard.writeText(secret);
     // Optional: add a "Copied!" toast if available. For now, quiet success.
   };
@@ -222,6 +264,19 @@ export function WebhooksPageContent() {
 
   const handleDeleteCancel = () => {
     setShowDeleteModal(null);
+  };
+
+  const helpWebhook =
+    userCreatedHelpWebhookId != null
+      ? webhooks.find((w) => w.id === userCreatedHelpWebhookId) ?? null
+      : null;
+
+  const handleCopyUserCreatedExample = () => {
+    void navigator.clipboard.writeText(DAMASCO_USER_CREATED_JSON_EXAMPLE.trim());
+  };
+
+  const handleCopyHelpWebhookUrl = () => {
+    if (helpWebhook?.url) void navigator.clipboard.writeText(helpWebhook.url);
   };
 
   return (
@@ -333,7 +388,7 @@ export function WebhooksPageContent() {
                 <TableHead>{t.table.endpoint}</TableHead>
                 <TableHead>{t.table.events}</TableHead>
                 <TableHead>{t.table.created}</TableHead>
-                <TableHead>{t.table.signingSecret || "Signing Secret"}</TableHead>
+                <TableHead>{t.table.signingSecret}</TableHead>
                 <TableHead className="text-right">{t.table.actions}</TableHead>
               </TableRow>
             </TableHeader>
@@ -344,7 +399,22 @@ export function WebhooksPageContent() {
                   className="text-sm text-dark dark:text-white"
                 >
                   <TableCell className="font-medium">{webhook.url}</TableCell>
-                  <TableCell>{eventLabel(webhook.event)}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span>{eventLabel(webhook.event)}</span>
+                      {shouldShowUserCreatedHelp(orgDetails, webhook) && (
+                        <button
+                          type="button"
+                          onClick={() => setUserCreatedHelpWebhookId(webhook.id)}
+                          className="inline-flex rounded-full border border-stroke p-1 text-dark-6 transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6 dark:hover:text-primary"
+                          title={t.userCreatedHelp.buttonAria}
+                          aria-label={t.userCreatedHelp.buttonAria}
+                        >
+                          <CircleHelp size={18} strokeWidth={1.75} aria-hidden />
+                        </button>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-dark-6 dark:text-dark-6">
                     {formatLocalDateTime(webhook.created_at)}
                   </TableCell>
@@ -402,6 +472,94 @@ export function WebhooksPageContent() {
           <p className="text-dark-6 dark:text-dark-6">
             {t.empty.message}
           </p>
+        </div>
+      )}
+
+      {/* Usuario Creado (Damasco): cómo utilizar — POST + x-signature */}
+      {helpWebhook && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="user-created-help-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setUserCreatedHelpWebhookId(null);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") setUserCreatedHelpWebhookId(null);
+          }}
+        >
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-stroke bg-white p-6 shadow-lg dark:border-dark-3 dark:bg-dark-2">
+            <h3
+              id="user-created-help-title"
+              className="text-lg font-semibold text-dark dark:text-white"
+            >
+              {t.userCreatedHelp.modalTitle}
+            </h3>
+            <p className="mt-3 text-sm leading-relaxed text-dark-6 dark:text-dark-6">
+              {t.userCreatedHelp.modalIntro}
+            </p>
+            <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-dark dark:text-white">
+              <li>
+                <span className="font-mono text-xs font-semibold">{t.userCreatedHelp.postLabel}</span>
+              </li>
+              <li>
+                <span className="font-mono text-xs font-semibold">{t.userCreatedHelp.signatureHeaderLabel}</span>
+              </li>
+            </ul>
+
+            <div className="mt-5 rounded-lg border border-stroke bg-gray-1/80 p-4 dark:border-dark-3 dark:bg-dark">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <label
+                  htmlFor="user-created-help-destination-url"
+                  className="text-sm font-semibold text-dark dark:text-white"
+                >
+                  {t.userCreatedHelp.destinationUrlLabel}
+                </label>
+                <button
+                  type="button"
+                  onClick={handleCopyHelpWebhookUrl}
+                  className="rounded-md border border-stroke bg-white px-2 py-1 text-xs font-medium text-primary hover:bg-gray-50 dark:border-dark-3 dark:bg-dark-2 dark:hover:bg-dark-3"
+                >
+                  {t.userCreatedHelp.copyUrl}
+                </button>
+              </div>
+              <p className="mb-2 text-xs text-dark-6 dark:text-dark-6">{t.userCreatedHelp.destinationUrlHint}</p>
+              <input
+                id="user-created-help-destination-url"
+                readOnly
+                value={helpWebhook.url}
+                className="w-full break-all rounded-md border border-stroke bg-white px-3 py-2 font-mono text-xs text-dark outline-none dark:border-dark-3 dark:bg-dark dark:text-white"
+              />
+            </div>
+
+            <div className="mt-4">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <span className="text-sm font-semibold text-dark dark:text-white">
+                  {t.userCreatedHelp.exampleJsonTitle}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyUserCreatedExample}
+                  className="rounded-md border border-stroke px-2 py-1 text-xs font-medium text-primary hover:bg-gray-50 dark:border-dark-3 dark:hover:bg-dark-3"
+                >
+                  {t.userCreatedHelp.copyJson}
+                </button>
+              </div>
+              <pre className="max-h-[40vh] overflow-auto rounded-md border border-stroke bg-gray-1 p-3 text-left text-xs leading-relaxed text-dark dark:border-dark-3 dark:bg-dark dark:text-dark-6">
+                {DAMASCO_USER_CREATED_JSON_EXAMPLE.trim()}
+              </pre>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setUserCreatedHelpWebhookId(null)}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90"
+              >
+                {t.userCreatedHelp.close}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

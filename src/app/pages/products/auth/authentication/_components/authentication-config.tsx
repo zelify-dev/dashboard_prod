@@ -185,7 +185,6 @@ export function AuthenticationConfig() {
         }
         setHasChanges(false);
         setSaveSuccess("Configuración guardada exitosamente");
-        console.log("Configuración guardada exitosamente");
       } else {
         let errorMessage = "Error al guardar la configuración";
         try {

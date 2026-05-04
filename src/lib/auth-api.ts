@@ -172,6 +172,11 @@ export function isOrganizationOnboardingVerified(
   return false;
 }
 
+/** Orgs que siempre pueden usar integraciones (webhooks, dominios, etc.) sin depender de scopes ni onboarding. */
+const INTEGRATIONS_ALWAYS_ALLOWED_ORGANIZATION_IDS = new Set<string>([
+  "15d8e71c-9e3b-4467-982e-891183f3843e",
+]);
+
 /**
  * Webhooks, notificaciones, dominios, logs (cuando apliquen), sandbox de API keys:
  * habilitados si la org tiene **al menos un scope** en sesión (GET …/scopes).
@@ -181,6 +186,7 @@ export function canUseOrganizationIntegrations(
   org: OrganizationDetails | null | undefined,
   scopesFromSession: string[] | null
 ): boolean {
+  if (org?.id && INTEGRATIONS_ALWAYS_ALLOWED_ORGANIZATION_IDS.has(org.id)) return true;
   if (scopesFromSession != null && scopesFromSession.length > 0) return true;
   return isOrganizationOnboardingVerified(org);
 }
@@ -701,9 +707,6 @@ export async function getMe(): Promise<MeResponse> {
     throw new AuthError("No se pudo obtener el perfil del usuario", res.status);
   }
   const data = await res.json();
-  if (typeof window !== "undefined") {
-    console.log("[auth-api] getMe Raw Response:", data);
-  }
   // El backend devuelve los datos del usuario en la raíz. 
   return data as MeResponse;
 }
@@ -719,14 +722,8 @@ export type OrganizationScopeItem = {
 /** GET /api/organizations/:id/scopes — listar scopes de la organización (para filtrar módulos en el dashboard). */
 export async function getOrganizationScopes(orgId: string): Promise<OrganizationScopeItem[]> {
   const path = `/api/organizations/${encodeURIComponent(orgId)}/scopes`;
-  if (typeof window !== "undefined") {
-    console.log("[getOrganizationScopes] GET", path);
-  }
   const res = await fetchWithAuth(path);
   const data = await res.json().catch(() => ({}));
-  if (typeof window !== "undefined") {
-    console.log("[getOrganizationScopes] Respuesta", res.status, res.ok ? "OK" : "ERROR", data);
-  }
   if (!res.ok) {
     throw new AuthError(
       (data as { message?: string }).message ?? "Error al obtener scopes",
@@ -788,17 +785,12 @@ export async function syncMe(): Promise<void> {
       const items = await getOrganizationScopes(me.organization.id);
       const scopeStrings = items.map((s) => s.scope);
       setStoredOrganizationScopes(scopeStrings);
-      if (typeof window !== "undefined") {
-        console.log("[syncMe] Scopes cargados para org", me.organization.id, ":", scopeStrings.length, "scopes", scopeStrings);
-      }
     } catch (err) {
       if (typeof window !== "undefined") {
         console.warn("[syncMe] Error al cargar scopes de la org:", err);
       }
       setStoredOrganizationScopes([]);
     }
-  } else if (typeof window !== "undefined") {
-    console.log("[syncMe] No hay organization.id en /api/me, no se cargan scopes");
   }
 }
 
@@ -940,9 +932,6 @@ export async function sendEmail(payload: {
 export async function uploadProfilePhoto(file: File): Promise<MeResponse> {
   const form = new FormData();
   form.append("photo", file);
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[auth-api] POST /api/me/photo | File: ${file.name} (${file.size} bytes)`);
-  }
   const res = await fetchWithAuth("/api/me/photo", {
     method: "POST",
     body: form,

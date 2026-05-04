@@ -335,8 +335,6 @@ export default function RequestCredentialsModal({
 
         if (!credentialsResponse.ok) {
           console.error("Failed to send temporary credentials to backend");
-        } else {
-          console.log("Temporary credentials request sent successfully");
         }
       } catch (err) {
         console.error("Error sending temporary credentials request:", err);
