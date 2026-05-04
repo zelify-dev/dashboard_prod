@@ -4,8 +4,11 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import Select from "react-select";
 
+type Option = { value: string; label: string };
+type GroupedOption = { label: string; options: Option[] };
+
 type SimpleSelectProps = {
-  options: { value: string; label: string }[];
+  options: (Option | GroupedOption)[];
   value?: string;
   defaultValue?: string;
   placeholder?: string;
@@ -24,15 +27,27 @@ export function SimpleSelect({
   isSearchable = false,
 }: SimpleSelectProps) {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [selectedValue, setSelectedValue] = useState<{ value: string; label: string } | null>(
-    value ? options.find(item => item.value === value) || { value, label: value }
-    : defaultValue ? options.find(item => item.value === defaultValue) || null
-    : null
+  const findOption = (val: string) => {
+    for (const opt of options) {
+      if ('options' in opt) {
+        const found = opt.options.find(o => o.value === val);
+        if (found) return found;
+      } else {
+        if (opt.value === val) return opt;
+      }
+    }
+    return null;
+  };
+
+  const [selectedValue, setSelectedValue] = useState<Option | null>(
+    value ? findOption(value) || { value, label: value }
+      : defaultValue ? findOption(defaultValue)
+        : null
   );
 
   useEffect(() => {
     if (value !== undefined) {
-      const option = options.find(item => item.value === value);
+      const option = findOption(value);
       setSelectedValue(option || (value ? { value, label: value } : null));
     }
   }, [value, options]);
@@ -42,15 +57,15 @@ export function SimpleSelect({
       const isDark = document.documentElement.classList.contains('dark');
       setIsDarkMode(isDark);
     };
-    
+
     checkDarkMode();
-    
+
     const observer = new MutationObserver(checkDarkMode);
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ['class']
     });
-    
+
     return () => observer.disconnect();
   }, []);
 
@@ -59,7 +74,7 @@ export function SimpleSelect({
   const customStyles = {
     control: (base: any, state: any) => ({
       ...base,
-      backgroundColor: hasError 
+      backgroundColor: hasError
         ? (isDarkMode ? '#7F1D1D' : '#FEF2F2')
         : (isDarkMode ? '#1F2937' : '#FFFFFF'),
       borderColor: hasError
@@ -69,9 +84,9 @@ export function SimpleSelect({
       padding: '0.25rem 0.5rem',
       minHeight: '38px',
       fontSize: '0.875rem',
-      boxShadow: state.isFocused 
-        ? (hasError 
-          ? '0 0 0 1px #EF4444' 
+      boxShadow: state.isFocused
+        ? (hasError
+          ? '0 0 0 1px #EF4444'
           : (isDarkMode ? '0 0 0 1px #004492' : '0 0 0 1px #004492'))
         : 'none',
       '&:hover': {
@@ -90,12 +105,13 @@ export function SimpleSelect({
       backgroundColor: state.isSelected
         ? (isDarkMode ? '#004492' : '#004492')
         : state.isFocused
-        ? (isDarkMode ? '#374151' : '#F3F4F6')
-        : 'transparent',
-      color: isDarkMode ? '#FFFFFF' : '#111827',
+          ? (isDarkMode ? '#374151' : '#F3F4F6')
+          : 'transparent',
+      color: state.isSelected ? '#FFFFFF' : (isDarkMode ? '#FFFFFF' : '#111827'),
       fontSize: '0.875rem',
       '&:hover': {
-        backgroundColor: isDarkMode ? '#374151' : '#F3F4F6',
+        backgroundColor: state.isSelected ? '#004492' : (isDarkMode ? '#374151' : '#F3F4F6'),
+        color: state.isSelected ? '#FFFFFF' : (isDarkMode ? '#FFFFFF' : '#111827'),
       },
     }),
     singleValue: (base: any) => ({
@@ -107,6 +123,23 @@ export function SimpleSelect({
       ...base,
       color: isDarkMode ? '#9CA3AF' : '#6B7280',
       fontSize: '0.875rem',
+    }),
+    groupHeading: (base: any) => ({
+      ...base,
+      color: isDarkMode ? '#9CA3AF' : '#6B7280',
+      fontSize: '0.75rem',
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+      padding: '0.5rem 0.75rem',
+      backgroundColor: isDarkMode ? '#374151' : '#F9FAFB',
+      borderBottom: `1px solid ${isDarkMode ? '#4B5563' : '#F3F4F6'}`,
+      marginBottom: '0.25rem',
+    }),
+    group: (base: any) => ({
+      ...base,
+      paddingTop: 0,
+      paddingBottom: 0,
     }),
     indicatorSeparator: () => ({
       display: 'none',

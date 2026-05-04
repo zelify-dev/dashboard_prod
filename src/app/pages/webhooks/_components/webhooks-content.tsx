@@ -21,33 +21,16 @@ import {
 } from "@/lib/auth-api";
 import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
 
-interface Webhook {
-  id: string;
-  endpoint: string;
-  event: string;
-  createdAt: string;
-}
-
-const AVAILABLE_EVENTS = [
-  "Wallet transaction event",
-  "Bank Income Refresh Update",
-  "Bank Income Refresh Complete",
-  "Account Update",
-  "Transaction Update",
-  "Identity Verification Complete",
-  "Link Event",
-  "Payment Status Update",
-];
-
-// Datos de ejemplo
-const MOCK_WEBHOOKS: Webhook[] = [
-  {
-    id: "1",
-    endpoint: "https://api.example.com/webhooks/income",
-    event: "Bank Income Refresh Update",
-    createdAt: "2024-10-11T16:12:00-05:00",
-  },
-];
+import { 
+  getWebhookEventTypes, 
+  getWebhooks, 
+  createWebhook, 
+  deleteWebhook,
+  rotateWebhookSecret,
+  type WebhookCategory, 
+  type WebhookRecord 
+} from "@/lib/webhooks-api";
+import { Eye, EyeOff, Copy, RefreshCw } from "lucide-react";
 
 export function WebhooksPageContent() {
   const { language } = useLanguage();
@@ -55,7 +38,29 @@ export function WebhooksPageContent() {
   const scopes = useOrganizationScopes();
   const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
   const [orgLoading, setOrgLoading] = useState(true);
-  const demoSeeded = useRef(false);
+  const [categories, setCategories] = useState<WebhookCategory[]>([]);
+  const [webhooks, setWebhooks] = useState<WebhookRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [revealedSecrets, setRevealedSecrets] = useState<Set<string>>(new Set());
+  const [isRotating, setIsRotating] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [eventsRes, webhooksRes] = await Promise.all([
+        getWebhookEventTypes(),
+        getWebhooks(),
+      ]);
+      setCategories(eventsRes.categories);
+      setWebhooks(webhooksRes);
+    } catch (err) {
+      console.error("Error fetching webhooks data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const id = getStoredOrganization()?.id;
@@ -68,11 +73,12 @@ export function WebhooksPageContent() {
       .then(setOrgDetails)
       .catch(() => setOrgDetails(null))
       .finally(() => setOrgLoading(false));
+
+    fetchData();
   }, []);
 
   const canUseWebhooks = canUseOrganizationIntegrations(orgDetails, scopes);
 
-  const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [showNewWebhook, setShowNewWebhook] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -84,20 +90,6 @@ export function WebhooksPageContent() {
     endpoint: "",
   });
 
-  useEffect(() => {
-    if (orgLoading) return;
-    if (!canUseWebhooks) {
-      setWebhooks([]);
-      setShowNewWebhook(false);
-      demoSeeded.current = false;
-      return;
-    }
-    if (!demoSeeded.current) {
-      demoSeeded.current = true;
-      setWebhooks(MOCK_WEBHOOKS);
-    }
-  }, [orgLoading, canUseWebhooks, scopes]);
-
   const locale = language === "es" ? "es-ES" : "en-US";
   const webhooksLocked = orgLoading || !canUseWebhooks;
 
@@ -105,30 +97,27 @@ export function WebhooksPageContent() {
     return url.startsWith("http://") || url.startsWith("https://");
   };
 
-  const eventLabel = (event: string) => {
-    switch (event) {
-      case "Wallet transaction event":
-        return t.events.walletTransactionEvent;
-      case "Bank Income Refresh Update":
-        return t.events.bankIncomeRefreshUpdate;
-      case "Bank Income Refresh Complete":
-        return t.events.bankIncomeRefreshComplete;
-      case "Account Update":
-        return t.events.accountUpdate;
-      case "Transaction Update":
-        return t.events.transactionUpdate;
-      case "Identity Verification Complete":
-        return t.events.identityVerificationComplete;
-      case "Link Event":
-        return t.events.linkEvent;
-      case "Payment Status Update":
-        return t.events.paymentStatusUpdate;
-      default:
-        return event;
+  const eventLabel = (eventId: string) => {
+    if ((t.events as any)[eventId]) {
+      return (t.events as any)[eventId];
     }
+    for (const cat of categories) {
+      const found = cat.events.find(e => e.id === eventId);
+      if (found) return found.name;
+    }
+    return eventId;
   };
 
-
+  const selectOptions = [
+    { value: "", label: t.sections.event.selectPlaceholder },
+    ...categories.map(cat => ({
+      label: cat.category,
+      options: cat.events.map(evt => ({
+        value: evt.id,
+        label: (t.events as any)[evt.id] || evt.name
+      }))
+    }))
+  ];
 
   const handleNewWebhook = () => {
     if (webhooksLocked) return;
@@ -148,8 +137,8 @@ export function WebhooksPageContent() {
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  const handleConfigure = () => {
-    if (webhooksLocked) return;
+  const handleConfigure = async () => {
+    if (webhooksLocked || isSaving) return;
     const newErrors = { event: "", endpoint: "" };
     let hasErrors = false;
 
@@ -171,18 +160,20 @@ export function WebhooksPageContent() {
       return;
     }
 
-    // Crear nuevo webhook
-    const newWebhook: Webhook = {
-      id: Date.now().toString(),
-      endpoint: formData.endpoint,
-      event: formData.event,
-      createdAt: new Date().toISOString(),
-    };
-
-    setWebhooks([...webhooks, newWebhook]);
-    setShowNewWebhook(false);
-    setFormData({ event: "", endpoint: "" });
-    setErrors({ event: "", endpoint: "" });
+    setIsSaving(true);
+    try {
+      await createWebhook({
+        url: formData.endpoint,
+        event: formData.event,
+      });
+      await fetchData(); // Refresh list
+      setShowNewWebhook(false);
+      setFormData({ event: "", endpoint: "" });
+    } catch (err) {
+      console.error("Error creating webhook:", err);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDeleteClick = (id: string) => {
@@ -190,10 +181,42 @@ export function WebhooksPageContent() {
     setShowDeleteModal(id);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (showDeleteModal) {
-      setWebhooks(webhooks.filter((w) => w.id !== showDeleteModal));
-      setShowDeleteModal(null);
+      try {
+        await deleteWebhook(showDeleteModal);
+        setWebhooks(webhooks.filter((w) => w.id !== showDeleteModal));
+        setShowDeleteModal(null);
+      } catch (err) {
+        console.error("Error deleting webhook:", err);
+      }
+    }
+  };
+
+  const handleToggleSecret = (id: string) => {
+    setRevealedSecrets((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleCopySecret = (secret: string) => {
+    navigator.clipboard.writeText(secret);
+    // Optional: add a "Copied!" toast if available. For now, quiet success.
+  };
+
+  const handleRotate = async (id: string) => {
+    if (webhooksLocked || isRotating) return;
+    setIsRotating(id);
+    try {
+      await rotateWebhookSecret(id);
+      await fetchData();
+    } catch (err) {
+      console.error("Error rotating secret:", err);
+    } finally {
+      setIsRotating(null);
     }
   };
 
@@ -253,13 +276,7 @@ export function WebhooksPageContent() {
                 {t.sections.event.description}
               </p>
               <SimpleSelect
-                options={[
-                  { value: "", label: t.sections.event.selectPlaceholder },
-                  ...AVAILABLE_EVENTS.map((event) => ({
-                    value: event,
-                    label: eventLabel(event),
-                  })),
-                ]}
+                options={selectOptions}
                 value={formData.event}
                 onChange={(value) => handleInputChange("event", value)}
                 isSearchable={true}
@@ -316,6 +333,7 @@ export function WebhooksPageContent() {
                 <TableHead>{t.table.endpoint}</TableHead>
                 <TableHead>{t.table.events}</TableHead>
                 <TableHead>{t.table.created}</TableHead>
+                <TableHead>{t.table.signingSecret || "Signing Secret"}</TableHead>
                 <TableHead className="text-right">{t.table.actions}</TableHead>
               </TableRow>
             </TableHeader>
@@ -325,10 +343,43 @@ export function WebhooksPageContent() {
                   key={webhook.id}
                   className="text-sm text-dark dark:text-white"
                 >
-                  <TableCell className="font-medium">{webhook.endpoint}</TableCell>
+                  <TableCell className="font-medium">{webhook.url}</TableCell>
                   <TableCell>{eventLabel(webhook.event)}</TableCell>
                   <TableCell className="text-dark-6 dark:text-dark-6">
-                    {formatLocalDateTime(webhook.createdAt)}
+                    {formatLocalDateTime(webhook.created_at)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex items-center gap-2 rounded-md bg-gray-1 px-3 py-1.5 font-mono text-xs dark:bg-dark-3">
+                        <span className="max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap text-dark-6 dark:text-dark-6">
+                          {revealedSecrets.has(webhook.id) ? webhook.secret : "••••••••••••••••••••••••"}
+                        </span>
+                        <div className="flex items-center gap-1 border-l border-stroke pl-2 dark:border-dark-4">
+                          <button
+                            onClick={() => handleToggleSecret(webhook.id)}
+                            className="text-dark-6 hover:text-primary dark:text-dark-6 dark:hover:text-primary"
+                            title={revealedSecrets.has(webhook.id) ? "Hide" : "Show"}
+                          >
+                            {revealedSecrets.has(webhook.id) ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                          <button
+                            onClick={() => handleCopySecret(webhook.secret)}
+                            className="text-dark-6 hover:text-primary dark:text-dark-6 dark:hover:text-primary"
+                            title="Copy"
+                          >
+                            <Copy size={14} />
+                          </button>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleRotate(webhook.id)}
+                        disabled={!!isRotating}
+                        className={`text-dark-6 hover:text-primary dark:text-dark-6 dark:hover:text-primary ${isRotating === webhook.id ? "animate-spin" : ""}`}
+                        title="Rotate Secret"
+                      >
+                        <RefreshCw size={14} />
+                      </button>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <button

@@ -13,6 +13,7 @@
   "dependencies": {
     "@fingerprintjs/fingerprintjs-pro-react": "^2.7.1",
     "@fingerprintjs/fingerprintjs-pro-server-api": "^6.10.0",
+    "@nestjs/event-emitter": "^3.0.1",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.0",
     "@tamagui/config": "^2.0.0-rc.40",
