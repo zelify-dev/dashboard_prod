@@ -2,6 +2,7 @@
 
 import { EmailIcon, EyeClosedIcon, EyeOpenIcon, PasswordIcon } from "@/assets/icons";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe, type AuthSuccessResponse } from "@/lib/auth-api";
