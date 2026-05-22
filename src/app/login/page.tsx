@@ -2,7 +2,6 @@
 
 import { EmailIcon, EyeClosedIcon, EyeOpenIcon, PasswordIcon } from "@/assets/icons";
 import Image from "next/image";
-import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe, type AuthSuccessResponse } from "@/lib/auth-api";
@@ -563,7 +562,7 @@ export default function LoginPage() {
                 ) : null}
                 {/* Logo + título centrados */}
                 <div className="mb-10 flex justify-center">
-                  <Link href="/" className="inline-block">
+                  <div className="inline-block">
                     <Image
                       className="hidden dark:block"
                       src={LOGO_URLS.dark}
@@ -578,7 +577,7 @@ export default function LoginPage() {
                       width={176}
                       height={32}
                     />
-                  </Link>
+                  </div>
                 </div>
 
                 <h1 className="mb-2 text-center text-2xl font-bold text-dark dark:text-white sm:text-heading-3">
