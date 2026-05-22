@@ -1,15 +1,35 @@
 "use client";
 
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
+import { canAccessZelifyKeys } from "@/lib/auth-api";
+import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { ClientIdSection } from "./client-id";
 import { ZelifySecretsSandbox } from "./zelify-secrets-sandbox";
-import { ProductionSection } from "./production";
 import { DataSection } from "./data";
 import { useZelifyKeysTranslations } from "./use-zelifykeys-translations";
 import { ZelifyKeysDataProvider } from "./zelify-keys-data-context";
 
 export function ZelifyKeysPageContent() {
   const translations = useZelifyKeysTranslations();
+  const router = useRouter();
+  const scopes = useOrganizationScopes();
+  const canViewZelifyKeys = canAccessZelifyKeys(scopes);
+
+  useEffect(() => {
+    if (scopes !== null && !canViewZelifyKeys) {
+      router.replace("/");
+    }
+  }, [canViewZelifyKeys, router, scopes]);
+
+  if (scopes === null || !canViewZelifyKeys) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <ZelifyKeysDataProvider>
@@ -25,7 +45,6 @@ export function ZelifyKeysPageContent() {
         <div className="lg:col-span-2 space-y-6">
           <ClientIdSection />
           <ZelifySecretsSandbox />
-          <ProductionSection />
         </div>
         <div className="lg:col-span-1">
           <DataSection />
@@ -35,4 +54,3 @@ export function ZelifyKeysPageContent() {
     </ZelifyKeysDataProvider>
   );
 }
-

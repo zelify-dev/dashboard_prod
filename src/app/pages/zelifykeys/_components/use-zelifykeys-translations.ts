@@ -34,12 +34,6 @@ type ZelifyKeysTranslations = {
     revealToCopy: string;
     rotateWarning: string;
     retry: string;
-    /** Aviso cuando la sección de sandbox aún no está disponible. */
-    disabledWarning: string;
-  };
-  production: {
-    title: string;
-    requestAccess: string;
   };
   data: {
     title: string;
@@ -61,7 +55,7 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
     },
     zelifySecrets: {
       title: "Zelify Secrets",
-      sandbox: "Development",
+      sandbox: "Production",
       rotate: "Rotate",
       rotateConfirm: {
         title: "Are you sure you want to rotate?",
@@ -83,11 +77,6 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
       revealToCopy: "Reveal the secret to copy it",
       rotateWarning: "Current keys will be revoked. Save the new secret when shown.",
       retry: "Retry",
-      disabledWarning: "Your dev keys will show up here after the data is in.",
-    },
-    production: {
-      title: "Production Secret",
-      requestAccess: "Request access",
     },
     data: {
       title: "Copy all your access data",
@@ -107,7 +96,7 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
     },
     zelifySecrets: {
       title: "Secretos de Zelify",
-      sandbox: "Desarrollo",
+      sandbox: "Producción",
       rotate: "Rotar",
       rotateConfirm: {
         title: "¿Estás seguro de que quieres rotar?",
@@ -129,11 +118,6 @@ const ZELIFYKEYS_TRANSLATIONS: Record<Language, ZelifyKeysTranslations> = {
       revealToCopy: "Revela el secret para copiarlo",
       rotateWarning: "Las claves actuales se revocarán. Guarda el nuevo secret cuando se muestre.",
       retry: "Reintentar",
-      disabledWarning: "Las claves de desarrollo aparecerán aquí cuando tengamos los datos listos.",
-    },
-    production: {
-      title: "Secreto de Producción",
-      requestAccess: "Solicitar acceso",
     },
     data: {
       title: "Copiar todos tus datos de acceso",

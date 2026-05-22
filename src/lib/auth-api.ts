@@ -178,7 +178,7 @@ const INTEGRATIONS_ALWAYS_ALLOWED_ORGANIZATION_IDS = new Set<string>([
 ]);
 
 /**
- * Webhooks, notificaciones, dominios, logs (cuando apliquen), sandbox de API keys:
+ * Webhooks, notificaciones, dominios, logs (cuando apliquen), sección de API keys (Zelify Keys):
  * habilitados si la org tiene **al menos un scope** en sesión (GET …/scopes).
  * Si no hay scopes (lista vacía o aún null), se mantiene el criterio anterior por **onboarding verificado**.
  */
@@ -189,6 +189,13 @@ export function canUseOrganizationIntegrations(
   if (org?.id && INTEGRATIONS_ALWAYS_ALLOWED_ORGANIZATION_IDS.has(org.id)) return true;
   if (scopesFromSession != null && scopesFromSession.length > 0) return true;
   return isOrganizationOnboardingVerified(org);
+}
+
+/** Zelify Keys solo debe estar visible cuando la organización tiene al menos un scope habilitado. */
+export function canAccessZelifyKeys(
+  scopesFromSession: string[] | null | undefined
+): boolean {
+  return Array.isArray(scopesFromSession) && scopesFromSession.length > 0;
 }
 
 export type AuthSuccessResponse = {

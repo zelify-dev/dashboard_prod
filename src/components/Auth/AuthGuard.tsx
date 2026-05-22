@@ -202,18 +202,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Si aún no está montado y NO estamos en login, mostrar loading
-  if (!isMounted) {
-    // Mostrar loading mientras se verifica
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-      </div>
-    );
-  }
-
-  // Si no está autenticado, mostrar loading mientras se redirige a /login (evita pantalla en blanco)
-  if (isAuthenticated === false) {
+  // En rutas protegidas, nunca renderizar children mientras la auth siga pendiente
+  // o mientras se redirige al login. Eso evita flashes del dashboard.
+  if (!isMounted || isAuthenticated !== true) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
