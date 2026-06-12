@@ -79,6 +79,7 @@ import {
 } from "@/lib/organization-identity-workflows-api";
 import { queryKeys } from "@/lib/query-keys";
 import { listRoles, type RoleCatalogItem } from "@/lib/roles-api";
+import { Dropdown, DropdownContent, DropdownTrigger, DropdownClose } from "@/components/ui/dropdown";
 
 type DetailTabId =
   | "overview"
@@ -176,7 +177,6 @@ const DETAIL_TABS: Array<{ id: DetailTabId; label: string }> = [
   { id: "roles", label: "Roles" },
   { id: "scopes", label: "Permisos" },
   { id: "workflows", label: "Workflows de Identidad" },
-  { id: "identity", label: "Configuracion de Identidad" },
   { id: "api-keys", label: "Claves API" },
   { id: "onboarding", label: "Onboarding" },
 ];
@@ -493,6 +493,7 @@ export function OrganizationAdministrationDetailClient() {
   const [memberBatchRoleCodes, setMemberBatchRoleCodes] = useState<string[]>([]);
   const [memberBatchResult, setMemberBatchResult] = useState<BatchActionResponse | null>(null);
   const [memberCreateOpen, setMemberCreateOpen] = useState(false);
+  const [activeDropdownMemberId, setActiveDropdownMemberId] = useState<string | null>(null);
   const [memberCreateForm, setMemberCreateForm] = useState<MemberCreateFormState>({
     full_name: "",
     email: "",
@@ -1257,6 +1258,44 @@ export function OrganizationAdministrationDetailClient() {
     }
   };
 
+  const toggleMemberStatus = async (member: OrgUserListItem) => {
+    const nextStatus: OrgUserStatus = member.status === "ACTIVE" ? "DISABLED" : "ACTIVE";
+    if (!window.confirm(`¿Cambiar el estado de ${member.full_name} a ${nextStatus}?`)) return;
+    setMemberActionLoading(true);
+    setMemberActionError("");
+    try {
+      await updateOrgUser(orgId, member.id, {
+        full_name: member.full_name,
+        status: nextStatus,
+      });
+      setFlash(`El miembro ${member.full_name} fue actualizado.`);
+      await reloadMembers();
+      if (selectedMemberId === member.id) {
+        await refreshSelectedMember();
+      }
+    } catch (err) {
+      setMemberActionError(err instanceof Error ? err.message : "No se pudo actualizar el estado del miembro.");
+    } finally {
+      setMemberActionLoading(false);
+    }
+  };
+
+  const resetMemberPasswordDirectly = async (member: OrgUserListItem) => {
+    if (!window.confirm(`¿Resetear contraseña para ${member.email}?`)) return;
+    setMemberActionLoading(true);
+    setMemberActionError("");
+    try {
+      const result = await resetOrgUserPassword(orgId, member.id);
+      setSelectedMemberId(member.id);
+      setTemporaryPassword(result.temporary_password);
+      setFlash(`Contraseña temporal generada para ${member.full_name}.`);
+    } catch (err) {
+      setMemberActionError(err instanceof Error ? err.message : "No se pudo resetear la contraseña.");
+    } finally {
+      setMemberActionLoading(false);
+    }
+  };
+
   const executeMemberBatchAction = async () => {
     if (!memberBatchAction || selectedMemberIds.length === 0) return;
     setMemberBatchLoading(true);
@@ -1762,7 +1801,7 @@ export function OrganizationAdministrationDetailClient() {
             </div>
 
             <div className="overflow-hidden rounded-xl border border-stroke dark:border-dark-3">
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto min-h-[250px]">
                 <table className="w-full min-w-[980px] text-left text-sm">
                   <thead className="bg-gray-2/70 dark:bg-dark-2/80">
                     <tr className="border-b border-stroke dark:border-dark-3">
@@ -1786,8 +1825,10 @@ export function OrganizationAdministrationDetailClient() {
                         <td colSpan={6} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">No hay miembros que coincidan con los filtros actuales.</td>
                       </tr>
                     ) : (
-                      members.map((member) => (
-                        <tr key={member.id} className="border-b border-stroke transition hover:bg-gray-1/50 dark:border-dark-3 dark:hover:bg-dark-2/60">
+                      members.map((member, index) => {
+                        const isLastMember = index === members.length - 1 && members.length > 1;
+                        return (
+                          <tr key={member.id} className="border-b border-stroke transition hover:bg-gray-1/50 dark:border-dark-3 dark:hover:bg-dark-2/60">
                           <td className="px-4 py-4 align-top">
                             <input type="checkbox" checked={selectedMemberIds.includes(member.id)} onChange={() => toggleMemberSelection(member.id)} className="mt-1 h-4 w-4 rounded accent-primary" />
                           </td>
@@ -1829,18 +1870,58 @@ export function OrganizationAdministrationDetailClient() {
                             </div>
                           </td>
                           <td className="px-4 py-4">
-                            <div className="flex flex-wrap gap-2">
-                              <button
-                                type="button"
-                                onClick={() => void fetchMemberDetail(member.id)}
-                                className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-white transition hover:bg-opacity-90"
+                            <Dropdown
+                              isOpen={activeDropdownMemberId === member.id}
+                              setIsOpen={(open) => setActiveDropdownMemberId(open ? member.id : null)}
+                            >
+                              <DropdownTrigger className="rounded-full p-1.5 hover:bg-gray-2 dark:hover:bg-dark-3 text-dark-6 dark:text-dark-6 hover:text-dark dark:hover:text-white transition">
+                                <svg
+                                  className="h-5 w-5 fill-current"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
+                                </svg>
+                              </DropdownTrigger>
+                              <DropdownContent
+                                align="end"
+                                className={`bg-white border border-stroke dark:bg-gray-dark dark:border-dark-3 py-1.5 w-48 shadow-lg ${
+                                  isLastMember ? "bottom-full mb-1 origin-bottom-right mt-0 top-auto" : ""
+                                }`}
                               >
-                                Abrir
-                              </button>
-                            </div>
+                                <DropdownClose>
+                                  <button
+                                    type="button"
+                                    onClick={() => void fetchMemberDetail(member.id)}
+                                    className="flex w-full items-center px-4 py-2 text-xs font-medium text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                  >
+                                    Ver detalle / Editar
+                                  </button>
+                                </DropdownClose>
+                                <DropdownClose>
+                                  <button
+                                    type="button"
+                                    onClick={() => void toggleMemberStatus(member)}
+                                    className="flex w-full items-center px-4 py-2 text-xs font-medium text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                  >
+                                    {member.status === "ACTIVE" ? "Desactivar" : "Activar"}
+                                  </button>
+                                </DropdownClose>
+                                <DropdownClose>
+                                  <button
+                                    type="button"
+                                    onClick={() => void resetMemberPasswordDirectly(member)}
+                                    className="flex w-full items-center px-4 py-2 text-xs font-medium text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20"
+                                  >
+                                    Resetear contraseña
+                                  </button>
+                                </DropdownClose>
+                              </DropdownContent>
+                            </Dropdown>
                           </td>
                         </tr>
-                      ))
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
@@ -1964,7 +2045,7 @@ export function OrganizationAdministrationDetailClient() {
       ) : null}
 
       {activeTab === "workflows" ? (
-        <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <div className="space-y-6">
           <ShowcaseSection title="Workflows de Identidad" className="!p-6">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
               <div className="max-w-3xl space-y-2 text-sm text-dark-6 dark:text-dark-6">
@@ -2098,131 +2179,125 @@ export function OrganizationAdministrationDetailClient() {
             </div>
           </ShowcaseSection>
 
-          <ShowcaseSection
-            title={workflowEditingId ? "Editar Workflow" : "Crear Workflow"}
-            className="!p-6"
-          >
-            <p className="mb-4 text-sm text-dark-6 dark:text-dark-6">
-              Crea o edita el flujo de verificacion que usara esta organizacion.
-            </p>
-            {!workflowEditorOpen ? (
-              <div className="rounded-lg border border-dashed border-stroke px-4 py-6 text-sm text-dark-6 dark:border-dark-3 dark:text-dark-6">
-                No estas editando ningun workflow. Usa el boton "Nuevo workflow" o selecciona uno existente para modificarlo.
-              </div>
-            ) : (
-              <form onSubmit={saveWorkflow} className="space-y-4">
-                <FormField
-                  label="Nombre del workflow"
-                  value={workflowForm.name}
-                  onChange={(value) =>
-                    setWorkflowForm((current) => ({ ...current, name: value }))
-                  }
-                  required
-                />
-                <FormSelect
-                  label="Tipo de documento"
-                  value={workflowForm.document_type}
-                  onChange={(value) =>
-                    setWorkflowForm((current) => ({
-                      ...current,
-                      document_type: value as IdentityWorkflowDocumentType,
-                    }))
-                  }
-                  options={IDENTITY_DOCUMENT_OPTIONS}
-                />
-                <FormSelect
-                  label="Metodo biometrico"
-                  value={workflowForm.biometry_method}
-                  onChange={(value) =>
-                    setWorkflowForm((current) => ({
-                      ...current,
-                      biometry_method: value as IdentityWorkflowBiometryMethod,
-                    }))
-                  }
-                  options={IDENTITY_BIOMETRY_OPTIONS}
-                />
-                <ToggleField
-                  label="Dejar activo este workflow"
-                  checked={workflowForm.is_active}
-                  onChange={(checked) =>
-                    setWorkflowForm((current) => ({ ...current, is_active: checked }))
-                  }
-                />
-
-                <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                  <div className="mb-3 text-sm font-medium text-dark dark:text-white">
-                    Payload resultante
+          {workflowEditorOpen ? (
+            <div className="fixed inset-0 z-999 overflow-hidden">
+              <div
+                className="absolute inset-0 bg-black/45"
+                onClick={closeWorkflowEditor}
+              />
+              <div className="absolute inset-y-0 right-0 flex w-full justify-end">
+                <div className="h-full w-full max-w-[620px] overflow-y-auto bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
+                  <div className="sticky top-0 z-10 border-b border-stroke bg-white px-6 py-5 dark:border-dark-3 dark:bg-gray-dark">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-xs font-medium uppercase tracking-[0.22em] text-dark-6 dark:text-dark-6">
+                          Workflow de Identidad
+                        </div>
+                        <h2 className="mt-2 text-xl font-semibold text-dark dark:text-white">
+                          {workflowEditingId ? "Editar Workflow" : "Crear Workflow"}
+                        </h2>
+                        <p className="mt-1 text-sm text-dark-6 dark:text-dark-6">
+                          Define el flujo de verificacion que usara esta organizacion.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={closeWorkflowEditor}
+                        className="rounded-full border border-stroke px-3 py-2 text-sm font-medium text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
+                      >
+                        Cerrar
+                      </button>
+                    </div>
                   </div>
-                  <pre className="overflow-auto rounded-lg bg-dark px-4 py-4 text-xs text-white">
-                    {prettifyJson({
-                      name: workflowForm.name.trim(),
-                      config: {
-                        ocr: { document_type: workflowForm.document_type },
-                        biometry: { method: workflowForm.biometry_method },
-                      },
-                      is_active: workflowForm.is_active,
-                    })}
-                  </pre>
-                </div>
 
-                {workflowError ? <ErrorAlert message={workflowError} /> : null}
+                  <div className="space-y-6 p-6">
+                    <form onSubmit={saveWorkflow} className="space-y-4">
+                      <FormField
+                        label="Nombre del workflow"
+                        value={workflowForm.name}
+                        onChange={(value) =>
+                          setWorkflowForm((current) => ({ ...current, name: value }))
+                        }
+                        required
+                      />
+                      <FormSelect
+                        label="Tipo de documento"
+                        value={workflowForm.document_type}
+                        onChange={(value) =>
+                          setWorkflowForm((current) => ({
+                            ...current,
+                            document_type: value as IdentityWorkflowDocumentType,
+                          }))
+                        }
+                        options={IDENTITY_DOCUMENT_OPTIONS}
+                      />
+                      <FormSelect
+                        label="Metodo biometrico"
+                        value={workflowForm.biometry_method}
+                        onChange={(value) =>
+                          setWorkflowForm((current) => ({
+                            ...current,
+                            biometry_method: value as IdentityWorkflowBiometryMethod,
+                          }))
+                        }
+                        options={IDENTITY_BIOMETRY_OPTIONS}
+                      />
+                      <ToggleField
+                        label="Dejar activo este workflow"
+                        checked={workflowForm.is_active}
+                        onChange={(checked) =>
+                          setWorkflowForm((current) => ({ ...current, is_active: checked }))
+                        }
+                      />
 
-                <div className="flex justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={closeWorkflowEditor}
-                    className="rounded-lg border border-stroke px-4 py-2.5 text-sm font-medium text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={workflowSaving}
-                    className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {workflowSaving
-                      ? "Guardando..."
-                      : workflowEditingId
-                        ? "Guardar cambios"
-                        : "Crear workflow"}
-                  </button>
+                      <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
+                        <div className="mb-3 text-sm font-medium text-dark dark:text-white">
+                          Payload resultante
+                        </div>
+                        <pre className="overflow-auto rounded-lg bg-dark px-4 py-4 text-xs text-white">
+                          {prettifyJson({
+                            name: workflowForm.name.trim(),
+                            config: {
+                              ocr: { document_type: workflowForm.document_type },
+                              biometry: { method: workflowForm.biometry_method },
+                            },
+                            is_active: workflowForm.is_active,
+                          })}
+                        </pre>
+                      </div>
+
+                      {workflowError ? <ErrorAlert message={workflowError} /> : null}
+
+                      <div className="flex justify-end gap-3 border-t border-stroke pt-4 dark:border-dark-3">
+                        <button
+                          type="button"
+                          onClick={closeWorkflowEditor}
+                          className="rounded-lg border border-stroke px-4 py-2.5 text-sm font-medium text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={workflowSaving}
+                          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {workflowSaving
+                            ? "Guardando..."
+                            : workflowEditingId
+                              ? "Guardar cambios"
+                              : "Crear workflow"}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
-              </form>
-            )}
-          </ShowcaseSection>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
-      {activeTab === "identity" ? (
-        <ShowcaseSection title="Configuracion de Identidad" className="!p-6">
-          <p className="mb-4 text-sm text-dark-6 dark:text-dark-6">
-            Esta vista muestra la configuracion tecnica avanzada de identidad. La operacion funcional de documentos y biometria se administra desde Workflows de Identidad.
-          </p>
-          {identityLoading ? (
-            <p className="text-sm text-dark-6 dark:text-dark-6">Cargando configuracion de identidad...</p>
-          ) : (
-            <>
-              <textarea
-                value={identityConfigText}
-                onChange={(event) => setIdentityConfigText(event.target.value)}
-                rows={24}
-                className="w-full rounded-lg border border-stroke bg-white px-4 py-3 font-mono text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-              />
-              {identityError || identityQueryError ? <div className="mt-4"><ErrorAlert message={identityError || identityQueryError} /></div> : null}
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => void saveIdentityConfig()}
-                  disabled={identitySaving}
-                  className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {identitySaving ? "Guardando..." : "Guardar configuracion de identidad"}
-                </button>
-              </div>
-            </>
-          )}
-        </ShowcaseSection>
-      ) : null}
+
 
       {activeTab === "api-keys" ? (
         <ShowcaseSection title="Claves API" className="!p-6">
@@ -2446,7 +2521,7 @@ export function OrganizationAdministrationDetailClient() {
 
       {memberCreateOpen ? (
         <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-2xl rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
             <div className="border-b border-stroke px-6 py-4 dark:border-dark-3">
               <h2 className="text-lg font-semibold text-dark dark:text-white">Crear miembro</h2>
               <p className="mt-1 text-sm text-dark-6 dark:text-dark-6">
@@ -2506,7 +2581,7 @@ export function OrganizationAdministrationDetailClient() {
 
       {memberBatchOpen ? (
         <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-3xl rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
             <div className="border-b border-stroke px-6 py-4 dark:border-dark-3">
               <h2 className="text-lg font-semibold text-dark dark:text-white">
                 {memberBatchActionLabel(memberBatchAction)}

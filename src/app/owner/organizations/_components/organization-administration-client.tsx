@@ -288,7 +288,6 @@ export function OrganizationAdministrationClient() {
                           <QuickAction href={`/owner/organizations/${organization.id}?tab=members`}>Miembros</QuickAction>
                           <QuickAction href={`/owner/organizations/${organization.id}?tab=branding`}>Marca</QuickAction>
                           <QuickAction href={`/owner/organizations/${organization.id}?tab=scopes`}>Permisos</QuickAction>
-                          <QuickAction href={`/owner/organizations/${organization.id}?tab=identity`}>Configuracion</QuickAction>
                           <QuickAction href={`/owner/organizations/${organization.id}?tab=api-keys`}>Claves API</QuickAction>
                           <QuickAction href={`/owner/organizations/${organization.id}?tab=onboarding`}>Onboarding</QuickAction>
                         </div>
