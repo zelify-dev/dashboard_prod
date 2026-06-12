@@ -356,7 +356,10 @@ export default function LoginPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target as { name: "email" | "password" | "organization_id"; value: string };
-    const nextData = { ...data, [name]: value };
+    const nextData =
+      name === "email"
+        ? { ...data, email: value, organization_id: "" }
+        : { ...data, [name]: value };
     setData(nextData);
     setError("");
     if (name === "email" && requiresOrganizationId) {
@@ -390,10 +393,15 @@ export default function LoginPage() {
       }
 
         try {
+          const normalizedEmail = data.email.trim();
+          const organizationIdForLogin =
+            requiresOrganizationId && data.organization_id.trim()
+              ? data.organization_id.trim()
+              : undefined;
           const result = await login({
-            email: data.email,
+            email: normalizedEmail,
             password: data.password,
-            organization_id: data.organization_id.trim() || undefined,
+            organization_id: organizationIdForLogin,
           });
 
         // Caso bypass de OTP ( tokens directos )

@@ -191,13 +191,6 @@ export function canUseOrganizationIntegrations(
   return isOrganizationOnboardingVerified(org);
 }
 
-/** Zelify Keys solo debe estar visible cuando la organización tiene al menos un scope habilitado. */
-export function canAccessZelifyKeys(
-  scopesFromSession: string[] | null | undefined
-): boolean {
-  return Array.isArray(scopesFromSession) && scopesFromSession.length > 0;
-}
-
 export type AuthSuccessResponse = {
   access_token: string;
   refresh_token: string;

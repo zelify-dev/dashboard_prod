@@ -2,7 +2,6 @@ import * as Icons from "../icons";
 import type { UiTranslations } from "@/hooks/use-ui-translations";
 import { ZENDESK_SUPPORT_MENU_HREF } from "@/lib/zendesk-widget";
 import { getDashboardActorFromRoles } from "@/lib/dashboard-routing";
-import { canAccessZelifyKeys } from "@/lib/auth-api";
 import { DEFAULT_ONBOARDING_VISIBILITY, type OnboardingVisibility } from "@/lib/onboarding-api";
 
 /** Verifica si al menos un scope de la org coincide con el prefijo (o con alguno de los prefijos). */
@@ -236,7 +235,6 @@ export function getNavData(
         : [];
   const productsSectionItems = filteredProductItems.map(({ scopePrefix: _p, ...item }) => item);
   const hasAnyScopes = Array.isArray(organizationScopes) && organizationScopes.length > 0;
-  const canSeeZelifyKeys = canAccessZelifyKeys(organizationScopes);
   const shouldPinOnboardingToTop = actor === "organization" && Array.isArray(organizationScopes) && !hasAnyScopes;
 
   const actorDashboardItems =
@@ -246,9 +244,9 @@ export function getNavData(
             title: translations.sidebar.menuItems.subItems.generalPanel,
             url: "/",
           },
-          { title: "Overview", url: "/owner" },
-          { title: "Merchants", url: "/owner/merchants" },
-          { title: "Visibility", url: "/owner/visibility" },
+          { title: "Resumen", url: "/owner" },
+          { title: "Comercios", url: "/owner/merchants" },
+          { title: "Visibilidad", url: "/owner/visibility" },
         ]
       : actor === "merchant"
         ? [
@@ -341,26 +339,28 @@ export function getNavData(
                   },
                 ]
               : []),
-            ...(isOwner
-              ? [
-                  {
-                    title: translations.sidebar.menuItems.subItems.organizationAdmin,
-                    url: "/organization/admin",
-                  },
-                ]
-              : []),
           ],
         },
-        ...(canSeeZelifyKeys
+        ...(isOwner
           ? [
               {
-                title: translations.sidebar.menuItems.zelifyKeys,
-                url: "/pages/zelifykeys",
-                icon: Icons.Key,
-                items: [],
+                title: "Administracion de Organizaciones",
+                icon: Icons.Organization,
+                items: [
+                  {
+                    title: "Directorio Global",
+                    url: "/owner/organizations",
+                  },
+                ],
               },
             ]
           : []),
+        {
+          title: translations.sidebar.menuItems.zelifyKeys,
+          url: "/pages/zelifykeys",
+          icon: Icons.Key,
+          items: [],
+        },
         // {
         //   title: translations.sidebar.menuItems.allProducts,
         //   url: "/pages/products",

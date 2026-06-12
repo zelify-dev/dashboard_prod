@@ -1,8 +1,8 @@
 /**
- * API de administración de organizaciones (solo OWNER).
- * GET /api/organizations, GET/PATCH /api/organizations/:id, scopes.
+ * API de administración global de organizaciones (solo OWNER).
  */
-import { fetchWithAuth, AuthError } from "@/lib/auth-api";
+import type { OrganizationBranding, UpdateOrganizationBrandingPayload } from "@/lib/auth-api";
+import { AuthError, fetchWithAuth, getOrganizationBranding, updateOrganizationBranding, uploadOrganizationLogo } from "@/lib/auth-api";
 
 export type OrganizationAdmin = {
   id: string;
@@ -14,6 +14,9 @@ export type OrganizationAdmin = {
   website?: string | null;
   industry?: string;
   fiscal_id?: string;
+  swift?: string | null;
+  default_daily_account_limit?: number | null;
+  defaultDailyAccountLimit?: number | null;
   zcoins?: string;
   url_log?: string | null;
   color_a?: string | null;
@@ -21,21 +24,48 @@ export type OrganizationAdmin = {
   created_at?: string;
   updated_at?: string;
   scopes?: string[];
-  organization_type?: string;
+  organization_type?: string | null;
+  onboarding_verified?: boolean;
+  onboarding_completed?: boolean;
+  kyb_verified?: boolean;
 };
 
 export type ListOrganizationsResponse = {
-  organizations: OrganizationAdmin[];
+  organizations?: OrganizationAdmin[];
+  items?: OrganizationAdmin[];
 };
 
 export type CreateOrganizationBody = {
   name: string;
   status?: string;
+  organization_type?: string;
+  cliente?: {
+    official_name: string;
+    currency?: string;
+    country_code?: string;
+    fiscal_id?: string;
+    institution_code?: string;
+    swift_code?: string;
+    local_address?: string;
+    logo_url?: string;
+    primary_color?: string;
+    secondary_color?: string;
+  };
 };
 
 export type UpdateOrganizationBody = {
   name?: string;
   status?: string;
+  organization_type?: string;
+  country?: string;
+  currency?: string;
+  company_legal_name?: string;
+  website?: string | null;
+  industry?: string;
+  fiscal_id?: string;
+  swift?: string | null;
+  default_daily_account_limit?: number | null;
+  defaultDailyAccountLimit?: number | null;
 };
 
 export type ScopeItem = {
@@ -49,7 +79,42 @@ export type ListScopesResponse = {
   scopes: ScopeItem[];
 };
 
-/** GET /api/organizations — listado de todas las organizaciones (solo OWNER). */
+export type OrganizationConfig = {
+  auth?: {
+    app_registration_enabled?: boolean;
+    otp_ttl_minutes?: number;
+  };
+  identity?: {
+    allowed_document_types?: {
+      national_id?: boolean;
+      driver_license?: boolean;
+      passport?: boolean;
+    };
+  };
+  aml?: {
+    screening_enabled?: boolean;
+  };
+  [key: string]: unknown;
+};
+export type OrganizationIdentityConfig = Record<string, unknown>;
+export type UpdateOrganizationConfigPayload = Partial<OrganizationConfig>;
+
+function parseOrganizationPayload(data: unknown): OrganizationAdmin {
+  if (data && typeof data === "object" && "organization" in data) {
+    return (data as { organization: OrganizationAdmin }).organization;
+  }
+  return data as OrganizationAdmin;
+}
+
+function parseOrganizationsListPayload(data: unknown): OrganizationAdmin[] {
+  if (Array.isArray(data)) return data as OrganizationAdmin[];
+  const parsed = data as ListOrganizationsResponse;
+  if (Array.isArray(parsed.organizations)) return parsed.organizations;
+  if (Array.isArray(parsed.items)) return parsed.items;
+  return [];
+}
+
+/** GET /api/organizations — listado global de organizaciones. */
 export async function listOrganizations(): Promise<OrganizationAdmin[]> {
   const res = await fetchWithAuth("/api/organizations");
   const data = await res.json().catch(() => ({}));
@@ -60,8 +125,7 @@ export async function listOrganizations(): Promise<OrganizationAdmin[]> {
       data
     );
   }
-  const parsed = data as ListOrganizationsResponse;
-  return Array.isArray(parsed.organizations) ? parsed.organizations : [];
+  return parseOrganizationsListPayload(data);
 }
 
 /** GET /api/organizations/:id — detalle de una organización. */
@@ -75,10 +139,10 @@ export async function getOrganizationAdmin(id: string): Promise<OrganizationAdmi
       data
     );
   }
-  return data as OrganizationAdmin;
+  return parseOrganizationPayload(data);
 }
 
-/** POST /api/organizations — crear organización (solo OWNER). */
+/** POST /api/organizations — crear organización. */
 export async function createOrganization(body: CreateOrganizationBody): Promise<OrganizationAdmin> {
   const res = await fetchWithAuth("/api/organizations", {
     method: "POST",
@@ -93,10 +157,10 @@ export async function createOrganization(body: CreateOrganizationBody): Promise<
       data
     );
   }
-  return data as OrganizationAdmin;
+  return parseOrganizationPayload(data);
 }
 
-/** PATCH /api/organizations/:id — actualizar organización (name, status). */
+/** PATCH /api/organizations/:id — actualizar información general de la organización. */
 export async function updateOrganization(
   id: string,
   body: UpdateOrganizationBody
@@ -114,10 +178,26 @@ export async function updateOrganization(
       data
     );
   }
-  return data as OrganizationAdmin;
+  return parseOrganizationPayload(data);
 }
 
-/** GET /api/organizations/:id/scopes — listar scopes de la organización. */
+/** GET /api/organizations/:id/branding. */
+export async function getOrganizationAdminBranding(orgId: string): Promise<OrganizationBranding> {
+  return getOrganizationBranding(orgId);
+}
+
+/** PATCH /api/organizations/:id/branding. */
+export async function updateOrganizationAdminBranding(
+  orgId: string,
+  payload: UpdateOrganizationBrandingPayload
+): Promise<OrganizationBranding> {
+  return updateOrganizationBranding(orgId, payload);
+}
+
+/** POST /api/organizations/:id/branding/logo. */
+export const uploadOrganizationAdminLogo = uploadOrganizationLogo;
+
+/** GET /api/organizations/:id/scopes. */
 export async function listOrganizationScopes(orgId: string): Promise<ScopeItem[]> {
   const res = await fetchWithAuth(`/api/organizations/${encodeURIComponent(orgId)}/scopes`);
   const data = await res.json().catch(() => ({}));
@@ -132,7 +212,7 @@ export async function listOrganizationScopes(orgId: string): Promise<ScopeItem[]
   return Array.isArray(parsed.scopes) ? parsed.scopes : [];
 }
 
-/** POST /api/organizations/:id/scopes — agregar scopes (bulk). */
+/** POST /api/organizations/:id/scopes. */
 export async function addOrganizationScopes(
   orgId: string,
   scopes: string[]
@@ -153,7 +233,7 @@ export async function addOrganizationScopes(
   return data as { added: number };
 }
 
-/** DELETE /api/organizations/:id/scopes/:scope — eliminar un scope (scope URL-encoded). */
+/** DELETE /api/organizations/:id/scopes/:scope. */
 export async function removeOrganizationScope(
   orgId: string,
   scopeEncoded: string
@@ -171,6 +251,78 @@ export async function removeOrganizationScope(
     );
   }
   return data as { ok: boolean; removed?: number };
+}
+
+/** GET /api/organizations/:id/config. */
+export async function getOrganizationConfig(orgId: string): Promise<OrganizationConfig> {
+  const res = await fetchWithAuth(`/api/organizations/${encodeURIComponent(orgId)}/config`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al obtener la configuración",
+      res.status,
+      data
+    );
+  }
+  return data as OrganizationConfig;
+}
+
+/** PATCH /api/organizations/:id/config. */
+export async function updateOrganizationConfig(
+  orgId: string,
+  payload: UpdateOrganizationConfigPayload
+): Promise<OrganizationConfig> {
+  const res = await fetchWithAuth(`/api/organizations/${encodeURIComponent(orgId)}/config`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al actualizar la configuración",
+      res.status,
+      data
+    );
+  }
+  return data as OrganizationConfig;
+}
+
+/** GET /api/organizations/:id/config/identity. */
+export async function getOrganizationIdentityConfig(
+  orgId: string
+): Promise<OrganizationIdentityConfig> {
+  const res = await fetchWithAuth(`/api/organizations/${encodeURIComponent(orgId)}/config/identity`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al obtener la configuración de identidad",
+      res.status,
+      data
+    );
+  }
+  return data as OrganizationIdentityConfig;
+}
+
+/** PATCH /api/organizations/:id/config/identity. */
+export async function updateOrganizationIdentityConfig(
+  orgId: string,
+  payload: OrganizationIdentityConfig
+): Promise<OrganizationIdentityConfig> {
+  const res = await fetchWithAuth(`/api/organizations/${encodeURIComponent(orgId)}/config/identity`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al actualizar la configuración de identidad",
+      res.status,
+      data
+    );
+  }
+  return data as OrganizationIdentityConfig;
 }
 
 /** Codifica scope para DELETE (ej: auth.authentication.* → auth.authentication.%2A). */

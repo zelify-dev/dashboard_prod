@@ -151,6 +151,34 @@ export type AssignRolesBody = {
   role_codes: string[];
 };
 
+export type BatchUsersStatusBody = {
+  user_ids: string[];
+  status: Exclude<OrgUserStatus, "PENDING">;
+};
+
+export type BatchUsersRolesBody = {
+  user_ids: string[];
+  role_codes: string[];
+};
+
+export type BatchUsersResetPasswordBody = {
+  user_ids: string[];
+};
+
+export type BatchActionResult = {
+  user_id: string;
+  ok: boolean;
+  message?: string;
+  temporary_password?: string;
+};
+
+export type BatchActionResponse = {
+  processed: number;
+  succeeded: number;
+  failed: number;
+  results: BatchActionResult[];
+};
+
 /** Respuesta 200 de GET /api/organizations/{id}/dashboard/members (back devuelve "members"). */
 export type ListDashboardMembersResponse = {
   members: OrgUserListItem[];
@@ -378,4 +406,100 @@ export async function sendDashboardMemberResetPasswordEmail(
     );
   }
   return data as { ok: boolean; message?: string };
+}
+
+/** PATCH /api/organizations/{orgId}/users/batch/status */
+export async function batchUpdateOrgUsersStatus(
+  orgId: string,
+  body: BatchUsersStatusBody
+): Promise<BatchActionResponse> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/users/batch/status`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al actualizar usuarios en lote",
+      res.status,
+      data
+    );
+  }
+  return data as BatchActionResponse;
+}
+
+/** POST /api/organizations/{orgId}/users/batch/roles */
+export async function batchAssignOrgUserRoles(
+  orgId: string,
+  body: BatchUsersRolesBody
+): Promise<BatchActionResponse> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/users/batch/roles`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al asignar roles en lote",
+      res.status,
+      data
+    );
+  }
+  return data as BatchActionResponse;
+}
+
+/** DELETE /api/organizations/{orgId}/users/batch/roles */
+export async function batchRemoveOrgUserRoles(
+  orgId: string,
+  body: BatchUsersRolesBody
+): Promise<BatchActionResponse> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/users/batch/roles`,
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al remover roles en lote",
+      res.status,
+      data
+    );
+  }
+  return data as BatchActionResponse;
+}
+
+/** POST /api/organizations/{orgId}/users/batch/reset-password */
+export async function batchResetOrgUserPasswords(
+  orgId: string,
+  body: BatchUsersResetPasswordBody
+): Promise<BatchActionResponse> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/users/batch/reset-password`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al resetear contraseñas en lote",
+      res.status,
+      data
+    );
+  }
+  return data as BatchActionResponse;
 }
