@@ -663,9 +663,26 @@ export function WebhooksPageContent() {
                       <p className="text-xs uppercase tracking-wide text-dark-6 dark:text-dark-6">
                         {t.detailModal.secretLabel}
                       </p>
-                      <code className="mt-1 block break-all rounded bg-white px-3 py-2 text-xs text-dark dark:bg-dark-2 dark:text-white">
-                        {detailWebhook.secret || t.detailModal.notAvailable}
-                      </code>
+                      <div className="mt-1 flex items-center gap-2">
+                        <code className="block break-all rounded bg-white px-3 py-2 text-xs text-dark dark:bg-dark-2 dark:text-white">
+                          {detailWebhook.secret
+                            ? revealedSecrets.has(detailWebhook.id)
+                              ? detailWebhook.secret
+                              : "••••••••••••••••••••••••"
+                            : t.detailModal.notAvailable}
+                        </code>
+                        {detailWebhook.secret && (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSecret(detailWebhook.id)}
+                            className="inline-flex rounded-md border border-stroke p-2 text-dark-6 hover:text-primary dark:border-dark-3 dark:text-dark-6 dark:hover:text-primary"
+                            title={revealedSecrets.has(detailWebhook.id) ? t.detailModal.hide : t.detailModal.show}
+                            aria-label={revealedSecrets.has(detailWebhook.id) ? t.detailModal.hide : t.detailModal.show}
+                          >
+                            {revealedSecrets.has(detailWebhook.id) ? <EyeOff size={14} /> : <Eye size={14} />}
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-2">
                       <button
