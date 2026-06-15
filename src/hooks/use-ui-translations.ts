@@ -206,20 +206,47 @@ export type UiTranslations = {
       cancel: string;
       delete: string;
     };
-    /** Ayuda para webhook Usuario Creado (org. Damasco): POST + x-signature + cuerpo de ejemplo */
-    userCreatedHelp: {
-      buttonAria: string;
-      modalTitle: string;
-      modalIntro: string;
-      postLabel: string;
-      signatureHeaderLabel: string;
-      /** Dirección (URL) donde Zelify envía el POST */
-      destinationUrlLabel: string;
-      destinationUrlHint: string;
-      copyUrl: string;
-      exampleJsonTitle: string;
-      copyJson: string;
+    detailModal: {
+      title: string;
+      openAria: string;
       close: string;
+      overviewTab: string;
+      deliveriesTab: string;
+      loading: string;
+      secretNotice: string;
+      eventNameLabel: string;
+      eventIdLabel: string;
+      destinationUrlLabel: string;
+      copyUrl: string;
+      category: string;
+      secretLabel: string;
+      copySecret: string;
+      rotateSecret: string;
+      show: string;
+      hide: string;
+      method: string;
+      contentType: string;
+      created: string;
+      headers: string;
+      copyHeaders: string;
+      signature: string;
+      algorithm: string;
+      signatureHeader: string;
+      timestampHeader: string;
+      encoding: string;
+      signedPayloadFormat: string;
+      payloadExample: string;
+      copyJson: string;
+      notes: string;
+      noNotes: string;
+      noDeliveries: string;
+      deliveryStatus: string;
+      statusCode: string;
+      attempt: string;
+      responseTime: string;
+      requestId: string;
+      responseBody: string;
+      notAvailable: string;
     };
     /** IDs de evento del API (p. ej. auth.user.created) → etiqueta localizada */
     events: Record<string, string>;
@@ -680,19 +707,47 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         cancel: "Cancel",
         delete: "Confirm Disable",
       },
-      userCreatedHelp: {
-        buttonAria: "How to handle this webhook",
-        modalTitle: "User Created webhook — how to verify",
-        modalIntro:
-          "Zelify calls your endpoint with an HTTP POST. Authenticate the request using the x-signature header (payload signature). The JSON body follows this structure (example for Damasco):",
-        postLabel: "Method: POST",
-        signatureHeaderLabel: "Authentication header: x-signature",
-        destinationUrlLabel: "Destination URL (where Zelify sends the webhook)",
-        destinationUrlHint: "Configure this exact HTTPS address on your server to receive POST requests.",
-        copyUrl: "Copy URL",
-        exampleJsonTitle: "Example JSON body",
-        copyJson: "Copy JSON",
+      detailModal: {
+        title: "Webhook details",
+        openAria: "Open webhook details",
         close: "Close",
+        overviewTab: "Overview",
+        deliveriesTab: "Deliveries",
+        loading: "Loading data…",
+        secretNotice: "Save this secret on your side. After rotation, the previous secret stops working.",
+        eventNameLabel: "Event",
+        eventIdLabel: "Event ID",
+        destinationUrlLabel: "Destination URL",
+        copyUrl: "Copy URL",
+        category: "Category",
+        secretLabel: "Signing secret",
+        copySecret: "Copy secret",
+        rotateSecret: "Rotate secret",
+        show: "Show",
+        hide: "Hide",
+        method: "Method",
+        contentType: "Content-Type",
+        created: "Created",
+        headers: "Headers",
+        copyHeaders: "Copy headers",
+        signature: "Signature scheme",
+        algorithm: "Algorithm",
+        signatureHeader: "Signature header",
+        timestampHeader: "Timestamp header",
+        encoding: "Encoding",
+        signedPayloadFormat: "Signed payload format",
+        payloadExample: "Payload example",
+        copyJson: "Copy JSON",
+        notes: "Notes",
+        noNotes: "No additional notes for this webhook.",
+        noDeliveries: "No deliveries recorded yet.",
+        deliveryStatus: "Status",
+        statusCode: "Status code",
+        attempt: "Attempt",
+        responseTime: "Response time",
+        requestId: "Request ID",
+        responseBody: "Response body",
+        notAvailable: "Not available",
       },
       events: {
         'auth.user.created': "User Created",
@@ -1148,20 +1203,48 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         cancel: "Cancelar",
         delete: "Confirmar Deshabilitación",
       },
-      userCreatedHelp: {
-        buttonAria: "Cómo utilizar este webhook",
-        modalTitle: "Webhook Usuario Creado — cómo utilizarlo",
-        modalIntro:
-          "Zelify enviará un POST a tu URL. Debes validar la cabecera de autenticación x-signature (firma del cuerpo). El cuerpo JSON tendrá esta forma (ejemplo para la organización Damasco):",
-        postLabel: "Método: POST",
-        signatureHeaderLabel: "Cabecera de autenticación: x-signature",
-        destinationUrlLabel: "Dirección de envío (URL del webhook)",
-        destinationUrlHint:
-          "Zelify enviará el POST a esta dirección exacta. Debe coincidir con la URL que configuraste en el webhook.",
-        copyUrl: "Copiar URL",
-        exampleJsonTitle: "Ejemplo de cuerpo JSON",
-        copyJson: "Copiar JSON",
+      detailModal: {
+        title: "Detalle del webhook",
+        openAria: "Abrir detalle del webhook",
         close: "Cerrar",
+        overviewTab: "Resumen",
+        deliveriesTab: "Entregas",
+        loading: "Cargando datos…",
+        secretNotice:
+          "Guarda este secret de tu lado. Cuando lo rotas, el secret anterior deja de funcionar.",
+        eventNameLabel: "Evento",
+        eventIdLabel: "ID del evento",
+        destinationUrlLabel: "URL de destino",
+        copyUrl: "Copiar URL",
+        category: "Categoría",
+        secretLabel: "Secreto de firma",
+        copySecret: "Copiar secret",
+        rotateSecret: "Rotar secret",
+        show: "Mostrar",
+        hide: "Ocultar",
+        method: "Método",
+        contentType: "Content-Type",
+        created: "Creado",
+        headers: "Headers",
+        copyHeaders: "Copiar headers",
+        signature: "Esquema de firma",
+        algorithm: "Algoritmo",
+        signatureHeader: "Header de firma",
+        timestampHeader: "Header de timestamp",
+        encoding: "Encoding",
+        signedPayloadFormat: "Formato firmado",
+        payloadExample: "Ejemplo de payload",
+        copyJson: "Copiar JSON",
+        notes: "Notas",
+        noNotes: "No hay notas adicionales para este webhook.",
+        noDeliveries: "Todavía no hay entregas registradas.",
+        deliveryStatus: "Estado",
+        statusCode: "Status code",
+        attempt: "Intento",
+        responseTime: "Tiempo de respuesta",
+        requestId: "Request ID",
+        responseBody: "Response body",
+        notAvailable: "No disponible",
       },
       events: {
         'auth.user.created': "Usuario Creado",
