@@ -179,8 +179,26 @@ export function BusinessInfoContent() {
           <InfoIcon className="mt-0.5 shrink-0" />
           <div className="text-sm">
             <span className="font-semibold block mb-0.5">Informacion importante</span>
-            Sube un unico archivo de plan de negocio en formato PDF, DOC o DOCX. El archivo se registrara para tu organizacion y no se requiere volver a subirlo salvo indicacion del equipo.
+            Sube el archivo de Business Plan para Mexico en formato PDF, DOC o
+            DOCX. Debe incluir la descripcion del negocio, productos o
+            servicios, mercado objetivo, modelo de ingresos, equipo directivo,
+            proyecciones financieras, forecast, flujo de caja, P&amp;L
+            proyectado y certificado bancario actualizado. El archivo se
+            registrara para tu organizacion y no se requiere volver a subirlo
+            salvo indicacion del equipo.
           </div>
+        </div>
+
+        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
+          <h4 className="mb-2 text-sm font-semibold text-black dark:text-white">
+            Sección 4 - Business plan y financiero
+          </h4>
+          <ul className="list-inside list-disc space-y-1 pl-1 text-xs text-body-color dark:text-body-color-dark">
+            <li>Business Plan cargado en la plataforma Zelify</li>
+            <li>Descripción del negocio, productos o servicios, mercado objetivo, modelo de ingresos y equipo directivo</li>
+            <li>Proyecciones financieras, forecast, flujo de caja y P&amp;L proyectado</li>
+            <li>Certificado bancario actualizado</li>
+          </ul>
         </div>
 
         {loadingStatus ? (

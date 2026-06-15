@@ -195,10 +195,12 @@ export function KybPageContent() {
               <span className="font-semibold block mb-0.5">
                 Información importante
               </span>
-              Si no envió la documentación por carga en Docsend, proceda a
-              cargar por aquí. Por favor, comprima todos los documentos
-              requeridos en un archivo ZIP y súbalo a continuación. Asegúrese de
-              que todos los documentos estén legibles y sean archivos válidos.
+              Esta documentación debe cargarse en{" "}
+              <span className="font-semibold">https://dashboard.zelify.com</span>. Se deben
+              entregar credenciales de acceso cuando correspondan. Si no envió la
+              documentación por Docsend, comprima todos los archivos requeridos en
+              un ZIP y súbalo aquí. Verifique que los documentos sean legibles,
+              vigentes y válidos para el proceso KYB de México.
             </div>
           </div>
 
@@ -216,39 +218,45 @@ export function KybPageContent() {
           )}
 
           <h3 className="mb-4 text-base font-medium text-black dark:text-white">
-            Documentación requerida
+            Documentación requerida para México
           </h3>
 
           <div className="mb-8 grid gap-4">
-            {/* Datos básicos */}
+            {/* Datos básicos de la empresa */}
             <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
               <div className="mb-2 flex items-center gap-2">
                 <PageIcon className="text-blue-600" />
                 <h4 className="font-semibold text-black dark:text-white text-sm">
-                  Datos básicos
+                  Sección 1.1 - Datos básicos de la empresa
                 </h4>
               </div>
               <ul className="list-inside list-disc text-xs text-body-color dark:text-body-color-dark pl-1 space-y-1">
-                <li>Nombre legal de la empresa</li>
-                <li>Identificación fiscal (EIN u otro)</li>
-                <li>Tipo de entidad</li>
-                <li>Dirección física</li>
-                <li>Teléfono, correo y sitio web</li>
+                <li>Denominación social</li>
+                <li>Identificación fiscal (RFC - Registro Federal de Contribuyentes)</li>
+                <li>Tipo de entidad (S.A. de C.V., SAPI de C.V., LLC, SRL u otra)</li>
+                <li>Dirección fiscal de la empresa</li>
+                <li>Número de teléfono corporativo</li>
+                <li>Correo electrónico corporativo</li>
+                <li>Sitio web oficial</li>
               </ul>
             </div>
 
-            {/* Representante autorizado o UBO */}
+            {/* Representante legal */}
             <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
               <div className="mb-2 flex items-center gap-2">
                 <UserIcon className="text-green-500" />
                 <h4 className="font-semibold text-black dark:text-white text-sm">
-                  Representante autorizado o UBO
+                  Sección 1.2 - Representante legal
                 </h4>
               </div>
               <ul className="list-inside list-disc text-xs text-body-color dark:text-body-color-dark pl-1 space-y-1">
-                <li>Datos personales completos</li>
-                <li>Documento de identidad oficial</li>
-                <li>Comprobante de dirección</li>
+                <li>Nombre completo del representante</li>
+                <li>Fecha de nacimiento</li>
+                <li>Nacionalidad y país de residencia</li>
+                <li>Cargo que ocupa en la empresa</li>
+                <li>Documento de identidad oficial (INE o pasaporte si es extranjero)</li>
+                <li>Comprobante de domicilio con máximo 3 meses de antigüedad</li>
+                <li>Copia certificada del poder notarial o escritura pública</li>
               </ul>
             </div>
 
@@ -257,13 +265,16 @@ export function KybPageContent() {
               <div className="mb-2 flex items-center gap-2">
                 <CertificateIcon className="text-purple-500" />
                 <h4 className="font-semibold text-black dark:text-white text-sm">
-                  Propietarios y directivos
+                  Sección 1.3 - Propietarios y directivos
                 </h4>
               </div>
               <ul className="list-inside list-disc text-xs text-body-color dark:text-body-color-dark pl-1 space-y-1">
-                <li>Información de quienes posean ≥25% de participación</li>
-                <li>Cargos de control (CEO, CFO, presidente)</li>
-                <li>Documentación de identidad y participación</li>
+                <li>Información de socios o accionistas con 25% o más de participación</li>
+                <li>Identificación de cargos de control: CEO</li>
+                <li>Identificación de cargos de control: CFO</li>
+                <li>Identificación de cargos de control: Presidente o Director</li>
+                <li>Documentación de identidad de cada propietario o directivo con 25% o más</li>
+                <li>Libro de Registro de Acciones o Libro de Variaciones de Capital</li>
               </ul>
             </div>
 
@@ -272,14 +283,14 @@ export function KybPageContent() {
               <div className="mb-2 flex items-center gap-2">
                 <BuildingIcon className="text-orange-500" />
                 <h4 className="font-semibold text-black dark:text-white text-sm">
-                  Documentos legales
+                  Sección 1.4 - Documentos legales
                 </h4>
               </div>
               <ul className="list-inside list-disc text-xs text-body-color dark:text-body-color-dark pl-1 space-y-1">
-                <li>Certificado de constitución</li>
-                <li>Licencia comercial (si aplica)</li>
-                <li>Nombre comercial registrado (DBA)</li>
-                <li>Permisos de operación según el rubro</li>
+                <li>Acta constitutiva y últimas modificaciones societarias</li>
+                <li>Constancia de Situación Fiscal (CSF)</li>
+                <li>Licencias, permisos o autorizaciones regulatorias aplicables al giro</li>
+                <li>Registro CNBV, CONDUSEF, aviso ante SAT, licencia municipal o permisos estatales, si aplica</li>
               </ul>
             </div>
           </div>

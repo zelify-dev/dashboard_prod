@@ -137,8 +137,21 @@ export function AmlPageContent() {
                 Información importante
               </span>
               Cargue la documentación relacionada con medidas Anti-Lavado de
-              Dinero (AML) de su empresa. Asegúrese de que todos los documentos
-              estén legibles y sean archivos válidos.
+              Dinero (AML) y la política de tratamiento de datos personales de
+              su empresa para el proceso de México. Asegúrese de que todos los
+              documentos estén legibles, vigentes y sean archivos válidos.
+            </div>
+          </div>
+
+          <div className="mb-6 grid gap-4">
+            <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
+              <h4 className="mb-2 text-sm font-semibold text-black dark:text-white">
+                Sección 2 - Documentación PLD/AML y tratamiento de datos personales
+              </h4>
+              <ul className="list-inside list-disc space-y-1 pl-1 text-xs text-body-color dark:text-body-color-dark">
+                <li>Política de PLD/AML de la empresa</li>
+                <li>Política de tratamiento de datos personales</li>
+              </ul>
             </div>
           </div>
 

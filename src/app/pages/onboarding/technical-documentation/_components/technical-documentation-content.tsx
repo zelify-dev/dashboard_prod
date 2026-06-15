@@ -380,9 +380,11 @@ export function TechnicalDocumentationPageContent() {
             <span className="font-semibold block mb-0.5">
               Información importante
             </span>
-            Cargue la documentación técnica requerida para la integración.
-            Asegúrese de que todos los documentos estén completos y
-            actualizados.
+            Cargue la documentación técnica requerida para la integración en
+            México. Debe incluir los ambientes de desarrollo registrados en el
+            panel Zelify, las API Keys de desarrollo configuradas y los
+            documentos técnicos solicitados. Asegúrese de que todos los
+            archivos estén completos y actualizados.
             {percents.technical != null && (
               <span className="mt-1 block tabular-nums">
                 Progreso del módulo: {percents.technical}%
@@ -394,6 +396,16 @@ export function TechnicalDocumentationPageContent() {
         <h3 className="mb-4 text-base font-medium text-black dark:text-white">
           Ambientes de desarrollo
         </h3>
+
+        <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
+          <h4 className="mb-2 text-sm font-semibold text-black dark:text-white">
+            Sección 3.1 - Ambientes de desarrollo
+          </h4>
+          <ul className="list-inside list-disc space-y-1 pl-1 text-xs text-body-color dark:text-body-color-dark">
+            <li>URLs de desarrollo registradas en el panel Zelify</li>
+            <li>API Keys de desarrollo configuradas</li>
+          </ul>
+        </div>
 
         {!statusLoading && tf.developmentEnvironmentsLocked && (
           <p className="mb-3 text-xs font-medium text-emerald-700 dark:text-emerald-400">
@@ -456,6 +468,18 @@ export function TechnicalDocumentationPageContent() {
         <h3 className="mb-4 text-base font-medium text-black dark:text-white">
           Documentos requeridos
         </h3>
+
+        <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
+          <h4 className="mb-2 text-sm font-semibold text-black dark:text-white">
+            Sección 3.2 - Documentos técnicos requeridos
+          </h4>
+          <ul className="list-inside list-disc space-y-1 pl-1 text-xs text-body-color dark:text-body-color-dark">
+            <li>Diagrama de flujo de datos</li>
+            <li>Política de seguridad</li>
+            <li>Certificaciones aplicables (PCI DSS, ISO 27001, SOC 2, entre otras)</li>
+            <li>Documentación de procesos</li>
+          </ul>
+        </div>
 
         {/* Diagrama de flujo */}
         <FileUploadArea
