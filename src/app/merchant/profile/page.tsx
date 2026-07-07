@@ -224,7 +224,7 @@ export default function MerchantProfilePage() {
                       alt={merchant.name} 
                       className={`h-full w-full object-cover transition duration-300 ${uploadingLogo ? "opacity-30" : "group-hover:opacity-75"}`}
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/images/logo/logo-icon.svg";
+                        (e.target as HTMLImageElement).src = "/images/logo/zelify-icon.svg";
                       }}
                     />
                   ) : (

@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description:
     "Zelify dashboard.",
   icons: {
-    icon: "/images/logo/logo-icon.svg",
+    icon: "/images/logo/zelify-icon.svg",
   },
 };
 

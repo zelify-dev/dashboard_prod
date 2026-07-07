@@ -195,6 +195,9 @@ const IDENTITY_BIOMETRY_OPTIONS: SelectOption[] = [
   { value: "selfie_photo", label: "selfie_photo - Selfie con foto" },
   { value: "selfie_video", label: "selfie_video - Selfie con video" },
 ];
+const ADMIN_FORM_CONTROL_CLASS =
+  "h-7 w-full rounded-xl border border-stroke bg-white px-3.5 text-sm text-dark outline-none transition placeholder:text-dark-6 focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:placeholder:text-dark-6";
+const ADMIN_FORM_LABEL_CLASS = "block text-[12px] font-medium text-dark dark:text-white";
 
 function buildDefaultWorkflowFormState(): IdentityWorkflowFormState {
   return {
@@ -1549,89 +1552,6 @@ export function OrganizationAdministrationDetailClient() {
             </div>
           </ShowcaseSection>
 
-          <ShowcaseSection title="Configuracion General" className="!p-6 xl:col-span-2">
-            <p className="mb-4 text-sm text-dark-6 dark:text-dark-6">
-              Este bloque resume la configuracion actual de la organizacion. Para realizar cambios, usa las pestañas dedicadas de cada modulo.
-            </p>
-            {configLoading ? (
-              <p className="text-sm text-dark-6 dark:text-dark-6">Cargando configuracion...</p>
-            ) : configError ? (
-              <ErrorAlert message={configError} />
-            ) : (
-              <div className="space-y-6">
-                <div className="grid gap-6 xl:grid-cols-3">
-                  <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                    <div className="mb-4 text-sm font-medium text-dark dark:text-white">Autenticacion</div>
-                    <div className="space-y-3 text-sm">
-                      <div className="rounded-lg border border-stroke px-4 py-3 dark:border-dark-3">
-                        <div className="mb-1 text-dark-6 dark:text-dark-6">
-                          Registro en app
-                        </div>
-                        <div className="font-medium text-dark dark:text-white">
-                          {configForm.auth.app_registration_enabled ? "Habilitado" : "Deshabilitado"}
-                        </div>
-                      </div>
-                      <div className="rounded-lg border border-stroke px-4 py-3 dark:border-dark-3">
-                        <div className="mb-1 text-dark-6 dark:text-dark-6">
-                          OTP TTL en minutos
-                        </div>
-                        <div className="font-medium text-dark dark:text-white">
-                          {configForm.auth.otp_ttl_minutes || "No definido"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                    <div className="mb-4 text-sm font-medium text-dark dark:text-white">Identidad</div>
-                    <div className="space-y-3 text-sm">
-                      <div className="rounded-lg border border-stroke px-4 py-3 dark:border-dark-3">
-                        <div className="mb-1 text-dark-6 dark:text-dark-6">Estado de verificacion</div>
-                        <div className="font-medium text-dark dark:text-white">
-                          {activeIdentityWorkflowLoading
-                            ? "Cargando..."
-                            : activeIdentityWorkflow
-                              ? activeIdentityWorkflow.name
-                              : "No configurado"}
-                        </div>
-                      </div>
-                      <div className="rounded-lg border border-stroke px-4 py-3 dark:border-dark-3">
-                        <div className="mb-1 text-dark-6 dark:text-dark-6">Configuracion activa</div>
-                        <div className="font-medium text-dark dark:text-white">
-                          {activeIdentityWorkflowLoading
-                            ? "Cargando..."
-                            : workflowStatusSummary(activeIdentityWorkflow)}
-                        </div>
-                      </div>
-                      <p className="text-xs text-dark-6 dark:text-dark-6">
-                        Si necesitas definir o cambiar el flujo de verificacion, usa la pestaña
-                        Workflows de Identidad.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                    <div className="mb-4 text-sm font-medium text-dark dark:text-white">AML</div>
-                    <div className="space-y-4">
-                      <div className="rounded-lg border border-stroke px-4 py-3 dark:border-dark-3">
-                        <div className="mb-1 text-dark-6 dark:text-dark-6">
-                          Screening
-                        </div>
-                        <div className="font-medium text-dark dark:text-white">
-                          {configForm.aml.screening_enabled ? "Habilitado" : "Deshabilitado"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700 dark:border-sky-900/60 dark:bg-sky-900/20 dark:text-sky-300">
-                  La edicion operativa de esta organizacion se hace desde sus pestañas
-                  especializadas, especialmente Workflows de Identidad para verificacion.
-                </div>
-              </div>
-            )}
-          </ShowcaseSection>
         </div>
       ) : null}
 
@@ -3061,7 +2981,7 @@ function FormField({
 }) {
   return (
     <label className="space-y-2">
-      <span className="block text-sm font-medium text-dark dark:text-white">
+      <span className={ADMIN_FORM_LABEL_CLASS}>
         {label}
         {required ? " *" : ""}
       </span>
@@ -3070,7 +2990,7 @@ function FormField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         required={required}
-        className="w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+        className={ADMIN_FORM_CONTROL_CLASS}
       />
     </label>
   );
@@ -3091,7 +3011,7 @@ function ColorField({
     <label className="space-y-2">
       <span className="block text-sm font-medium text-dark dark:text-white">{label}</span>
       <div className="rounded-[18px] border border-stroke bg-white p-4 shadow-sm dark:border-dark-3 dark:bg-dark-2">
-        <div className="grid gap-4 lg:grid-cols-[160px_1fr] lg:items-stretch">
+        <div className="grid gap-4 lg:grid-cols-[160px_220px_1fr] lg:items-start">
           <div className="mx-auto w-full max-w-[160px]">
             <HexColorPicker
               color={normalized}
@@ -3099,14 +3019,19 @@ function ColorField({
               style={{ width: "100%", height: 160 }}
             />
           </div>
-          <div className="flex min-h-[160px] flex-col justify-between">
+          <div className="rounded-2xl border border-stroke bg-gray-1/70 p-4 dark:border-dark-3 dark:bg-dark-3/40">
             <div
-              className="h-18 rounded-2xl border border-stroke dark:border-dark-3"
+              className="h-28 w-full rounded-2xl border border-stroke shadow-sm dark:border-dark-3"
               style={{
                 background: `linear-gradient(135deg, ${normalized} 0%, ${normalized}CC 100%)`,
               }}
             />
-            <div className="mt-3 flex items-center gap-3 rounded-xl border border-stroke px-3 py-3 dark:border-dark-3">
+            <div className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-dark-6 dark:text-dark-6">
+              Vista previa
+            </div>
+          </div>
+          <div className="flex min-h-[160px] flex-col justify-between">
+            <div className="flex items-center gap-3 rounded-xl border border-stroke px-3 py-3 dark:border-dark-3">
               <div
                 className="h-10 w-10 rounded-xl border border-stroke dark:border-dark-3"
                 style={{ backgroundColor: normalized }}
@@ -3175,21 +3100,34 @@ function FormSelect({
 }) {
   return (
     <label className="space-y-2">
-      <span className="block text-sm font-medium text-dark dark:text-white">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-      >
-        {options.map((option) => (
-          <option
-            key={typeof option === "string" ? option : option.value}
-            value={typeof option === "string" ? option : option.value}
-          >
-            {typeof option === "string" ? option : option.label}
-          </option>
-        ))}
-      </select>
+      <span className={ADMIN_FORM_LABEL_CLASS}>{label}</span>
+      <div className="relative">
+        <select
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={`${ADMIN_FORM_CONTROL_CLASS} appearance-none pr-12`}
+        >
+          {options.map((option) => (
+            <option
+              key={typeof option === "string" ? option : option.value}
+              value={typeof option === "string" ? option : option.value}
+            >
+              {typeof option === "string" ? option : option.label}
+            </option>
+          ))}
+        </select>
+        <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-dark-6 dark:text-dark-6">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path
+              d="M5 7.5L10 12.5L15 7.5"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </div>
     </label>
   );
 }
