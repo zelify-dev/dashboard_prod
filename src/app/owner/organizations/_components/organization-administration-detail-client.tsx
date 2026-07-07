@@ -1605,9 +1605,9 @@ export function OrganizationAdministrationDetailClient() {
               />
               <LogoUploadCard
                 label="Logo para fondos claros"
-                description="Acepta PNG. La vista previa usa un fondo gris oscuro de referencia para que el logo se distinga con claridad."
+                description="Acepta PNG. La vista previa usa un fondo gris neutro de referencia para que el logo se distinga con claridad."
                 src={withCacheBust(branding?.url_log_light, brandingAssetVersion)}
-                previewClassName="border-slate-500/60 bg-slate-700"
+                previewClassName="border-slate-300 bg-slate-400/70"
                 loading={brandingUploading === "logoLight"}
                 onChange={(file) => void uploadBrandingAsset("logoLight", file)}
               />

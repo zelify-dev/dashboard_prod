@@ -205,10 +205,10 @@ export default function OrganizationBrandingPage() {
               <div className="rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
                 <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo claro</p>
                 <p className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">
-                  Acepta PNG. La vista previa usa un fondo gris oscuro de referencia para comprobar que el archivo se vea con claridad.
+                  Acepta PNG. La vista previa usa un fondo gris neutro de referencia para comprobar que el archivo se vea con claridad.
                 </p>
                 {branding?.url_log_light ? (
-                  <div className="mb-3 inline-flex rounded-xl border border-slate-500/60 bg-slate-700 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 inline-flex rounded-xl border border-slate-300 bg-slate-400/70 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                     <img
                       src={withCacheBust(branding.url_log_light, assetVersion)}
                       alt="Logo light"
@@ -216,7 +216,7 @@ export default function OrganizationBrandingPage() {
                     />
                   </div>
                 ) : (
-                  <div className="mb-3 rounded-xl border border-slate-500/60 bg-slate-700 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 rounded-xl border border-slate-300 bg-slate-400/70 px-4 py-5 text-sm text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                     Sin logo
                   </div>
                 )}
