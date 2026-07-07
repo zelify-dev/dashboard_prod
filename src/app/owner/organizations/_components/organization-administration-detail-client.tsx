@@ -3,7 +3,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { HexColorPicker } from "react-colorful";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
@@ -459,9 +458,6 @@ export function OrganizationAdministrationDetailClient() {
   const [brandingUploading, setBrandingUploading] = useState<BrandingLogoType | null>(null);
   const [brandingError, setBrandingError] = useState("");
   const [brandingAssetVersion, setBrandingAssetVersion] = useState(() => Date.now());
-  const [expandedBrandingColor, setExpandedBrandingColor] = useState<"primary" | "secondary" | null>(
-    "primary"
-  );
 
   const [configForm, setConfigForm] = useState<OrganizationConfigFormState>({
     auth: {
@@ -1626,58 +1622,25 @@ export function OrganizationAdministrationDetailClient() {
               <p className="text-sm text-dark-6 dark:text-dark-6">Cargando branding...</p>
             ) : (
               <form onSubmit={submitBranding} className="space-y-5">
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stroke bg-gray-1/60 px-4 py-4 dark:border-dark-3 dark:bg-dark-2/60">
-                  <div className="space-y-1">
-                    <div className="text-lg font-semibold text-dark dark:text-white">
-                      Colores institucionales
-                    </div>
-                    <p className="text-sm text-dark-6 dark:text-dark-6">
-                      Haz clic en un color para desplegar su selector o escribe el valor HEX manualmente.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <ColorChip
-                      label="Primario"
-                      value={brandingForm.color_a}
-                      active={expandedBrandingColor === "primary"}
-                      onClick={() =>
-                        setExpandedBrandingColor((current) =>
-                          current === "primary" ? null : "primary"
-                        )
-                      }
-                    />
-                    <ColorChip
-                      label="Secundario"
-                      value={brandingForm.color_b}
-                      active={expandedBrandingColor === "secondary"}
-                      onClick={() =>
-                        setExpandedBrandingColor((current) =>
-                          current === "secondary" ? null : "secondary"
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-
-                {expandedBrandingColor === "primary" ? (
-                  <ColorField
+                <p className="text-sm text-dark-6 dark:text-dark-6">
+                  Selecciona un color desde la muestra o escribe el valor HEX manualmente.
+                </p>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <SimpleBrandingColorField
                     label="Color primario"
                     value={brandingForm.color_a}
                     onChange={(value) =>
                       setBrandingForm((current) => ({ ...current, color_a: value }))
                     }
                   />
-                ) : null}
-
-                {expandedBrandingColor === "secondary" ? (
-                  <ColorField
+                  <SimpleBrandingColorField
                     label="Color secundario"
                     value={brandingForm.color_b}
                     onChange={(value) =>
                       setBrandingForm((current) => ({ ...current, color_b: value }))
                     }
                   />
-                ) : null}
+                </div>
 
                 {brandingError || brandingQueryError ? <ErrorAlert message={brandingError || brandingQueryError} /> : null}
                 <div className="flex justify-end">
@@ -2997,7 +2960,7 @@ function FormField({
   );
 }
 
-function ColorField({
+function SimpleBrandingColorField({
   label,
   value,
   onChange,
@@ -3010,81 +2973,26 @@ function ColorField({
 
   return (
     <label className="space-y-2">
-      <span className="block text-sm font-medium text-dark dark:text-white">{label}</span>
-      <div className="rounded-[18px] border border-stroke bg-white p-4 shadow-sm dark:border-dark-3 dark:bg-dark-2">
-        <div className="grid gap-4 lg:grid-cols-[160px_220px_1fr] lg:items-start">
-          <div className="mx-auto w-full max-w-[160px]">
-            <HexColorPicker
-              color={normalized}
-              onChange={(next) => onChange(next.toUpperCase())}
-              style={{ width: "100%", height: 160 }}
-            />
-          </div>
-          <div className="rounded-2xl border border-stroke bg-gray-1/70 p-4 dark:border-dark-3 dark:bg-dark-3/40">
-            <div
-              className="h-28 w-full rounded-2xl border border-stroke shadow-sm dark:border-dark-3"
-              style={{
-                background: `linear-gradient(135deg, ${normalized} 0%, ${normalized}CC 100%)`,
-              }}
-            />
-            <div className="mt-3 text-xs font-medium uppercase tracking-[0.18em] text-dark-6 dark:text-dark-6">
-              Vista previa
-            </div>
-          </div>
-          <div className="flex min-h-[160px] flex-col justify-between">
-            <div className="flex items-center gap-3 rounded-xl border border-stroke px-3 py-3 dark:border-dark-3">
-              <div
-                className="h-10 w-10 rounded-xl border border-stroke dark:border-dark-3"
-                style={{ backgroundColor: normalized }}
-              />
-              <input
-                type="text"
-                value={value}
-                onChange={(event) => onChange(event.target.value.toUpperCase())}
-                placeholder="#004492"
-                className="w-full bg-transparent text-sm font-medium text-dark outline-none dark:text-white"
-              />
-            </div>
-            <p className="mt-3 text-xs text-dark-6 dark:text-dark-6">
-              Selecciona el color o escribe el HEX.
-            </p>
-          </div>
-        </div>
+      <span className={ADMIN_FORM_LABEL_CLASS}>{label}</span>
+      <div className="flex items-center gap-3">
+        <input
+          type="color"
+          value={normalized}
+          onChange={(event) => onChange(event.target.value.toUpperCase())}
+          className="h-12 w-16 cursor-pointer rounded-xl border border-stroke bg-white p-1 dark:border-dark-3 dark:bg-dark-2"
+        />
+        <input
+          type="text"
+          value={value}
+          onChange={(event) => onChange(event.target.value.toUpperCase())}
+          placeholder="#004492"
+          className={`${ADMIN_FORM_CONTROL_CLASS} flex-1 font-mono`}
+        />
       </div>
+      <p className="text-xs text-dark-6 dark:text-dark-6">
+        Selecciona el color o escribe el HEX.
+      </p>
     </label>
-  );
-}
-
-function ColorChip({
-  label,
-  value,
-  active = false,
-  onClick,
-}: {
-  label: string;
-  value: string;
-  active?: boolean;
-  onClick?: () => void;
-}) {
-  const normalized = HEX_REGEX.test(value) ? value : "#000000";
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex items-center gap-3 rounded-full border px-3 py-2 shadow-sm transition ${
-        active
-          ? "border-primary bg-primary/[0.08]"
-          : "border-stroke bg-white/80 hover:border-primary/40 dark:border-dark-3 dark:bg-dark-2/80"
-      }`}
-    >
-      <span
-        className="h-4 w-4 rounded-full border border-black/10"
-        style={{ backgroundColor: normalized }}
-      />
-      <span className="text-sm font-medium text-dark dark:text-white">{label}</span>
-      <span className="font-mono text-xs text-dark-6 dark:text-dark-6">{value}</span>
-    </button>
   );
 }
 
