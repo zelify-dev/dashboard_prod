@@ -456,6 +456,9 @@ export function OrganizationAdministrationDetailClient() {
   const [brandingUploading, setBrandingUploading] = useState<BrandingLogoType | null>(null);
   const [brandingError, setBrandingError] = useState("");
   const [brandingAssetVersion, setBrandingAssetVersion] = useState(() => Date.now());
+  const [expandedBrandingColor, setExpandedBrandingColor] = useState<"primary" | "secondary" | null>(
+    "primary"
+  );
 
   const [configForm, setConfigForm] = useState<OrganizationConfigFormState>({
     auth: {
@@ -1663,58 +1666,9 @@ export function OrganizationAdministrationDetailClient() {
       ) : null}
 
       {activeTab === "branding" ? (
-        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <ShowcaseSection title="Configuracion de Branding" className="!p-6">
-            {brandingLoading ? (
-              <p className="text-sm text-dark-6 dark:text-dark-6">Cargando branding...</p>
-            ) : (
-              <form onSubmit={submitBranding} className="space-y-6">
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stroke bg-gray-1/60 px-4 py-4 dark:border-dark-3 dark:bg-dark-2/60">
-                  <div className="space-y-1">
-                    <div className="text-lg font-semibold text-dark dark:text-white">
-                      Paleta institucional
-                    </div>
-                    <p className="text-sm text-dark-6 dark:text-dark-6">
-                      Define los colores base de la organizacion. Los logos se gestionan en el panel lateral.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <ColorChip label="Primario" value={brandingForm.color_a} />
-                    <ColorChip label="Secundario" value={brandingForm.color_b} />
-                  </div>
-                </div>
-                <div className="grid gap-5 md:grid-cols-2">
-                  <ColorField
-                    label="Color primario"
-                    value={brandingForm.color_a}
-                    onChange={(value) =>
-                      setBrandingForm((current) => ({ ...current, color_a: value }))
-                    }
-                  />
-                  <ColorField
-                    label="Color secundario"
-                    value={brandingForm.color_b}
-                    onChange={(value) =>
-                      setBrandingForm((current) => ({ ...current, color_b: value }))
-                    }
-                  />
-                </div>
-                {brandingError || brandingQueryError ? <ErrorAlert message={brandingError || brandingQueryError} /> : null}
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={brandingSaving}
-                    className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {brandingSaving ? "Guardando..." : "Guardar marca"}
-                  </button>
-                </div>
-              </form>
-            )}
-          </ShowcaseSection>
-
+        <div className="space-y-6">
           <ShowcaseSection title="Carga de Logos" className="!p-6">
-            <div className="space-y-4">
+            <div className="grid gap-4 xl:grid-cols-2">
               <LogoUploadCard
                 label="Logo principal"
                 description="Acepta PNG. La vista previa usa un fondo oscuro de referencia para distinguir mejor el archivo cargado."
@@ -1744,6 +1698,78 @@ export function OrganizationAdministrationDetailClient() {
                 onChange={(file) => void uploadBrandingAsset("icon", file)}
               />
             </div>
+          </ShowcaseSection>
+
+          <ShowcaseSection title="Color de Branding" className="!p-6">
+            {brandingLoading ? (
+              <p className="text-sm text-dark-6 dark:text-dark-6">Cargando branding...</p>
+            ) : (
+              <form onSubmit={submitBranding} className="space-y-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stroke bg-gray-1/60 px-4 py-4 dark:border-dark-3 dark:bg-dark-2/60">
+                  <div className="space-y-1">
+                    <div className="text-lg font-semibold text-dark dark:text-white">
+                      Colores institucionales
+                    </div>
+                    <p className="text-sm text-dark-6 dark:text-dark-6">
+                      Haz clic en un color para desplegar su selector o escribe el valor HEX manualmente.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <ColorChip
+                      label="Primario"
+                      value={brandingForm.color_a}
+                      active={expandedBrandingColor === "primary"}
+                      onClick={() =>
+                        setExpandedBrandingColor((current) =>
+                          current === "primary" ? null : "primary"
+                        )
+                      }
+                    />
+                    <ColorChip
+                      label="Secundario"
+                      value={brandingForm.color_b}
+                      active={expandedBrandingColor === "secondary"}
+                      onClick={() =>
+                        setExpandedBrandingColor((current) =>
+                          current === "secondary" ? null : "secondary"
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+
+                {expandedBrandingColor === "primary" ? (
+                  <ColorField
+                    label="Color primario"
+                    value={brandingForm.color_a}
+                    onChange={(value) =>
+                      setBrandingForm((current) => ({ ...current, color_a: value }))
+                    }
+                  />
+                ) : null}
+
+                {expandedBrandingColor === "secondary" ? (
+                  <ColorField
+                    label="Color secundario"
+                    value={brandingForm.color_b}
+                    onChange={(value) =>
+                      setBrandingForm((current) => ({ ...current, color_b: value }))
+                    }
+                  />
+                ) : null}
+
+                {brandingError || brandingQueryError ? <ErrorAlert message={brandingError || brandingQueryError} /> : null}
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={brandingSaving}
+                    className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {brandingSaving ? "Guardando..." : "Guardar marca"}
+                  </button>
+                </div>
+              </form>
+            )}
           </ShowcaseSection>
         </div>
       ) : null}
@@ -3103,18 +3129,36 @@ function ColorField({
   );
 }
 
-function ColorChip({ label, value }: { label: string; value: string }) {
+function ColorChip({
+  label,
+  value,
+  active = false,
+  onClick,
+}: {
+  label: string;
+  value: string;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   const normalized = HEX_REGEX.test(value) ? value : "#000000";
 
   return (
-    <div className="inline-flex items-center gap-3 rounded-full border border-stroke bg-white/80 px-3 py-2 shadow-sm dark:border-dark-3 dark:bg-dark-2/80">
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-3 rounded-full border px-3 py-2 shadow-sm transition ${
+        active
+          ? "border-primary bg-primary/[0.08]"
+          : "border-stroke bg-white/80 hover:border-primary/40 dark:border-dark-3 dark:bg-dark-2/80"
+      }`}
+    >
       <span
         className="h-4 w-4 rounded-full border border-black/10"
         style={{ backgroundColor: normalized }}
       />
       <span className="text-sm font-medium text-dark dark:text-white">{label}</span>
       <span className="font-mono text-xs text-dark-6 dark:text-dark-6">{value}</span>
-    </div>
+    </button>
   );
 }
 
