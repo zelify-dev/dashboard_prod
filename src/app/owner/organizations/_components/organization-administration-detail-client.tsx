@@ -267,6 +267,18 @@ function isValidAbsoluteUrl(value: string): boolean {
   }
 }
 
+function withCacheBust(url: string | null | undefined, version: number): string {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set("v", String(version));
+    return parsed.toString();
+  } catch {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}v=${version}`;
+  }
+}
+
 function buildConfigFormState(config: OrganizationConfig | null | undefined): OrganizationConfigFormState {
   const auth =
     config?.auth && typeof config.auth === "object" ? (config.auth as Record<string, unknown>) : {};
@@ -443,6 +455,7 @@ export function OrganizationAdministrationDetailClient() {
   const [brandingSaving, setBrandingSaving] = useState(false);
   const [brandingUploading, setBrandingUploading] = useState<BrandingLogoType | null>(null);
   const [brandingError, setBrandingError] = useState("");
+  const [brandingAssetVersion, setBrandingAssetVersion] = useState(() => Date.now());
 
   const [configForm, setConfigForm] = useState<OrganizationConfigFormState>({
     auth: {
@@ -954,6 +967,7 @@ export function OrganizationAdministrationDetailClient() {
     try {
       const updated = await uploadOrganizationAdminLogo(orgId, file, type);
       queryClient.setQueryData(queryKeys.ownerOrganizationBranding(orgId), updated);
+      setBrandingAssetVersion(Date.now());
       setBrandingForm((current) => ({
         ...current,
         color_a: updated.color_a ?? current.color_a,
@@ -1701,10 +1715,10 @@ export function OrganizationAdministrationDetailClient() {
 
           <ShowcaseSection title="Carga de Logos" className="!p-6">
             <div className="space-y-4">
-              <LogoUploadCard label="Logo principal" src={branding?.url_log} loading={brandingUploading === "logo"} onChange={(file) => void uploadBrandingAsset("logo", file)} />
-              <LogoUploadCard label="Logo para fondos oscuros" src={branding?.url_log_dark} loading={brandingUploading === "logoDark"} onChange={(file) => void uploadBrandingAsset("logoDark", file)} />
-              <LogoUploadCard label="Logo para fondos claros" src={branding?.url_log_light} loading={brandingUploading === "logoLight"} onChange={(file) => void uploadBrandingAsset("logoLight", file)} />
-              <LogoUploadCard label="Icono de la aplicacion" src={branding?.url_icon} loading={brandingUploading === "icon"} onChange={(file) => void uploadBrandingAsset("icon", file)} />
+              <LogoUploadCard label="Logo principal" src={withCacheBust(branding?.url_log, brandingAssetVersion)} loading={brandingUploading === "logo"} onChange={(file) => void uploadBrandingAsset("logo", file)} />
+              <LogoUploadCard label="Logo para fondos oscuros" src={withCacheBust(branding?.url_log_dark, brandingAssetVersion)} loading={brandingUploading === "logoDark"} onChange={(file) => void uploadBrandingAsset("logoDark", file)} />
+              <LogoUploadCard label="Logo para fondos claros" src={withCacheBust(branding?.url_log_light, brandingAssetVersion)} loading={brandingUploading === "logoLight"} onChange={(file) => void uploadBrandingAsset("logoLight", file)} />
+              <LogoUploadCard label="Icono de la aplicacion" src={withCacheBust(branding?.url_icon, brandingAssetVersion)} loading={brandingUploading === "icon"} onChange={(file) => void uploadBrandingAsset("icon", file)} />
             </div>
           </ShowcaseSection>
         </div>
@@ -3156,7 +3170,10 @@ function LogoUploadCard({
       <input
         type="file"
         accept=".png,image/png"
-        onChange={(event) => onChange(event.target.files?.[0] ?? null)}
+        onChange={(event) => {
+          onChange(event.target.files?.[0] ?? null);
+          event.currentTarget.value = "";
+        }}
         className="block w-full text-sm text-dark-6 file:mr-3 file:rounded file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
       />
       {loading ? <div className="mt-2 text-xs text-dark-6 dark:text-dark-6">Cargando...</div> : null}

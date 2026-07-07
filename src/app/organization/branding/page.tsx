@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
@@ -14,6 +15,18 @@ const HEX_REGEX = /^#[0-9A-Fa-f]{6}$/;
 
 function isValidHex(value: string): boolean {
   return HEX_REGEX.test(value.trim());
+}
+
+function withCacheBust(url: string | null | undefined, version: number): string {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url);
+    parsed.searchParams.set("v", String(version));
+    return parsed.toString();
+  } catch {
+    const separator = url.includes("?") ? "&" : "?";
+    return `${url}${separator}v=${version}`;
+  }
 }
 
 export default function OrganizationBrandingPage() {
@@ -36,7 +49,7 @@ export default function OrganizationBrandingPage() {
   const [logoError, setLogoError] = useState("");
   const [brandingSaving, setBrandingSaving] = useState(false);
   const [brandingError, setBrandingError] = useState("");
-  const [toast, setToast] = useState("");
+  const [assetVersion, setAssetVersion] = useState(() => Date.now());
 
   const fetchBranding = useCallback(async () => {
     if (!org?.id) return;
@@ -68,13 +81,6 @@ export default function OrganizationBrandingPage() {
     fetchBranding();
   }, [canSeeBranding, fetchBranding, router]);
 
-  useEffect(() => {
-    if (toast) {
-      const id = setTimeout(() => setToast(""), 3000);
-      return () => clearTimeout(id);
-    }
-  }, [toast]);
-
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>, type: BrandingLogoType) => {
     const file = e.target.files?.[0];
     if (!file || !org?.id) return;
@@ -88,7 +94,8 @@ export default function OrganizationBrandingPage() {
     try {
       const updated = await uploadOrganizationLogo(org.id, file, type);
       setBranding(updated);
-      setToast("Logo actualizado.");
+      setAssetVersion(Date.now());
+      toast.success("Logo actualizado.");
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.statusCode === 401) router.push("/login");
@@ -119,7 +126,7 @@ export default function OrganizationBrandingPage() {
     try {
       const updated = await updateOrganizationBranding(org.id, { color_a: a, color_b: b });
       setBranding(updated);
-      setToast("Branding actualizado.");
+      toast.success("Branding actualizado.");
     } catch (err) {
       if (err instanceof AuthError) {
         if (err.statusCode === 401) router.push("/login");
@@ -155,12 +162,6 @@ export default function OrganizationBrandingPage() {
         <p className="text-red-600 dark:text-red-400">{error}</p>
       ) : (
         <>
-          {toast && (
-            <div className="mb-4 rounded-lg bg-emerald-100 px-4 py-2 text-sm text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
-              {toast}
-            </div>
-          )}
-
           <ShowcaseSection title="Logos e ícono" className="!p-6">
             <p className="mb-6 text-sm text-dark-6 dark:text-dark-6">
               Solo archivos PNG. Cada subida reemplaza el archivo anterior.
@@ -171,7 +172,11 @@ export default function OrganizationBrandingPage() {
               <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo principal</p>
               <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
                 {branding?.url_log ? (
-                  <img src={branding.url_log} alt="Logo principal" className="mb-3 h-20 w-auto max-w-[200px] object-contain" />
+                  <img
+                    src={withCacheBust(branding.url_log, assetVersion)}
+                    alt="Logo principal"
+                    className="mb-3 h-20 w-auto max-w-[200px] object-contain"
+                  />
                 ) : (
                   <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
                 )}
@@ -193,7 +198,11 @@ export default function OrganizationBrandingPage() {
               <div className="rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
                 <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo claro</p>
                 {branding?.url_log_light ? (
-                  <img src={branding.url_log_light} alt="Logo light" className="mb-3 h-20 w-20 object-contain" />
+                  <img
+                    src={withCacheBust(branding.url_log_light, assetVersion)}
+                    alt="Logo light"
+                    className="mb-3 h-20 w-20 object-contain"
+                  />
                 ) : (
                   <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
                 )}
@@ -209,7 +218,11 @@ export default function OrganizationBrandingPage() {
                 <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo oscuro</p>
                 {branding?.url_log_dark ? (
                   <div className="mb-3 inline-flex rounded-lg border border-slate-400/25 bg-slate-700/55 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-                    <img src={branding.url_log_dark} alt="Logo dark" className="h-20 w-20 object-contain" />
+                    <img
+                      src={withCacheBust(branding.url_log_dark, assetVersion)}
+                      alt="Logo dark"
+                      className="h-20 w-20 object-contain"
+                    />
                   </div>
                 ) : (
                   <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
@@ -232,7 +245,11 @@ export default function OrganizationBrandingPage() {
               </p>
               <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
                 {branding?.url_icon ? (
-                  <img src={branding.url_icon} alt="Icono" className="mb-3 h-14 w-14 object-contain" />
+                  <img
+                    src={withCacheBust(branding.url_icon, assetVersion)}
+                    alt="Icono"
+                    className="mb-3 h-14 w-14 object-contain"
+                  />
                 ) : (
                   <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin ícono</p>
                 )}
