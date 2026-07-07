@@ -1605,8 +1605,9 @@ export function OrganizationAdministrationDetailClient() {
               />
               <LogoUploadCard
                 label="Logo para fondos claros"
-                description="Acepta PNG. La vista previa tambien usa un fondo oscuro de referencia para que el logo se distinga con claridad."
+                description="Acepta PNG. La vista previa usa un fondo gris oscuro de referencia para que el logo se distinga con claridad."
                 src={withCacheBust(branding?.url_log_light, brandingAssetVersion)}
+                previewClassName="border-slate-500/60 bg-slate-700"
                 loading={brandingUploading === "logoLight"}
                 onChange={(file) => void uploadBrandingAsset("logoLight", file)}
               />
@@ -3158,25 +3159,31 @@ function LogoUploadCard({
   label,
   description,
   src,
+  previewClassName,
   loading,
   onChange,
 }: {
   label: string;
   description: string;
   src?: string | null;
+  previewClassName?: string;
   loading: boolean;
   onChange: (file: File | null) => void;
 }) {
+  const previewSurfaceClassName =
+    previewClassName ??
+    "border-slate-700/60 bg-slate-900";
+
   return (
     <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
       <div className="mb-2 text-sm font-medium text-dark dark:text-white">{label}</div>
       <div className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">{description}</div>
       {src ? (
-        <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className={`mb-3 rounded-xl border px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${previewSurfaceClassName}`}>
           <img src={src} alt={label} className="h-16 w-auto max-w-[180px] object-contain" />
         </div>
       ) : (
-        <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className={`mb-3 rounded-xl border px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${previewSurfaceClassName}`}>
           No hay archivo cargado.
         </div>
       )}
