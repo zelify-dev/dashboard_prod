@@ -1715,10 +1715,34 @@ export function OrganizationAdministrationDetailClient() {
 
           <ShowcaseSection title="Carga de Logos" className="!p-6">
             <div className="space-y-4">
-              <LogoUploadCard label="Logo principal" src={withCacheBust(branding?.url_log, brandingAssetVersion)} loading={brandingUploading === "logo"} onChange={(file) => void uploadBrandingAsset("logo", file)} />
-              <LogoUploadCard label="Logo para fondos oscuros" src={withCacheBust(branding?.url_log_dark, brandingAssetVersion)} loading={brandingUploading === "logoDark"} onChange={(file) => void uploadBrandingAsset("logoDark", file)} />
-              <LogoUploadCard label="Logo para fondos claros" src={withCacheBust(branding?.url_log_light, brandingAssetVersion)} loading={brandingUploading === "logoLight"} onChange={(file) => void uploadBrandingAsset("logoLight", file)} />
-              <LogoUploadCard label="Icono de la aplicacion" src={withCacheBust(branding?.url_icon, brandingAssetVersion)} loading={brandingUploading === "icon"} onChange={(file) => void uploadBrandingAsset("icon", file)} />
+              <LogoUploadCard
+                label="Logo principal"
+                description="Acepta PNG. La vista previa usa un fondo oscuro de referencia para distinguir mejor el archivo cargado."
+                src={withCacheBust(branding?.url_log, brandingAssetVersion)}
+                loading={brandingUploading === "logo"}
+                onChange={(file) => void uploadBrandingAsset("logo", file)}
+              />
+              <LogoUploadCard
+                label="Logo para fondos oscuros"
+                description="Acepta PNG. Este bloque mantiene un fondo oscuro de referencia para validar contraste y legibilidad."
+                src={withCacheBust(branding?.url_log_dark, brandingAssetVersion)}
+                loading={brandingUploading === "logoDark"}
+                onChange={(file) => void uploadBrandingAsset("logoDark", file)}
+              />
+              <LogoUploadCard
+                label="Logo para fondos claros"
+                description="Acepta PNG. La vista previa tambien usa un fondo oscuro de referencia para que el logo se distinga con claridad."
+                src={withCacheBust(branding?.url_log_light, brandingAssetVersion)}
+                loading={brandingUploading === "logoLight"}
+                onChange={(file) => void uploadBrandingAsset("logoLight", file)}
+              />
+              <LogoUploadCard
+                label="Icono de la aplicacion"
+                description="Acepta PNG. El fondo de referencia ayuda a verificar el icono aunque tenga zonas claras o transparentes."
+                src={withCacheBust(branding?.url_icon, brandingAssetVersion)}
+                loading={brandingUploading === "icon"}
+                onChange={(file) => void uploadBrandingAsset("icon", file)}
+              />
             </div>
           </ShowcaseSection>
         </div>
@@ -3150,22 +3174,29 @@ function ToggleField({
 
 function LogoUploadCard({
   label,
+  description,
   src,
   loading,
   onChange,
 }: {
   label: string;
+  description: string;
   src?: string | null;
   loading: boolean;
   onChange: (file: File | null) => void;
 }) {
   return (
     <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-        <div className="mb-2 text-sm font-medium text-dark dark:text-white">{label}</div>
+      <div className="mb-2 text-sm font-medium text-dark dark:text-white">{label}</div>
+      <div className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">{description}</div>
       {src ? (
-        <img src={src} alt={label} className="mb-3 h-16 w-auto max-w-[180px] object-contain" />
+        <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <img src={src} alt={label} className="h-16 w-auto max-w-[180px] object-contain" />
+        </div>
       ) : (
-        <div className="mb-3 text-sm text-dark-6 dark:text-dark-6">No hay archivo cargado.</div>
+        <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          No hay archivo cargado.
+        </div>
       )}
       <input
         type="file"

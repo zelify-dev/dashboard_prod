@@ -164,21 +164,28 @@ export default function OrganizationBrandingPage() {
         <>
           <ShowcaseSection title="Logos e ícono" className="!p-6">
             <p className="mb-6 text-sm text-dark-6 dark:text-dark-6">
-              Solo archivos PNG. Cada subida reemplaza el archivo anterior.
+              Solo archivos PNG. Cada vista previa usa un fondo oscuro de referencia para que puedas distinguir mejor logos claros, blancos o con transparencia.
             </p>
 
             {/* Logo principal — solo arriba */}
             <div className="mb-8">
               <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo principal</p>
+              <p className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">
+                Acepta PNG. El fondo de vista previa es referencial y ayuda a validar la legibilidad del logo cargado.
+              </p>
               <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
                 {branding?.url_log ? (
-                  <img
-                    src={withCacheBust(branding.url_log, assetVersion)}
-                    alt="Logo principal"
-                    className="mb-3 h-20 w-auto max-w-[200px] object-contain"
-                  />
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <img
+                      src={withCacheBust(branding.url_log, assetVersion)}
+                      alt="Logo principal"
+                      className="h-20 w-auto max-w-[200px] object-contain"
+                    />
+                  </div>
                 ) : (
-                  <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    Sin logo
+                  </div>
                 )}
                 <input
                   type="file"
@@ -197,14 +204,21 @@ export default function OrganizationBrandingPage() {
             <div className="mb-8 grid gap-6 sm:grid-cols-2">
               <div className="rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
                 <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo claro</p>
+                <p className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">
+                  Acepta PNG. La vista previa usa un fondo oscuro de referencia para comprobar que el archivo se vea con claridad.
+                </p>
                 {branding?.url_log_light ? (
-                  <img
-                    src={withCacheBust(branding.url_log_light, assetVersion)}
-                    alt="Logo light"
-                    className="mb-3 h-20 w-20 object-contain"
-                  />
+                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <img
+                      src={withCacheBust(branding.url_log_light, assetVersion)}
+                      alt="Logo light"
+                      className="h-20 w-20 object-contain"
+                    />
+                  </div>
                 ) : (
-                  <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    Sin logo
+                  </div>
                 )}
                 <input
                   type="file"
@@ -216,8 +230,11 @@ export default function OrganizationBrandingPage() {
               </div>
               <div className="rounded-lg border border-stroke bg-slate-600/18 p-4 dark:border-dark-3 dark:bg-slate-500/12">
                 <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo oscuro</p>
+                <p className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">
+                  Acepta PNG. El fondo oscuro es referencial y sirve para verificar contraste si el logo es blanco o tiene transparencia.
+                </p>
                 {branding?.url_log_dark ? (
-                  <div className="mb-3 inline-flex rounded-lg border border-slate-400/25 bg-slate-700/55 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                     <img
                       src={withCacheBust(branding.url_log_dark, assetVersion)}
                       alt="Logo dark"
@@ -225,7 +242,9 @@ export default function OrganizationBrandingPage() {
                     />
                   </div>
                 ) : (
-                  <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin logo</p>
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    Sin logo
+                  </div>
                 )}
                 <input
                   type="file"
@@ -241,17 +260,21 @@ export default function OrganizationBrandingPage() {
             <div>
               <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Ícono</p>
               <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">
-                Se usa para las notificaciones push y representación de la app en dispositivos.
+                Se usa para las notificaciones push y representación de la app en dispositivos. Acepta PNG y el fondo de vista previa es referencial para distinguir mejor el icono.
               </p>
               <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
                 {branding?.url_icon ? (
-                  <img
-                    src={withCacheBust(branding.url_icon, assetVersion)}
-                    alt="Icono"
-                    className="mb-3 h-14 w-14 object-contain"
-                  />
+                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    <img
+                      src={withCacheBust(branding.url_icon, assetVersion)}
+                      alt="Icono"
+                      className="h-14 w-14 object-contain"
+                    />
+                  </div>
                 ) : (
-                  <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">Sin ícono</p>
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                    Sin ícono
+                  </div>
                 )}
                 <input
                   type="file"
