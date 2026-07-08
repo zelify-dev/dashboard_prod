@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { HexColorPicker } from "react-colorful";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -78,6 +79,7 @@ import {
 } from "@/lib/organization-identity-workflows-api";
 import { queryKeys } from "@/lib/query-keys";
 import { listRoles, type RoleCatalogItem } from "@/lib/roles-api";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import { Dropdown, DropdownContent, DropdownTrigger, DropdownClose } from "@/components/ui/dropdown";
 
 type DetailTabId =
@@ -2970,24 +2972,67 @@ function SimpleBrandingColorField({
   onChange: (value: string) => void;
 }) {
   const normalized = HEX_REGEX.test(value) ? value : "#000000";
+  const [open, setOpen] = useState(false);
+  const popoverRef = useClickOutside<HTMLDivElement>(() => setOpen(false));
 
   return (
     <label className="space-y-2">
       <span className={ADMIN_FORM_LABEL_CLASS}>{label}</span>
-      <div className="flex items-center gap-3">
-        <input
-          type="color"
-          value={normalized}
-          onChange={(event) => onChange(event.target.value.toUpperCase())}
-          className="h-12 w-16 cursor-pointer rounded-xl border border-stroke bg-white p-1 dark:border-dark-3 dark:bg-dark-2"
-        />
-        <input
-          type="text"
-          value={value}
-          onChange={(event) => onChange(event.target.value.toUpperCase())}
-          placeholder="#004492"
-          className={`${ADMIN_FORM_CONTROL_CLASS} flex-1 font-mono`}
-        />
+      <div className="relative" ref={popoverRef}>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setOpen((current) => !current)}
+            className="flex h-12 w-16 items-center justify-center rounded-xl border border-stroke bg-white p-1 transition hover:border-primary dark:border-dark-3 dark:bg-dark-2"
+            aria-label={`Seleccionar ${label.toLowerCase()}`}
+          >
+            <span
+              className="h-full w-full rounded-lg border border-black/10"
+              style={{ backgroundColor: normalized }}
+            />
+          </button>
+          <input
+            type="text"
+            value={value}
+            onChange={(event) => onChange(event.target.value.toUpperCase())}
+            placeholder="#004492"
+            className={`${ADMIN_FORM_CONTROL_CLASS} flex-1 font-mono`}
+          />
+        </div>
+        {open ? (
+          <div className="absolute bottom-[calc(100%+12px)] left-0 z-30 w-[320px] rounded-2xl border border-stroke bg-white p-4 shadow-2xl dark:border-dark-3 dark:bg-dark-2">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="text-sm font-medium text-dark dark:text-white">{label}</div>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded-lg border border-stroke px-2.5 py-1 text-xs text-dark-6 transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6"
+              >
+                Cerrar
+              </button>
+            </div>
+            <div className="rounded-2xl border border-stroke bg-gray-1/40 p-3 dark:border-dark-3 dark:bg-dark-3/20">
+              <HexColorPicker
+                color={normalized}
+                onChange={(next) => onChange(next.toUpperCase())}
+                style={{ width: "100%", height: 180 }}
+              />
+            </div>
+            <div className="mt-3 flex items-center gap-3 rounded-xl border border-stroke bg-gray-1/60 px-3 py-3 dark:border-dark-3 dark:bg-dark-3/30">
+              <span
+                className="h-9 w-9 rounded-lg border border-black/10"
+                style={{ backgroundColor: normalized }}
+              />
+              <input
+                type="text"
+                value={value}
+                onChange={(event) => onChange(event.target.value.toUpperCase())}
+                placeholder="#004492"
+                className="w-full bg-transparent font-mono text-sm text-dark outline-none dark:text-white"
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
       <p className="text-xs text-dark-6 dark:text-dark-6">
         Selecciona el color o escribe el HEX.
