@@ -613,29 +613,33 @@ export function NotificationsPageContent() {
 
   useEffect(() => {
     if (!organization?.id || typeof window === "undefined") return;
-    const controller = new AbortController();
+    let isMounted = true;
     const load = async () => {
       try {
         const response = await fetchWithAuth(
-          `/api/templates/list?organization_id=${encodeURIComponent(organization.id)}`,
-          { signal: controller.signal },
+          `/api/templates/list?organization_id=${encodeURIComponent(organization.id)}`
         );
+        if (!isMounted) return;
         if (!response.ok) {
           console.warn("Failed to fetch templates list:", response.status);
           return;
         }
+        if (!isMounted) return;
         const json = (await response.json().catch(() => null)) as
           | { status: "success"; data: RemoteTemplateListItem[] }
           | null;
+        if (!isMounted) return;
         const list = json?.status === "success" ? json.data : [];
         setRemoteTemplatesList(list);
       } catch (error) {
-        if ((error as DOMException)?.name === "AbortError") return;
+        if (!isMounted) return;
         console.warn("Error fetching templates list", error);
       }
     };
     load();
-    return () => controller.abort();
+    return () => {
+      isMounted = false;
+    };
   }, [organization?.id]);
 
   useEffect(() => {
