@@ -8,7 +8,7 @@ import { useLanguage, type Language } from "@/contexts/language-context";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { useOrganizationCountry } from "@/hooks/use-organization-country";
 import { useOrganizationScopes } from "@/hooks/use-organization-scopes";
-import { canUseOrganizationIntegrations, fetchWithAuth, getStoredOrganization } from "@/lib/auth-api";
+import { canUseOrganizationIntegrations, fetchWithAuth, getStoredOrganization, type OrganizationDetails } from "@/lib/auth-api";
 import {
   DEFAULT_NOTIFICATION_TEMPLATES,
   DEFAULT_TEMPLATE_GROUPS,
@@ -85,6 +85,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
   const { language } = useLanguage();
   const translations = useNotificationsTranslations();
   const t = translations.templateEditor;
+  const { organization } = useOrganizationCountry();
   const previewFrameRef = useRef<HTMLIFrameElement | null>(null);
   const [previewFrameKey, setPreviewFrameKey] = useState(0);
 
@@ -180,7 +181,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
   }, [template]);
 
   const codeForPreview = codeByLanguage[editorLanguage] ?? templateData.html[editorLanguage];
-  const renderedTemplateHtml = renderTemplateHtml(codeForPreview, templateData.variables);
+  const renderedTemplateHtml = renderTemplateHtml(codeForPreview, templateData.variables, organization);
   const requiredVariables = templateData.variables?.filter((variable) => variable.required !== false) ?? [];
   const templateGroup = useMemo(
     () => DEFAULT_TEMPLATE_GROUPS.find((group) => group.id === templateData.groupId),
@@ -615,15 +616,40 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
   );
 }
 
-function renderTemplateHtml(html: string, variables: TemplateVariable[] | undefined) {
-  if (!variables?.length) {
-    return html;
+function renderTemplateHtml(html: string, variables: TemplateVariable[] | undefined, organization?: OrganizationDetails | null) {
+  let content = html;
+  
+  if (variables?.length) {
+    content = variables.reduce((acc, variable) => {
+      const value = variable.sampleValue;
+      const pattern = new RegExp(`\\$\\{${escapeRegExp(variable.key)}\\}`, "g");
+      return acc.replace(pattern, value);
+    }, content);
   }
-  return variables.reduce((content, variable) => {
-    const value = variable.sampleValue;
-    const pattern = new RegExp(`\\$\\{${escapeRegExp(variable.key)}\\}`, "g");
-    return content.replace(pattern, value);
-  }, html);
+
+  if (organization) {
+    const primaryColor = organization.color_a || "#000000";
+    const secondaryColor = organization.color_b || "#000000";
+    const logoUrl = organization.url_log || "https://zelify.com/logo.png";
+    const companyName = organization.name || "Zelify S.A";
+    const year = new Date().getFullYear().toString();
+
+    content = content.replace(/\$\{primaryColor\}/gi, primaryColor)
+      .replace(/\{\{PRIMARY_COLOR\}\}/gi, primaryColor)
+      .replace(/\$\{secondaryColor\}/gi, secondaryColor)
+      .replace(/\{\{SECONDARY_COLOR\}\}/gi, secondaryColor)
+      .replace(/\$\{logoUrl\}/gi, logoUrl)
+      .replace(/\{\{LOGO\}\}/gi, logoUrl)
+      .replace(/\$\{companyName\}/gi, companyName)
+      .replace(/\{\{COMPANY_NAME\}\}/gi, companyName)
+      .replace(/\$\{year\}/gi, year)
+      .replace(/\{\{\s*year\s*\}\}/gi, year)
+      .replace(/\{\{YEAR\}\}/gi, year)
+      .replace(/\{\{BODY\}\}/gi, "Este es el contenido principal de la notificación.")
+      .replace(/\{\{SIGNATURE\}\}/gi, `Atentamente, el equipo de ${companyName}`);
+  }
+
+  return content;
 }
 
 function escapeRegExp(value: string) {
