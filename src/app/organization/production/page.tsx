@@ -47,11 +47,7 @@ export default function PasoProduccionPage() {
   ]);
 
   const [require2fa, setRequire2fa] = useState<boolean>(true);
-  const [authMethods, setAuthMethods] = useState({
-    email: true,
-    sms: false,
-    authenticator: false,
-  });
+
 
   const [urlCommerce, setUrlCommerce] = useState("");
   const [urlPrivacy, setUrlPrivacy] = useState("");
@@ -115,7 +111,6 @@ export default function PasoProduccionPage() {
             setObservations(latest.observations || "");
             setUserRequests(latest.user_requests || []);
             setRequire2fa(latest.require_2fa);
-            setAuthMethods(latest.auth_methods || { email: true, sms: false, authenticator: false });
             setUrlCommerce(latest.url_commerce || "");
             setUrlPrivacy(latest.url_privacy || "");
             setUrlWhatsapp(latest.url_whatsapp || "");
@@ -187,7 +182,7 @@ export default function PasoProduccionPage() {
       observations: observations,
       user_requests: userRequests,
       require_2fa: require2fa,
-      auth_methods: authMethods,
+      auth_methods: { email: require2fa, sms: false, authenticator: false },
       url_commerce: urlCommerce,
       url_privacy: urlPrivacy,
       url_whatsapp: urlWhatsapp,
@@ -604,77 +599,16 @@ export default function PasoProduccionPage() {
         {/* Sección 5: Configuración de seguridad */}
         <ShowcaseSection title="5. Configuración de Seguridad" className="!p-6">
           <div className="space-y-4">
-            <div>
-              <span className="block text-xs font-semibold text-dark dark:text-white">
-                ¿Se requiere autenticación de doble factor (2FA)?
-              </span>
-              <div className="flex gap-4 mt-2">
-                <label className="flex items-center gap-2 text-sm text-dark dark:text-white">
-                  <input
-                    type="radio"
-                    name="require2fa"
-                    checked={require2fa === true}
-                    onChange={() => setRequire2fa(true)}
-                    disabled={isFormDisabled}
-                    className="h-4 w-4 accent-primary"
-                  />
-                  Sí
-                </label>
-                <label className="flex items-center gap-2 text-sm text-dark dark:text-white">
-                  <input
-                    type="radio"
-                    name="require2fa"
-                    checked={require2fa === false}
-                    onChange={() => setRequire2fa(false)}
-                    disabled={isFormDisabled}
-                    className="h-4 w-4 accent-primary"
-                  />
-                  No
-                </label>
-              </div>
-            </div>
-
-            {require2fa && (
-              <div>
-                <span className="block text-xs font-semibold text-dark dark:text-white">
-                  Métodos de autenticación a habilitar
-                </span>
-                <div className="grid gap-3 sm:grid-cols-3 mt-3">
-                  <label className="flex items-center gap-2.5 text-sm text-dark dark:text-white">
-                    <input
-                      type="checkbox"
-                      checked={authMethods.email}
-                      onChange={(e) => setAuthMethods((c) => ({ ...c, email: e.target.checked }))}
-                      disabled={isFormDisabled}
-                      className="h-4 w-4 rounded accent-primary"
-                    />
-                    Correo electrónico
-                  </label>
-                  <label className="flex items-center gap-2.5 text-sm text-dark dark:text-white">
-                    <input
-                      type="checkbox"
-                      checked={authMethods.sms}
-                      onChange={(e) => setAuthMethods((c) => ({ ...c, sms: e.target.checked }))}
-                      disabled={isFormDisabled}
-                      className="h-4 w-4 rounded accent-primary"
-                    />
-                    SMS
-                  </label>
-                  <label className="flex items-center gap-2.5 text-sm text-dark dark:text-white">
-                    <input
-                      type="checkbox"
-                      checked={authMethods.authenticator}
-                      onChange={(e) =>
-                        setAuthMethods((c) => ({ ...c, authenticator: e.target.checked }))
-                      }
-                      disabled={isFormDisabled}
-                      className="h-4 w-4 rounded accent-primary"
-                    />
-                    Aplicación autenticadora (Google/Microsoft Auth)
-                  </label>
-                </div>
-              </div>
-            )}
+            <label className="flex items-start gap-3 text-sm font-semibold text-dark dark:text-white">
+              <input
+                type="checkbox"
+                checked={require2fa === true}
+                onChange={(e) => setRequire2fa(e.target.checked)}
+                disabled={isFormDisabled}
+                className="mt-1 h-4 w-4 rounded border-stroke accent-primary dark:border-dark-3"
+              />
+              <span>¿Se requiere autenticación de doble factor (2FA) por correo electrónico?</span>
+            </label>
           </div>
         </ShowcaseSection>
 
