@@ -643,16 +643,16 @@ export default function PasoProduccionPage() {
                 className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary disabled:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:disabled:bg-dark"
               />
             </label>
-            <label className="space-y-1.5">
+            <label className="space-y-1.5 sm:col-span-2">
               <span className="block text-xs font-semibold text-dark dark:text-white">
                 Accesos WhatsApp Business API (Envío de Mensajería)
               </span>
-              <input
-                type="text"
+              <textarea
                 value={urlWhatsapp}
                 onChange={(e) => setUrlWhatsapp(e.target.value)}
                 disabled={isFormDisabled}
-                placeholder="Tokens, credenciales o URL del proveedor de mensajería"
+                rows={3}
+                placeholder="Ingresa tokens, credenciales, números autorizados o URL del proveedor de mensajería (ej. Twilio, Meta Developer Console)"
                 className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary disabled:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:disabled:bg-dark"
               />
             </label>

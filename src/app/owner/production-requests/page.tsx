@@ -446,9 +446,9 @@ export default function OwnerProductionRequestsPage() {
                   {selectedRequest.url_whatsapp && (
                     <div>
                       <span className="block font-semibold text-dark-6">Acceso WhatsApp Business API:</span>
-                      <span className="font-medium font-mono break-all bg-slate-50 dark:bg-dark-2 px-2 py-1 rounded inline-block border border-stroke dark:border-dark-3 w-full">
+                      <p className="font-medium font-mono break-all bg-slate-50 dark:bg-dark-2 px-2 py-1 rounded border border-stroke dark:border-dark-3 w-full whitespace-pre-wrap text-xs">
                         {selectedRequest.url_whatsapp}
-                      </span>
+                      </p>
                     </div>
                   )}
                   <div>
