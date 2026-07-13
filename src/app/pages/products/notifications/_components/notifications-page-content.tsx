@@ -143,17 +143,28 @@ const applyBrandingPreview = (
   const url = (branding.logoUrl ?? "").trim();
   const primaryColor = (branding.primaryColor ?? "").trim() || "#004195";
   const secondaryColor = (branding.secondaryColor ?? "").trim() || "#6AFF00";
-  const companyName = (branding.companyName ?? "").trim() || "Company";
+  const companyName = (branding.companyName ?? "").trim() || "Zelify S.A";
   const year = String(new Date().getFullYear());
 
   const replaced = normalizeBrandingVariables(html)
-    .replace(/\$\{logoUrl\}/gi, url || "${logoUrl}")
+    .replace(/\$\{logoUrl\}/gi, url || "https://zelify.com/logo.png")
+    .replace(/\{\{LOGO\}\}/gi, url || "https://zelify.com/logo.png")
     .replace(/\$\{primaryColor\}/gi, primaryColor)
+    .replace(/\{\{PRIMARY_COLOR\}\}/gi, primaryColor)
     .replace(/\$\{secondaryColor\}/gi, secondaryColor)
-    .replace(/\$\{companyName\}/gi, companyName);
+    .replace(/\{\{SECONDARY_COLOR\}\}/gi, secondaryColor)
+    .replace(/\$\{companyName\}/gi, companyName)
+    .replace(/\{\{COMPANY_NAME\}\}/gi, companyName)
+    .replace(/\$\{safeName\}/gi, "John Doe")
+    .replace(/\{\{SAFENAME\}\}/gi, "John Doe")
+    .replace(/\$\{code\}/gi, "123456")
+    .replace(/\{\{CODE\}\}/gi, "123456")
+    .replace(/\{\{BODY\}\}/gi, "Este es el contenido principal de la notificación.")
+    .replace(/\{\{SIGNATURE\}\}/gi, `Atentamente, el equipo de ${companyName}`);
   const replacedWithYear = replaced
     .replace(/\$\{year\}/gi, year)
-    .replace(/\{\{\s*year\s*\}\}/gi, year);
+    .replace(/\{\{\s*year\s*\}\}/gi, year)
+    .replace(/\{\{YEAR\}\}/gi, year);
 
   try {
     const parser = new DOMParser();
@@ -602,29 +613,33 @@ export function NotificationsPageContent() {
 
   useEffect(() => {
     if (!organization?.id || typeof window === "undefined") return;
-    const controller = new AbortController();
+    let isMounted = true;
     const load = async () => {
       try {
         const response = await fetchWithAuth(
-          `/api/templates/list?organization_id=${encodeURIComponent(organization.id)}`,
-          { signal: controller.signal },
+          `/api/templates/list?organization_id=${encodeURIComponent(organization.id)}`
         );
+        if (!isMounted) return;
         if (!response.ok) {
           console.warn("Failed to fetch templates list:", response.status);
           return;
         }
+        if (!isMounted) return;
         const json = (await response.json().catch(() => null)) as
           | { status: "success"; data: RemoteTemplateListItem[] }
           | null;
+        if (!isMounted) return;
         const list = json?.status === "success" ? json.data : [];
         setRemoteTemplatesList(list);
       } catch (error) {
-        if ((error as DOMException)?.name === "AbortError") return;
+        if (!isMounted) return;
         console.warn("Error fetching templates list", error);
       }
     };
     load();
-    return () => controller.abort();
+    return () => {
+      isMounted = false;
+    };
   }, [organization?.id]);
 
   useEffect(() => {
