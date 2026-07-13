@@ -452,6 +452,40 @@ export function OrganizationAdministrationDetailClient() {
   const [generalSaving, setGeneralSaving] = useState(false);
   const [generalError, setGeneralError] = useState("");
 
+  const [environment, setEnvironment] = useState<"SANDBOX" | "PRODUCTION">("SANDBOX");
+
+  useEffect(() => {
+    if (!orgId) return;
+    fetch(`/api/organizations/${orgId}/environment`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.environment) {
+          setEnvironment(data.environment);
+        }
+      })
+      .catch((err) => console.error("Error cargando entorno", err));
+  }, [orgId]);
+
+  const toggleEnvironment = async (checked: boolean) => {
+    const nextEnv = checked ? "PRODUCTION" : "SANDBOX";
+    setEnvironment(nextEnv);
+    try {
+      const res = await fetch(`/api/organizations/${orgId}/environment`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ environment: nextEnv }),
+      });
+      if (res.ok) {
+        toast.success(`Entorno actualizado a ${nextEnv === "PRODUCTION" ? "Producción" : "Sandbox"}`);
+      } else {
+        throw new Error("Failed");
+      }
+    } catch (err) {
+      toast.error("No se pudo actualizar el entorno");
+      setEnvironment(checked ? "SANDBOX" : "PRODUCTION");
+    }
+  };
+
   const [brandingForm, setBrandingForm] = useState<BrandingFormState>({
     color_a: "#004492",
     color_b: "#0FADCF",
@@ -1569,6 +1603,21 @@ export function OrganizationAdministrationDetailClient() {
               <FormField label="Limite diario por defecto" value={generalForm.default_daily_account_limit} onChange={(value) => setGeneralForm((current) => ({ ...current, default_daily_account_limit: value }))} />
             </div>
             <FormField label="Sitio web" value={generalForm.website} onChange={(value) => setGeneralForm((current) => ({ ...current, website: value }))} />
+            <div className="rounded-lg border border-stroke bg-slate-50/50 p-4 dark:border-dark-3 dark:bg-dark-2/40 flex items-center justify-between">
+              <div>
+                <span className="block text-sm font-semibold text-dark dark:text-white">Entorno de la Organización</span>
+                <span className="block text-xs text-dark-6">Activa o desactiva el paso a producción para esta organización de forma directa.</span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={environment === "PRODUCTION"}
+                  onChange={(e) => toggleEnvironment(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-dark-3 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
+              </label>
+            </div>
             {generalError ? <ErrorAlert message={generalError} /> : null}
             <div className="flex justify-end">
               <button

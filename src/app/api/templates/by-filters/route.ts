@@ -1,12 +1,20 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-
-const REMOTE_BASE_URL = process.env.NOTIFICATIONS_SERVICE_URL ?? "http://localhost:3002";
+import { getNotificationsServiceBaseUrl } from "../_lib/notifications-service";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams.toString();
-  const targetUrl = `${REMOTE_BASE_URL}/api/templates/by-filters${searchParams ? `?${searchParams}` : ""}`;
+  const baseUrl = getNotificationsServiceBaseUrl();
+  if (!baseUrl) {
+    return NextResponse.json([], {
+      status: 200,
+      headers: {
+        "x-upstream-error": "missing_base_url",
+      },
+    });
+  }
+  const targetUrl = `${baseUrl}/api/templates/by-filters${searchParams ? `?${searchParams}` : ""}`;
 
   try {
     const response = await fetch(targetUrl, {

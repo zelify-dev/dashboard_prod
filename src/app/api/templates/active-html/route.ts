@@ -1,8 +1,7 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-
-const REMOTE_BASE_URL = process.env.NOTIFICATIONS_SERVICE_URL ?? "http://localhost:3002";
+import { getNotificationsServiceBaseUrl } from "../_lib/notifications-service";
 
 async function fetchJson(url: string, init?: RequestInit) {
   const response = await fetch(url, {
@@ -26,8 +25,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "category is required" }, { status: 400 });
   }
 
+  const baseUrl = getNotificationsServiceBaseUrl();
+  if (!baseUrl) {
+    return NextResponse.json(
+      {
+        channel,
+        category,
+        name: null,
+        template: null,
+        updatedAt: null,
+        message: "Notifications service URL is not configured.",
+      },
+      { status: 503, headers: { "x-upstream-error": "missing_base_url" } },
+    );
+  }
+
   try {
-    const filtersUrl = new URL(`${REMOTE_BASE_URL}/api/templates/by-filters`);
+    const filtersUrl = new URL(`${baseUrl}/api/templates/by-filters`);
     filtersUrl.searchParams.set("channel", channel);
     filtersUrl.searchParams.set("category", category);
     const templates = (await fetchJson(filtersUrl.toString())) as { name: string; active: boolean | string }[];
@@ -46,7 +60,7 @@ export async function GET(request: NextRequest) {
     }
 
     const templateData = await fetchJson(
-      `${REMOTE_BASE_URL}/api/templates/name/${encodeURIComponent(activeTemplate.name)}`,
+      `${baseUrl}/api/templates/name/${encodeURIComponent(activeTemplate.name)}`,
     );
 
     return NextResponse.json({

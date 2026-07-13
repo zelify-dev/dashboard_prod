@@ -38,10 +38,6 @@ export function getNavData(
       icon: Icons.Authentication,
       items: [
             {
-              title: translations.sidebar.menuItems.subItems.authentication,
-              url: "/pages/products/auth/authentication",
-            },
-            {
               title: translations.sidebar.menuItems.subItems.deviceInformation,
               url: "/pages/products/auth/device-information",
             },
@@ -341,6 +337,16 @@ export function getNavData(
               : []),
           ],
         },
+        ...(actor === "organization"
+          ? [
+              {
+                title: "Paso a Producción",
+                url: "/organization/production",
+                icon: Icons.DocumentTextIcon,
+                items: [],
+              },
+            ]
+          : []),
         ...(isOwner
           ? [
               {
@@ -350,6 +356,10 @@ export function getNavData(
                   {
                     title: "Directorio Global",
                     url: "/owner/organizations",
+                  },
+                  {
+                    title: "Solicitudes de Producción",
+                    url: "/owner/production-requests",
                   },
                 ],
               },

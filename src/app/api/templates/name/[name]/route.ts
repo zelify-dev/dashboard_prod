@@ -1,8 +1,7 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-
-const REMOTE_BASE_URL = process.env.NOTIFICATIONS_SERVICE_URL ?? "http://localhost:3002";
+import { getNotificationsServiceBaseUrl } from "../../_lib/notifications-service";
 
 export async function GET(request: NextRequest) {
   const segments = request.nextUrl.pathname.split("/").filter(Boolean);
@@ -11,8 +10,25 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "missing-name" }, { status: 400 });
   }
   const encodedName = encodeURIComponent(templateName);
+  const baseUrl = getNotificationsServiceBaseUrl();
+  if (!baseUrl) {
+    return NextResponse.json(
+      {
+        templateId: null,
+        id: null,
+        name: templateName,
+        template: null,
+        subject: null,
+        from: null,
+        updatedAt: null,
+        active: false,
+        error: "missing_base_url",
+      },
+      { status: 503, headers: { "x-upstream-error": "missing_base_url" } },
+    );
+  }
   try {
-    const response = await fetch(`${REMOTE_BASE_URL}/api/templates/name/${encodedName}`, {
+    const response = await fetch(`${baseUrl}/api/templates/name/${encodedName}`, {
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",

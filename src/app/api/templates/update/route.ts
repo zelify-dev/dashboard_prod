@@ -1,13 +1,16 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-
-const REMOTE_BASE_URL = process.env.NOTIFICATIONS_SERVICE_URL ?? "http://localhost:3002";
+import { getNotificationsServiceBaseUrl } from "../_lib/notifications-service";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const response = await fetch(`${REMOTE_BASE_URL}/api/templates/update`, {
+    const baseUrl = getNotificationsServiceBaseUrl();
+    if (!baseUrl) {
+      return NextResponse.json({ error: "notifications-service-url-missing" }, { status: 503 });
+    }
+    const response = await fetch(`${baseUrl}/api/templates/update`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
