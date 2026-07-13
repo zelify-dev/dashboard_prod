@@ -664,16 +664,16 @@ export default function PasoProduccionPage() {
             <div className="rounded-xl border border-stroke bg-slate-50/30 p-5 dark:border-dark-3 dark:bg-dark-2/20 space-y-4 sm:col-span-2">
               <div>
                 <h4 className="text-sm font-semibold text-dark dark:text-white">
-                  A. Avisar a tu sistema cuando ocurra un pago (Zelify → Tu ERP / Sistema)
+                  A. Endpoint de Webhook propio del Comercio (Opcional)
                 </h4>
                 <p className="text-xs text-dark-6 mt-1">
-                  Si tienes un sistema propio y deseas que Zelify le envíe notificaciones automáticas cada vez que ocurra un pago, cobro o reembolso en tiempo real, ingresa la URL receptora aquí.
+                  Si tu ERP o sistema de facturación ya dispone de un webhook configurado para recibir confirmaciones de pago, indica la URL aquí para integrarnos y enviarte las notificaciones de transacciones.
                 </p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-1.5">
                   <span className="block text-xs font-semibold text-dark-6">
-                    URL de tu sistema para recibir avisos
+                    URL de tu Webhook receptor
                   </span>
                   <input
                     type="url"
@@ -686,7 +686,7 @@ export default function PasoProduccionPage() {
                 </label>
                 <label className="space-y-1.5">
                   <span className="block text-xs font-semibold text-dark-6">
-                    Eventos que deseas recibir (Separados por comas)
+                    Eventos a suscribir (Separados por comas)
                   </span>
                   <input
                     type="text"
