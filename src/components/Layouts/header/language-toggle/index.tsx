@@ -22,18 +22,18 @@ export function LanguageToggleSwitch() {
   return (
     <button
       onClick={toggleLanguage}
-      className="group rounded-full bg-gray-3 p-[5px] text-[#111928] outline-1 outline-primary focus-visible:outline dark:bg-[#020D1A] dark:text-current"
+      className="group rounded-full bg-gray-3 p-[3px] text-[#111928] outline-1 outline-primary focus-visible:outline dark:bg-[#020D1A] dark:text-current"
     >
       <span className="sr-only">
         {language === "en" ? translations.languageToggle.switchToSpanish : translations.languageToggle.switchToEnglish}
       </span>
 
-      <span aria-hidden className="relative flex gap-2.5">
+      <span aria-hidden className="relative flex gap-1.5">
         {/* Indicator */}
         <span
           className={cn(
-            "absolute size-[38px] rounded-full border border-gray-200 bg-white transition-all dark:border-none dark:bg-dark-2 dark:group-hover:bg-dark-3",
-            language === "es" && "translate-x-[48px]"
+            "absolute size-[26px] rounded-full border border-gray-200 bg-white transition-all dark:border-none dark:bg-dark-2 dark:group-hover:bg-dark-3",
+            language === "es" && "translate-x-[32px]"
           )}
         />
 
@@ -41,7 +41,7 @@ export function LanguageToggleSwitch() {
           <span
             key={name}
             className={cn(
-              "relative grid size-[38px] place-items-center rounded-full text-sm font-medium",
+              "relative grid size-[26px] place-items-center rounded-full text-xs font-semibold",
               name === "es" && "dark:text-white"
             )}
           >

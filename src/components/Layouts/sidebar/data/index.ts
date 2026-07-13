@@ -457,10 +457,10 @@ export function getNavData(
   ];
 
   const productionSection = {
-    label: "PASO A PRODUCCIÓN",
+    label: "PRODUCCIÓN",
     items: [
       {
-        title: "Paso a Producción",
+        title: "Producción",
         url: "/organization/production",
         icon: Icons.DocumentTextIcon,
         items: [],

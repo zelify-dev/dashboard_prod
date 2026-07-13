@@ -6,17 +6,35 @@ import zelifyLogoLight from "@/assets/logos/zelifyLogo_ligth.svg";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useSidebarContext } from "../sidebar/sidebar-context";
 import { MenuIcon } from "./icons";
 import { LanguageToggleSwitch } from "./language-toggle";
 // import { ThemeToggleSwitch } from "./theme-toggle";
 import { UserInfo } from "./user-info";
 import { TOUR_FEATURE_ENABLED, useTour } from "@/contexts/tour-context";
+import { getStoredOrganization } from "@/lib/auth-api";
 
 export function Header() {
   const { toggleSidebar, isMobile } = useSidebarContext();
   const translations = useUiTranslations();
   const { openModal, isTourActive } = useTour();
+
+  const [environment, setEnvironment] = useState<string | null>(null);
+
+  useEffect(() => {
+    const org = getStoredOrganization();
+    if (!org?.id) return;
+
+    fetch(`/api/organizations/${org.id}/environment`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.environment) {
+          setEnvironment(data.environment);
+        }
+      })
+      .catch((err) => console.error("Error cargando entorno en header", err));
+  }, []);
 
   return (
     <header className={`sticky top-0 flex items-center justify-between border-b border-stroke bg-white px-4 py-2 shadow-1 dark:border-stroke-dark dark:bg-gray-dark md:px-5 2xl:px-8 ${isTourActive ? "z-[110]" : "z-30"}`}>
@@ -78,6 +96,18 @@ export function Header() {
         </div>
 
         {/* <ThemeToggleSwitch /> */}
+
+        {environment && (
+          <span
+            className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase ${
+              environment === "PRODUCTION"
+                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
+                : "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+            }`}
+          >
+            {environment === "PRODUCTION" ? "Producción" : "Sandbox"}
+          </span>
+        )}
 
         <LanguageToggleSwitch />
 
