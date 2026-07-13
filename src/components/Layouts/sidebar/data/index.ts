@@ -337,16 +337,7 @@ export function getNavData(
               : []),
           ],
         },
-        ...(actor === "organization"
-          ? [
-              {
-                title: "Paso a Producción",
-                url: "/organization/production",
-                icon: Icons.DocumentTextIcon,
-                items: [],
-              },
-            ]
-          : []),
+
         ...(isOwner
           ? [
               {
@@ -465,9 +456,31 @@ export function getNavData(
     mainSection,
   ];
 
+  const productionSection = {
+    label: "PASO A PRODUCCIÓN",
+    items: [
+      {
+        title: "Paso a Producción",
+        url: "/organization/production",
+        icon: Icons.DocumentTextIcon,
+        items: [],
+      },
+    ],
+  };
+
+  const hasProduction = actor === "organization";
+
   if (shouldPinOnboardingToTop) {
-    return [onboardingSection, ...sections];
+    return [
+      onboardingSection,
+      ...sections,
+      ...(hasProduction ? [productionSection] : []),
+    ];
   }
 
-  return [...sections, onboardingSection];
+  return [
+    ...sections,
+    ...(hasProduction ? [productionSection] : []),
+    onboardingSection,
+  ];
 }

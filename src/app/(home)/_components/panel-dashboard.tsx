@@ -276,6 +276,7 @@ export function PanelDashboard() {
     const t = useLanguageTranslations(translations);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
+    const showZcoins = false; // Ocultar hasta cobrar el primer mes
 
     useEffect(() => {
         const checkDarkMode = () => setIsDarkMode(document.documentElement.classList.contains("dark"));
@@ -363,30 +364,34 @@ export function PanelDashboard() {
 
     return (
         <div className="space-y-8">
-            {/* ─── 4 KPIs principales ─── */}
+            {/* ─── KPIs principales ─── */}
             <section>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className={cardClass}>
-                        <div className={labelClass}>{t.totalTokens}</div>
-                        <div className={valueClass}>{zcoinsBalance}</div>
-                        <div className={`${subClass} ${trendColorClass(false, monthlyGrowthZcoins)}`}>
-                            {t.vsPreviousMonth}: {monthlyGrowthZcoins >= 0 ? "+" : ""}{monthlyGrowthZcoins.toFixed(1)}%
-                        </div>
-                    </div>
-                    <div className={cardClass}>
-                        <div className={labelClass}>{t.tokensUsed}</div>
-                        <div className={valueClass}>0</div>
-                        <div className={subClass}>
-                            {usagePercentage.toFixed(1)}% used · <span className={trendColorClass(false, monthlyGrowthZcoins)}>{t.vsPreviousMonth}: {monthlyGrowthZcoins >= 0 ? "+" : ""}{monthlyGrowthZcoins.toFixed(1)}%</span>
-                        </div>
-                    </div>
-                    <div className={cardClass}>
-                        <div className={labelClass}>{t.tokensRemaining}</div>
-                        <div className={valueClass}>{zcoinsBalance}</div>
-                        <div className={subClass}>
-                            {t.projectedDepletion}: {projectedDepletionDays} {t.days}
-                        </div>
-                    </div>
+                <div className={`grid grid-cols-1 gap-4 ${showZcoins ? "sm:grid-cols-2 lg:grid-cols-4" : "w-full"}`}>
+                    {showZcoins && (
+                        <>
+                            <div className={cardClass}>
+                                <div className={labelClass}>{t.totalTokens}</div>
+                                <div className={valueClass}>{zcoinsBalance}</div>
+                                <div className={`${subClass} ${trendColorClass(false, monthlyGrowthZcoins)}`}>
+                                    {t.vsPreviousMonth}: {monthlyGrowthZcoins >= 0 ? "+" : ""}{monthlyGrowthZcoins.toFixed(1)}%
+                                </div>
+                            </div>
+                            <div className={cardClass}>
+                                <div className={labelClass}>{t.tokensUsed}</div>
+                                <div className={valueClass}>0</div>
+                                <div className={subClass}>
+                                    {usagePercentage.toFixed(1)}% used · <span className={trendColorClass(false, monthlyGrowthZcoins)}>{t.vsPreviousMonth}: {monthlyGrowthZcoins >= 0 ? "+" : ""}{monthlyGrowthZcoins.toFixed(1)}%</span>
+                                </div>
+                            </div>
+                            <div className={cardClass}>
+                                <div className={labelClass}>{t.tokensRemaining}</div>
+                                <div className={valueClass}>{zcoinsBalance}</div>
+                                <div className={subClass}>
+                                    {t.projectedDepletion}: {projectedDepletionDays} {t.days}
+                                </div>
+                            </div>
+                        </>
+                    )}
                     <div className={cardClass}>
                         <div className={labelClass}>{t.transactionalVolume}</div>
                         <div className={valueClass}>{formatCurrency(txVol.total_volume_current_month, txVol.currency_code)}</div>
@@ -398,48 +403,50 @@ export function PanelDashboard() {
             </section>
 
             {/* ─── Consumo de Zcoins por Servicio — ancho completo ─── */}
-            <section className="w-full">
-                <div className="rounded-xl border border-stroke bg-white p-6 shadow-sm dark:border-stroke-dark dark:bg-gray-dark md:p-8">
-                    <h2 className="mb-6 text-lg font-semibold text-gray-900 dark:text-white md:mb-8">
-                        {t.tokenConsumption} — {t.byService}
-                    </h2>
-                    <div className="space-y-5 md:space-y-6">
-                        {initialTokenData.byService.length === 0 ? (
-                            <p className="text-sm text-gray-500 dark:text-gray-400">{t.noLogs}</p>
-                        ) : (
-                        initialTokenData.byService.map((item, index) => {
-                            const trend = item.percentage - item.previousMonthPct;
-                            return (
-                                <div key={index} className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
-                                    <div className="min-w-0 flex-1">
-                                        <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-                                            <span className="text-sm font-semibold text-gray-900 dark:text-white md:text-base">{item.service}</span>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">
-                                                {item.percentage}%
-                                                {trend !== 0 && (
-                                                    <span className={trendColorClass(false, trend)}>
-                                                        {" "}{trend > 0 ? "↑" : "↓"} vs mes anterior
-                                                    </span>
-                                                )}
-                                            </span>
+            {showZcoins && (
+                <section className="w-full">
+                    <div className="rounded-xl border border-stroke bg-white p-6 shadow-sm dark:border-stroke-dark dark:bg-gray-dark md:p-8">
+                        <h2 className="mb-6 text-lg font-semibold text-gray-900 dark:text-white md:mb-8">
+                            {t.tokenConsumption} — {t.byService}
+                        </h2>
+                        <div className="space-y-5 md:space-y-6">
+                            {initialTokenData.byService.length === 0 ? (
+                                <p className="text-sm text-gray-500 dark:text-gray-400">{t.noLogs}</p>
+                            ) : (
+                            initialTokenData.byService.map((item, index) => {
+                                const trend = item.percentage - item.previousMonthPct;
+                                return (
+                                    <div key={index} className="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
+                                        <div className="min-w-0 flex-1">
+                                            <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                                                <span className="text-sm font-semibold text-gray-900 dark:text-white md:text-base">{item.service}</span>
+                                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                    {item.percentage}%
+                                                    {trend !== 0 && (
+                                                        <span className={trendColorClass(false, trend)}>
+                                                            {" "}{trend > 0 ? "↑" : "↓"} vs mes anterior
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700 md:h-4">
+                                                <div
+                                                    className="h-full rounded-full transition-all"
+                                                    style={{ width: `${Math.min(100, item.percentage)}%`, backgroundColor: "#10B981" }}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700 md:h-4">
-                                            <div
-                                                className="h-full rounded-full transition-all"
-                                                style={{ width: `${Math.min(100, item.percentage)}%`, backgroundColor: "#10B981" }}
-                                            />
+                                        <div className="shrink-0 text-sm font-medium text-gray-700 dark:text-gray-300 md:w-32 md:text-right">
+                                            {t.estimatedCost}: {formatCurrency(item.costEstimation, "USD")}
                                         </div>
                                     </div>
-                                    <div className="shrink-0 text-sm font-medium text-gray-700 dark:text-gray-300 md:w-32 md:text-right">
-                                        {t.estimatedCost}: {formatCurrency(item.costEstimation, "USD")}
-                                    </div>
-                                </div>
-                            );
-                        })
-                        )}
+                                );
+                            })
+                            )}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* ─── Sección: Usuarios y negocio ─── */}
             <section>

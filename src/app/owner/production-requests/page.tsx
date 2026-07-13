@@ -40,6 +40,7 @@ type RequestType = {
   url_commerce: string;
   url_privacy: string;
   url_whatsapp?: string;
+  webhook_type?: string;
   webhooks_erp?: string;
   sandbox_payment_apis?: string;
   created_at: string;
@@ -450,14 +451,25 @@ export default function OwnerProductionRequestsPage() {
                       </span>
                     </div>
                   )}
-                  {selectedRequest.webhooks_erp && (
-                    <div>
-                      <span className="block font-semibold text-dark-6">Webhooks ERP:</span>
+                  <div>
+                    <span className="block font-semibold text-dark-6">Configuración de Webhooks ERP:</span>
+                    <div className="font-medium text-xs mb-1">
+                      Tipo: {selectedRequest.webhook_type === "zelify_provides"
+                        ? "Zelify provee el webhook a la organización"
+                        : "La organización provee el webhook"}
+                    </div>
+                    {selectedRequest.webhook_type === "client_provides" && selectedRequest.webhooks_erp ? (
                       <span className="font-medium font-mono break-all bg-slate-50 dark:bg-dark-2 px-2 py-1 rounded inline-block border border-stroke dark:border-dark-3 w-full">
                         {selectedRequest.webhooks_erp}
                       </span>
-                    </div>
-                  )}
+                    ) : selectedRequest.webhook_type === "zelify_provides" ? (
+                      <span className="text-xs text-dark-6 italic">
+                        * Requiere generar URL de endpoint y credenciales para el ERP de la organización.
+                      </span>
+                    ) : (
+                      <span className="text-xs text-dark-6 italic">Sin webhook configurado</span>
+                    )}
+                  </div>
                   {selectedRequest.sandbox_payment_apis && (
                     <div>
                       <span className="block font-semibold text-dark-6">APIs Sandbox (Botón Pago):</span>
