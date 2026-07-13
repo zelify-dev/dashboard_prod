@@ -52,8 +52,9 @@ export default function PasoProduccionPage() {
   const [urlCommerce, setUrlCommerce] = useState("");
   const [urlPrivacy, setUrlPrivacy] = useState("");
   const [urlWhatsapp, setUrlWhatsapp] = useState("");
-  const [webhookType, setWebhookType] = useState<"client_provides" | "zelify_provides">("client_provides");
-  const [webhooksERP, setWebhooksERP] = useState("");
+  const [webhookClientUrl, setWebhookClientUrl] = useState("");
+  const [webhookClientEvents, setWebhookClientEvents] = useState("");
+  const [webhookZelifyRequested, setWebhookZelifyRequested] = useState(true);
   const [sandboxPaymentApis, setSandboxPaymentApis] = useState("");
 
   const [declarationAccepted, setDeclarationAccepted] = useState(false);
@@ -114,8 +115,9 @@ export default function PasoProduccionPage() {
             setUrlCommerce(latest.url_commerce || "");
             setUrlPrivacy(latest.url_privacy || "");
             setUrlWhatsapp(latest.url_whatsapp || "");
-            setWebhookType(latest.webhook_type || "client_provides");
-            setWebhooksERP(latest.webhooks_erp || "");
+            setWebhookClientUrl(latest.webhook_client_url || latest.webhooks_erp || "");
+            setWebhookClientEvents(latest.webhook_client_events || "");
+            setWebhookZelifyRequested(latest.webhook_zelify_requested !== undefined ? latest.webhook_zelify_requested : true);
             setSandboxPaymentApis(latest.sandbox_payment_apis || "");
             setDeclarationAccepted(latest.declaration_accepted);
           }
@@ -186,8 +188,10 @@ export default function PasoProduccionPage() {
       url_commerce: urlCommerce,
       url_privacy: urlPrivacy,
       url_whatsapp: urlWhatsapp,
-      webhook_type: webhookType,
-      webhooks_erp: webhookType === "client_provides" ? webhooksERP : "",
+      webhook_client_url: webhookClientUrl,
+      webhook_client_events: webhookClientEvents,
+      webhook_zelify_requested: webhookZelifyRequested,
+      webhooks_erp: webhookClientUrl,
       sandbox_payment_apis: sandboxPaymentApis,
       declaration_accepted: declarationAccepted,
     };
@@ -656,55 +660,74 @@ export default function PasoProduccionPage() {
                 className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary disabled:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:disabled:bg-dark"
               />
             </label>
-            <div className="space-y-1.5 sm:col-span-2">
-              <span className="block text-xs font-semibold text-dark dark:text-white">
-                Configuración de Webhooks (ERP)
-              </span>
-              <div className="flex flex-wrap gap-6 mt-2 mb-3">
-                <label className="flex items-center gap-2 text-sm text-dark dark:text-white">
-                  <input
-                    type="radio"
-                    name="webhookType"
-                    checked={webhookType === "client_provides"}
-                    onChange={() => setWebhookType("client_provides")}
-                    disabled={isFormDisabled}
-                    className="h-4 w-4 accent-primary"
-                  />
-                  La organización provee el webhook (nosotros le notificamos eventos a la URL provista)
-                </label>
-                <label className="flex items-center gap-2 text-sm text-dark dark:text-white">
-                  <input
-                    type="radio"
-                    name="webhookType"
-                    checked={webhookType === "zelify_provides"}
-                    onChange={() => setWebhookType("zelify_provides")}
-                    disabled={isFormDisabled}
-                    className="h-4 w-4 accent-primary"
-                  />
-                  Zelify provee el webhook a la organización (nosotros le damos la URL para integrar en el ERP)
-                </label>
+            {/* Subsección A: Webhook Outbound */}
+            <div className="rounded-xl border border-stroke bg-slate-50/30 p-5 dark:border-dark-3 dark:bg-dark-2/20 space-y-4 sm:col-span-2">
+              <div>
+                <h4 className="text-sm font-semibold text-dark dark:text-white">
+                  A. Webhook de Salida (Notificaciones de Zelify al ERP del Comercio)
+                </h4>
+                <p className="text-xs text-dark-6 mt-1">
+                  Configura el endpoint de tu ERP donde Zelify enviará alertas y confirmaciones de eventos de transacciones en tiempo real.
+                </p>
               </div>
-              {webhookType === "client_provides" ? (
-                <label className="block space-y-1.5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="space-y-1.5">
                   <span className="block text-xs font-semibold text-dark-6">
-                    URL de Webhook del comercio
+                    URL de Destino (Endpoint del ERP)
                   </span>
                   <input
                     type="url"
-                    value={webhooksERP}
-                    onChange={(e) => setWebhooksERP(e.target.value)}
+                    value={webhookClientUrl}
+                    onChange={(e) => setWebhookClientUrl(e.target.value)}
                     disabled={isFormDisabled}
-                    required={webhookType === "client_provides"}
-                    placeholder="https://tucomercio.com/webhook-receptor"
+                    placeholder="https://api.tucomercio.com/v1/webhooks/zelify"
                     className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary disabled:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:disabled:bg-dark"
                   />
                 </label>
-              ) : (
-                <div className="rounded border border-stroke bg-slate-50 dark:border-dark-3 dark:bg-dark-2/45 p-4 text-xs text-dark-6">
-                  Se generará una URL de endpoint segura de Zelify y credenciales asociadas para que las integren en el ERP de la organización tras la aprobación del paso a producción.
+                <label className="space-y-1.5">
+                  <span className="block text-xs font-semibold text-dark-6">
+                    Eventos a Suscribir (Separados por comas)
+                  </span>
+                  <input
+                    type="text"
+                    value={webhookClientEvents}
+                    onChange={(e) => setWebhookClientEvents(e.target.value)}
+                    disabled={isFormDisabled}
+                    placeholder="payment.success, payment.failed, refund.created"
+                    className="w-full rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm outline-none transition focus:border-primary disabled:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:disabled:bg-dark"
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Subsección B: Webhook Inbound */}
+            <div className="rounded-xl border border-stroke bg-slate-50/30 p-5 dark:border-dark-3 dark:bg-dark-2/20 space-y-4 sm:col-span-2">
+              <div>
+                <h4 className="text-sm font-semibold text-dark dark:text-white">
+                  B. Webhook de Entrada (Notificaciones del ERP del Comercio a Zelify)
+                </h4>
+                <p className="text-xs text-dark-6 mt-1">
+                  Si tu ERP requiere enviar actualizaciones de estados o eventos hacia Zelify, solicita un endpoint y tokens seguros.
+                </p>
+              </div>
+              <label className="flex items-start gap-3 text-sm font-semibold text-dark dark:text-white">
+                <input
+                  type="checkbox"
+                  checked={webhookZelifyRequested}
+                  onChange={(e) => setWebhookZelifyRequested(e.target.checked)}
+                  disabled={isFormDisabled}
+                  className="mt-1 h-4 w-4 rounded border-stroke accent-primary dark:border-dark-3"
+                />
+                <span>Solicitar credenciales de integración (Client ID/Secret) y URL del endpoint de Zelify para el ERP.</span>
+              </label>
+              {webhookZelifyRequested && (
+                <div className="rounded border border-stroke bg-white dark:border-dark-3 dark:bg-dark-2 p-3 text-xs text-dark-6 leading-5">
+                  * Al aprobarse esta solicitud en producción, se te proveerá el endpoint de recepción y las llaves de seguridad en el panel de credenciales del dashboard para autenticar el envío desde tu ERP.
                 </div>
               )}
             </div>
+
+            {/* APIs Sandbox y WhatsApp */}
             <label className="space-y-1.5 sm:col-span-2">
               <span className="block text-xs font-semibold text-dark dark:text-white">
                 APIs de Sandbox del botón de pago (URLs para pruebas)

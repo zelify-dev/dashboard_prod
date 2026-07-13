@@ -42,6 +42,9 @@ type RequestType = {
   url_whatsapp?: string;
   webhook_type?: string;
   webhooks_erp?: string;
+  webhook_client_url?: string;
+  webhook_client_events?: string;
+  webhook_zelify_requested?: boolean;
   sandbox_payment_apis?: string;
   created_at: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
@@ -453,22 +456,35 @@ export default function OwnerProductionRequestsPage() {
                   )}
                   <div>
                     <span className="block font-semibold text-dark-6">Configuración de Webhooks ERP:</span>
-                    <div className="font-medium text-xs mb-1">
-                      Tipo: {selectedRequest.webhook_type === "zelify_provides"
-                        ? "Zelify provee el webhook a la organización"
-                        : "La organización provee el webhook"}
+                    <div className="space-y-2 mt-1">
+                      {/* Webhook Outbound */}
+                      <div className="bg-slate-50 dark:bg-dark-2 p-2 rounded border border-stroke dark:border-dark-3">
+                        <span className="block font-semibold text-[10px] uppercase text-dark-6">Webhook de Salida (A):</span>
+                        {selectedRequest.webhook_client_url ? (
+                          <div className="mt-1 space-y-1">
+                            <div className="font-mono text-xs break-all">{selectedRequest.webhook_client_url}</div>
+                            {selectedRequest.webhook_client_events && (
+                              <div className="text-[10px] text-gray-500 font-medium">Eventos: {selectedRequest.webhook_client_events}</div>
+                            )}
+                          </div>
+                        ) : selectedRequest.webhooks_erp ? (
+                          <div className="font-mono text-xs break-all mt-1">{selectedRequest.webhooks_erp}</div>
+                        ) : (
+                          <span className="text-xs text-dark-6 italic">No provisto por el comercio</span>
+                        )}
+                      </div>
+                      {/* Webhook Inbound */}
+                      <div className="bg-slate-50 dark:bg-dark-2 p-2 rounded border border-stroke dark:border-dark-3">
+                        <span className="block font-semibold text-[10px] uppercase text-dark-6">Webhook de Entrada (B):</span>
+                        {selectedRequest.webhook_zelify_requested !== false ? (
+                          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium block mt-1">
+                            ✓ Solicita generar URL de endpoint y credenciales seguras.
+                          </span>
+                        ) : (
+                          <span className="text-xs text-dark-6 italic block mt-1">No solicitado</span>
+                        )}
+                      </div>
                     </div>
-                    {selectedRequest.webhook_type === "client_provides" && selectedRequest.webhooks_erp ? (
-                      <span className="font-medium font-mono break-all bg-slate-50 dark:bg-dark-2 px-2 py-1 rounded inline-block border border-stroke dark:border-dark-3 w-full">
-                        {selectedRequest.webhooks_erp}
-                      </span>
-                    ) : selectedRequest.webhook_type === "zelify_provides" ? (
-                      <span className="text-xs text-dark-6 italic">
-                        * Requiere generar URL de endpoint y credenciales para el ERP de la organización.
-                      </span>
-                    ) : (
-                      <span className="text-xs text-dark-6 italic">Sin webhook configurado</span>
-                    )}
                   </div>
                   {selectedRequest.sandbox_payment_apis && (
                     <div>
