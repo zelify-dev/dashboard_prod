@@ -10,6 +10,7 @@ import {
   setStoredOrganizationScopes,
   type OrganizationDetails,
 } from "@/lib/auth-api";
+import { useRouter } from "next/navigation";
 
 type PanelTranslations = {
     title: string;
@@ -277,6 +278,8 @@ export function PanelDashboard() {
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [orgDetails, setOrgDetails] = useState<OrganizationDetails | null>(null);
     const showZcoins = false; // Ocultar hasta cobrar el primer mes
+    const router = useRouter();
+    const [environment, setEnvironment] = useState<string>("SANDBOX");
 
     useEffect(() => {
         const checkDarkMode = () => setIsDarkMode(document.documentElement.classList.contains("dark"));
@@ -293,6 +296,16 @@ export function PanelDashboard() {
         getOrganization(org.id)
             .then(setOrgDetails)
             .catch(() => setOrgDetails(null));
+
+        fetch(`/api/organizations/${org.id}/environment`)
+            .then((res) => res.json())
+            .then((data) => {
+                if (data?.environment) {
+                    setEnvironment(data.environment);
+                }
+            })
+            .catch((err) => console.error("Error cargando entorno en panel", err));
+
         getOrganizationScopes(org.id)
             .then((items) => {
                 const scopeStrings = items.map((s) => s.scope);
@@ -363,7 +376,29 @@ export function PanelDashboard() {
     const subClass = "text-xs text-gray-500 dark:text-gray-400 mt-1";
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-8 relative">
+            {/* Si es Sandbox, renderizamos el overlay difuminado con gradiente sobre todo el panel */}
+            {environment === "SANDBOX" && (
+                <div className="absolute inset-0 z-40 flex flex-col items-center justify-start rounded-xl bg-white/40 dark:bg-gray-dark/30 backdrop-blur-[6px] p-6 text-center select-none pt-24 min-h-[400px]">
+                    <div className="max-w-[480px] rounded-2xl border border-stroke bg-white p-8 shadow-2xl dark:border-dark-3 dark:bg-dark-2">
+                        <h3 className="text-xl font-bold text-dark dark:text-white">
+                            Modo Sandbox Activo
+                        </h3>
+                        <p className="mt-3 text-sm text-dark-6">
+                            Completa el proceso de paso a producción para poder visualizar todas las métricas, tarjetas y registros en tiempo real de tu organización en el panel principal.
+                        </p>
+                        <div className="mt-6">
+                            <button
+                                onClick={() => router.push("/organization/production")}
+                                className="inline-flex rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-opacity-95"
+                            >
+                                Ir a Paso a Producción
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* ─── KPIs principales ─── */}
             <section>
                 <div className={`grid grid-cols-1 gap-4 ${showZcoins ? "sm:grid-cols-2 lg:grid-cols-4" : "w-full"}`}>
