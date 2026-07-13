@@ -380,7 +380,7 @@ export function PanelDashboard() {
             {/* Si es Sandbox, renderizamos el overlay difuminado con gradiente sobre todo el panel */}
             {environment === "SANDBOX" && (
                 <div className="absolute inset-0 z-40 flex flex-col items-center justify-start rounded-xl bg-white/40 dark:bg-gray-dark/30 backdrop-blur-[6px] p-6 text-center select-none pt-24 min-h-[400px]">
-                    <div className="max-w-[480px] rounded-2xl border border-stroke bg-white p-8 shadow-2xl dark:border-dark-3 dark:bg-dark-2">
+                    <div className="max-w-[480px] rounded-xl border border-stroke bg-white p-8 shadow-md dark:border-dark-3 dark:bg-dark-2">
                         <h3 className="text-xl font-bold text-dark dark:text-white">
                             Modo Sandbox Activo
                         </h3>
@@ -390,7 +390,7 @@ export function PanelDashboard() {
                         <div className="mt-6">
                             <button
                                 onClick={() => router.push("/organization/production")}
-                                className="inline-flex rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-opacity-95"
+                                className="inline-flex rounded-lg bg-[#0A2540] hover:bg-[#0A2540]/90 text-white font-medium px-6 py-2 rounded-lg text-sm transition-colors"
                             >
                                 Ir a Paso a Producción
                             </button>

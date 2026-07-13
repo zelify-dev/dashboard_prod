@@ -101,13 +101,13 @@ export function Header() {
           <div className="rounded-full bg-gray-3 p-[3px] dark:bg-[#020D1A] flex items-center relative text-[9px] font-bold select-none cursor-default opacity-90 h-[30px] border border-stroke dark:border-dark-3">
             {/* Sliding Indicator background */}
             <span
-              className={`absolute h-[22px] w-[56px] rounded-full bg-white dark:bg-dark-2 border border-gray-200 dark:border-none transition-all duration-300 ${
-                environment === "PRODUCTION" ? "translate-x-[56px]" : "translate-x-0"
+              className={`absolute h-[22px] w-[84px] rounded-full bg-white dark:bg-dark-2 border border-gray-200 dark:border-none transition-all duration-300 ${
+                environment === "PRODUCTION" ? "translate-x-[84px]" : "translate-x-0"
               }`}
             />
             {/* Options */}
             <span
-              className={`relative z-10 w-[56px] h-[22px] flex items-center justify-center transition-colors duration-300 ${
+              className={`relative z-10 w-[84px] h-[22px] flex items-center justify-center transition-colors duration-300 ${
                 environment === "SANDBOX"
                   ? "text-amber-600 dark:text-amber-400"
                   : "text-gray-400 dark:text-gray-600"
@@ -116,13 +116,13 @@ export function Header() {
               Sandbox
             </span>
             <span
-              className={`relative z-10 w-[56px] h-[22px] flex items-center justify-center transition-colors duration-300 ${
+              className={`relative z-10 w-[84px] h-[22px] flex items-center justify-center transition-colors duration-300 ${
                 environment === "PRODUCTION"
                   ? "text-emerald-600 dark:text-emerald-400"
                   : "text-gray-400 dark:text-gray-600"
               }`}
             >
-              Prod
+              Producción
             </span>
           </div>
         )}
