@@ -98,15 +98,33 @@ export function Header() {
         {/* <ThemeToggleSwitch /> */}
 
         {environment && (
-          <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide uppercase ${
-              environment === "PRODUCTION"
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
-                : "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
-            }`}
-          >
-            {environment === "PRODUCTION" ? "Producción" : "Sandbox"}
-          </span>
+          <div className="rounded-full bg-gray-3 p-[3px] dark:bg-[#020D1A] flex items-center relative text-[9px] font-bold select-none cursor-default opacity-90 h-[30px] border border-stroke dark:border-dark-3">
+            {/* Sliding Indicator background */}
+            <span
+              className={`absolute h-[22px] w-[56px] rounded-full bg-white dark:bg-dark-2 border border-gray-200 dark:border-none transition-all duration-300 ${
+                environment === "PRODUCTION" ? "translate-x-[56px]" : "translate-x-0"
+              }`}
+            />
+            {/* Options */}
+            <span
+              className={`relative z-10 w-[56px] h-[22px] flex items-center justify-center transition-colors duration-300 ${
+                environment === "SANDBOX"
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-gray-400 dark:text-gray-600"
+              }`}
+            >
+              Sandbox
+            </span>
+            <span
+              className={`relative z-10 w-[56px] h-[22px] flex items-center justify-center transition-colors duration-300 ${
+                environment === "PRODUCTION"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-gray-400 dark:text-gray-600"
+              }`}
+            >
+              Prod
+            </span>
+          </div>
         )}
 
         <LanguageToggleSwitch />
