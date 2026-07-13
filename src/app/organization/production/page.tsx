@@ -664,16 +664,16 @@ export default function PasoProduccionPage() {
             <div className="rounded-xl border border-stroke bg-slate-50/30 p-5 dark:border-dark-3 dark:bg-dark-2/20 space-y-4 sm:col-span-2">
               <div>
                 <h4 className="text-sm font-semibold text-dark dark:text-white">
-                  A. Webhook de Salida (Notificaciones de Zelify al ERP del Comercio)
+                  A. Avisar a tu sistema cuando ocurra un pago (Zelify → Tu ERP / Sistema)
                 </h4>
                 <p className="text-xs text-dark-6 mt-1">
-                  Configura el endpoint de tu ERP donde Zelify enviará alertas y confirmaciones de eventos de transacciones en tiempo real.
+                  Si tienes un sistema propio y deseas que Zelify le envíe notificaciones automáticas cada vez que ocurra un pago, cobro o reembolso en tiempo real, ingresa la URL receptora aquí.
                 </p>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-1.5">
                   <span className="block text-xs font-semibold text-dark-6">
-                    URL de Destino (Endpoint del ERP)
+                    URL de tu sistema para recibir avisos
                   </span>
                   <input
                     type="url"
@@ -686,7 +686,7 @@ export default function PasoProduccionPage() {
                 </label>
                 <label className="space-y-1.5">
                   <span className="block text-xs font-semibold text-dark-6">
-                    Eventos a Suscribir (Separados por comas)
+                    Eventos que deseas recibir (Separados por comas)
                   </span>
                   <input
                     type="text"
@@ -704,10 +704,10 @@ export default function PasoProduccionPage() {
             <div className="rounded-xl border border-stroke bg-slate-50/30 p-5 dark:border-dark-3 dark:bg-dark-2/20 space-y-4 sm:col-span-2">
               <div>
                 <h4 className="text-sm font-semibold text-dark dark:text-white">
-                  B. Webhook de Entrada (Notificaciones del ERP del Comercio a Zelify)
+                  B. Enviar avisos de tu sistema hacia Zelify (Tu ERP / Sistema → Zelify)
                 </h4>
                 <p className="text-xs text-dark-6 mt-1">
-                  Si tu ERP requiere enviar actualizaciones de estados o eventos hacia Zelify, solicita un endpoint y tokens seguros.
+                  Si tu ERP o sistema de facturación necesita enviar de vuelta información, actualizaciones de stock o confirmaciones a Zelify, marca esta opción para solicitar credenciales exclusivas.
                 </p>
               </div>
               <label className="flex items-start gap-3 text-sm font-semibold text-dark dark:text-white">
@@ -718,7 +718,7 @@ export default function PasoProduccionPage() {
                   disabled={isFormDisabled}
                   className="mt-1 h-4 w-4 rounded border-stroke accent-primary dark:border-dark-3"
                 />
-                <span>Solicitar credenciales de integración (Client ID/Secret) y URL del endpoint de Zelify para el ERP.</span>
+                <span>Solicitar dirección (URL de endpoint) de Zelify y credenciales de seguridad (Client ID / Secret) para que mi ERP envíe datos a Zelify.</span>
               </label>
               {webhookZelifyRequested && (
                 <div className="rounded border border-stroke bg-white dark:border-dark-3 dark:bg-dark-2 p-3 text-xs text-dark-6 leading-5">
