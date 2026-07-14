@@ -2545,131 +2545,140 @@ export function OrganizationAdministrationDetailClient() {
       ) : null}
 
       {activeTab === "onboarding" ? (
-        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-          <ShowcaseSection title="Estado de Onboarding" className="!p-6">
-            {onboardingLoading ? (
-              <p className="text-sm text-dark-6 dark:text-dark-6">Cargando estado de onboarding...</p>
-            ) : onboardingError || onboardingQueryError ? (
-              <ErrorAlert message={onboardingError || onboardingQueryError} />
-            ) : onboarding ? (
-              <div className="space-y-4">
-                <ProgressRow label="KYB" value={onboarding.percents.kyb} />
-                <ProgressRow label="AML" value={onboarding.percents.aml} />
-                <ProgressRow label="Documentacion tecnica" value={onboarding.percents.technical} />
-                <ProgressRow label="Plan de negocio" value={onboarding.percents.businessPlan} />
-                <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                  <div className="mb-3 text-sm font-medium text-dark dark:text-white">
-                    Evidencia cargada disponible hoy
-                  </div>
-                  <div className="space-y-3">
-                    {onboardingAssets.primary.map((asset) => (
-                      <OnboardingAssetRow key={asset.label} asset={asset} />
-                    ))}
-                  </div>
-                </div>
-                <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                  <div className="mb-3 text-sm font-medium text-dark dark:text-white">
-                    Bloques de documentacion tecnica
-                  </div>
-                  <div className="space-y-3">
-                    {onboardingAssets.technical.map((asset) => (
-                      <OnboardingAssetRow key={asset.label} asset={asset} />
-                    ))}
-                  </div>
-                </div>
-                <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                  <div className="mb-3 text-sm font-medium text-dark dark:text-white">
-                    Ambientes de desarrollo
-                  </div>
-                  <div className="space-y-3 text-sm">
-                    <div>
-                      <div className="mb-1 text-dark-6 dark:text-dark-6">Ultima actualizacion</div>
-                      <div className="text-dark dark:text-white">
-                        {formatDate(onboardingAssets.development.updatedAt)}
+        <div className="space-y-6">
+          {onboardingLoading ? (
+            <p className="text-sm text-dark-6 dark:text-dark-6">Cargando estado de onboarding...</p>
+          ) : onboardingError || onboardingQueryError ? (
+            <ErrorAlert message={onboardingError || onboardingQueryError} />
+          ) : onboarding ? (
+            <div className="space-y-6">
+              
+              {/* Sección 1: Resumen de Progreso (Grid Compacto) */}
+              <ShowcaseSection title="Progreso de Onboarding" className="!p-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: "KYB", val: onboarding.percents.kyb },
+                    { label: "AML", val: onboarding.percents.aml },
+                    { label: "Doc. Técnica", val: onboarding.percents.technical },
+                    { label: "Plan de Negocio", val: onboarding.percents.businessPlan }
+                  ].map((item, idx) => (
+                    <div key={idx} className="p-4 rounded-xl border border-stroke bg-white dark:border-dark-3 dark:bg-dark-2/40 space-y-2">
+                      <div className="text-xs text-dark-6 font-semibold uppercase">{item.label}</div>
+                      <div className="flex items-baseline justify-between">
+                        <span className="text-2xl font-extrabold text-dark dark:text-white">{item.val}%</span>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                          item.val === 100
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40"
+                            : "bg-amber-100 text-amber-700 dark:bg-amber-950/40"
+                        }`}>
+                          {item.val === 100 ? "Verificado" : "Pendiente"}
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-dark-3 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            item.val === 100 ? "bg-emerald-500" : "bg-primary"
+                          }`}
+                          style={{ width: `${item.val}%` }}
+                        />
                       </div>
                     </div>
+                  ))}
+                </div>
+              </ShowcaseSection>
+
+              {/* Sección 2: Evidencia Documental */}
+              <ShowcaseSection title="Expediente de Evidencia Cargada" className="!p-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-dark-6 dark:text-dark-6 uppercase tracking-wider border-b border-stroke pb-1.5 dark:border-dark-3">
+                      Documentación Legal y Comercial
+                    </h4>
+                    <div className="grid gap-2.5">
+                      {onboardingAssets.primary.map((asset) => (
+                        <OnboardingAssetRow key={asset.label} asset={asset} />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-bold text-dark-6 dark:text-dark-6 uppercase tracking-wider border-b border-stroke pb-1.5 dark:border-dark-3">
+                      Documentación Técnica de Integración
+                    </h4>
+                    <div className="grid gap-2.5">
+                      {onboardingAssets.technical.map((asset) => (
+                        <OnboardingAssetRow key={asset.label} asset={asset} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </ShowcaseSection>
+
+              {/* Sección 3: Datos de Ambientes */}
+              <ShowcaseSection title="Credenciales y Ambientes Declarados" className="!p-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-4">
                     <div>
-                      <div className="mb-1 text-dark-6 dark:text-dark-6">URLs</div>
-                      <pre className="overflow-auto rounded-lg bg-gray-2 px-3 py-2 text-xs text-dark dark:bg-dark-2 dark:text-white">
+                      <span className="block text-xs font-bold text-dark-6 dark:text-dark-6 uppercase tracking-wider mb-1">
+                        URLs de Prueba Declaradas
+                      </span>
+                      <pre className="overflow-auto rounded-lg bg-gray-2 px-3.5 py-3 text-xs font-mono text-dark break-all max-h-36 dark:bg-dark-2 dark:text-white">
                         {onboardingAssets.development.urls || "No hay URLs guardadas"}
                       </pre>
                     </div>
                     <div>
-                      <div className="mb-1 text-dark-6 dark:text-dark-6">Referencia de claves API</div>
-                      <pre className="overflow-auto rounded-lg bg-gray-2 px-3 py-2 text-xs text-dark dark:bg-dark-2 dark:text-white">
+                      <span className="block text-xs font-bold text-dark-6 dark:text-dark-6 uppercase tracking-wider mb-1">
+                        Claves API de Prueba
+                      </span>
+                      <pre className="overflow-auto rounded-lg bg-gray-2 px-3.5 py-3 text-xs font-mono text-dark break-all max-h-36 dark:bg-dark-2 dark:text-white">
                         {onboardingAssets.development.apiKeys || "No hay claves API guardadas"}
                       </pre>
                     </div>
                   </div>
-                </div>
-                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-900/20 dark:text-amber-300">
-                  La evidencia actual del backend se limita a `uploaded`, `url`, `s3_key` y timestamps de ambientes. La metadata de auditoria como uploader, version o review status sigue dependiendo de una expansion backend.
-                </div>
-                <pre className="overflow-auto rounded-lg bg-dark px-4 py-4 text-xs text-white">{prettifyJson(onboarding.raw)}</pre>
-              </div>
-            ) : (
-              <p className="text-sm text-dark-6 dark:text-dark-6">No hay datos de onboarding disponibles.</p>
-            )}
-          </ShowcaseSection>
 
-          <ShowcaseSection title="Acciones de Onboarding" className="!p-6">
-            <div className="space-y-5">
-              <UploadBlock
-                title="Archivos KYB"
-                hint={onboarding?.flags.kybLocked ? "Backend reporta que KYB ya fue cargado o completado." : "Cargar un nuevo bundle KYB."}
-                loading={onboardingActionLoading === "kyb"}
-                onChange={(file) => file ? runOnboardingAction("kyb", () => postKybFiles(orgId, file)) : Promise.resolve()}
-              />
-              <UploadBlock
-                title="Archivos AML"
-                hint={onboarding?.flags.amlLocked ? "Backend reporta que AML ya fue cargado o completado." : "Cargar un nuevo bundle AML."}
-                loading={onboardingActionLoading === "aml"}
-                onChange={(file) => file ? runOnboardingAction("aml", () => postAmlFiles(orgId, file)) : Promise.resolve()}
-              />
-              <UploadBlock
-                title="Plan de negocio"
-                hint={onboarding?.businessPlan.uploaded ? "Ya existe un archivo de plan de negocio registrado." : "Cargar el documento de plan de negocio."}
-                loading={onboardingActionLoading === "business-plan"}
-                onChange={(file) => file ? runOnboardingAction("business-plan", () => postBusinessPlanFile(orgId, file)) : Promise.resolve()}
-              />
-              <TechnicalDocumentationBlock
-                loading={onboardingActionLoading === "technical"}
-                onSubmit={(files) => runOnboardingAction("technical", () => postTechnicalDocumentation(orgId, files))}
-              />
-              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                <div className="text-sm font-medium text-dark dark:text-white">Ambientes de desarrollo</div>
-                <p className="mt-1 text-sm text-dark-6 dark:text-dark-6">Guarda URLs y claves API para el bloque tecnico del onboarding.</p>
-                <div className="mt-4 grid gap-4">
-                  <label className="space-y-2">
-                    <span className="block text-sm font-medium text-dark dark:text-white">URLs</span>
-                    <textarea
-                      value={developmentUrls}
-                      onChange={(event) => setDevelopmentUrls(event.target.value)}
-                      rows={4}
-                      className="w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                    />
-                  </label>
-                  <label className="space-y-2">
-                    <span className="block text-sm font-medium text-dark dark:text-white">Claves API</span>
-                    <textarea
-                      value={developmentApiKeys}
-                      onChange={(event) => setDevelopmentApiKeys(event.target.value)}
-                      rows={4}
-                      className="w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => void saveDevelopmentEnvironments()}
-                    disabled={onboardingActionLoading === "development-environments"}
-                    className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {onboardingActionLoading === "development-environments" ? "Guardando..." : "Guardar ambientes"}
-                  </button>
+                  <div className="p-4 rounded-xl border border-stroke bg-slate-50/50 dark:border-dark-3 dark:bg-dark-2/10 space-y-3 h-fit">
+                    <span className="block text-xs font-bold text-dark dark:text-white uppercase tracking-wider">
+                      Metadatos de Integración
+                    </span>
+                    <div className="text-xs space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-dark-6">Última actualización:</span>
+                        <span className="font-semibold text-dark dark:text-white">
+                          {formatDate(onboardingAssets.development.updatedAt) || "Sin fecha"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-dark-6">Estatus técnico:</span>
+                        <span className="font-semibold text-dark dark:text-white">
+                          {onboarding.flags.technical.developmentEnvironmentsLocked ? "Completado y bloqueado" : "Pendiente de envío"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </ShowcaseSection>
+
+              {/* Sección 4: Depuración Técnica (Colapsable) */}
+              <details className="group rounded-xl border border-stroke bg-slate-50/30 p-4 dark:border-dark-3 dark:bg-dark-2/10 transition">
+                <summary className="flex cursor-pointer items-center justify-between text-xs font-semibold text-dark-6 dark:text-dark-6 outline-none">
+                  <span>Ver JSON crudo de auditoría (Desarrolladores)</span>
+                  <span className="transition group-open:rotate-180">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </summary>
+                <div className="mt-3">
+                  <pre className="overflow-auto rounded-lg bg-dark p-4 text-xs font-mono text-white leading-5 max-h-96">
+                    {prettifyJson(onboarding.raw)}
+                  </pre>
+                </div>
+              </details>
+
             </div>
-          </ShowcaseSection>
+          ) : (
+            <p className="text-sm text-dark-6 dark:text-dark-6">No hay datos de onboarding disponibles.</p>
+          )}
         </div>
       ) : null}
 
