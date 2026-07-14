@@ -173,7 +173,7 @@ type MembersBatchAction = "activate" | "disable" | "assign-roles" | "remove-role
 const PAGE_TITLE = "Administracion de Organizaciones";
 const DETAIL_TABS: Array<{ id: DetailTabId; label: string }> = [
   { id: "overview", label: "Resumen" },
-  { id: "general", label: "Informacion General" },
+  { id: "general", label: "Editar Información" },
   { id: "branding", label: "Marca" },
   { id: "members", label: "Miembros" },
   { id: "roles", label: "Roles" },
@@ -188,6 +188,33 @@ const SYSTEM_HIDDEN_ROLE_CODES = new Set([
   "USER_APP",
 ]);
 const HEX_REGEX = /^#[0-9A-Fa-f]{6}$/;
+const AVAILABLE_SCOPES_GROUPS = [
+  {
+    category: "Autenticación y Seguridad",
+    scopes: [
+      { value: "auth.authentication.*", label: "Autenticación General", desc: "Permite usar el flujo de inicio de sesión y validación de tokens" },
+      { value: "auth.users.*", label: "Gestión de Usuarios", desc: "Crear, listar, actualizar y dar de baja usuarios de la organización" },
+      { value: "auth.roles.*", label: "Gestión de Roles", desc: "Administración de perfiles y asignación de permisos a miembros" },
+    ]
+  },
+  {
+    category: "Pagos y QR",
+    scopes: [
+      { value: "payments.qr.*", label: "Cobros con QR", desc: "Generación de QRs estáticos y dinámicos para cobros integrados" },
+      { value: "payments.transactions.*", label: "Transacciones", desc: "Listar, consultar y auditar movimientos de transacciones" },
+      { value: "payments.refunds.*", label: "Reembolsos", desc: "Permite emitir devoluciones de cobros directamente desde el comercio" },
+      { value: "payments.payouts.*", label: "Dispersión de Fondos", desc: "Realizar transferencias de salida y payouts hacia cuentas de destino" },
+    ]
+  },
+  {
+    category: "Configuración y Negocio",
+    scopes: [
+      { value: "organization.branding.*", label: "Configuración de Marca", desc: "Modificar logos, colores y personalización del comercio" },
+      { value: "organization.config.*", label: "Límites y Reglas", desc: "Configurar montos máximos diarios y políticas operativas" },
+      { value: "identity.workflows.*", label: "Flujos de Identidad (KYC/KYB)", desc: "Administración de reglas de biometría y escaneo de documentos" },
+    ]
+  }
+];
 const IDENTITY_DOCUMENT_OPTIONS: SelectOption[] = [
   { value: "identity_document", label: "identity_document - Documento de identidad" },
   { value: "driver_license", label: "driver_license - Licencia de conducir" },
@@ -1200,6 +1227,26 @@ export function OrganizationAdministrationDetailClient() {
     }
   };
 
+  const handleToggleScope = async (scopeValue: string) => {
+    const hasScope = scopes.some((s) => s.scope === scopeValue);
+    setScopesSaving(true);
+    setScopesError("");
+    try {
+      if (hasScope) {
+        await removeOrganizationScope(orgId, encodeScopeForUrl(scopeValue));
+        setFlash("Permiso removido.");
+      } else {
+        await addOrganizationScopes(orgId, [scopeValue]);
+        setFlash("Permiso agregado.");
+      }
+      await Promise.all([refreshScopes(), refreshOrganizationCaches()]);
+    } catch (err) {
+      setScopesError(err instanceof Error ? err.message : "No se pudo actualizar el permiso.");
+    } finally {
+      setScopesSaving(false);
+    }
+  };
+
   const deleteScope = async (scope: string) => {
     if (!window.confirm(`Eliminar el permiso "${scope}" de esta organizacion?`)) return;
     setScopesSaving(true);
@@ -1589,7 +1636,7 @@ export function OrganizationAdministrationDetailClient() {
       ) : null}
 
       {activeTab === "general" ? (
-        <ShowcaseSection title="Informacion General" className="!p-6">
+        <ShowcaseSection title="Editar Información" className="!p-6">
           <form onSubmit={submitGeneralInfo} className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <FormField label="Nombre de la organizacion" value={generalForm.name} onChange={(value) => setGeneralForm((current) => ({ ...current, name: value }))} required />
@@ -1626,7 +1673,7 @@ export function OrganizationAdministrationDetailClient() {
                 disabled={generalSaving}
                 className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {generalSaving ? "Guardando..." : "Guardar informacion general"}
+                {generalSaving ? "Guardando..." : "Guardar información"}
               </button>
             </div>
           </form>
@@ -1997,34 +2044,111 @@ export function OrganizationAdministrationDetailClient() {
 
       {activeTab === "scopes" ? (
         <ShowcaseSection title="Permisos" className="!p-6">
-          <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-            <div className="space-y-4">
-              <p className="text-sm text-dark-6 dark:text-dark-6">
-                Agrega uno o varios permisos separados por comas o saltos de linea. Las eliminaciones piden confirmacion porque impactan de inmediato los productos habilitados.
-              </p>
-              <textarea
-                value={newScopesText}
-                onChange={(event) => setNewScopesText(event.target.value)}
-                rows={8}
-                placeholder={"auth.authentication.*\npayments.qr.*"}
-                className="w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-              />
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+            
+            {/* Columna Izquierda: Catálogo de Permisos */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-dark dark:text-white uppercase tracking-wider">
+                  Catálogo de Permisos Disponibles
+                </h3>
+                <p className="text-xs text-dark-6 mt-1">
+                  Selecciona o desmarca los permisos para asignarlos o removerlos de esta organización.
+                </p>
+              </div>
+
               {scopesError || scopesQueryError ? <ErrorAlert message={scopesError || scopesQueryError} /> : null}
-              <button
-                type="button"
-                onClick={() => void addScopes()}
-                disabled={scopesSaving}
-                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {scopesSaving ? "Guardando..." : "Agregar permisos"}
-              </button>
+
+              <div className="space-y-6">
+                {AVAILABLE_SCOPES_GROUPS.map((group, groupIdx) => (
+                  <div key={groupIdx} className="space-y-3">
+                    <h4 className="text-xs font-bold text-dark-6 dark:text-dark-6 border-b border-stroke pb-1 dark:border-dark-3">
+                      {group.category}
+                    </h4>
+                    <div className="grid gap-3">
+                      {group.scopes.map((s, sIdx) => {
+                        const isAssigned = scopes.some((x) => x.scope === s.value);
+                        return (
+                          <label
+                            key={sIdx}
+                            className={`flex items-start gap-3 p-3 rounded-lg border transition cursor-pointer select-none ${
+                              isAssigned
+                                ? "border-emerald-200 bg-emerald-50/20 dark:border-emerald-950/40 dark:bg-emerald-950/5"
+                                : "border-stroke bg-white hover:bg-slate-50/50 dark:border-dark-3 dark:bg-dark-2/20"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isAssigned}
+                              onChange={() => void handleToggleScope(s.value)}
+                              disabled={scopesSaving}
+                              className="mt-1 h-4 w-4 rounded border-stroke accent-emerald-500 disabled:cursor-not-allowed"
+                            />
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-dark dark:text-white">
+                                  {s.label}
+                                </span>
+                                <span className="font-mono text-[9px] text-dark-6 bg-slate-100 dark:bg-dark-3 px-1 rounded">
+                                  {s.value}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-dark-6 leading-4">
+                                {s.desc}
+                              </p>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Scope Personalizado (Avanzado) */}
+              <div className="rounded-xl border border-stroke p-4 bg-slate-50/30 dark:border-dark-3 dark:bg-dark-2/10 space-y-3">
+                <span className="block text-xs font-bold text-dark dark:text-white uppercase tracking-wider">
+                  Asignar Permiso Personalizado (Avanzado)
+                </span>
+                <p className="text-[11px] text-dark-6">
+                  Si necesitas asignar un scope técnico específico no listado en el catálogo superior, escríbelo aquí abajo.
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newScopesText}
+                    onChange={(event) => setNewScopesText(event.target.value)}
+                    disabled={scopesSaving}
+                    placeholder="ej. custom.service.action.*"
+                    className="flex-1 rounded-lg border border-stroke bg-white px-3 py-1.5 text-xs text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void addScopes()}
+                    disabled={scopesSaving || !newScopesText.trim()}
+                    className="rounded-lg bg-[#0A2540] hover:bg-[#0A2540]/90 text-white font-medium px-4 py-1.5 text-xs transition disabled:opacity-50"
+                  >
+                    Asignar
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="rounded-xl border border-stroke p-4 dark:border-dark-3">
-              <div className="mb-3 text-sm font-medium text-dark dark:text-white">Permisos actuales ({scopes.length})</div>
+
+            {/* Columna Derecha: Lista de Permisos Asignados */}
+            <div className="rounded-xl border border-stroke p-5 bg-white dark:border-dark-3 dark:bg-dark-2/40 h-fit space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-dark dark:text-white uppercase tracking-wider">
+                  Permisos Asignados Activos ({scopes.length})
+                </h3>
+                <p className="text-xs text-dark-6 mt-1">
+                  Esta organización cuenta actualmente con los siguientes accesos y permisos.
+                </p>
+              </div>
+
               {scopesLoading ? (
-                <p className="text-sm text-dark-6 dark:text-dark-6">Cargando scopes...</p>
+                <p className="text-xs text-dark-6 dark:text-dark-6">Cargando scopes...</p>
               ) : scopes.length === 0 ? (
-                <p className="text-sm text-dark-6 dark:text-dark-6">Aun no hay scopes asignados.</p>
+                <p className="text-xs text-dark-6 dark:text-dark-6 italic">Aun no hay scopes asignados.</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {scopes.map((scope) => (
@@ -2032,14 +2156,18 @@ export function OrganizationAdministrationDetailClient() {
                       key={scope.id}
                       type="button"
                       onClick={() => void deleteScope(scope.scope)}
-                      className="rounded-full border border-stroke px-3 py-1.5 text-xs font-medium text-dark transition hover:border-rose-500 hover:text-rose-500 dark:border-dark-3 dark:text-white"
+                      disabled={scopesSaving}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-stroke bg-slate-50 px-3 py-1 text-xs font-semibold text-dark transition hover:border-rose-500 hover:text-rose-600 hover:bg-rose-50/30 dark:border-dark-3 dark:bg-dark-3 dark:text-white dark:hover:border-rose-500 dark:hover:text-rose-400"
+                      title="Haz clic para quitar este permiso"
                     >
-                      {scope.scope} ×
+                      <span>{scope.scope}</span>
+                      <span className="text-[10px] text-dark-6 font-bold">×</span>
                     </button>
                   ))}
                 </div>
               )}
             </div>
+
           </div>
         </ShowcaseSection>
       ) : null}
