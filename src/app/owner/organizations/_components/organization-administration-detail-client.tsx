@@ -40,12 +40,15 @@ import {
   createOrgUser,
   getOrgUser,
   removeOrgUserRole,
-  resetOrgUserPassword,
+  setOrgUserPassword,
+  batchSetOrgUserPassword,
   updateOrgUser,
   type BatchActionResponse,
   type OrgUser,
   type OrgUserListItem,
   type OrgUserStatus,
+  type SetOrgUserPasswordPayload,
+  type BatchSetOrgUserPasswordPayload,
 } from "@/lib/organization-users-api";
 import {
   getApiKeySecret,
@@ -572,6 +575,18 @@ export function OrganizationAdministrationDetailClient() {
   const [memberBatchError, setMemberBatchError] = useState("");
   const [memberBatchRoleCodes, setMemberBatchRoleCodes] = useState<string[]>([]);
   const [memberBatchResult, setMemberBatchResult] = useState<BatchActionResponse | null>(null);
+
+  // Estados para modal de restablecer contraseña estilo Google Admin
+  const [resetUser, setResetUser] = useState<OrgUserListItem | null>(null);
+  const [resetMode, setResetMode] = useState<"auto" | "manual">("auto");
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetShowPassword, setResetShowPassword] = useState(false);
+  const [resetMustChange, setResetMustChange] = useState(true);
+  const [resetSendEmail, setResetSendEmail] = useState(true);
+  const [resetResultPassword, setResetResultPassword] = useState("");
+  const [resetResultEmailSent, setResetResultEmailSent] = useState(false);
+  const [resetResultCopied, setResetResultCopied] = useState(false);
+
   const [memberCreateOpen, setMemberCreateOpen] = useState(false);
   const [activeDropdownMemberId, setActiveDropdownMemberId] = useState<string | null>(null);
   const [memberCreateForm, setMemberCreateForm] = useState<MemberCreateFormState>({
@@ -1356,20 +1371,18 @@ export function OrganizationAdministrationDetailClient() {
     }
   };
 
-  const resetSelectedMemberPassword = async () => {
+  const resetSelectedMemberPassword = () => {
     if (!selectedMember) return;
-    if (!window.confirm(`Resetear contrasena para ${selectedMember.email}?`)) return;
-    setMemberActionLoading(true);
+    setResetUser(selectedMember);
+    setResetMode("auto");
+    setResetNewPassword("");
+    setResetShowPassword(false);
+    setResetMustChange(true);
+    setResetSendEmail(true);
+    setResetResultPassword("");
+    setResetResultEmailSent(false);
+    setResetResultCopied(false);
     setMemberActionError("");
-    try {
-      const result = await resetOrgUserPassword(orgId, selectedMember.id);
-      setTemporaryPassword(result.temporary_password);
-      setFlash("Contrasena temporal generada.");
-    } catch (err) {
-      setMemberActionError(err instanceof Error ? err.message : "No se pudo resetear la contrasena.");
-    } finally {
-      setMemberActionLoading(false);
-    }
   };
 
   const toggleMemberStatus = async (member: OrgUserListItem) => {
@@ -1394,20 +1407,17 @@ export function OrganizationAdministrationDetailClient() {
     }
   };
 
-  const resetMemberPasswordDirectly = async (member: OrgUserListItem) => {
-    if (!window.confirm(`¿Resetear contraseña para ${member.email}?`)) return;
-    setMemberActionLoading(true);
+  const resetMemberPasswordDirectly = (member: OrgUserListItem) => {
+    setResetUser(member);
+    setResetMode("auto");
+    setResetNewPassword("");
+    setResetShowPassword(false);
+    setResetMustChange(true);
+    setResetSendEmail(true);
+    setResetResultPassword("");
+    setResetResultEmailSent(false);
+    setResetResultCopied(false);
     setMemberActionError("");
-    try {
-      const result = await resetOrgUserPassword(orgId, member.id);
-      setSelectedMemberId(member.id);
-      setTemporaryPassword(result.temporary_password);
-      setFlash(`Contraseña temporal generada para ${member.full_name}.`);
-    } catch (err) {
-      setMemberActionError(err instanceof Error ? err.message : "No se pudo resetear la contraseña.");
-    } finally {
-      setMemberActionLoading(false);
-    }
   };
 
   const executeMemberBatchAction = async () => {
@@ -1443,9 +1453,12 @@ export function OrganizationAdministrationDetailClient() {
           role_codes: memberBatchRoleCodes,
         });
       } else {
-        result = await batchResetOrgUserPasswords(orgId, {
+        result = await batchSetOrgUserPassword(orgId, {
           user_ids: selectedMemberIds,
-        });
+          mode: "auto",
+          must_change_password: true,
+          send_email: false,
+        }) as any;
       }
 
       setMemberBatchResult(result);
@@ -3029,6 +3042,210 @@ export function OrganizationAdministrationDetailClient() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {resetUser ? (
+        <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-dark dark:shadow-card">
+            {resetResultPassword ? (
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-dark dark:text-white">Contraseña Restablecida</h2>
+                <p className="text-xs text-dark-6">
+                  Se ha generado una nueva contraseña para la cuenta del miembro.
+                </p>
+                <div className="flex items-center gap-2 rounded-lg border border-stroke bg-slate-50 p-3 dark:border-dark-3 dark:bg-dark-2">
+                  <code className="min-w-0 flex-1 truncate font-mono text-sm text-dark dark:text-white">
+                    {resetResultPassword}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(resetResultPassword);
+                        setResetResultCopied(true);
+                        setTimeout(() => setResetResultCopied(false), 2000);
+                      } catch (e) {}
+                    }}
+                    className="shrink-0 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-opacity-90"
+                  >
+                    {resetResultCopied ? "Copiado" : "Copiar"}
+                  </button>
+                </div>
+                {resetResultEmailSent && (
+                  <p className="text-xs font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/20 p-2 rounded-lg">
+                    Las credenciales también han sido enviadas al correo del usuario.
+                  </p>
+                )}
+                <div className="mt-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResetUser(null);
+                      reloadMembers();
+                      if (selectedMemberId === resetUser.id) refreshSelectedMember();
+                    }}
+                    className="rounded-lg bg-primary hover:bg-opacity-90 px-5 py-2 text-xs font-semibold text-white transition"
+                  >
+                    Entendido
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-dark dark:text-white">Restablecer contraseña</h2>
+                <p className="text-xs text-dark-6">
+                  Define los parámetros de la nueva clave de acceso para el miembro.
+                </p>
+                
+                <div className="p-3 bg-slate-50 dark:bg-dark-2 rounded-lg border border-stroke dark:border-dark-3 text-xs space-y-0.5">
+                  <div className="text-dark-6">Usuario:</div>
+                  <div className="font-bold text-dark dark:text-white truncate">{resetUser.full_name}</div>
+                  <div className="text-dark-6 font-mono truncate">{resetUser.email}</div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-dark dark:text-white">
+                      <input
+                        type="radio"
+                        name="owner_reset_password_mode"
+                        checked={resetMode === "auto"}
+                        onChange={() => setResetMode("auto")}
+                        className="h-4 w-4 accent-primary"
+                      />
+                      Generar contraseña automáticamente
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-dark dark:text-white">
+                      <input
+                        type="radio"
+                        name="owner_reset_password_mode"
+                        checked={resetMode === "manual"}
+                        onChange={() => setResetMode("manual")}
+                        className="h-4 w-4 accent-primary"
+                      />
+                      Crear contraseña manualmente
+                    </label>
+                  </div>
+
+                  {resetMode === "manual" && (
+                    <div className="space-y-1">
+                      <label className="block text-xs font-bold text-dark dark:text-white uppercase tracking-wider">
+                        Contraseña Manual
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={resetShowPassword ? "text" : "password"}
+                          value={resetNewPassword}
+                          onChange={(e) => setResetNewPassword(e.target.value)}
+                          placeholder="Mínimo 6 caracteres"
+                          className="h-10 w-full rounded-lg border border-stroke bg-white pl-3 pr-10 text-xs text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setResetShowPassword(!resetShowPassword)}
+                          className="absolute right-3 top-2.5 text-dark-6 hover:text-dark dark:hover:text-white"
+                        >
+                          {resetShowPassword ? (
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          ) : (
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-2 border-t border-stroke pt-3 dark:border-dark-3">
+                    <label className="flex items-start gap-2.5 cursor-pointer text-xs text-dark-6 select-none">
+                      <input
+                        type="checkbox"
+                        checked={resetMustChange}
+                        onChange={(e) => setResetMustChange(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-stroke accent-primary"
+                      />
+                      <div>
+                        <span className="font-semibold text-dark dark:text-white block">Exigir cambio de contraseña al próximo inicio</span>
+                        El usuario deberá renovar la contraseña en su primera entrada.
+                      </div>
+                    </label>
+
+                    <label className="flex items-start gap-2.5 cursor-pointer text-xs text-dark-6 select-none">
+                      <input
+                        type="checkbox"
+                        checked={resetSendEmail}
+                        onChange={(e) => setResetSendEmail(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 rounded border-stroke accent-primary"
+                      />
+                      <div>
+                        <span className="font-semibold text-dark dark:text-white block">Enviar contraseña por correo electrónico</span>
+                        Se enviará la nueva clave temporal a su email.
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {memberActionError && (
+                  <p className="text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 p-2.5 rounded-lg">
+                    {memberActionError}
+                  </p>
+                )}
+
+                <div className="mt-6 flex justify-end gap-3 pt-3 border-t border-stroke dark:border-dark-3">
+                  <button
+                    type="button"
+                    onClick={() => setResetUser(null)}
+                    disabled={memberActionLoading}
+                    className="rounded-lg border border-stroke bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white transition"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setMemberActionError("");
+                      if (resetMode === "manual" && !resetNewPassword.trim()) {
+                        setMemberActionError("Debes escribir una contraseña manual.");
+                        return;
+                      }
+                      if (resetMode === "manual" && resetNewPassword.length < 6) {
+                        setMemberActionError("La contraseña debe tener al menos 6 caracteres.");
+                        return;
+                      }
+                      setMemberActionLoading(true);
+                      try {
+                        const payload: SetOrgUserPasswordPayload = {
+                          mode: resetMode,
+                          must_change_password: resetMustChange,
+                          send_email: resetSendEmail,
+                        };
+                        if (resetMode === "manual") {
+                          payload.new_password = resetNewPassword;
+                        }
+                        const res = await setOrgUserPassword(orgId, resetUser.id, payload);
+                        setResetResultPassword(res.password ?? res.temporary_password ?? resetNewPassword);
+                        setResetResultEmailSent(!!res.email_sent);
+                        setFlash("Contraseña restablecida correctamente.");
+                      } catch (err) {
+                        setMemberActionError(err instanceof Error ? err.message : "Error al restablecer contraseña.");
+                      } finally {
+                        setMemberActionLoading(false);
+                      }
+                    }}
+                    disabled={memberActionLoading}
+                    className="rounded-lg bg-primary hover:bg-opacity-90 px-4 py-2.5 text-xs font-semibold text-white transition"
+                  >
+                    {memberActionLoading ? "Procesando..." : "Restablecer contraseña"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ) : null}

@@ -64,12 +64,13 @@ export type CreateOrgUserResponse = {
   invite_token: string | null;
 };
 
-/** Body para POST /api/organizations/{id}/dashboard/members (crear miembro desde dashboard). */
 export type CreateDashboardMemberBody = {
   email: string;
   full_name: string;
   roles?: string[];
   send_invite?: boolean;
+  password?: string;
+  must_change_password?: boolean;
 };
 
 /** Respuesta 201 de POST /api/organizations/{id}/dashboard/members */
@@ -381,6 +382,78 @@ export async function resetOrgUserPassword(
     );
   }
   return data as { ok: boolean; temporary_password: string };
+}
+
+export type SetOrgUserPasswordPayload = {
+  mode: "auto" | "manual";
+  new_password?: string;
+  must_change_password?: boolean;
+  send_email?: boolean;
+};
+
+export type SetOrgUserPasswordResponse = {
+  ok: boolean;
+  password?: string;
+  temporary_password?: string;
+  must_change_password?: boolean;
+  email_sent?: boolean;
+};
+
+export type BatchSetOrgUserPasswordPayload = {
+  user_ids: string[];
+  mode: "auto" | "manual";
+  new_password?: string;
+  must_change_password?: boolean;
+  send_email?: boolean;
+};
+
+/** POST /api/organizations/{orgId}/users/{userId}/set-password */
+export async function setOrgUserPassword(
+  orgId: string,
+  userId: string,
+  payload: SetOrgUserPasswordPayload
+): Promise<SetOrgUserPasswordResponse> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/users/${encodeURIComponent(userId)}/set-password`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al definir contraseña",
+      res.status,
+      data
+    );
+  }
+  return data as SetOrgUserPasswordResponse;
+}
+
+/** POST /api/organizations/{orgId}/users/batch/set-password */
+export async function batchSetOrgUserPassword(
+  orgId: string,
+  payload: BatchSetOrgUserPasswordPayload
+): Promise<{ ok: boolean; results?: any[] }> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/users/batch/set-password`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al definir contraseñas en lote",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean; results?: any[] };
 }
 
 /** POST /api/organizations/{orgId}/dashboard/members/{userId}/send-reset-password-email */

@@ -12,12 +12,13 @@ import {
   updateOrgUser,
   assignOrgUserRoles,
   removeOrgUserRole,
-  resetOrgUserPassword,
+  setOrgUserPassword,
   sendDashboardMemberInviteEmail,
   sendDashboardMemberResetPasswordEmail,
   type OrgUserListItem,
   type OrgUser,
   type OrgUserStatus,
+  type SetOrgUserPasswordPayload,
 } from "@/lib/organization-users-api";
 import { AuthError } from "@/lib/auth-api";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
@@ -275,7 +276,13 @@ export default function TeamsPage() {
     setAddModalOpen(true);
   };
 
-  const handleAddMember = async (data: { fullName: string; email: string; role: string }) => {
+  const handleAddMember = async (data: {
+    fullName: string;
+    email: string;
+    role: string;
+    password?: string;
+    mustChangePassword?: boolean;
+  }) => {
     if (!orgId) return;
     setAddError("");
     setAddLoading(true);
@@ -284,6 +291,8 @@ export default function TeamsPage() {
         email: data.email,
         full_name: data.fullName,
         roles: data.role ? [data.role] : undefined,
+        password: data.password,
+        must_change_password: data.mustChangePassword,
       });
       setAddModalOpen(false);
       setTempPasswordModal({
@@ -376,10 +385,10 @@ export default function TeamsPage() {
     fetchMembers();
   };
 
-  const handleResetPassword = async (userId: string) => {
-    if (!orgId) return { temporary_password: "" };
-    const res = await resetOrgUserPassword(orgId, userId);
-    return { temporary_password: res.temporary_password };
+  const handleResetPassword = async (userId: string, payload: SetOrgUserPasswordPayload) => {
+    if (!orgId) return { ok: false };
+    const res = await setOrgUserPassword(orgId, userId, payload);
+    return res;
   };
 
   const openEdit = async (user: OrgUserListItem) => {
