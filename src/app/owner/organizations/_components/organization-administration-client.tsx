@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
-import { AuthError } from "@/lib/auth-api";
+import { AuthError, fetchWithAuth } from "@/lib/auth-api";
 import { ORGANIZATION_COUNTRY_OPTIONS, ORGANIZATION_CURRENCY_OPTIONS, type SelectOption } from "@/lib/organization-form-options";
 import { createOrganization, type CreateOrganizationBody } from "@/lib/organizations-admin-api";
 import { useOwnerOrganizations } from "@/hooks/use-owner-organizations";
@@ -51,6 +51,22 @@ export function OrganizationAdministrationClient() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
+  const [pendingOrgIds, setPendingOrgIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    fetchWithAuth("/api/production-requests?status=PENDING")
+      .then((res: any) => {
+        if (res.ok) return res.json();
+        return [];
+      })
+      .then((data: any) => {
+        if (Array.isArray(data)) {
+          const ids = new Set<string>(data.map((req: any) => req.organization_id));
+          setPendingOrgIds(ids);
+        }
+      })
+      .catch((err: any) => console.error("Error cargando solicitudes pendientes para directorio", err));
+  }, []);
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CreateFormState>(INITIAL_CREATE_FORM);
   const [createError, setCreateError] = useState("");
@@ -235,6 +251,7 @@ export function OrganizationAdministrationClient() {
                   <th className="px-4 py-3 font-medium text-dark dark:text-white">Organizacion</th>
                   <th className="px-4 py-3 font-medium text-dark dark:text-white">Tipo</th>
                   <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
+                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Entorno</th>
                   <th className="px-4 py-3 font-medium text-dark dark:text-white">Pais / Moneda</th>
                   <th className="px-4 py-3 font-medium text-dark dark:text-white">Legal / Fiscal</th>
                   <th className="px-4 py-3 font-medium text-dark dark:text-white">Permisos</th>
@@ -245,13 +262,13 @@ export function OrganizationAdministrationClient() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-10 text-center text-dark-6 dark:text-dark-6">
+                    <td colSpan={9} className="px-4 py-10 text-center text-dark-6 dark:text-dark-6">
                       Cargando directorio global...
                     </td>
                   </tr>
                 ) : filteredOrganizations.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="px-4 py-10 text-center text-dark-6 dark:text-dark-6">
+                    <td colSpan={9} className="px-4 py-10 text-center text-dark-6 dark:text-dark-6">
                       No hay organizaciones que coincidan con los filtros actuales.
                     </td>
                   </tr>
@@ -260,7 +277,17 @@ export function OrganizationAdministrationClient() {
                     <tr key={organization.id} className="border-b border-stroke align-top dark:border-dark-3">
                       <td className="px-4 py-4">
                         <div className="space-y-1">
-                          <div className="font-medium text-dark dark:text-white">{organization.name}</div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <div className="font-medium text-dark dark:text-white">{organization.name}</div>
+                            {pendingOrgIds.has(organization.id) && (
+                              <Link
+                                href="/owner/production-requests?status=PENDING"
+                                className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[9px] font-bold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 animate-pulse hover:bg-rose-200"
+                              >
+                                Solicitud Pendiente
+                              </Link>
+                            )}
+                          </div>
                           <div className="font-mono text-xs text-dark-6 dark:text-dark-6">{organization.id}</div>
                         </div>
                       </td>
@@ -268,6 +295,17 @@ export function OrganizationAdministrationClient() {
                       <td className="px-4 py-4">
                         <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusBadgeClass(organization.status)}`}>
                           {organization.status || "UNKNOWN"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium uppercase ${
+                            organization.environment === "PRODUCTION"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
+                              : "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+                          }`}
+                        >
+                          {organization.environment === "PRODUCTION" ? "Producción" : "Sandbox"}
                         </span>
                       </td>
                       <td className="px-4 py-4 text-dark dark:text-white">
@@ -279,7 +317,29 @@ export function OrganizationAdministrationClient() {
                       </td>
                       <td className="px-4 py-4 text-dark dark:text-white">{organization.scopes?.length ?? 0}</td>
                       <td className="px-4 py-4 text-dark dark:text-white">
-                        {organization.onboarding_verified || organization.onboarding_completed || organization.kyb_verified ? "Verificado" : "En progreso"}
+                        {(() => {
+                          let pct = 20;
+                          if (organization.company_legal_name && organization.fiscal_id) pct = 40;
+                          if (organization.kyb_verified) pct = 80;
+                          if (organization.onboarding_verified || organization.onboarding_completed) pct = 100;
+
+                          return (
+                            <div className="w-28 space-y-1.5">
+                              <div className="flex justify-between text-xs font-semibold">
+                                <span>{pct === 100 ? "Verificado" : "En progreso"}</span>
+                                <span>{pct}%</span>
+                              </div>
+                              <div className="h-1.5 w-full rounded-full bg-gray-2 dark:bg-dark-3 overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    pct === 100 ? "bg-emerald-500" : "bg-primary"
+                                  }`}
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-2">
