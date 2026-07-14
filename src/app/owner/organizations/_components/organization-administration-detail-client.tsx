@@ -3051,34 +3051,54 @@ export function OrganizationAdministrationDetailClient() {
           <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-dark dark:shadow-card">
             {resetResultPassword ? (
               <div className="space-y-4">
-                <h2 className="text-lg font-bold text-dark dark:text-white">Contraseña Restablecida</h2>
-                <p className="text-xs text-dark-6">
-                  Se ha generado una nueva contraseña para la cuenta del miembro.
-                </p>
-                <div className="flex items-center gap-2 rounded-lg border border-stroke bg-slate-50 p-3 dark:border-dark-3 dark:bg-dark-2">
-                  <code className="min-w-0 flex-1 truncate font-mono text-sm text-dark dark:text-white">
-                    {resetResultPassword}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(resetResultPassword);
-                        setResetResultCopied(true);
-                        setTimeout(() => setResetResultCopied(false), 2000);
-                      } catch (e) {}
-                    }}
-                    className="shrink-0 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-opacity-90"
-                  >
-                    {resetResultCopied ? "Copiado" : "Copiar"}
-                  </button>
+                
+                {/* Encabezado elegante con visto bueno animado sutil */}
+                <div className="flex flex-col items-center text-center space-y-2 mb-4">
+                  <div className="h-12 w-12 rounded-full bg-emerald-50 border border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/30 flex items-center justify-center text-emerald-500 dark:text-emerald-400">
+                    <svg className="h-6 w-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h2 className="text-md font-bold text-dark dark:text-white uppercase tracking-wider">
+                    Contraseña Restablecida
+                  </h2>
+                  <p className="text-xs text-dark-6 max-w-xs">
+                    Las credenciales del miembro de equipo han sido modificadas correctamente.
+                  </p>
                 </div>
+
+                {/* Caja de contraseña minimalista */}
+                <div className="rounded-xl border border-stroke bg-slate-50/70 p-3.5 dark:border-dark-3 dark:bg-dark-2/40 space-y-1">
+                  <span className="block text-[10px] font-bold text-dark-6 uppercase tracking-wider">
+                    Contraseña generada
+                  </span>
+                  <div className="flex items-center justify-between gap-3">
+                    <code className="min-w-0 flex-1 truncate font-mono text-sm font-semibold text-dark dark:text-white select-all">
+                      {resetResultPassword}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(resetResultPassword);
+                          setResetResultCopied(true);
+                          setTimeout(() => setResetResultCopied(false), 2000);
+                        } catch (e) {}
+                      }}
+                      className="shrink-0 rounded-lg border border-stroke bg-white hover:bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white transition"
+                    >
+                      {resetResultCopied ? "Copiado" : "Copiar"}
+                    </button>
+                  </div>
+                </div>
+
                 {resetResultEmailSent && (
-                  <p className="text-xs font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/20 p-2 rounded-lg">
-                    Las credenciales también han sido enviadas al correo del usuario.
+                  <p className="text-[11px] text-center font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 p-2.5 rounded-lg">
+                    Las credenciales de acceso también han sido enviadas al correo del usuario.
                   </p>
                 )}
-                <div className="mt-6 flex justify-end">
+
+                <div className="mt-6 flex justify-end pt-3 border-t border-stroke dark:border-dark-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -3086,7 +3106,7 @@ export function OrganizationAdministrationDetailClient() {
                       reloadMembers();
                       if (selectedMemberId === resetUser.id) refreshSelectedMember();
                     }}
-                    className="rounded-lg bg-primary hover:bg-opacity-90 px-5 py-2 text-xs font-semibold text-white transition"
+                    className="rounded-lg bg-[#0A2540] hover:bg-[#0A2540]/90 text-white px-5 py-2.5 text-xs font-semibold transition"
                   >
                     Entendido
                   </button>
@@ -3094,44 +3114,47 @@ export function OrganizationAdministrationDetailClient() {
               </div>
             ) : (
               <div className="space-y-4">
-                <h2 className="text-lg font-bold text-dark dark:text-white">Restablecer contraseña</h2>
+                <h2 className="text-md font-bold text-dark dark:text-white uppercase tracking-wider">
+                  Restablecer contraseña
+                </h2>
                 <p className="text-xs text-dark-6">
                   Define los parámetros de la nueva clave de acceso para el miembro.
                 </p>
                 
-                <div className="p-3 bg-slate-50 dark:bg-dark-2 rounded-lg border border-stroke dark:border-dark-3 text-xs space-y-0.5">
-                  <div className="text-dark-6">Usuario:</div>
-                  <div className="font-bold text-dark dark:text-white truncate">{resetUser.full_name}</div>
+                {/* Caja de usuario minimalista */}
+                <div className="p-3.5 bg-slate-50/70 dark:bg-dark-2/20 rounded-xl border border-stroke dark:border-dark-3 text-xs space-y-0.5">
+                  <div className="text-[10px] font-bold text-dark-6 uppercase tracking-wider">Usuario</div>
+                  <div className="font-semibold text-dark dark:text-white truncate">{resetUser.full_name}</div>
                   <div className="text-dark-6 font-mono truncate">{resetUser.email}</div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-dark dark:text-white">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2.5 cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-200">
                       <input
                         type="radio"
                         name="owner_reset_password_mode"
                         checked={resetMode === "auto"}
                         onChange={() => setResetMode("auto")}
-                        className="h-4 w-4 accent-primary"
+                        className="h-4 w-4 accent-slate-800"
                       />
                       Generar contraseña automáticamente
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-dark dark:text-white">
+                    <label className="flex items-center gap-2.5 cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-200">
                       <input
                         type="radio"
                         name="owner_reset_password_mode"
                         checked={resetMode === "manual"}
                         onChange={() => setResetMode("manual")}
-                        className="h-4 w-4 accent-primary"
+                        className="h-4 w-4 accent-slate-800"
                       />
                       Crear contraseña manualmente
                     </label>
                   </div>
 
                   {resetMode === "manual" && (
-                    <div className="space-y-1">
-                      <label className="block text-xs font-bold text-dark dark:text-white uppercase tracking-wider">
+                    <div className="space-y-1.5 animate-fadeIn">
+                      <label className="block text-[10px] font-bold text-dark dark:text-white uppercase tracking-wider">
                         Contraseña Manual
                       </label>
                       <div className="relative">
@@ -3140,7 +3163,7 @@ export function OrganizationAdministrationDetailClient() {
                           value={resetNewPassword}
                           onChange={(e) => setResetNewPassword(e.target.value)}
                           placeholder="Mínimo 6 caracteres"
-                          className="h-10 w-full rounded-lg border border-stroke bg-white pl-3 pr-10 text-xs text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                          className="h-10 w-full rounded-lg border border-stroke bg-white pl-3 pr-10 text-xs text-dark outline-none focus:border-slate-400 dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                         />
                         <button
                           type="button"
@@ -3162,17 +3185,17 @@ export function OrganizationAdministrationDetailClient() {
                     </div>
                   )}
 
-                  <div className="space-y-2 border-t border-stroke pt-3 dark:border-dark-3">
+                  <div className="space-y-3.5 border-t border-stroke pt-3.5 dark:border-dark-3">
                     <label className="flex items-start gap-2.5 cursor-pointer text-xs text-dark-6 select-none">
                       <input
                         type="checkbox"
                         checked={resetMustChange}
                         onChange={(e) => setResetMustChange(e.target.checked)}
-                        className="mt-0.5 h-4 w-4 rounded border-stroke accent-primary"
+                        className="mt-0.5 h-4 w-4 rounded border-stroke accent-slate-800"
                       />
-                      <div>
-                        <span className="font-semibold text-dark dark:text-white block">Exigir cambio de contraseña al próximo inicio</span>
-                        El usuario deberá renovar la contraseña en su primera entrada.
+                      <div className="space-y-0.5">
+                        <span className="font-semibold text-slate-700 dark:text-slate-200 block">Exigir cambio de contraseña al próximo inicio</span>
+                        <span className="text-[11px] text-dark-6 leading-4">El miembro deberá crear una nueva clave en su primera sesión.</span>
                       </div>
                     </label>
 
@@ -3181,18 +3204,18 @@ export function OrganizationAdministrationDetailClient() {
                         type="checkbox"
                         checked={resetSendEmail}
                         onChange={(e) => setResetSendEmail(e.target.checked)}
-                        className="mt-0.5 h-4 w-4 rounded border-stroke accent-primary"
+                        className="mt-0.5 h-4 w-4 rounded border-stroke accent-slate-800"
                       />
-                      <div>
-                        <span className="font-semibold text-dark dark:text-white block">Enviar contraseña por correo electrónico</span>
-                        Se enviará la nueva clave temporal a su email.
+                      <div className="space-y-0.5">
+                        <span className="font-semibold text-slate-700 dark:text-slate-200 block">Enviar contraseña por correo electrónico</span>
+                        <span className="text-[11px] text-dark-6 leading-4">Se enviarán las credenciales al email registrado.</span>
                       </div>
                     </label>
                   </div>
                 </div>
 
                 {memberActionError && (
-                  <p className="text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 p-2.5 rounded-lg">
+                  <p className="text-xs font-semibold text-red-600 dark:text-red-400 bg-rose-50 dark:bg-rose-950/20 p-2.5 rounded-lg">
                     {memberActionError}
                   </p>
                 )}
@@ -3202,7 +3225,7 @@ export function OrganizationAdministrationDetailClient() {
                     type="button"
                     onClick={() => setResetUser(null)}
                     disabled={memberActionLoading}
-                    className="rounded-lg border border-stroke bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white transition"
+                    className="rounded-lg border border-stroke bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-dark transition dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                   >
                     Cancelar
                   </button>
@@ -3239,7 +3262,7 @@ export function OrganizationAdministrationDetailClient() {
                       }
                     }}
                     disabled={memberActionLoading}
-                    className="rounded-lg bg-primary hover:bg-opacity-90 px-4 py-2.5 text-xs font-semibold text-white transition"
+                    className="rounded-lg bg-[#0A2540] hover:bg-[#0A2540]/90 text-white px-5 py-2.5 text-xs font-semibold transition"
                   >
                     {memberActionLoading ? "Procesando..." : "Restablecer contraseña"}
                   </button>

@@ -77,47 +77,50 @@ export function ResetPasswordModal({ user, onClose, onReset, onSendEmail }: Rese
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-dark dark:shadow-card">
-        <h2 className="text-heading-5 font-semibold text-dark dark:text-white">
+        
+        {/* Encabezado elegante y sutil */}
+        <h2 className="text-md font-bold text-dark dark:text-white uppercase tracking-wider">
           Restablecer contraseña
         </h2>
         <p className="mt-1.5 text-xs text-dark-6">
-          Define los parámetros de la nueva clave de acceso para el miembro de tu equipo.
+          Define los parámetros de la nueva clave de acceso para el miembro.
         </p>
         
-        <div className="mt-4 p-3 bg-slate-50 dark:bg-dark-2 rounded-lg border border-stroke dark:border-dark-3">
-          <div className="text-xs text-dark-6">Usuario:</div>
-          <div className="text-xs font-bold text-dark dark:text-white truncate">{user.full_name}</div>
-          <div className="text-xs text-dark-6 font-mono mt-0.5 truncate">{user.email}</div>
+        {/* Caja de usuario minimalista */}
+        <div className="mt-4 p-3.5 bg-slate-50/70 dark:bg-dark-2/20 rounded-xl border border-stroke dark:border-dark-3 space-y-0.5">
+          <div className="text-[10px] font-bold text-dark-6 uppercase tracking-wider">Usuario</div>
+          <div className="text-xs font-semibold text-dark dark:text-white truncate">{user.full_name}</div>
+          <div className="text-xs text-dark-6 font-mono truncate">{user.email}</div>
         </div>
 
         {/* Opciones de Contraseña */}
         <div className="mt-4 space-y-4">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-dark dark:text-white">
+            <label className="flex items-center gap-2.5 cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-200">
               <input
                 type="radio"
                 name="password_mode"
                 checked={mode === "auto"}
                 onChange={() => setMode("auto")}
-                className="h-4 w-4 accent-primary"
+                className="h-4 w-4 accent-slate-800"
               />
               Generar contraseña automáticamente
             </label>
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-dark dark:text-white">
+            <label className="flex items-center gap-2.5 cursor-pointer text-xs font-medium text-slate-700 dark:text-slate-200">
               <input
                 type="radio"
                 name="password_mode"
                 checked={mode === "manual"}
                 onChange={() => setMode("manual")}
-                className="h-4 w-4 accent-primary"
+                className="h-4 w-4 accent-slate-800"
               />
               Crear contraseña manualmente
             </label>
           </div>
 
           {mode === "manual" && (
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-dark dark:text-white uppercase tracking-wider">
+            <div className="space-y-1.5 animate-fadeIn">
+              <label className="block text-[10px] font-bold text-dark dark:text-white uppercase tracking-wider">
                 Nueva Contraseña
               </label>
               <div className="relative">
@@ -125,8 +128,8 @@ export function ResetPasswordModal({ user, onClose, onReset, onSendEmail }: Rese
                   type={showPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Escribe la contraseña segura"
-                  className="h-10 w-full rounded-lg border border-stroke bg-white pl-3 pr-10 text-xs text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                  placeholder="Mínimo 6 caracteres"
+                  className="h-10 w-full rounded-lg border border-stroke bg-white pl-3 pr-10 text-xs text-dark outline-none focus:border-slate-400 dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                 />
                 <button
                   type="button"
@@ -149,17 +152,17 @@ export function ResetPasswordModal({ user, onClose, onReset, onSendEmail }: Rese
           )}
 
           {/* Checkboxes de Opciones */}
-          <div className="space-y-2 border-t border-stroke pt-3 dark:border-dark-3">
+          <div className="space-y-3.5 border-t border-stroke pt-3.5 dark:border-dark-3">
             <label className="flex items-start gap-2.5 cursor-pointer text-xs text-dark-6 select-none">
               <input
                 type="checkbox"
                 checked={mustChangePassword}
                 onChange={(e) => setMustChangePassword(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-stroke accent-primary"
+                className="mt-0.5 h-4 w-4 rounded border-stroke accent-slate-800"
               />
-              <div>
-                <span className="font-semibold text-dark dark:text-white block">Exigir cambio de contraseña al próximo inicio</span>
-                El usuario deberá crear una contraseña nueva la próxima vez que acceda.
+              <div className="space-y-0.5">
+                <span className="font-semibold text-slate-700 dark:text-slate-200 block">Exigir cambio de contraseña al próximo inicio</span>
+                <span className="text-[11px] text-dark-6 leading-4">El miembro deberá crear una nueva clave en su primera sesión.</span>
               </div>
             </label>
 
@@ -168,23 +171,23 @@ export function ResetPasswordModal({ user, onClose, onReset, onSendEmail }: Rese
                 type="checkbox"
                 checked={sendEmail}
                 onChange={(e) => setSendEmail(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-stroke accent-primary"
+                className="mt-0.5 h-4 w-4 rounded border-stroke accent-slate-800"
               />
-              <div>
-                <span className="font-semibold text-dark dark:text-white block">Enviar contraseña por correo electrónico</span>
-                Se enviarán las credenciales al correo del usuario.
+              <div className="space-y-0.5">
+                <span className="font-semibold text-slate-700 dark:text-slate-200 block">Enviar contraseña por correo electrónico</span>
+                <span className="text-[11px] text-dark-6 leading-4">Se enviarán de forma segura las credenciales al email registrado.</span>
               </div>
             </label>
           </div>
         </div>
 
-        {error && <p className="mt-3 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 p-2.5 rounded-lg">{error}</p>}
+        {error && <p className="mt-3 text-xs font-semibold text-red-600 dark:text-red-400 bg-rose-50 dark:bg-rose-950/20 p-2.5 rounded-lg">{error}</p>}
         
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-6 flex justify-end gap-3 pt-3 border-t border-stroke dark:border-dark-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-stroke bg-white hover:bg-slate-50 px-4 py-2 text-xs font-semibold text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white transition"
+            className="rounded-lg border border-stroke bg-white hover:bg-slate-50 px-4 py-2.5 text-xs font-semibold text-dark transition dark:border-dark-3 dark:bg-dark-2 dark:text-white"
           >
             {t.organizationTeams.actions.cancel}
           </button>
@@ -192,7 +195,7 @@ export function ResetPasswordModal({ user, onClose, onReset, onSendEmail }: Rese
             type="button"
             onClick={handleConfirm}
             disabled={loading}
-            className="rounded-lg bg-primary hover:bg-opacity-90 px-4 py-2 text-xs font-semibold text-white transition disabled:opacity-70"
+            className="rounded-lg bg-[#0A2540] hover:bg-[#0A2540]/90 text-white px-5 py-2.5 text-xs font-semibold transition disabled:opacity-70"
           >
             {loading ? "Procesando..." : "Restablecer contraseña"}
           </button>
