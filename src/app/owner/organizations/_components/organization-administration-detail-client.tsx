@@ -1921,17 +1921,18 @@ export function OrganizationAdministrationDetailClient() {
                       <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
                       <th className="px-4 py-3 font-medium text-dark dark:text-white">Roles</th>
                       <th className="px-4 py-3 font-medium text-dark dark:text-white">Actualizado</th>
+                      <th className="px-4 py-3 font-medium text-dark dark:text-white">OTP</th>
                       <th className="px-4 py-3 font-medium text-dark dark:text-white">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {membersLoading ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">Cargando miembros...</td>
+                        <td colSpan={7} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">Cargando miembros...</td>
                       </tr>
                     ) : members.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">No hay miembros que coincidan con los filtros actuales.</td>
+                        <td colSpan={7} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">No hay miembros que coincidan con los filtros actuales.</td>
                       </tr>
                     ) : (
                       members.map((member, index) => {
