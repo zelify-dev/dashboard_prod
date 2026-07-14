@@ -337,7 +337,7 @@ export type AvailableScopesResponse = {
 };
 
 /** GET /api/organizations/available-scopes */
-export async function listAvailableScopes(): Promise<string[]> {
+export async function listAvailableScopes(): Promise<any[]> {
   const res = await fetchWithAuth("/api/organizations/available-scopes");
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -347,7 +347,11 @@ export async function listAvailableScopes(): Promise<string[]> {
       data
     );
   }
-  const parsed = data as AvailableScopesResponse;
-  const list = parsed.assignable_scopes ?? parsed.assignableScopes ?? [];
+  let list: any[] = [];
+  if (Array.isArray(data)) {
+    list = data;
+  } else if (data && typeof data === "object") {
+    list = (data as any).assignable_scopes ?? (data as any).assignableScopes ?? (data as any).scopes ?? [];
+  }
   return Array.isArray(list) ? list : [];
 }

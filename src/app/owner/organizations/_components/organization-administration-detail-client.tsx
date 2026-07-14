@@ -2094,10 +2094,14 @@ export function OrganizationAdministrationDetailClient() {
                     >
                       <option value="">-- Selecciona un permiso para asignar --</option>
                       {availableScopes
-                        .filter((s) => !scopes.some((assigned) => assigned.scope === s))
-                        .map((s) => (
-                          <option key={s} value={s}>
-                            {s}
+                        .map((s) => {
+                          const val = typeof s === "object" && s !== null ? (s as any).scope ?? (s as any).value : s;
+                          return typeof val === "string" ? val : "";
+                        })
+                        .filter((val) => val && !scopes.some((assigned) => assigned.scope === val))
+                        .map((val) => (
+                          <option key={val} value={val}>
+                            {val}
                           </option>
                         ))}
                     </select>
