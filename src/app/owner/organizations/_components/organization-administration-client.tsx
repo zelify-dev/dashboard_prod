@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 import { AuthError, fetchWithAuth } from "@/lib/auth-api";
+import { Dropdown, DropdownContent, DropdownTrigger, DropdownClose } from "@/components/ui/dropdown";
 import { ORGANIZATION_COUNTRY_OPTIONS, ORGANIZATION_CURRENCY_OPTIONS, type SelectOption } from "@/lib/organization-form-options";
 import { createOrganization, type CreateOrganizationBody } from "@/lib/organizations-admin-api";
 import { useOwnerOrganizations } from "@/hooks/use-owner-organizations";
@@ -51,6 +52,7 @@ export function OrganizationAdministrationClient() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [typeFilter, setTypeFilter] = useState("ALL");
+  const [activeDropdownOrgId, setActiveDropdownOrgId] = useState<string | null>(null);
   const [pendingOrgIds, setPendingOrgIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -342,15 +344,81 @@ export function OrganizationAdministrationClient() {
                         })()}
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          <QuickAction href={`/owner/organizations/${organization.id}`}>Resumen</QuickAction>
-                          <QuickAction href={`/owner/organizations/${organization.id}?tab=general`}>Editar</QuickAction>
-                          <QuickAction href={`/owner/organizations/${organization.id}?tab=members`}>Miembros</QuickAction>
-                          <QuickAction href={`/owner/organizations/${organization.id}?tab=branding`}>Marca</QuickAction>
-                          <QuickAction href={`/owner/organizations/${organization.id}?tab=scopes`}>Permisos</QuickAction>
-                          <QuickAction href={`/owner/organizations/${organization.id}?tab=api-keys`}>Claves API</QuickAction>
-                          <QuickAction href={`/owner/organizations/${organization.id}?tab=onboarding`}>Onboarding</QuickAction>
-                        </div>
+                        <Dropdown
+                          isOpen={activeDropdownOrgId === organization.id}
+                          setIsOpen={(open) => setActiveDropdownOrgId(open ? organization.id : null)}
+                        >
+                          <DropdownTrigger className="rounded-full p-1.5 hover:bg-gray-2 dark:hover:bg-dark-3 text-dark-6 dark:text-dark-6 hover:text-dark dark:hover:text-white transition">
+                            <svg
+                              className="h-5 w-5 fill-current"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M12 8a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                          </DropdownTrigger>
+                          <DropdownContent
+                            align="end"
+                            className="bg-white border border-stroke dark:bg-gray-dark dark:border-dark-3 py-1.5 w-48 shadow-lg z-50"
+                          >
+                            <DropdownClose>
+                              <Link
+                                href={`/owner/organizations/${organization.id}`}
+                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                              >
+                                Resumen General
+                              </Link>
+                            </DropdownClose>
+                            <DropdownClose>
+                              <Link
+                                href={`/owner/organizations/${organization.id}?tab=general`}
+                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                              >
+                                Editar Datos
+                              </Link>
+                            </DropdownClose>
+                            <DropdownClose>
+                              <Link
+                                href={`/owner/organizations/${organization.id}?tab=members`}
+                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                              >
+                                Miembros
+                              </Link>
+                            </DropdownClose>
+                            <DropdownClose>
+                              <Link
+                                href={`/owner/organizations/${organization.id}?tab=branding`}
+                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                              >
+                                Personalización y Marca
+                              </Link>
+                            </DropdownClose>
+                            <DropdownClose>
+                              <Link
+                                href={`/owner/organizations/${organization.id}?tab=scopes`}
+                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                              >
+                                Permisos y Scopes
+                              </Link>
+                            </DropdownClose>
+                            <DropdownClose>
+                              <Link
+                                href={`/owner/organizations/${organization.id}?tab=api-keys`}
+                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                              >
+                                Claves de API
+                              </Link>
+                            </DropdownClose>
+                            <DropdownClose>
+                              <Link
+                                href={`/owner/organizations/${organization.id}?tab=onboarding`}
+                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                              >
+                                Estado de Onboarding
+                              </Link>
+                            </DropdownClose>
+                          </DropdownContent>
+                        </Dropdown>
                       </td>
                     </tr>
                   ))
