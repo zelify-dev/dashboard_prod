@@ -81,6 +81,7 @@ import { queryKeys } from "@/lib/query-keys";
 import { listRoles, type RoleCatalogItem } from "@/lib/roles-api";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { Dropdown, DropdownContent, DropdownTrigger, DropdownClose } from "@/components/ui/dropdown";
+import { fetchWithAuth } from "@/lib/auth-api";
 
 type DetailTabId =
   | "overview"
@@ -456,21 +457,21 @@ export function OrganizationAdministrationDetailClient() {
 
   useEffect(() => {
     if (!orgId) return;
-    fetch(`/api/organizations/${orgId}/environment`)
-      .then((res) => res.json())
-      .then((data) => {
+    fetchWithAuth(`/api/organizations/${orgId}/environment`)
+      .then((res: any) => res.json())
+      .then((data: any) => {
         if (data?.environment) {
           setEnvironment(data.environment);
         }
       })
-      .catch((err) => console.error("Error cargando entorno", err));
+      .catch((err: any) => console.error("Error cargando entorno", err));
   }, [orgId]);
 
   const toggleEnvironment = async (checked: boolean) => {
     const nextEnv = checked ? "PRODUCTION" : "SANDBOX";
     setEnvironment(nextEnv);
     try {
-      const res = await fetch(`/api/organizations/${orgId}/environment`, {
+      const res = await fetchWithAuth(`/api/organizations/${orgId}/environment`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ environment: nextEnv }),

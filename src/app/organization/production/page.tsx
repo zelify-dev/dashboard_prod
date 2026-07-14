@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
-import { getStoredOrganization, getOrganization } from "@/lib/auth-api";
+import { getStoredOrganization, getOrganization, fetchWithAuth } from "@/lib/auth-api";
 
 type UserRequestRow = {
   fullName: string;
@@ -76,23 +76,17 @@ export default function PasoProduccionPage() {
         }
 
         // Load environment state
-        const envRes = await fetch(`/api/organizations/${org.id}/environment`);
+        const envRes = await fetchWithAuth(`/api/organizations/${org.id}/environment`);
         if (envRes.ok) {
           const envData = await envRes.json();
           setEnvironment(envData.environment);
         }
 
         // Load existing request
-        const reqRes = await fetch(`/api/production-requests?organization_id=${org.id}`);
+        const reqRes = await fetchWithAuth("/api/production-requests/latest");
         if (reqRes.ok) {
-          const reqList = await reqRes.json();
-          if (reqList && reqList.length > 0) {
-            // Sort by latest created_at
-            const sorted = reqList.sort(
-              (a: any, b: any) =>
-                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-            );
-            const latest = sorted[0];
+          const latest = await reqRes.json();
+          if (latest && latest.id) {
             setExistingRequest(latest);
 
             // Populate form if request exists
@@ -197,7 +191,7 @@ export default function PasoProduccionPage() {
     };
 
     try {
-      const res = await fetch("/api/production-requests", {
+      const res = await fetchWithAuth("/api/production-requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

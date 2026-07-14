@@ -13,7 +13,7 @@ import { LanguageToggleSwitch } from "./language-toggle";
 // import { ThemeToggleSwitch } from "./theme-toggle";
 import { UserInfo } from "./user-info";
 import { TOUR_FEATURE_ENABLED, useTour } from "@/contexts/tour-context";
-import { getStoredOrganization } from "@/lib/auth-api";
+import { getStoredOrganization, fetchWithAuth } from "@/lib/auth-api";
 
 export function Header() {
   const { toggleSidebar, isMobile } = useSidebarContext();
@@ -26,7 +26,7 @@ export function Header() {
     const org = getStoredOrganization();
     if (!org?.id) return;
 
-    fetch(`/api/organizations/${org.id}/environment`)
+    fetchWithAuth(`/api/organizations/${org.id}/environment`)
       .then((res) => res.json())
       .then((data) => {
         if (data?.environment) {

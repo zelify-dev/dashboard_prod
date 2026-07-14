@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { getStoredRoles } from "@/lib/auth-api";
+import { getStoredRoles, fetchWithAuth } from "@/lib/auth-api";
 import { isOwner } from "@/app/organization/teams/_constants/team-roles";
 
 type RequestType = {
@@ -67,7 +67,7 @@ export default function OwnerProductionRequestsPage() {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/production-requests");
+      const res = await fetchWithAuth("/api/production-requests");
       if (res.ok) {
         const data = await res.json();
         // Sort by latest created_at
@@ -106,45 +106,24 @@ export default function OwnerProductionRequestsPage() {
     setUpdating(true);
 
     try {
-      // 1. Update the request status
-      const reqRes = await fetch(`/api/production-requests/${selectedRequest.id}`, {
-        method: "PATCH",
+      const url = `/api/production-requests/${selectedRequest.id}/${status === "APPROVED" ? "approve" : "reject"}`;
+      const res = await fetchWithAuth(url, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status,
-          observations: reviewObservations,
-        }),
+        body: status === "REJECTED" ? JSON.stringify({ observations: reviewObservations }) : undefined,
       });
 
-      if (!reqRes.ok) {
-        throw new Error("Failed to update production request status");
+      if (!res.ok) {
+        throw new Error(`Failed to ${status.toLowerCase()} production request`);
       }
 
-      const updatedRequest = await reqRes.json();
-
-      // 2. If approved, automatically transition the organization's environment to PRODUCTION
-      if (status === "APPROVED") {
-        const envRes = await fetch(
-          `/api/organizations/${selectedRequest.organization_id}/environment`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ environment: "PRODUCTION" }),
-          }
-        );
-
-        if (!envRes.ok) {
-          toast.warning("La solicitud fue aprobada, pero falló la activación del ambiente productivo.");
-        } else {
-          toast.success("Solicitud aprobada y ambiente activado en Producción.");
-        }
-      } else {
-        toast.success("Solicitud rechazada con éxito.");
-      }
-
-      // Close details and refresh list
-      setSelectedRequest(null);
+      toast.success(
+        status === "APPROVED"
+          ? "Solicitud aprobada con éxito. El entorno ha pasado a Producción."
+          : "Solicitud rechazada."
+      );
       void fetchRequests();
+      handleCloseRequest();
     } catch (err) {
       console.error("Error processing approval/rejection", err);
       toast.error("Ocurrió un error al procesar el estado.");

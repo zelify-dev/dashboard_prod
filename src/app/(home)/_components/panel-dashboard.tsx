@@ -9,6 +9,7 @@ import {
   getOrganizationScopes,
   setStoredOrganizationScopes,
   type OrganizationDetails,
+  fetchWithAuth,
 } from "@/lib/auth-api";
 import { useRouter } from "next/navigation";
 
@@ -297,7 +298,7 @@ export function PanelDashboard() {
             .then(setOrgDetails)
             .catch(() => setOrgDetails(null));
 
-        fetch(`/api/organizations/${org.id}/environment`)
+        fetchWithAuth(`/api/organizations/${org.id}/environment`)
             .then((res) => res.json())
             .then((data) => {
                 if (data?.environment) {
