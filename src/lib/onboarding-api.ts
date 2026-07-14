@@ -639,3 +639,50 @@ export async function putDevelopmentEnvironments(
   }
   return data;
 }
+
+export type OnboardingVisibilityPatchPayload = {
+  kyb: boolean;
+  aml_documentation: boolean;
+  technical_documentation: boolean;
+  business_plan: boolean;
+};
+
+/** GET /api/organizations/:organizationId/onboarding-visibility */
+export async function getOrganizationOnboardingVisibility(
+  organizationId: string
+): Promise<OnboardingVisibility> {
+  const res = await fetchWithAuth(`/api/organizations/${encodeURIComponent(organizationId)}/onboarding-visibility`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al obtener la visibilidad de onboarding",
+      res.status,
+      data
+    );
+  }
+  return parseOnboardingVisibilityPayload(data);
+}
+
+/** PATCH /api/organizations/:organizationId/onboarding-visibility */
+export async function updateOrganizationOnboardingVisibility(
+  organizationId: string,
+  payload: OnboardingVisibilityPatchPayload
+): Promise<{ ok: boolean }> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(organizationId)}/onboarding-visibility`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al actualizar la visibilidad de onboarding",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean };
+}

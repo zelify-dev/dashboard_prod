@@ -67,6 +67,8 @@ import {
   postKybFiles,
   postTechnicalDocumentation,
   putDevelopmentEnvironments,
+  getOrganizationOnboardingVisibility,
+  updateOrganizationOnboardingVisibility,
   type DevelopmentEnvironmentsPayload,
   type BusinessPlanStatus,
 } from "@/lib/onboarding-api";
@@ -682,6 +684,12 @@ export function OrganizationAdministrationDetailClient() {
     enabled: activeTab === "overview" || activeTab === "onboarding",
   });
 
+  const onboardingVisibilityQuery = useQuery({
+    queryKey: ["owner-organization-onboarding-visibility", orgId],
+    queryFn: () => getOrganizationOnboardingVisibility(orgId),
+    enabled: activeTab === "onboarding",
+  });
+
   const selectedMemberQuery = useQuery({
     queryKey: queryKeys.ownerOrganizationMemberDetail(orgId, selectedMemberId),
     queryFn: () => getOrgUser(orgId, selectedMemberId),
@@ -753,6 +761,10 @@ export function OrganizationAdministrationDetailClient() {
   const onboardingLoading = onboardingQuery.isLoading;
   const onboardingQueryError =
     onboardingQuery.error instanceof Error ? onboardingQuery.error.message : "";
+  const onboardingVisibility = onboardingVisibilityQuery.data ?? null;
+  const onboardingVisibilityLoading = onboardingVisibilityQuery.isLoading || onboardingVisibilityQuery.isFetching;
+  const onboardingVisibilityError =
+    onboardingVisibilityQuery.error instanceof Error ? onboardingVisibilityQuery.error.message : "";
   const selectedMember = selectedMemberDraft;
   const selectedMemberLoading = selectedMemberQuery.isLoading || selectedMemberQuery.isFetching;
   const selectedMemberError =
@@ -1534,6 +1546,28 @@ export function OrganizationAdministrationDetailClient() {
       setFlash("Seccion de onboarding actualizada.");
     } catch (err) {
       setOnboardingError(err instanceof Error ? err.message : "No se pudo actualizar onboarding.");
+    } finally {
+      setOnboardingActionLoading("");
+    }
+  };
+
+  const handleToggleVisibility = async (key: "kyb" | "aml_documentation" | "technical_documentation" | "business_plan", enabled: boolean) => {
+    if (!onboardingVisibility) return;
+    setOnboardingActionLoading(key);
+    setOnboardingError("");
+    try {
+      const payload = {
+        kyb: onboardingVisibility.kyb,
+        aml_documentation: onboardingVisibility.amlDocumentation,
+        technical_documentation: onboardingVisibility.technicalDocumentation,
+        business_plan: onboardingVisibility.businessPlan,
+      };
+      payload[key] = enabled;
+      await updateOrganizationOnboardingVisibility(orgId, payload);
+      await onboardingVisibilityQuery.refetch();
+      setFlash("Visibilidad de onboarding actualizada con éxito.");
+    } catch (err) {
+      setOnboardingError(err instanceof Error ? err.message : "Error al actualizar visibilidad de onboarding.");
     } finally {
       setOnboardingActionLoading("");
     }
@@ -2711,6 +2745,77 @@ export function OrganizationAdministrationDetailClient() {
                     </div>
                   </div>
                 </div>
+              </ShowcaseSection>
+
+              {/* Configuración de Visibilidad de Módulos */}
+              <ShowcaseSection title="Configuración de Módulos Activos para la Organización" className="!p-6">
+                <p className="text-xs text-dark-6 mb-4">
+                  Activa o desactiva qué módulos de onboarding se presentarán y exigirán a esta organización en su dashboard.
+                </p>
+                {onboardingVisibilityLoading ? (
+                  <p className="text-xs text-dark-6">Cargando configuración de visibilidad...</p>
+                ) : onboardingVisibilityError ? (
+                  <ErrorAlert message={onboardingVisibilityError} />
+                ) : onboardingVisibility ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {[
+                      {
+                        key: "kyb" as const,
+                        label: "Módulo KYB (Know Your Business)",
+                        desc: "Formulario de información comercial y legal de la empresa.",
+                        val: onboardingVisibility.kyb
+                      },
+                      {
+                        key: "aml_documentation" as const,
+                        label: "Documentación AML (Antilavado)",
+                        desc: "Carga de expedientes de cumplimiento y prevención de lavado de dinero.",
+                        val: onboardingVisibility.amlDocumentation
+                      },
+                      {
+                        key: "technical_documentation" as const,
+                        label: "Documentación Técnica",
+                        desc: "Subida y revisión de especificaciones técnicas de integración.",
+                        val: onboardingVisibility.technicalDocumentation
+                      },
+                      {
+                        key: "business_plan" as const,
+                        label: "Plan de Negocio",
+                        desc: "Formularios y balances financieros requeridos para la aprobación comercial.",
+                        val: onboardingVisibility.businessPlan
+                      }
+                    ].map((item) => (
+                      <div
+                        key={item.key}
+                        className="flex items-center justify-between p-4 rounded-xl border border-stroke bg-white dark:border-dark-3 dark:bg-dark-2/40"
+                      >
+                        <div className="space-y-1 pr-4">
+                          <span className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                            {item.label}
+                          </span>
+                          <span className="block text-[10px] text-dark-6 leading-relaxed">
+                            {item.desc}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => void handleToggleVisibility(item.key, !item.val)}
+                          disabled={onboardingActionLoading !== ""}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            item.val
+                              ? "bg-emerald-500"
+                              : "bg-slate-200 dark:bg-dark-3"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                              item.val ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </ShowcaseSection>
 
               {/* Sección 4: Depuración Técnica (Colapsable) */}
