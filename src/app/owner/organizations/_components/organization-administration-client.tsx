@@ -9,6 +9,7 @@ import { Dropdown, DropdownContent, DropdownTrigger, DropdownClose } from "@/com
 import { ORGANIZATION_COUNTRY_OPTIONS, ORGANIZATION_CURRENCY_OPTIONS, type SelectOption } from "@/lib/organization-form-options";
 import { createOrganization, type CreateOrganizationBody } from "@/lib/organizations-admin-api";
 import { useOwnerOrganizations } from "@/hooks/use-owner-organizations";
+import { getOnboardingStatus, parseOnboardingStatusPayload } from "@/lib/onboarding-api";
 
 const PAGE_TITLE = "Administracion de Organizaciones";
 
@@ -69,6 +70,39 @@ export function OrganizationAdministrationClient() {
       })
       .catch((err: any) => console.error("Error cargando solicitudes pendientes para directorio", err));
   }, []);
+
+  const [onboardingPercentages, setOnboardingPercentages] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (!organizations || organizations.length === 0) return;
+
+    organizations.forEach((org) => {
+      if (org.onboarding_verified || org.onboarding_completed) {
+        setOnboardingPercentages((prev) => ({ ...prev, [org.id]: 100 }));
+        return;
+      }
+
+      getOnboardingStatus(org.id)
+        .then((raw: any) => {
+          const percents = parseOnboardingStatusPayload(raw);
+          const total = Math.round(
+            ((percents.kyb || 0) +
+              (percents.aml || 0) +
+              (percents.technical || 0) +
+              (percents.businessPlan || 0)) /
+              4
+          );
+          setOnboardingPercentages((prev) => ({ ...prev, [org.id]: total }));
+        })
+        .catch((err: any) => {
+          console.warn(`Error obteniendo onboarding para org ${org.id}`, err);
+          let pct = 20;
+          if (org.company_legal_name && org.fiscal_id) pct = 40;
+          if (org.kyb_verified) pct = 80;
+          setOnboardingPercentages((prev) => ({ ...prev, [org.id]: pct }));
+        });
+    });
+  }, [organizations]);
   const [createOpen, setCreateOpen] = useState(false);
   const [createForm, setCreateForm] = useState<CreateFormState>(INITIAL_CREATE_FORM);
   const [createError, setCreateError] = useState("");
@@ -320,23 +354,25 @@ export function OrganizationAdministrationClient() {
                       <td className="px-4 py-4 text-dark dark:text-white">{organization.scopes?.length ?? 0}</td>
                       <td className="px-4 py-4 text-dark dark:text-white">
                         {(() => {
-                          let pct = 20;
-                          if (organization.company_legal_name && organization.fiscal_id) pct = 40;
-                          if (organization.kyb_verified) pct = 80;
-                          if (organization.onboarding_verified || organization.onboarding_completed) pct = 100;
+                          const pct = onboardingPercentages[organization.id];
+                          const isLoaded = pct !== undefined;
 
                           return (
                             <div className="w-28 space-y-1.5">
                               <div className="flex justify-between text-xs font-semibold">
-                                <span>{pct === 100 ? "Verificado" : "En progreso"}</span>
-                                <span>{pct}%</span>
+                                <span>{!isLoaded ? "Cargando..." : pct === 100 ? "Verificado" : "En progreso"}</span>
+                                <span>{isLoaded ? `${pct}%` : "--%"}</span>
                               </div>
                               <div className="h-1.5 w-full rounded-full bg-gray-2 dark:bg-dark-3 overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all duration-500 ${
-                                    pct === 100 ? "bg-emerald-500" : "bg-primary"
+                                    !isLoaded
+                                      ? "bg-gray-400 dark:bg-gray-600 animate-pulse w-1/3"
+                                      : pct === 100
+                                      ? "bg-emerald-500"
+                                      : "bg-primary"
                                   }`}
-                                  style={{ width: `${pct}%` }}
+                                  style={isLoaded ? { width: `${pct}%` } : undefined}
                                 />
                               </div>
                             </div>
