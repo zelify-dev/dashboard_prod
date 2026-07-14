@@ -18,6 +18,7 @@ import {
   getOrganizationConfig,
   getOrganizationIdentityConfig,
   listOrganizationScopes,
+  listAvailableScopes,
   removeOrganizationScope,
   updateOrganization,
   updateOrganizationAdminBranding,
@@ -636,6 +637,12 @@ export function OrganizationAdministrationDetailClient() {
     enabled: activeTab === "scopes" || activeTab === "overview",
   });
 
+  const availableScopesQuery = useQuery({
+    queryKey: ["available-scopes"],
+    queryFn: () => listAvailableScopes(),
+    enabled: activeTab === "scopes",
+  });
+
   const apiKeysQuery = useQuery({
     queryKey: queryKeys.ownerOrganizationApiKeys(orgId),
     queryFn: () => listApiKeys(orgId),
@@ -715,6 +722,13 @@ export function OrganizationAdministrationDetailClient() {
   const scopesLoading = scopesQuery.isLoading || scopesQuery.isFetching;
   const scopesQueryError =
     scopesQuery.error instanceof Error ? scopesQuery.error.message : "";
+
+  const availableScopes = availableScopesQuery.data ?? [];
+  const availableScopesLoading = availableScopesQuery.isLoading;
+  const availableScopesError =
+    availableScopesQuery.error instanceof Error ? availableScopesQuery.error.message : "";
+
+  const [selectedAssignableScope, setSelectedAssignableScope] = useState("");
   const apiKeys = apiKeysQuery.data ?? [];
   const apiKeysLoading = apiKeysQuery.isLoading || apiKeysQuery.isFetching;
   const apiKeysQueryError =
@@ -2046,72 +2060,80 @@ export function OrganizationAdministrationDetailClient() {
         <ShowcaseSection title="Permisos" className="!p-6">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
             
-            {/* Columna Izquierda: Catálogo de Permisos */}
+            {/* Columna Izquierda: Asignar Permisos */}
             <div className="space-y-6">
               <div>
                 <h3 className="text-sm font-bold text-dark dark:text-white uppercase tracking-wider">
-                  Catálogo de Permisos Disponibles
+                  Asignar Nuevos Permisos (Scopes)
                 </h3>
                 <p className="text-xs text-dark-6 mt-1">
-                  Selecciona o desmarca los permisos para asignarlos o removerlos de esta organización.
+                  Selecciona un permiso disponible del listado del servidor para agregarlo a la organización.
                 </p>
               </div>
 
-              {scopesError || scopesQueryError ? <ErrorAlert message={scopesError || scopesQueryError} /> : null}
+              {scopesError || scopesQueryError || availableScopesError ? (
+                <ErrorAlert message={scopesError || scopesQueryError || availableScopesError} />
+              ) : null}
 
-              <div className="space-y-6">
-                {AVAILABLE_SCOPES_GROUPS.map((group, groupIdx) => (
-                  <div key={groupIdx} className="space-y-3">
-                    <h4 className="text-xs font-bold text-dark-6 dark:text-dark-6 border-b border-stroke pb-1 dark:border-dark-3">
-                      {group.category}
-                    </h4>
-                    <div className="grid gap-3">
-                      {group.scopes.map((s, sIdx) => {
-                        const isAssigned = scopes.some((x) => x.scope === s.value);
-                        return (
-                          <label
-                            key={sIdx}
-                            className={`flex items-start gap-3 p-3 rounded-lg border transition cursor-pointer select-none ${
-                              isAssigned
-                                ? "border-emerald-200 bg-emerald-50/20 dark:border-emerald-950/40 dark:bg-emerald-950/5"
-                                : "border-stroke bg-white hover:bg-slate-50/50 dark:border-dark-3 dark:bg-dark-2/20"
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isAssigned}
-                              onChange={() => void handleToggleScope(s.value)}
-                              disabled={scopesSaving}
-                              className="mt-1 h-4 w-4 rounded border-stroke accent-emerald-500 disabled:cursor-not-allowed"
-                            />
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-dark dark:text-white">
-                                  {s.label}
-                                </span>
-                                <span className="font-mono text-[9px] text-dark-6 bg-slate-100 dark:bg-dark-3 px-1 rounded">
-                                  {s.value}
-                                </span>
-                              </div>
-                              <p className="text-[11px] text-dark-6 leading-4">
-                                {s.desc}
-                              </p>
-                            </div>
-                          </label>
-                        );
-                      })}
+              {/* Selector Dropdown dinámico */}
+              <div className="flex flex-col sm:flex-row gap-3 items-end bg-white border border-stroke p-5 rounded-xl dark:border-dark-3 dark:bg-dark-2/20">
+                <div className="flex-1 w-full space-y-1.5">
+                  <label className="block text-xs font-bold text-dark dark:text-white uppercase tracking-wider">
+                    Permisos Disponibles en el Sistema
+                  </label>
+                  {availableScopesLoading ? (
+                    <div className="h-10 w-full rounded-xl border border-stroke bg-slate-50 dark:border-dark-3 dark:bg-dark-2 flex items-center px-3 text-xs text-dark-6">
+                      Cargando listado de permisos disponibles...
                     </div>
-                  </div>
-                ))}
+                  ) : (
+                    <select
+                      value={selectedAssignableScope}
+                      onChange={(e) => setSelectedAssignableScope(e.target.value)}
+                      disabled={scopesSaving}
+                      className="h-10 w-full rounded-xl border border-stroke bg-white px-3 text-xs text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                    >
+                      <option value="">-- Selecciona un permiso para asignar --</option>
+                      {availableScopes
+                        .filter((s) => !scopes.some((assigned) => assigned.scope === s))
+                        .map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                    </select>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!selectedAssignableScope) return;
+                    setScopesSaving(true);
+                    setScopesError("");
+                    try {
+                      await addOrganizationScopes(orgId, [selectedAssignableScope]);
+                      setSelectedAssignableScope("");
+                      await Promise.all([refreshScopes(), refreshOrganizationCaches()]);
+                      setFlash("Permiso asignado correctamente.");
+                    } catch (err) {
+                      setScopesError(err instanceof Error ? err.message : "Error al asignar permiso.");
+                    } finally {
+                      setScopesSaving(false);
+                    }
+                  }}
+                  disabled={scopesSaving || !selectedAssignableScope || availableScopesLoading}
+                  className="h-10 w-full sm:w-auto rounded-xl bg-primary hover:bg-opacity-90 text-white font-semibold px-5 text-xs transition disabled:opacity-50"
+                >
+                  {scopesSaving ? "Asignando..." : "Asignar Permiso"}
+                </button>
               </div>
 
               {/* Scope Personalizado (Avanzado) */}
-              <div className="rounded-xl border border-stroke p-4 bg-slate-50/30 dark:border-dark-3 dark:bg-dark-2/10 space-y-3">
+              <div className="rounded-xl border border-stroke p-4 bg-slate-50/35 dark:border-dark-3 dark:bg-dark-2/10 space-y-3">
                 <span className="block text-xs font-bold text-dark dark:text-white uppercase tracking-wider">
                   Asignar Permiso Personalizado (Avanzado)
                 </span>
                 <p className="text-[11px] text-dark-6">
-                  Si necesitas asignar un scope técnico específico no listado en el catálogo superior, escríbelo aquí abajo.
+                  Si necesitas asignar un scope técnico personalizado que no se liste en el catálogo superior, escríbelo directamente aquí.
                 </p>
                 <div className="flex gap-2">
                   <input
@@ -2119,7 +2141,7 @@ export function OrganizationAdministrationDetailClient() {
                     value={newScopesText}
                     onChange={(event) => setNewScopesText(event.target.value)}
                     disabled={scopesSaving}
-                    placeholder="ej. custom.service.action.*"
+                    placeholder="ej. custom.scope.name.*"
                     className="flex-1 rounded-lg border border-stroke bg-white px-3 py-1.5 text-xs text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
                   />
                   <button

@@ -330,3 +330,24 @@ export async function updateOrganizationIdentityConfig(
 export function encodeScopeForUrl(scope: string): string {
   return encodeURIComponent(scope);
 }
+
+export type AvailableScopesResponse = {
+  assignable_scopes?: string[];
+  assignableScopes?: string[];
+};
+
+/** GET /api/organizations/available-scopes */
+export async function listAvailableScopes(): Promise<string[]> {
+  const res = await fetchWithAuth("/api/organizations/available-scopes");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al obtener scopes disponibles",
+      res.status,
+      data
+    );
+  }
+  const parsed = data as AvailableScopesResponse;
+  const list = parsed.assignable_scopes ?? parsed.assignableScopes ?? [];
+  return Array.isArray(list) ? list : [];
+}
