@@ -14,6 +14,7 @@ export type OrgUser = {
   full_name: string;
   status: OrgUserStatus;
   must_change_password: boolean;
+  dashboard_otp_enabled?: boolean;
   created_at?: string;
   updated_at?: string;
   roles?: { id: string; code: string; name: string }[];
@@ -27,6 +28,7 @@ export type OrgUserListItem = {
   full_name: string;
   status: OrgUserStatus;
   must_change_password: boolean;
+  dashboard_otp_enabled?: boolean;
   balance?: string;
   created_at?: string;
   updated_at?: string;
@@ -575,4 +577,29 @@ export async function batchResetOrgUserPasswords(
     );
   }
   return data as BatchActionResponse;
+}
+
+/** PATCH /api/organizations/{orgId}/users/{userId}/dashboard-otp */
+export async function updateDashboardOtpStatus(
+  orgId: string,
+  userId: string,
+  enabled: boolean
+): Promise<{ ok: boolean; user_id: string; dashboard_otp_enabled: boolean }> {
+  const res = await fetchWithAuth(
+    `/api/organizations/${encodeURIComponent(orgId)}/users/${encodeURIComponent(userId)}/dashboard-otp`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dashboard_otp_enabled: enabled }),
+    }
+  );
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new AuthError(
+      (data as { message?: string }).message ?? "Error al actualizar el estado de OTP",
+      res.status,
+      data
+    );
+  }
+  return data as { ok: boolean; user_id: string; dashboard_otp_enabled: boolean };
 }

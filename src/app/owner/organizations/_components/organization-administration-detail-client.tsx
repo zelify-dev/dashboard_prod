@@ -43,6 +43,7 @@ import {
   setOrgUserPassword,
   batchSetOrgUserPassword,
   updateOrgUser,
+  updateDashboardOtpStatus,
   type BatchActionResponse,
   type OrgUser,
   type OrgUserListItem,
@@ -2966,6 +2967,49 @@ export function OrganizationAdministrationDetailClient() {
                           }
                           options={["ACTIVE", "PENDING", "DISABLED"]}
                         />
+
+                        {/* Doble Factor (OTP) */}
+                        <div className="flex items-center justify-between border-t border-stroke pt-4 mt-2 dark:border-dark-3">
+                          <div className="space-y-0.5 pr-4">
+                            <span className="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                              Doble Factor de Autenticación (OTP)
+                            </span>
+                            <span className="block text-[10px] text-dark-6">
+                              Determina si se exige código OTP de seguridad al ingresar al dashboard.
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              if (!selectedMember) return;
+                              const currentVal = selectedMember.dashboard_otp_enabled ?? false;
+                              setMemberActionLoading(true);
+                              setMemberActionError("");
+                              try {
+                                await updateDashboardOtpStatus(orgId, selectedMember.id, !currentVal);
+                                await refreshSelectedMember();
+                                await reloadMembers();
+                                setFlash("Configuración de OTP del miembro actualizada.");
+                              } catch (err) {
+                                setMemberActionError(err instanceof Error ? err.message : "Error al actualizar OTP.");
+                              } finally {
+                                setMemberActionLoading(false);
+                              }
+                            }}
+                            disabled={memberActionLoading}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                              selectedMember.dashboard_otp_enabled
+                                ? "bg-emerald-500"
+                                : "bg-slate-200 dark:bg-dark-3"
+                            }`}
+                          >
+                            <span
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                selectedMember.dashboard_otp_enabled ? "translate-x-5" : "translate-x-0"
+                              }`}
+                            />
+                          </button>
+                        </div>
                       </div>
                     </div>
 
