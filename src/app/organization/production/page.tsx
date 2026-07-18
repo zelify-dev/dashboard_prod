@@ -202,7 +202,17 @@ export default function PasoProduccionPage() {
         setExistingRequest(data);
         toast.success("Solicitud de paso a producción enviada con éxito.");
       } else {
-        toast.error("Error al enviar la solicitud. Intenta de nuevo.");
+        const errData = await res.json().catch(() => ({}));
+        let errMsg = "Error al enviar la solicitud.";
+        if (errData.message) {
+          errMsg = typeof errData.message === "string" ? errData.message : JSON.stringify(errData.message);
+        } else if (errData.error) {
+          errMsg = typeof errData.error === "string" ? errData.error : JSON.stringify(errData.error);
+        } else if (Array.isArray(errData.errors)) {
+          errMsg = errData.errors.map((e: any) => e.message || JSON.stringify(e)).join(", ");
+        }
+        console.error("Error devuelto por la API del backend:", errData);
+        toast.error(`Error: ${errMsg}`);
       }
     } catch (err) {
       toast.error("Ocurrió un error en el envío.");
