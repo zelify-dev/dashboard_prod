@@ -160,6 +160,22 @@ export default function PasoProduccionPage() {
 
     setSubmitting(true);
 
+    const mappedUserRequests = userRequests.map((ur) => {
+      let roleCode = "DEVELOPER";
+      if (ur.role === "Administrador") roleCode = "ORG_ADMIN";
+      else if (ur.role === "Operador") roleCode = "BUSINESS";
+      else if (ur.role === "Consulta") roleCode = "DEVELOPER";
+      else if (ur.role === "Auditor") roleCode = "MERCHANT_ADMIN";
+
+      return {
+        name: ur.fullName,
+        email: ur.email,
+        position: ur.position,
+        role: roleCode,
+        phone: ur.phone,
+      };
+    });
+
     const payload = {
       organization_id: org.id,
       company_name: companyName,
@@ -176,9 +192,9 @@ export default function PasoProduccionPage() {
       authorized_pass: authorizedPass,
       validity_accepted: validityAccepted,
       observations: observations,
-      user_requests: userRequests,
+      user_requests: mappedUserRequests,
       require_2fa: require2fa,
-      auth_methods: { email: require2fa, sms: false, authenticator: false },
+      auth_methods: { email: require2fa, sms: false, authenticator: require2fa },
       url_commerce: urlCommerce,
       url_privacy: urlPrivacy,
       url_whatsapp: urlWhatsapp,
