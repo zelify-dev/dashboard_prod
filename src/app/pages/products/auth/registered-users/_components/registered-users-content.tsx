@@ -78,11 +78,11 @@ export function RegisteredUsersContent() {
   const statusBadgeClass = (status: OrgUserStatus) => {
     switch (status) {
       case "ACTIVE":
-        return "rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-300";
+        return "rounded-lg bg-zelify-midnight px-2.5 py-1 text-[10px] font-light uppercase text-zelify-green border border-zelify-black/30";
       case "PENDING":
-        return "rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300";
+        return "rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-light uppercase text-amber-600 border border-amber-100";
       default:
-        return "rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-dark-3 dark:text-dark-6";
+        return "rounded-lg bg-gray-100 px-2.5 py-1 text-[10px] font-light uppercase text-dark-6 border border-gray-200";
     }
   };
 
@@ -103,7 +103,7 @@ export function RegisteredUsersContent() {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="max-w-sm rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm shadow-sm transition focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+            className="max-w-sm rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-light text-dark transition focus:border-zelify-midnight focus:outline-none"
           />
           <select
             value={statusFilter}
@@ -111,7 +111,7 @@ export function RegisteredUsersContent() {
               setStatusFilter(e.target.value as OrgUserStatus | "");
               setPage(1);
             }}
-            className="rounded-lg border border-stroke bg-white px-4 py-2.5 text-sm shadow-sm transition focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+            className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-light text-dark transition focus:border-zelify-midnight focus:outline-none"
           >
             <option value="">{m.filterStatus}</option>
             <option value="ACTIVE">{m.statusActive}</option>
@@ -120,24 +120,24 @@ export function RegisteredUsersContent() {
           </select>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-stroke bg-white shadow-sm dark:border-dark-3 dark:bg-dark-2">
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-stroke bg-gray-2 dark:border-dark-3 dark:bg-dark-3">
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-dark-6 dark:text-dark-6">
+                <tr className="border-b border-gray-100 bg-transparent">
+                  <th className="px-5 py-3 text-xs font-light uppercase tracking-wider text-dark-6">
                     {m.colEmail}
                   </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-dark-6 dark:text-dark-6">
+                  <th className="px-5 py-3 text-xs font-light uppercase tracking-wider text-dark-6">
                     {m.colFullName}
                   </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-dark-6 dark:text-dark-6">
+                  <th className="px-5 py-3 text-xs font-light uppercase tracking-wider text-dark-6">
                     {m.colStatus}
                   </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-dark-6 dark:text-dark-6">
+                  <th className="px-5 py-3 text-xs font-light uppercase tracking-wider text-dark-6">
                     {m.colCreatedAt}
                   </th>
-                  <th className="px-5 py-4 text-xs font-semibold uppercase tracking-wider text-dark-6 dark:text-dark-6">
+                  <th className="px-5 py-3 text-xs font-light uppercase tracking-wider text-dark-6">
                     {m.colUpdatedAt}
                   </th>
                 </tr>
@@ -156,28 +156,24 @@ export function RegisteredUsersContent() {
                     </td>
                   </tr>
                 ) : (
-                  items.map((user, index) => (
+                  items.map((user) => (
                     <tr
                       key={user.id}
-                      className={
-                        index % 2 === 0
-                          ? "bg-white transition-colors hover:bg-gray-2/60 dark:bg-dark-2 dark:hover:bg-dark-3/60"
-                          : "bg-gray-2/50 transition-colors hover:bg-gray-2 dark:bg-dark-2/80 dark:hover:bg-dark-3/80"
-                      }
+                      className="bg-white border-b border-gray-100 transition-colors hover:bg-gray-50"
                     >
-                      <td className="px-5 py-4 font-medium text-dark dark:text-white">
+                      <td className="px-5 py-3 font-normal text-dark">
                         {user.email}
                       </td>
-                      <td className="px-5 py-4 text-dark dark:text-white">{user.full_name}</td>
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-3 font-light text-dark">{user.full_name}</td>
+                      <td className="px-5 py-3">
                         <span className={statusBadgeClass(user.status)}>
                           {getStatusLabel(user.status)}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-dark-6 dark:text-dark-6">
+                      <td className="px-5 py-3 font-light text-dark-6">
                         {formatDate(user.created_at)}
                       </td>
-                      <td className="px-5 py-4 text-dark-6 dark:text-dark-6">
+                      <td className="px-5 py-3 font-light text-dark-6">
                         {formatDate(user.updated_at)}
                       </td>
                     </tr>
@@ -188,9 +184,9 @@ export function RegisteredUsersContent() {
           </div>
 
           {total > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stroke bg-gray-2/40 px-5 py-3 dark:border-dark-3 dark:bg-dark-3/50">
-              <p className="text-sm text-dark-6 dark:text-dark-6">
-                <span className="font-medium text-dark dark:text-white">{total}</span>{" "}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 bg-white px-5 py-3">
+              <p className="text-sm font-light text-dark-6">
+                <span className="font-normal text-dark">{total}</span>{" "}
                 {total === 1 ? "user" : "users"}
                 {totalPages > 1 && (
                   <> · Page {page} of {totalPages}</>
@@ -202,7 +198,7 @@ export function RegisteredUsersContent() {
                     type="button"
                     disabled={page <= 1}
                     onClick={() => setPage((p) => p - 1)}
-                    className="rounded-lg border border-stroke bg-white px-3 py-2 text-sm font-medium text-dark shadow-sm transition hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                    className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-light text-dark transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Previous
                   </button>
@@ -210,7 +206,7 @@ export function RegisteredUsersContent() {
                     type="button"
                     disabled={page >= totalPages}
                     onClick={() => setPage((p) => p + 1)}
-                    className="rounded-lg border border-stroke bg-white px-3 py-2 text-sm font-medium text-dark shadow-sm transition hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+                    className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-light text-dark transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Next
                   </button>
