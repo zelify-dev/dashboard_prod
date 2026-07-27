@@ -16,15 +16,11 @@ export function MenuItem(
   const { className, children, isActive, title, isSubItem, "data-tour-id": dataTourId, ...rest } = props;
 
   const baseStyles = cn(
-    "flex items-center transition-all duration-200 font-medium",
+    "flex items-center transition-all duration-200 font-light rounded-xl",
     isCollapsed && !isMobile ? "justify-center px-0" : "px-3.5 gap-3",
-    isSubItem
-      ? isActive
-        ? "text-zelify-green font-semibold"
-        : "text-dark-4 hover:text-dark"
-      : isActive
-        ? "bg-zelify-midnight text-zelify-white border-l-[3.5px] border-zelify-green rounded-r-lg pl-[11px] py-2.5"
-        : "text-dark-4 hover:bg-gray-100 hover:text-dark rounded-lg py-2.5",
+    isActive
+      ? "bg-zelify-midnight text-white py-2.5"
+      : "text-dark-4 hover:bg-gray-100 hover:text-dark py-2.5",
     className,
   );
 

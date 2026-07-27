@@ -520,7 +520,7 @@ export function Sidebar() {
                 }
               >
                 {!isCollapsed || isMobile ? (
-                  <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-dark-4">
+                  <h2 className="mb-5 text-xs font-light uppercase tracking-wider text-dark-4/70">
                     {section.label}
                   </h2>
                 ) : (
@@ -625,7 +625,8 @@ export function Sidebar() {
                                   className={cn(
                                     "ml-auto rotate-180 transition-all duration-200",
                                     isItemExpanded && "rotate-0",
-                                    isCollapsed && !isMobile ? "hidden" : "block"
+                                    isCollapsed && !isMobile ? "hidden" : "block",
+                                    isItemActive ? "text-white" : "text-dark-4"
                                   )}
                                   aria-hidden="true"
                                 />
@@ -784,8 +785,8 @@ export function Sidebar() {
                                               <ChevronUp
                                                 className={cn(
                                                   "ml-auto rotate-180 transition-transform duration-200",
-                                                  isSubItemExpanded &&
-                                                    "rotate-0",
+                                                  isSubItemExpanded && "rotate-0",
+                                                  isSubItemActive ? "text-white" : "text-dark-4"
                                                 )}
                                                 aria-hidden="true"
                                               />
