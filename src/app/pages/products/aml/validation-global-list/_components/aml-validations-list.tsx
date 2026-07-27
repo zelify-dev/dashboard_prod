@@ -89,20 +89,20 @@ function VerificationStatus({
   const translations = useAMLTranslations();
   if (status === "success") {
     return (
-      <div className="flex items-center gap-1.5 w-fit rounded-lg bg-zelify-midnight px-2.5 py-1 text-[10px] font-light uppercase text-zelify-green border border-zelify-black/30">
-        <svg className="h-3 w-3 text-zelify-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="flex items-center gap-1.5 w-[145px] justify-center rounded-lg bg-zelify-midnight px-2.5 py-1 text-[10px] font-light uppercase text-zelify-green border border-zelify-black/30">
+        <svg className="h-3 w-3 text-zelify-green shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
         </svg>
-        <span>{translations.status.approved}</span>
+        <span className="truncate">{translations.status.approved}</span>
       </div>
     );
   }
 
   if (status === "pending") {
     return (
-      <div className="flex items-center gap-1.5 w-fit rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-light uppercase text-amber-600 border border-amber-100">
+      <div className="flex items-center gap-1.5 w-[145px] justify-center rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-light uppercase text-amber-600 border border-amber-100">
         <svg 
-          className="h-3 w-3 text-amber-600 animate-spin" 
+          className="h-3 w-3 text-amber-600 animate-spin shrink-0" 
           fill="none" 
           viewBox="0 0 24 24"
         >
@@ -120,18 +120,18 @@ function VerificationStatus({
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           />
         </svg>
-        <span>{translations.status.pending}</span>
+        <span className="truncate">{translations.status.pending}</span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-1.5 w-fit rounded-lg bg-red-50 px-2.5 py-1 text-[10px] font-light uppercase text-red-600 border border-red-100">
-      <svg className="h-3 w-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div className="flex items-center gap-1.5 w-[145px] justify-center rounded-lg bg-red-50 px-2.5 py-1 text-[10px] font-light uppercase text-red-600 border border-red-100">
+      <svg className="h-3 w-3 text-red-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
       </svg>
-      <span>
-        {status === "Hit" ? "Hit Detectado" : (foundIn || status)}
+      <span className="truncate">
+        {status === "Hit" || status === "hit" ? translations.status.hit : (foundIn || status)}
       </span>
     </div>
   );
@@ -164,7 +164,7 @@ export function AMLValidationsList({ validations, onSelectValidation, onCreateNe
             <thead>
               <tr className="border-b border-gray-100">
                 <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.name}</th>
-                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.verification}</th>
+                <th className="px-4 py-3 text-center text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.verification}</th>
                 <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.created}</th>
                 <th className="px-4 py-3 text-right text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.actions}</th>
               </tr>
@@ -195,10 +195,12 @@ export function AMLValidationsList({ validations, onSelectValidation, onCreateNe
                       <p className="text-sm font-normal text-dark dark:text-white">{validation.name}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <VerificationStatus 
-                        status={validation.verification} 
-                        foundIn={validation.foundIn}
-                      />
+                      <div className="flex justify-center">
+                        <VerificationStatus 
+                          status={validation.verification} 
+                          foundIn={validation.foundIn}
+                        />
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <p className="text-sm font-light text-dark-6">{validation.createdAt}</p>

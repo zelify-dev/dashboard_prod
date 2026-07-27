@@ -23,16 +23,16 @@ export const amlTranslations = {
     validationsDesc: "Administra tus validaciones AML",
     validationsTable: {
       name: "Nombre",
-      verification: "Verificación",
+      verification: "Coincidencias",
       created: "Fecha",
       actions: "Acciones",
       view: "Ver",
       noValidations: "No se encontraron validaciones. Crea tu primera validación AML para comenzar."
     },
     status: {
-      approved: "Aprobado",
+      approved: "Sin Coincidencias",
       pending: "Pendiente",
-      hit: "Match Detectado"
+      hit: "Coincidencia"
     },
     detailTitle: "Detalle de Validación AML",
     detail: {
@@ -76,16 +76,16 @@ export const amlTranslations = {
     validationsDesc: "Manage your AML validation checks",
     validationsTable: {
       name: "Name",
-      verification: "Verification",
+      verification: "Matches",
       created: "Created",
       actions: "Actions",
       view: "View",
       noValidations: "No validations found. Create your first AML validation to get started."
     },
     status: {
-      approved: "Approved",
+      approved: "No Matches",
       pending: "Pending",
-      hit: "Match Detected"
+      hit: "Match Found"
     },
     detailTitle: "AML Validation Detail",
     detail: {
