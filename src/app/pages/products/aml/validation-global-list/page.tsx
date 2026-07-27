@@ -240,7 +240,7 @@ export default function AMLValidationPage() {
   return (
     <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
       {/* View Selectors */}
-      <div className="mb-6 flex space-x-8 border-b border-stroke dark:border-dark-3">
+      <div className="mb-6 flex space-x-8 border-b border-gray-100">
         <button
           onClick={() => {
             setActiveTab("auditoria");
@@ -248,10 +248,10 @@ export default function AMLValidationPage() {
             setShowForm(false);
           }}
           className={cn(
-            "pb-4 text-sm font-bold transition-all",
+            "pb-4 text-sm font-light transition-all",
             activeTab === "auditoria" 
-              ? "border-b-2 border-primary text-primary" 
-              : "text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
+              ? "border-b border-zelify-midnight text-zelify-midnight font-normal" 
+              : "text-dark-6 hover:text-dark"
           )}
         >
           Historial de Auditoría
@@ -259,10 +259,10 @@ export default function AMLValidationPage() {
         <button
           onClick={() => setActiveTab("configuracion")}
           className={cn(
-            "pb-4 text-sm font-bold transition-all",
+            "pb-4 text-sm font-light transition-all",
             activeTab === "configuracion" 
-              ? "border-b-2 border-primary text-primary" 
-              : "text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
+              ? "border-b border-zelify-midnight text-zelify-midnight font-normal" 
+              : "text-dark-6 hover:text-dark"
           )}
         >
           Configuración de Listas y Grupos

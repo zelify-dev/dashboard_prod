@@ -89,55 +89,48 @@ function VerificationStatus({
   const translations = useAMLTranslations();
   if (status === "success") {
     return (
-      <div className="flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-          <svg className="h-3.5 w-3.5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span className="text-sm font-medium text-green-600 dark:text-green-400">{translations.status.approved}</span>
+      <div className="flex items-center gap-1.5 w-fit rounded-lg bg-zelify-midnight px-2.5 py-1 text-[10px] font-light uppercase text-zelify-green border border-zelify-black/30">
+        <svg className="h-3 w-3 text-zelify-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+        </svg>
+        <span>{translations.status.approved}</span>
       </div>
     );
   }
 
   if (status === "pending") {
     return (
-      <div className="flex items-center gap-2">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/20">
-          <svg 
-            className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400 animate-spin" 
-            fill="none" 
-            viewBox="0 0 24 24"
-          >
-            <circle 
-              className="opacity-25" 
-              cx="12" 
-              cy="12" 
-              r="10" 
-              stroke="currentColor" 
-              strokeWidth="4"
-            />
-            <path 
-              className="opacity-75" 
-              fill="currentColor" 
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-        </div>
-        <span className="text-sm font-medium text-orange-600 dark:text-orange-400">{translations.status.pending}</span>
+      <div className="flex items-center gap-1.5 w-fit rounded-lg bg-amber-50 px-2.5 py-1 text-[10px] font-light uppercase text-amber-600 border border-amber-100">
+        <svg 
+          className="h-3 w-3 text-amber-600 animate-spin" 
+          fill="none" 
+          viewBox="0 0 24 24"
+        >
+          <circle 
+            className="opacity-25" 
+            cx="12" 
+            cy="12" 
+            r="10" 
+            stroke="currentColor" 
+            strokeWidth="3"
+          />
+          <path 
+            className="opacity-75" 
+            fill="currentColor" 
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+        <span>{translations.status.pending}</span>
       </div>
     );
   }
 
-  // Para cualquier coincidencia encontrada (Hit, PEP, OFAC, etc.)
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
-        <svg className="h-3.5 w-3.5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </div>
-      <span className="text-sm font-medium text-red-600 dark:text-red-400">
+    <div className="flex items-center gap-1.5 w-fit rounded-lg bg-red-50 px-2.5 py-1 text-[10px] font-light uppercase text-red-600 border border-red-100">
+      <svg className="h-3 w-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+      <span>
         {status === "Hit" ? "Hit Detectado" : (foundIn || status)}
       </span>
     </div>
@@ -148,42 +141,39 @@ export function AMLValidationsList({ validations, onSelectValidation, onCreateNe
   const translations = useAMLTranslations();
   return (
     <div className="mt-6">
-      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">
+      <div className="rounded-2xl bg-white p-8 border border-gray-100 dark:bg-dark-2">
         <div className="mb-6 flex items-center justify-between" data-tour-id="tour-aml-validations-list">
           <div>
-            <h2 className="text-xl font-bold text-dark dark:text-white">{translations.validationsTitle}</h2>
-            <p className="text-sm text-dark-6 dark:text-dark-6">
+            <h2 className="text-xl font-light text-dark dark:text-white">{translations.validationsTitle}</h2>
+            <p className="text-sm font-light text-dark-6">
               {translations.validationsDesc}
             </p>
           </div>
-          <Button
+          <button
             onClick={onCreateNew}
-            label={translations.newValidation}
-            variant="primary"
-            shape="rounded"
-            size="small"
-            icon={
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            }
-          />
+            className="flex items-center gap-2 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light uppercase text-white transition-all hover:bg-zelify-midnight/90 active:scale-95"
+          >
+            <svg className="h-4 w-4 text-zelify-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            {translations.newValidation}
+          </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-stroke dark:border-dark-3">
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">{translations.validationsTable.name}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">{translations.validationsTable.verification}</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">{translations.validationsTable.created}</th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-dark dark:text-white">{translations.validationsTable.actions}</th>
+              <tr className="border-b border-gray-100">
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.name}</th>
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.verification}</th>
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.created}</th>
+                <th className="px-4 py-3 text-right text-xs font-light uppercase tracking-wider text-dark-6">{translations.validationsTable.actions}</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={`skeleton-${i}`} className="border-b border-stroke animate-pulse dark:border-dark-3">
-                    <td className="px-4 py-3"><div className="h-4 w-32 rounded bg-gray-200 dark:bg-dark-3" md-tour-id="skeleton-row"></div></td>
+                  <tr key={`skeleton-${i}`} className="border-b border-gray-100 animate-pulse">
+                    <td className="px-4 py-3"><div className="h-4 w-32 rounded bg-gray-200 dark:bg-dark-3"></div></td>
                     <td className="px-4 py-3"><div className="h-4 w-24 rounded bg-gray-200 dark:bg-dark-3"></div></td>
                     <td className="px-4 py-3"><div className="h-4 w-24 rounded bg-gray-200 dark:bg-dark-3"></div></td>
                     <td className="px-4 py-3 text-right"><div className="ml-auto h-8 w-16 rounded bg-gray-200 dark:bg-dark-3"></div></td>
@@ -191,7 +181,7 @@ export function AMLValidationsList({ validations, onSelectValidation, onCreateNe
                 ))
               ) : validations.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-dark-6 dark:text-dark-6">
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm font-light text-dark-6">
                     {translations.validationsTable.noValidations}
                   </td>
                 </tr>
@@ -199,10 +189,10 @@ export function AMLValidationsList({ validations, onSelectValidation, onCreateNe
                 validations.map((validation) => (
                   <tr
                     key={validation.id}
-                    className="border-b border-stroke transition hover:bg-gray-50 dark:border-dark-3 dark:hover:bg-dark-3"
+                    className="border-b border-gray-100 transition hover:bg-gray-50 dark:border-dark-3 dark:hover:bg-dark-3"
                   >
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-dark dark:text-white">{validation.name}</p>
+                      <p className="text-sm font-normal text-dark dark:text-white">{validation.name}</p>
                     </td>
                     <td className="px-4 py-3">
                       <VerificationStatus 
@@ -211,17 +201,15 @@ export function AMLValidationsList({ validations, onSelectValidation, onCreateNe
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-sm text-dark-6 dark:text-dark-6">{validation.createdAt}</p>
+                      <p className="text-sm font-light text-dark-6">{validation.createdAt}</p>
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Button
+                      <button
                         onClick={() => onSelectValidation(validation.id)}
-                        label={translations.validationsTable.view}
-                        variant="outlinePrimary"
-                        shape="rounded"
-                        size="small"
-                        className="text-xs py-1.5 px-3"
-                      />
+                        className="rounded-lg bg-gray-100 text-dark-6 border border-gray-200 hover:bg-zelify-midnight hover:text-white hover:border-transparent py-1 px-4 text-xs font-light transition-all"
+                      >
+                        {translations.validationsTable.view}
+                      </button>
                     </td>
                   </tr>
                 ))
