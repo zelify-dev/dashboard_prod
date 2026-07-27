@@ -21,10 +21,10 @@ export function MenuItem(
     isSubItem
       ? isActive
         ? "text-zelify-green font-semibold"
-        : "text-zelify-white/50 hover:text-zelify-white"
+        : "text-dark-4 hover:text-dark"
       : isActive
-        ? "bg-zelify-black text-zelify-white border-l-[3px] border-zelify-green rounded-r-lg pl-[11px] py-2.5"
-        : "text-zelify-white/65 hover:bg-zelify-black/30 hover:text-zelify-white rounded-lg py-2.5",
+        ? "bg-zelify-midnight text-zelify-white border-l-[3.5px] border-zelify-green rounded-r-lg pl-[11px] py-2.5"
+        : "text-dark-4 hover:bg-gray-100 hover:text-dark rounded-lg py-2.5",
     className,
   );
 
