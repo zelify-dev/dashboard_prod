@@ -435,7 +435,7 @@ export function Sidebar() {
       <aside
         data-tour-id="tour-sidebar"
         className={cn(
-          "overflow-hidden border-r border-gray-200 bg-white transition-all duration-300 ease-in-out dark:border-gray-800 dark:bg-gray-dark",
+          "overflow-hidden border-r border-zelify-black/30 bg-zelify-midnight transition-all duration-300 ease-in-out",
           isMobile
             ? "fixed bottom-0 top-0 z-50"
             : cn("sticky top-0 h-screen", !isTourActive && "z-30"),
@@ -520,11 +520,11 @@ export function Sidebar() {
                 }
               >
                 {!isCollapsed || isMobile ? (
-                  <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-dark-4 dark:text-dark-6">
+                  <h2 className="mb-5 text-xs font-semibold uppercase tracking-wider text-zelify-white/40">
                     {section.label}
                   </h2>
                 ) : (
-                  <div className="mb-5 h-px bg-stroke dark:bg-dark-3" />
+                  <div className="mb-5 h-px bg-zelify-black/40" />
                 )}
 
                 <nav role="navigation" aria-label={section.label}>
@@ -604,7 +604,12 @@ export function Sidebar() {
                                   />
                                 ) : (
                                   <IconComponent
-                                    className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
+                                    className={cn(
+                                      "size-6 shrink-0 transition-colors duration-200",
+                                      isItemActive
+                                        ? "text-zelify-green"
+                                        : "text-zelify-white/45"
+                                    )}
                                     aria-hidden="true"
                                   />
                                 )}
@@ -770,6 +775,7 @@ export function Sidebar() {
                                             <MenuItem
                                               isActive={isSubItemActive}
                                               title={subItem.title}
+                                              isSubItem={true}
                                               onClick={() =>
                                                 toggleExpanded(subItemKey)
                                               }
@@ -805,6 +811,7 @@ export function Sidebar() {
                                                               pathname ===
                                                               nestedItem.url
                                                             }
+                                                            isSubItem={true}
                                                           >
                                                             <span>
                                                               {nestedItem.title}
@@ -830,6 +837,7 @@ export function Sidebar() {
                                             title={subItem.title}
                                             href={subItem.url}
                                             isActive={pathname === subItem.url}
+                                            isSubItem={true}
                                             data-tour-id={
                                               subItem.title ===
                                               translations.sidebar.menuItems
@@ -900,7 +908,7 @@ export function Sidebar() {
                                       isCollapsed && !isMobile ? "justify-center px-0" : "px-3.5 gap-3"
                                     )}>
                                     <IconComponent
-                                      className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
+                                      className="size-6 shrink-0 text-zelify-white/25"
                                       aria-hidden="true"
                                     />
 
@@ -948,7 +956,7 @@ export function Sidebar() {
                                     }}
                                   >
                                     <IconComponent
-                                      className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
+                                      className="size-6 shrink-0 text-zelify-white/45"
                                       aria-hidden="true"
                                     />
 
@@ -967,7 +975,10 @@ export function Sidebar() {
                                   isActive={pathname === href}
                                 >
                                   <IconComponent
-                                    className="size-6 shrink-0 text-blue-600 dark:text-blue-400"
+                                    className={cn(
+                                      "size-6 shrink-0 transition-colors duration-200",
+                                      pathname === href ? "text-zelify-green" : "text-zelify-white/45"
+                                    )}
                                     aria-hidden="true"
                                   />
 

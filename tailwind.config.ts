@@ -15,6 +15,12 @@ const config: Config = {
         "3xl": "2000px",
       },
       colors: {
+        zelify: {
+          midnight: "#000016",
+          green: "#75fa4c",
+          white: "#f6f4f3",
+          black: "#000000",
+        },
         current: "currentColor",
         transparent: "transparent",
         white: "#FFFFFF",

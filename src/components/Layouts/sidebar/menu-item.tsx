@@ -8,18 +8,23 @@ export function MenuItem(
     children: React.ReactNode;
     isActive: boolean;
     title?: string;
+    isSubItem?: boolean;
     "data-tour-id"?: string;
   } & ({ as?: "button"; onClick: () => void } | { as: "link"; href: string }),
 ) {
   const { toggleSidebar, isMobile, isCollapsed } = useSidebarContext();
-  const { className, children, isActive, title, "data-tour-id": dataTourId, ...rest } = props;
+  const { className, children, isActive, title, isSubItem, "data-tour-id": dataTourId, ...rest } = props;
 
   const baseStyles = cn(
-    "flex items-center transition-all duration-200 rounded-lg font-medium",
+    "flex items-center transition-all duration-200 font-medium",
     isCollapsed && !isMobile ? "justify-center px-0" : "px-3.5 gap-3",
-    isActive
-      ? "bg-[#F3F2FE] text-primary dark:bg-[#343E4E] dark:text-white"
-      : "text-dark-4 dark:text-dark-6 hover:bg-gray-100 hover:text-dark hover:dark:bg-[#FFFFFF1A] hover:dark:text-white",
+    isSubItem
+      ? isActive
+        ? "text-zelify-green font-semibold"
+        : "text-zelify-white/50 hover:text-zelify-white"
+      : isActive
+        ? "bg-zelify-black text-zelify-white border-l-[3px] border-zelify-green rounded-r-lg pl-[11px] py-2.5"
+        : "text-zelify-white/65 hover:bg-zelify-black/30 hover:text-zelify-white rounded-lg py-2.5",
     className,
   );
 
@@ -38,7 +43,7 @@ export function MenuItem(
           onClick={closeOnNavigate}
           data-tour-id={dataTourId}
           title={isCollapsed ? title : undefined}
-          className={cn(baseStyles, "relative w-full py-2")}
+          className={cn(baseStyles, "relative w-full")}
         >
           {children}
         </a>
@@ -51,7 +56,7 @@ export function MenuItem(
         onClick={closeOnNavigate}
         data-tour-id={dataTourId}
         title={isCollapsed ? title : undefined}
-        className={cn(baseStyles, "relative w-full py-2")}
+        className={cn(baseStyles, "relative w-full")}
       >
         {children}
       </Link>
@@ -64,7 +69,7 @@ export function MenuItem(
       aria-expanded={isActive}
       data-tour-id={dataTourId}
       title={isCollapsed ? title : undefined}
-      className={cn(baseStyles, "w-full py-3")}
+      className={cn(baseStyles, "w-full")}
     >
       {children}
     </button>
