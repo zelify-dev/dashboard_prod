@@ -16,7 +16,7 @@ export function MenuItem(
   const { className, children, isActive, title, isSubItem, "data-tour-id": dataTourId, ...rest } = props;
 
   const baseStyles = cn(
-    "flex items-center transition-all duration-200 font-light rounded-xl",
+    "flex items-center transition-all duration-200 font-light rounded-xl text-xs",
     isCollapsed && !isMobile ? "justify-center px-0" : "px-3.5 gap-3",
     isActive
       ? "bg-zelify-midnight text-white py-2.5"
