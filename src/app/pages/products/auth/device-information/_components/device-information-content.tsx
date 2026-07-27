@@ -271,14 +271,9 @@ function detectImpossibleTravel(events: IdentificationEvent[]): IdentificationEv
   return sorted;
 }
 
-// Función para obtener bandera del país (emoji)
 function getCountryFlag(countryCode?: string): string {
-  if (!countryCode) return "🌐";
-  const codePoints = countryCode
-    .toUpperCase()
-    .split("")
-    .map((char) => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
+  if (!countryCode) return "";
+  return `[${countryCode.toUpperCase()}]`;
 }
 
 // Función para generar un ID aleatorio
@@ -666,25 +661,25 @@ function DeviceDetailsModal({
                   {details.vpn && (
                     <div className="flex items-center gap-3 rounded-xl bg-red-50 px-4 py-3 border border-red-100">
                       <AlertTriangle className="h-5 w-5 text-red-600" />
-                      <span className="text-xs font-light text-red-600 uppercase tracking-wider">⚠️ Este usuario está enmascarando su conexión</span>
+                      <span className="text-xs font-light text-red-600 uppercase tracking-wider">Este usuario está enmascarando su conexión</span>
                     </div>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 p-5 dark:bg-dark-2">
+                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 py-3 px-5 dark:bg-dark-2">
                     <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">IP Declarada (Client)</span>
                     <p className="text-sm font-light text-dark dark:text-white font-mono">{details.clientIp || event.ipAddress}</p>
                   </div>
-                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 p-5 dark:bg-dark-2">
+                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 py-3 px-5 dark:bg-dark-2">
                     <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">IP Real Detectada</span>
                     <p className="text-sm font-light text-zelify-midnight font-mono">{details.detectedIp || details.clientIp || "En análisis..."}</p>
                   </div>
-                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 p-5 dark:bg-dark-2">
+                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 py-3 px-5 dark:bg-dark-2">
                     <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">Proveedor (ISP)</span>
                     <p className="text-sm font-light text-dark dark:text-white truncate" title={details.asnName}>{details.asnName || "—"}</p>
                   </div>
-                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 p-5 dark:bg-dark-2">
+                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 py-3 px-5 dark:bg-dark-2">
                     <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">Zona Horaria</span>
                     <p className="text-sm font-light text-dark dark:text-white">{details.timezone || "—"}</p>
                   </div>
@@ -769,7 +764,7 @@ function DeviceDetailsModal({
                             {details.fingerprint || event.visitorId}
                           </p>
                           <p className="mt-3 text-[9px] font-light text-dark-6 italic leading-relaxed">
-                            💡 Si este fingerprint aparece en múltiples cuentas, podría indicar fraude multicuenta.
+                            Si este fingerprint aparece en múltiples cuentas, podría indicar fraude multicuenta.
                           </p>
                        </div>
                     </div>
