@@ -70,7 +70,7 @@ export function Header() {
       )}
 
       <div className="max-xl:hidden flex items-center gap-3">
-        <h1 className="mb-0.5 text-lg font-bold text-dark dark:text-white leading-none tracking-tight">
+        <h1 className="mb-0.5 text-lg font-light text-dark leading-none tracking-tight">
           {translations.header.title}
         </h1>
       </div>
@@ -89,7 +89,7 @@ export function Header() {
           <input
             type="search"
             placeholder={translations.header.searchPlaceholder}
-            className="flex w-full items-center gap-3.5 rounded-full border bg-gray-2 py-1.5 pl-[48px] pr-4 outline-none transition-all focus-visible:border-primary dark:border-dark-3 dark:bg-dark-2 dark:hover:border-dark-4 dark:hover:bg-dark-3 dark:hover:text-dark-6 dark:focus-visible:border-primary text-xs font-medium"
+            className="flex w-full items-center gap-3.5 rounded-xl border border-gray-200 bg-gray-100 py-1.5 pl-[48px] pr-4 outline-none transition-all focus-visible:border-primary text-xs font-light text-dark"
           />
 
           <SearchIcon className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 max-[1015px]:size-4 size-4" />
@@ -98,19 +98,19 @@ export function Header() {
         {/* <ThemeToggleSwitch /> */}
 
         {environment && (
-          <div className="rounded-full bg-gray-3 p-[3px] dark:bg-[#020D1A] flex items-center relative text-[9px] font-bold select-none cursor-default opacity-90 h-[30px] border border-stroke dark:border-dark-3">
+          <div className="rounded-xl bg-gray-100 p-[3px] flex items-center relative text-[10px] font-light select-none cursor-default opacity-95 h-[30px] border border-gray-200">
             {/* Sliding Indicator background */}
             <span
-              className={`absolute h-[22px] w-[84px] rounded-full bg-white dark:bg-dark-2 border border-gray-200 dark:border-none transition-all duration-300 ${
-                environment === "PRODUCTION" ? "translate-x-[84px]" : "translate-x-0"
+              className={`absolute h-[22px] w-[84px] rounded-lg transition-all duration-300 ${
+                environment === "PRODUCTION" ? "translate-x-[84px] bg-zelify-midnight" : "translate-x-0 bg-white border border-gray-200"
               }`}
             />
             {/* Options */}
             <span
               className={`relative z-10 w-[84px] h-[22px] flex items-center justify-center transition-colors duration-300 ${
                 environment === "SANDBOX"
-                  ? "text-amber-600 dark:text-amber-400"
-                  : "text-gray-400 dark:text-gray-600"
+                  ? "text-amber-600 font-normal"
+                  : "text-gray-400"
               }`}
             >
               Sandbox
@@ -118,8 +118,8 @@ export function Header() {
             <span
               className={`relative z-10 w-[84px] h-[22px] flex items-center justify-center transition-colors duration-300 ${
                 environment === "PRODUCTION"
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-gray-400 dark:text-gray-600"
+                  ? "text-white font-normal"
+                  : "text-gray-400"
               }`}
             >
               Producción

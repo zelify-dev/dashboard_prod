@@ -64,7 +64,7 @@ export function UserInfo() {
               <UserIcon className="size-4 text-dark-6" />
             )}
           </div>
-          <span className="text-xs font-bold text-dark dark:text-dark-6 max-[1024px]:sr-only">
+          <span className="text-xs font-light text-dark max-[1024px]:sr-only">
             {USER.name}
           </span>
           <ChevronUpIcon
@@ -73,7 +73,7 @@ export function UserInfo() {
               "rotate-180 transition-transform size-4",
               isOpen && "rotate-0",
             )}
-            strokeWidth={2}
+            strokeWidth={1.5}
           />
         </div>
       </DropdownTrigger>
@@ -100,7 +100,7 @@ export function UserInfo() {
             )}
           </div>
           <div className="space-y-0.5 text-sm font-medium">
-            <div className="mb-1 leading-tight font-bold text-dark dark:text-white">
+            <div className="mb-1 leading-tight font-light text-dark">
               {USER.name}
             </div>
             <div className="leading-tight text-xs text-gray-6">{USER.email}</div>
@@ -117,7 +117,7 @@ export function UserInfo() {
           >
             <SettingsIcon className="size-4" />
 
-            <span className="mr-auto text-xs font-bold">
+            <span className="mr-auto text-xs font-light">
               {translations.userInfo.accountSettings}
             </span>
           </Link>
@@ -132,7 +132,7 @@ export function UserInfo() {
           >
             <LogOutIcon className="size-4" />
 
-            <span className="text-xs font-bold">{translations.userInfo.logOut}</span>
+            <span className="text-xs font-light">{translations.userInfo.logOut}</span>
           </button>
         </div>
       </DropdownContent>

@@ -22,7 +22,7 @@ export function LanguageToggleSwitch() {
   return (
     <button
       onClick={toggleLanguage}
-      className="group rounded-full bg-gray-3 p-[3px] text-[#111928] outline-1 outline-primary focus-visible:outline dark:bg-[#020D1A] dark:text-current"
+      className="group rounded-xl bg-gray-100 p-[3px] text-dark outline-none"
     >
       <span className="sr-only">
         {language === "en" ? translations.languageToggle.switchToSpanish : translations.languageToggle.switchToEnglish}
@@ -32,7 +32,7 @@ export function LanguageToggleSwitch() {
         {/* Indicator */}
         <span
           className={cn(
-            "absolute size-[26px] rounded-full border border-gray-200 bg-white transition-all dark:border-none dark:bg-dark-2 dark:group-hover:bg-dark-3",
+            "absolute h-[26px] w-[26px] rounded-lg border border-gray-200 bg-white transition-all",
             language === "es" && "translate-x-[32px]"
           )}
         />
@@ -41,8 +41,7 @@ export function LanguageToggleSwitch() {
           <span
             key={name}
             className={cn(
-              "relative grid size-[26px] place-items-center rounded-full text-xs font-semibold",
-              name === "es" && "dark:text-white"
+              "relative grid h-[26px] w-[26px] place-items-center rounded-lg text-xs font-light text-dark",
             )}
           >
             {label}
