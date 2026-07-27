@@ -144,9 +144,9 @@ export function AMLListConfig({
   return (
     <div className="mt-8 space-y-6">
       {/* Cabecera Principal */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-stroke pb-6 dark:border-dark-3">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-dark dark:text-white">
+          <h2 className="text-3xl font-light tracking-tight text-dark">
             {translations.config.title}
           </h2>
           <p className="mt-1 text-base font-light text-dark-6">
@@ -156,8 +156,11 @@ export function AMLListConfig({
         <div className="shrink-0">
           <button
             onClick={() => setShowCreateGroupModal(true)}
-            className="rounded-xl bg-zelify-midnight px-6 py-3 text-sm font-light uppercase text-white transition-all hover:bg-zelify-midnight/90 active:scale-95"
+            className="flex items-center gap-2 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-zelify-midnight/90 active:scale-95"
           >
+            <svg className="h-4 w-4 text-zelify-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
             {translations.config.newGroup}
           </button>
         </div>

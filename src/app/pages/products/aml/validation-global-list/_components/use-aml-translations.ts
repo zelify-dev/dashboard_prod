@@ -137,7 +137,7 @@ const AML_TRANSLATIONS: Record<Language, AMLTranslations> = {
     config: {
       title: "Configuración de Listas AML",
       description: "Gestiona las listas de verificación AML y crea grupos personalizados para tus búsquedas",
-      newGroup: "Nuevo grupo de listas AML",
+      newGroup: "Nuevo grupo",
       selectGroup: "Seleccionar grupo de listas",
       default: "Por defecto",
       allLists: "Todas las listas",
@@ -381,7 +381,7 @@ const AML_TRANSLATIONS: Record<Language, AMLTranslations> = {
     config: {
       title: "AML Lists Configuration",
       description: "Manage AML verification lists and create custom groups for your searches",
-      newGroup: "New AML list group",
+      newGroup: "New Group",
       selectGroup: "Select list group",
       default: "Default",
       allLists: "All lists",
