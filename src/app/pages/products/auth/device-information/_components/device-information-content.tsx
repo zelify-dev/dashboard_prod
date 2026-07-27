@@ -551,52 +551,52 @@ function DeviceDetailsModal({
       }}
     >
       <div className={cn(
-        "relative w-full max-w-5xl max-h-[95vh] overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-dark-2 border border-stroke dark:border-dark-3 transition-all animate-in zoom-in-95 duration-500",
+        "relative w-full max-w-5xl max-h-[95vh] overflow-hidden rounded-3xl bg-white dark:bg-dark-2 border border-gray-100 dark:border-dark-3 transition-all animate-in zoom-in-95 duration-500",
         isModalTarget && "z-[111]"
       )}>
         
         {event.impossibleTravel && (
-          <div className="bg-red/10 border-b border-red/20 px-6 py-3 flex items-center gap-3 animate-pulse">
-            <AlertTriangle className="h-5 w-5 text-red" />
+          <div className="bg-red-50 border-b border-red-100 px-6 py-3 flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-red-600" />
             <div className="flex-1">
-              <p className="text-sm font-bold text-red uppercase tracking-wider">{t.impossibleTravel}</p>
-              <p className="text-xs text-red/80">{t.impossibleTravelDesc}</p>
+              <p className="text-xs font-normal text-red-600 uppercase tracking-wider">{t.impossibleTravel}</p>
+              <p className="text-[11px] text-red-600/80">{t.impossibleTravelDesc}</p>
             </div>
           </div>
         )}
 
-        <div className="sticky top-0 z-20 border-b border-stroke bg-white/100 px-8 py-6 dark:border-dark-3 dark:bg-dark-2">
+        <div className="sticky top-0 z-20 border-b border-gray-100 bg-white px-8 py-6 dark:border-dark-3 dark:bg-dark-2">
           <div className="flex items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-2 dark:bg-dark-3 shrink-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100 dark:bg-dark-3 shrink-0">
                 {isLoading ? (
                   <div className="h-6 w-6 animate-pulse rounded-full bg-primary/20" />
                 ) : details.device?.toLowerCase() === "mobile" ? (
-                  <Smartphone className="h-6 w-6 text-primary" />
+                  <Smartphone className="h-6 w-6 text-dark-4" />
                 ) : (
-                  <Monitor className="h-6 w-6 text-primary" />
+                  <Monitor className="h-6 w-6 text-dark-4" />
                 )}
               </div>
               <div>
-                <h2 className="text-xl font-bold text-dark dark:text-white tracking-normal flex flex-wrap items-center gap-3">
+                <h2 className="text-xl font-light text-dark dark:text-white tracking-normal flex flex-wrap items-center gap-3">
                   {t.technicalRadiography}
                   {isLoading ? (
-                    <div className="h-6 w-16 animate-pulse rounded-full bg-gray-2 dark:bg-dark-3" />
+                    <div className="h-6 w-16 animate-pulse rounded-full bg-gray-100" />
                   ) : details.vpn ? (
-                    <span className="flex items-center gap-1.5 rounded-full bg-red/10 px-2.5 py-1 text-[10px] font-bold uppercase text-red border border-red/10">
+                    <span className="flex items-center gap-1 w-fit rounded-lg bg-red-50 px-2.5 py-1 text-[9px] font-light uppercase text-red-600 border border-red-100">
                       <ShieldAlert className="h-3 w-3" />
                       {t.vpn}
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1.5 rounded-full bg-green/10 px-2.5 py-1 text-[10px] font-bold uppercase text-green border border-green/10">
+                    <span className="flex items-center gap-1 w-fit rounded-lg bg-zelify-midnight px-2.5 py-1 text-[9px] font-light uppercase text-zelify-green border border-zelify-black/30">
                       <ShieldCheck className="h-3 w-3" />
                       {t.safe}
                     </span>
                   )}
                 </h2>
-                <div className="mt-1 flex items-center gap-3 text-xs font-semibold text-dark-6">
-                  <span className="font-mono bg-gray-2 dark:bg-dark-3 px-1.5 py-0.5 rounded uppercase">{event.id.substring(0, 12)}...</span>
-                  <span className="h-1 w-1 rounded-full bg-dark-6/30" />
+                <div className="mt-1 flex items-center gap-3 text-xs font-light text-dark-6">
+                  <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded uppercase">{event.id.substring(0, 12)}...</span>
+                  <span className="h-1 w-1 rounded-full bg-dark-6/35" />
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
                     {formatLocalDateTime(event.timestamp)}
@@ -608,28 +608,28 @@ function DeviceDetailsModal({
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowJSON(!showJSON)}
-                className="flex items-center gap-2 rounded-xl border border-stroke px-4 py-2 text-xs font-semibold uppercase text-dark-6 tracking-wide bg-white hover:bg-gray-2 transition-all dark:border-dark-3 dark:bg-dark-3 dark:text-dark-6 dark:hover:bg-dark-4 dark:hover:text-white"
+                className="flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-xs font-light uppercase text-dark-6 tracking-wide bg-white hover:bg-gray-50 transition-all"
               >
                 {showJSON ? t.hideJson : t.showJson}
               </button>
               <button
                 onClick={onClose}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-stroke bg-white text-dark-6 hover:bg-red hover:text-white transition-all dark:border-dark-3 dark:bg-dark-3"
+                className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-dark-6 hover:bg-zelify-midnight hover:text-white transition-all"
               >
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
           </div>
 
-          <div className="mt-8 flex gap-8 border-b border-stroke dark:border-dark-3">
+          <div className="mt-8 flex gap-8 border-b border-gray-100 dark:border-dark-3">
             <button
               onClick={() => setActiveTab("details")}
               className={cn(
-                "pb-3 text-[11px] font-bold uppercase tracking-[0.15em] transition-all",
+                "pb-3 text-[11px] font-light uppercase tracking-[0.15em] transition-all",
                 activeTab === "details"
-                  ? "border-b-2 border-primary text-primary"
+                  ? "border-b border-zelify-midnight text-zelify-midnight font-normal"
                   : "text-dark-6 hover:text-dark-3"
               )}
             >
@@ -638,9 +638,9 @@ function DeviceDetailsModal({
             <button
               onClick={() => setActiveTab("history")}
               className={cn(
-                "pb-3 text-[11px] font-bold uppercase tracking-[0.15em] transition-all",
+                "pb-3 text-[11px] font-light uppercase tracking-[0.15em] transition-all",
                 activeTab === "history"
-                  ? "border-b-2 border-primary text-primary"
+                  ? "border-b border-zelify-midnight text-zelify-midnight font-normal"
                   : "text-dark-6 hover:text-dark-3"
               )}
             >
@@ -654,58 +654,58 @@ function DeviceDetailsModal({
             <div className="space-y-8 animate-in slide-in-from-bottom-5 duration-700 pb-10">
               
               {/* Bloque A: Análisis de Conexión (Seguridad) */}
-              <div className="rounded-2xl border border-stroke bg-white p-8 dark:border-dark-3 dark:bg-dark-3 shadow-sm lg:col-span-12">
+              <div className="rounded-3xl border border-gray-100 bg-white p-8 dark:border-dark-3 dark:bg-dark-3 lg:col-span-12">
                 <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                   <div>
-                    <h3 className="text-[11px] font-bold uppercase text-dark-6 tracking-[0.2em] flex items-center gap-2 mb-2">
-                       <ShieldAlert className="h-4 w-4 text-primary" />
+                    <h3 className="text-[11px] font-light uppercase text-dark-6 tracking-[0.2em] flex items-center gap-2 mb-2">
+                       <ShieldAlert className="h-4 w-4 text-dark-4" />
                        Bloque A: Análisis de Conexión
                     </h3>
-                    <p className="text-sm font-semibold text-dark-6">Auditoría técnica de la red y seguridad de la sesión.</p>
+                    <p className="text-sm font-light text-dark-6">Auditoría técnica de la red y seguridad de la sesión.</p>
                   </div>
                   {details.vpn && (
-                    <div className="flex items-center gap-3 rounded-xl bg-red/10 px-4 py-3 border border-red/20 animate-pulse">
-                      <AlertTriangle className="h-5 w-5 text-red" />
-                      <span className="text-xs font-bold text-red uppercase tracking-wider">⚠️ Este usuario está enmascarando su conexión</span>
+                    <div className="flex items-center gap-3 rounded-xl bg-red-50 px-4 py-3 border border-red-100">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                      <span className="text-xs font-light text-red-600 uppercase tracking-wider">⚠️ Este usuario está enmascarando su conexión</span>
                     </div>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-xl bg-gray-2 p-5 dark:bg-dark-2">
-                    <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">IP Declarada (Client)</span>
-                    <p className="text-sm font-bold text-dark dark:text-white font-mono">{details.clientIp || event.ipAddress}</p>
+                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 p-5 dark:bg-dark-2">
+                    <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">IP Declarada (Client)</span>
+                    <p className="text-sm font-light text-dark dark:text-white font-mono">{details.clientIp || event.ipAddress}</p>
                   </div>
-                  <div className="rounded-xl bg-gray-2 p-5 dark:bg-dark-2">
-                    <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">IP Real Detectada</span>
-                    <p className="text-sm font-bold text-primary font-mono">{details.detectedIp || details.clientIp || "En análisis..."}</p>
+                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 p-5 dark:bg-dark-2">
+                    <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">IP Real Detectada</span>
+                    <p className="text-sm font-light text-zelify-midnight font-mono">{details.detectedIp || details.clientIp || "En análisis..."}</p>
                   </div>
-                  <div className="rounded-xl bg-gray-2 p-5 dark:bg-dark-2">
-                    <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">Proveedor (ISP)</span>
-                    <p className="text-sm font-bold text-dark dark:text-white truncate" title={details.asnName}>{details.asnName || "—"}</p>
+                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 p-5 dark:bg-dark-2">
+                    <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">Proveedor (ISP)</span>
+                    <p className="text-sm font-light text-dark dark:text-white truncate" title={details.asnName}>{details.asnName || "—"}</p>
                   </div>
-                  <div className="rounded-xl bg-gray-2 p-5 dark:bg-dark-2">
-                    <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">Zona Horaria</span>
-                    <p className="text-sm font-bold text-dark dark:text-white">{details.timezone || "—"}</p>
+                  <div className="rounded-xl bg-gray-50 border border-gray-100/50 p-5 dark:bg-dark-2">
+                    <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">Zona Horaria</span>
+                    <p className="text-sm font-light text-dark dark:text-white">{details.timezone || "—"}</p>
                   </div>
                 </div>
 
                 <div className="mt-6 flex flex-wrap gap-4">
-                   <div className="flex items-center gap-3 rounded-lg border border-stroke px-4 py-2 dark:border-dark-3">
+                   <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-2">
                       <div className={cn(
                         "h-2 w-2 rounded-full",
-                        details.vpn ? "bg-red shadow-[0_0_8px_rgba(255,0,0,0.5)]" : "bg-green shadow-[0_0_8px_rgba(0,255,0,0.5)]"
+                        details.vpn ? "bg-red-500" : "bg-zelify-green"
                       )} />
-                      <span className="text-[10px] font-bold uppercase text-dark-6">{details.vpn ? "VPN Detectada" : "Conexión Segura"}</span>
+                      <span className="text-[10px] font-light uppercase text-dark-6">{details.vpn ? "VPN Detectada" : "Conexión Segura"}</span>
                    </div>
-                   <div className="flex items-center gap-3 rounded-lg border border-stroke px-4 py-2 dark:border-dark-3">
-                      <Info className="h-4 w-4 text-primary" />
-                      <span className="text-[10px] font-bold uppercase text-dark-6">Confianza: {details.confidence}%</span>
+                   <div className="flex items-center gap-3 rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-2">
+                      <Info className="h-4 w-4 text-dark-4" />
+                      <span className="text-[10px] font-light uppercase text-dark-6">Confianza: {details.confidence}%</span>
                    </div>
                    {event.impossibleTravel && (
-                      <div className="flex items-center gap-3 rounded-lg bg-red/5 border border-red/20 px-4 py-2">
-                        <AlertTriangle className="h-4 w-4 text-red" />
-                        <span className="text-[10px] font-bold uppercase text-red">Viaje Imposible</span>
+                      <div className="flex items-center gap-3 rounded-lg bg-red-50/5 border border-red-100 px-4 py-2">
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <span className="text-[10px] font-light uppercase text-red-600">Viaje Imposible</span>
                       </div>
                    )}
                 </div>
@@ -716,16 +716,16 @@ function DeviceDetailsModal({
                 
                 {/* Bloque B: Ubicación Geográfica */}
                 <div className="lg:col-span-8 flex flex-col gap-6">
-                  <div className="flex-1 rounded-2xl border border-stroke bg-white p-2 dark:border-dark-3 dark:bg-dark-3 shadow-sm overflow-hidden min-h-[400px] relative">
+                  <div className="flex-1 rounded-3xl border border-gray-100 bg-white p-2 dark:border-dark-3 dark:bg-dark-3 overflow-hidden min-h-[400px] relative">
                     <div className="absolute top-4 left-4 z-[10] flex flex-col gap-2">
-                       <div className="flex items-center gap-2 rounded-xl bg-white/90 backdrop-blur px-3 py-2 shadow-lg border border-stroke dark:bg-dark-2/90 dark:border-dark-3">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          <span className="text-xs font-bold uppercase tracking-wider text-dark dark:text-white">
+                       <div className="flex items-center gap-2 rounded-xl bg-white/95 backdrop-blur px-3 py-2 border border-gray-100">
+                          <MapPin className="h-4 w-4 text-dark-4" />
+                          <span className="text-xs font-light uppercase tracking-wider text-dark dark:text-white">
                             Bloque B: {event.city || "—"}, {event.country || t.location}
                           </span>
                        </div>
                     </div>
-                    <div className="h-full w-full rounded-xl overflow-hidden">
+                    <div className="h-full w-full rounded-2xl overflow-hidden">
                       <LocationMap
                         latitude={details.latitude}
                         longitude={details.longitude}
@@ -739,36 +739,36 @@ function DeviceDetailsModal({
 
                 {/* Bloque C: Hardware y Software */}
                 <div className="lg:col-span-4 space-y-6">
-                  <div className="rounded-2xl border border-stroke bg-white p-8 dark:border-dark-3 dark:bg-dark-3 shadow-sm">
-                    <h3 className="text-[11px] font-bold uppercase text-dark-6 tracking-[0.2em] flex items-center gap-2 mb-8">
-                       <Smartphone className="h-4 w-4 text-primary" />
+                  <div className="rounded-3xl border border-gray-100 bg-white p-8 dark:border-dark-3 dark:bg-dark-3">
+                    <h3 className="text-[11px] font-light uppercase text-dark-6 tracking-[0.2em] flex items-center gap-2 mb-8">
+                       <Smartphone className="h-4 w-4 text-dark-4" />
                        Bloque C: Hardware/Software
                     </h3>
                     
                     <div className="space-y-6">
                        <div>
-                          <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">Navegador</span>
+                          <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">Navegador</span>
                           <div className="flex items-center justify-between">
-                            <p className="text-sm font-bold text-dark dark:text-white">{details.browserName} {details.browserVersion}</p>
-                            <ExternalLink className="h-4 w-4 text-dark-6 opacity-40" />
+                            <p className="text-sm font-light text-dark dark:text-white">{details.browserName} {details.browserVersion}</p>
+                            <ExternalLink className="h-4 w-4 text-dark-6 opacity-45" />
                           </div>
                        </div>
-                       <div className="pt-6 border-t border-stroke dark:border-dark-3">
-                          <span className="text-[9px] font-bold text-dark-6 uppercase block mb-2">Sistema Operativo</span>
+                       <div className="pt-6 border-t border-gray-100">
+                          <span className="text-[9px] font-light text-dark-6 uppercase block mb-2">Sistema Operativo</span>
                           <div className="flex items-center justify-between">
-                            <p className="text-sm font-bold text-dark dark:text-white">{details.os} {details.osVersion}</p>
-                            <Monitor className="h-4 w-4 text-dark-6 opacity-40" />
+                            <p className="text-sm font-light text-dark dark:text-white">{details.os} {details.osVersion}</p>
+                            <Monitor className="h-4 w-4 text-dark-6 opacity-45" />
                           </div>
                        </div>
-                       <div className="pt-6 border-t border-stroke dark:border-dark-3">
+                       <div className="pt-6 border-t border-gray-100">
                           <div className="flex items-center gap-2 mb-3">
-                            <ShieldCheck className="h-4 w-4 text-green" />
-                            <span className="text-[9px] font-bold text-green uppercase tracking-wider">Fingerprint Unico</span>
+                            <ShieldCheck className="h-4 w-4 text-zelify-green" />
+                            <span className="text-[9px] font-light text-zelify-green uppercase tracking-wider">Fingerprint Unico</span>
                           </div>
-                          <p className="font-mono text-[10px] break-all bg-gray-2 dark:bg-dark-2 p-4 rounded-xl text-dark-6 leading-relaxed border border-stroke dark:border-dark-3">
+                          <p className="font-mono text-[10px] break-all bg-gray-50 p-4 rounded-xl text-dark leading-relaxed border border-gray-100/60">
                             {details.fingerprint || event.visitorId}
                           </p>
-                          <p className="mt-3 text-[9px] font-semibold text-dark-6 italic leading-relaxed">
+                          <p className="mt-3 text-[9px] font-light text-dark-6 italic leading-relaxed">
                             💡 Si este fingerprint aparece en múltiples cuentas, podría indicar fraude multicuenta.
                           </p>
                        </div>
@@ -780,15 +780,15 @@ function DeviceDetailsModal({
             </div>
           ) : (
             <div className="animate-in fade-in duration-500">
-              <h3 className="mb-6 text-lg font-bold text-dark dark:text-white tracking-normal">{t.visitorHistoryTitle}</h3>
-              <div className="overflow-hidden rounded-2xl border border-stroke dark:border-dark-3 shadow-sm">
+              <h3 className="mb-6 text-lg font-light text-dark dark:text-white tracking-normal">{t.visitorHistoryTitle}</h3>
+              <div className="overflow-hidden rounded-2xl border border-gray-100">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-none bg-gray-2 dark:bg-dark-3">
-                      <TableHead className="py-4 px-6 text-[10px] font-semibold uppercase text-dark-6 tracking-wide">{ht.visitorId}</TableHead>
-                      <TableHead className="py-4 px-6 text-[10px] font-semibold uppercase text-dark-6 tracking-wide">{ht.ipAddress}</TableHead>
-                      <TableHead className="py-4 px-6 text-[10px] font-semibold uppercase text-dark-6 tracking-wide">ID / {ht.requestId}</TableHead>
-                      <TableHead className="py-4 px-6 text-[10px] font-semibold uppercase text-dark-6 tracking-wide text-right">{ht.date}</TableHead>
+                    <TableRow className="border-b border-gray-100 bg-transparent">
+                      <TableHead className="py-4 px-6 text-[10px] font-light uppercase text-dark-6 tracking-wide">{ht.visitorId}</TableHead>
+                      <TableHead className="py-4 px-6 text-[10px] font-light uppercase text-dark-6 tracking-wide">{ht.ipAddress}</TableHead>
+                      <TableHead className="py-4 px-6 text-[10px] font-light uppercase text-dark-6 tracking-wide">ID / {ht.requestId}</TableHead>
+                      <TableHead className="py-4 px-6 text-[10px] font-light uppercase text-dark-6 tracking-wide text-right">{ht.date}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -797,24 +797,24 @@ function DeviceDetailsModal({
                         <TableCell colSpan={4} className="py-20 text-center">
                            <div className="flex flex-col items-center gap-2 grayscale brightness-50">
                              <Clock className="h-10 w-10 text-dark-6 opacity-20" />
-                             <p className="text-sm font-bold text-dark-6 uppercase tracking-widest">{t.historyEmpty}</p>
+                             <p className="text-sm font-light text-dark-6 uppercase tracking-widest">{t.historyEmpty}</p>
                            </div>
                         </TableCell>
                       </TableRow>
                     ) : (
                       relatedEvents.map((e) => (
-                        <TableRow key={e.id} className="hover:bg-gray-2/50 dark:hover:bg-dark-3/50 transition-colors cursor-pointer group">
-                          <TableCell className="py-4 px-6 font-mono text-xs font-bold text-dark dark:text-white group-hover:text-primary transition-colors">
+                        <TableRow key={e.id} className="hover:bg-gray-50 transition-colors cursor-pointer group">
+                          <TableCell className="py-4 px-6 font-mono text-xs font-normal text-dark dark:text-white group-hover:text-zelify-midnight transition-colors">
                             {e.visitorId.substring(0, 12)}...
                           </TableCell>
                           <TableCell className="py-4 px-6">
                             <div className="flex items-center gap-2">
                               <span className="text-lg leading-none">{getCountryFlag(e.countryCode)}</span>
-                              <span className="text-xs font-bold text-dark dark:text-white">{e.ipAddress}</span>
+                              <span className="text-xs font-normal text-dark dark:text-white">{e.ipAddress}</span>
                             </div>
                           </TableCell>
                           <TableCell className="py-4 px-6 text-xs text-dark-6">{e.requestId.substring(0, 10)}...</TableCell>
-                          <TableCell className="py-4 px-6 text-xs font-bold text-dark dark:text-white text-right">
+                          <TableCell className="py-4 px-6 text-xs font-normal text-dark dark:text-white text-right">
                              {dayjs(e.timestamp).format("DD MMM, HH:mm")}
                           </TableCell>
                         </TableRow>
@@ -828,15 +828,15 @@ function DeviceDetailsModal({
         </div>
 
         {showJSON && (
-          <div className="border-t border-stroke p-8 bg-gray-2/30 dark:border-dark-3 dark:bg-dark-3/30 animate-in slide-in-from-bottom-2 duration-500">
-            <div className="relative rounded-2xl bg-gray-2 px-6 py-6 dark:bg-dark-3 border border-stroke dark:border-dark-2">
+          <div className="border-t border-gray-100 p-8 bg-gray-50/20 animate-in slide-in-from-bottom-2 duration-500">
+            <div className="relative rounded-2xl bg-gray-50 px-6 py-6 border border-gray-100">
               <div className="flex items-center justify-between mb-4">
-                 <span className="text-[10px] font-semibold uppercase tracking-wider text-dark-6">Raw Event JSON Data</span>
+                 <span className="text-[10px] font-light uppercase tracking-wider text-dark-6">Raw Event JSON Data</span>
                  <button
                     onClick={() => {
                        navigator.clipboard.writeText(JSON.stringify(event, null, 2));
                     }}
-                    className="flex items-center gap-2 text-xs font-bold text-primary"
+                    className="flex items-center gap-2 text-xs font-light text-zelify-midnight"
                  >
                     <Copy className="h-3.5 w-3.5" />
                     Copy Data
