@@ -1,5 +1,5 @@
-import zelifyLogoDark from "@/assets/logos/zelifyLogo_dark.svg";
-import zelifyLogoLight from "@/assets/logos/zelifyLogo_ligth.svg";
+import zelifyLogoDark from "../../public/images/logo/zelifyLogo_dark.svg";
+import zelifyLogoLight from "../../public/images/logo/zelifyLogo_ligth.svg";
 
 import zelifyIcon from "../../public/images/logo/zelify-icon.svg";
 
