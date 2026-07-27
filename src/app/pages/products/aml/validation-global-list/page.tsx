@@ -273,26 +273,28 @@ export default function AMLValidationPage() {
         {activeTab === "auditoria" ? (
           selectedValidationData ? (
             <div>
-              <Button
+              <button
                 onClick={() => setSelectedValidation(null)}
-                label={translations.backToValidations}
-                variant="outlineDark"
-                size="small"
-                shape="rounded"
-                className="mb-4"
-              />
+                className="mb-6 flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light uppercase text-dark-6 transition hover:bg-gray-50 active:scale-95"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                {translations.backToValidations}
+              </button>
               <AMLValidationDetail validation={selectedValidationData} />
             </div>
           ) : showForm ? (
             <div>
-              <Button
+              <button
                 onClick={() => setShowForm(false)}
-                label={translations.backToValidations}
-                variant="outlineDark"
-                size="small"
-                shape="rounded"
-                className="mb-4"
-              />
+                className="mb-6 flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light uppercase text-dark-6 transition hover:bg-gray-50 active:scale-95"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                {translations.backToValidations}
+              </button>
               <AMLValidationForm 
                 groups={groups}
                 selectedGroupId={selectedGroupId}

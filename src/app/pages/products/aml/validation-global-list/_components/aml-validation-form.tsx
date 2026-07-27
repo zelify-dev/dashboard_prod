@@ -290,10 +290,10 @@ export function AMLValidationForm({
   });
 
   return (
-    <div className="mt-6 rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2" data-tour-id="tour-aml-validation-form">
+    <div className="mt-6 rounded-3xl bg-white p-8 border border-gray-100 dark:bg-dark-2" data-tour-id="tour-aml-validation-form">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-dark dark:text-white">{translations.newValidation}</h2>
-        <p className="text-sm text-dark-6 dark:text-dark-6">
+        <h2 className="text-xl font-light text-dark dark:text-white">{translations.newValidation}</h2>
+        <p className="text-sm font-light text-dark-6">
           {translations.newValidationDesc}
         </p>
       </div>
@@ -302,7 +302,7 @@ export function AMLValidationForm({
         {/* Selector de grupo */}
         {groups.length > 0 && (
           <div className="space-y-2">
-            <label htmlFor="group" className="block text-sm font-semibold text-dark dark:text-white">
+            <label htmlFor="group" className="block text-sm font-normal text-dark dark:text-white">
               {translations.selectGroupForValidation}
             </label>
             <SimpleSelect
@@ -316,7 +316,7 @@ export function AMLValidationForm({
                 errors.country && "react-select-error"
               )}
             />
-            <p className="text-xs text-dark-6 dark:text-dark-6">
+            <p className="text-xs font-light text-dark-6">
               {listsSummaryText}
             </p>
           </div>
@@ -324,7 +324,7 @@ export function AMLValidationForm({
 
         {/* Nombre Completo */}
         <div className="space-y-2">
-          <label htmlFor="fullName" className="block text-sm font-semibold text-dark dark:text-white">
+          <label htmlFor="fullName" className="block text-sm font-normal text-dark dark:text-white">
             Nombre Completo del Sujeto
             <span className="ml-1 text-red-500">*</span>
           </label>
@@ -341,23 +341,23 @@ export function AMLValidationForm({
             disabled={isSearching}
             placeholder="Ej: Patricio Maldonado"
             className={cn(
-              "block w-full rounded-lg border px-4 py-3 text-sm text-dark placeholder-dark-6 transition-colors focus:outline-none focus:ring-1 dark:bg-dark-2 dark:text-white dark:placeholder-dark-6 disabled:opacity-50",
+              "block w-full rounded-xl border px-4 py-3 text-sm font-light text-dark placeholder-dark-6 transition-colors focus:outline-none disabled:opacity-50",
               errors.fullName
-                ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500"
-                : "border-stroke focus:border-primary focus:ring-primary dark:border-dark-3"
+                ? "border-red-500 focus:border-red-500"
+                : "border-gray-200 focus:border-zelify-midnight"
             )}
             required
           />
           {errors.fullName && (
-            <p className="text-xs text-red-600 dark:text-red-400">{errors.fullName}</p>
+            <p className="text-xs text-red-600">{errors.fullName}</p>
           )}
         </div>
         
         {/* País (Opcional) */}
         <div className="space-y-2">
-          <label htmlFor="country" className="block text-sm font-semibold text-dark dark:text-white">
+          <label htmlFor="country" className="block text-sm font-normal text-dark dark:text-white">
             Nacionalidad / Residencia
-            <span className="ml-1 text-xs font-medium text-dark-6">(Opcional)</span>
+            <span className="ml-1 text-xs font-light text-dark-6">(Opcional)</span>
           </label>
           <SimpleSelect
             options={countryOptions}
@@ -376,7 +376,7 @@ export function AMLValidationForm({
             )}
           />
           {errors.country && (
-            <p className="text-xs text-red-600 dark:text-red-400">{errors.country}</p>
+            <p className="text-xs text-red-600">{errors.country}</p>
           )}
         </div>
 
@@ -385,49 +385,49 @@ export function AMLValidationForm({
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+            className="flex items-center gap-2 text-sm font-light text-zelify-midnight transition-colors hover:text-zelify-midnight/85"
           >
             <svg 
               className={cn("h-4 w-4 transition-transform", showAdvanced && "rotate-180")} 
               fill="none" viewBox="0 0 24 24" stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
             </svg>
             {translations.config.advancedOptions}
           </button>
         </div>
 
         {showAdvanced && (
-          <div className="grid grid-cols-1 gap-6 rounded-lg border border-dashed border-stroke p-5 dark:border-dark-3 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 rounded-2xl border border-dashed border-gray-200 p-6 bg-gray-50/20 md:grid-cols-2">
             {/* Tipo de Entidad */}
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-dark dark:text-white">
+              <label className="block text-sm font-normal text-dark dark:text-white">
                 {translations.config.entityType}
               </label>
               <SimpleSelect
                 options={entityTypeOptions}
                 value={entityType}
                 onChange={setEntityType}
-                className="w-full"
+                className="w-full font-light"
               />
             </div>
 
             {/* Fecha de Nacimiento */}
             <div className="space-y-2">
-              <label className="block text-sm font-semibold text-dark dark:text-white">
+              <label className="block text-sm font-normal text-dark dark:text-white">
                 {translations.config.dateOfBirth}
               </label>
               <input
                 type="date"
                 value={dob}
                 onChange={(e) => setDob(e.target.value)}
-                className="block w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition-colors focus:border-primary dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+                className="block w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-light text-dark outline-none transition-colors focus:border-zelify-midnight"
               />
             </div>
 
             {/* Puntaje de Confianza */}
             <div className="space-y-3">
-              <label className="block text-sm font-semibold text-dark dark:text-white">
+              <label className="block text-sm font-normal text-dark dark:text-white">
                 {translations.config.confidenceScore}
               </label>
               <div className="flex items-center gap-4">
@@ -439,13 +439,13 @@ export function AMLValidationForm({
                     step="0.01"
                     value={minScore}
                     onChange={(e) => setMinScore(parseFloat(e.target.value))}
-                    className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-dark-3 outline-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:ring-2 [&::-webkit-slider-thumb]:ring-primary [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:hover:scale-110"
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-dark-3 outline-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:ring-2 [&::-webkit-slider-thumb]:ring-zelify-midnight [&::-webkit-slider-thumb]:transition-all [&::-webkit-slider-thumb]:hover:scale-110"
                     style={{
-                      background: `linear-gradient(to right, #3C50E0 0%, #3C50E0 ${(minScore - 0.5) / 0.5 * 100}%, #E2E8F0 ${(minScore - 0.5) / 0.5 * 100}%, #E2E8F0 100%)`
+                      background: `linear-gradient(to right, #000016 0%, #000016 ${(minScore - 0.5) / 0.5 * 100}%, #E2E8F0 ${(minScore - 0.5) / 0.5 * 100}%, #E2E8F0 100%)`
                     }}
                   />
                 </div>
-                <span className="min-w-[50px] rounded-full bg-primary/10 px-3 py-1 text-center text-[12px] font-bold text-primary border border-primary/20 shadow-sm">
+                <span className="min-w-[50px] rounded-xl bg-zelify-midnight px-3 py-1.5 text-center text-[11px] font-light text-white shadow-sm">
                   {Math.round(minScore * 100)}%
                 </span>
               </div>
@@ -456,9 +456,9 @@ export function AMLValidationForm({
 
         {/* Número de documento (Opcional) */}
         <div className="space-y-2">
-          <label htmlFor="documentNumber" className="block text-sm font-semibold text-dark dark:text-white">
+          <label htmlFor="documentNumber" className="block text-sm font-normal text-dark dark:text-white">
             {translations.documentNumber}
-            <span className="ml-1 text-xs font-medium text-dark-6">(Opcional)</span>
+            <span className="ml-1 text-xs font-light text-dark-6">(Opcional)</span>
           </label>
           <input
             id="documentNumber"
@@ -476,37 +476,37 @@ export function AMLValidationForm({
             disabled={isSearching}
             placeholder={translations.documentNumberPlaceholder}
             className={cn(
-              "block w-full rounded-lg border px-4 py-3 text-sm text-dark placeholder-dark-6 transition-colors focus:outline-none focus:ring-1 dark:bg-dark-2 dark:text-white dark:placeholder-dark-6 disabled:opacity-50",
+              "block w-full rounded-xl border px-4 py-3 text-sm font-light text-dark placeholder-dark-6 transition-colors focus:outline-none disabled:opacity-50",
               errors.documentNumber
-                ? "border-red-500 focus:border-red-500 focus:ring-red-500 dark:border-red-500"
-                : "border-stroke focus:border-primary focus:ring-primary dark:border-dark-3"
+                ? "border-red-500 focus:border-red-500"
+                : "border-gray-200 focus:border-zelify-midnight"
             )}
             required
           />
           {errors.documentNumber && (
-            <p className="text-xs text-red-600 dark:text-red-400">{errors.documentNumber}</p>
+            <p className="text-xs text-red-600">{errors.documentNumber}</p>
           )}
         </div>
 
         {/* Barra de progreso */}
         {isSearching && (
-          <div className="space-y-4 rounded-lg border border-stroke bg-gray-50 p-4 dark:border-dark-3 dark:bg-dark-3">
+          <div className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50/40 p-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-dark dark:text-white">
+                <span className="font-light text-dark">
                   {searchSteps[currentStep] || translations.status.pending}
                 </span>
-                <span className="font-semibold text-primary">{Math.round(progress)}%</span>
+                <span className="font-normal text-zelify-midnight">{Math.round(progress)}%</span>
               </div>
-              <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-dark-4">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary to-primary/80 transition-all duration-300 ease-out"
+                  className="h-full rounded-full bg-zelify-midnight transition-all duration-300 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </div>
-            <div className="flex items-center gap-2 text-xs text-dark-6 dark:text-dark-6">
-              <svg className="h-4 w-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2 text-xs font-light text-dark-6">
+              <svg className="h-4 w-4 animate-spin text-zelify-midnight" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
@@ -518,27 +518,22 @@ export function AMLValidationForm({
         {/* Botones de acción */}
         {!isSearching && (
           <div className="flex gap-3 pt-2">
-            <Button
+            <button
               type="submit"
-              label={translations.verify}
-              variant="primary"
-              shape="rounded"
-              size="small"
-              className="flex-1"
-              icon={
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              }
-            />
-            <Button
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-zelify-midnight py-3 text-sm font-light uppercase text-white transition-all hover:bg-zelify-midnight/90 active:scale-95"
+            >
+              <svg className="h-5 w-5 text-zelify-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {translations.verify}
+            </button>
+            <button
               type="button"
               onClick={onCancel}
-              label={translations.cancel}
-              variant="outlineDark"
-              shape="rounded"
-              size="small"
-            />
+              className="rounded-xl border border-gray-200 bg-white px-6 py-3 text-sm font-light uppercase text-dark-6 hover:bg-gray-50 transition-all active:scale-95"
+            >
+              {translations.cancel}
+            </button>
           </div>
         )}
       </form>
