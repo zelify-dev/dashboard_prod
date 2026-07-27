@@ -33,7 +33,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <ZendeskWidget />
         <ScopesLoader />
         <Sidebar />
-        <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
+        <div className="w-full bg-white">
           <Header />
             <main className="mx-auto w-full max-w-screen-2xl overflow-hidden p-2 md:p-4 2xl:p-6">
             {children}
@@ -48,7 +48,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <ZendeskWidget />
       <ScopesLoader />
       <Sidebar />
-      <div className="w-full bg-gray-2 dark:bg-[#020d1a]">
+      <div className="w-full bg-white">
         <Header />
 
           <main className="mx-auto w-full max-w-screen-2xl overflow-hidden p-2 md:p-4 2xl:p-6">

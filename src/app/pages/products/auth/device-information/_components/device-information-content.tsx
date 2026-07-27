@@ -1031,18 +1031,18 @@ export function DeviceInformationContent() {
 
   return (
     <div className="mt-6 space-y-6">
-      <div className="rounded-2xl bg-white p-8 shadow-sm dark:bg-dark-2 border border-stroke dark:border-dark-3" data-tour-id="tour-device-information">
+      <div className="rounded-2xl bg-white p-8 dark:bg-dark-2 border border-gray-100 dark:border-dark-3" data-tour-id="tour-device-information">
         <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <h2 className="text-2xl font-bold text-dark dark:text-white tracking-normal flex items-center gap-3">
-              <ShieldCheck className="h-7 w-7 text-primary" />
+            <h2 className="text-2xl font-light text-dark dark:text-white tracking-normal flex items-center gap-3">
+              <ShieldCheck className="h-7 w-7 text-zelify-green" />
               {translations.pageTitle}
             </h2>
-            <p className="mt-2 text-sm font-semibold text-dark-6 leading-relaxed">
+            <p className="mt-2 text-sm font-light text-dark-6 leading-relaxed">
               {translations.pageDescription}
             </p>
             <div className="mt-4 flex items-center gap-2">
-                <span className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[9px] font-semibold uppercase text-primary border border-primary/20 tracking-wider">
+                <span className="flex items-center gap-1.5 rounded-xl bg-zelify-midnight px-3 py-1.5 text-[9px] font-light uppercase text-white tracking-wider">
                   {translations.subtitleGlobal(displayEvents.length)}
                 </span>
             </div>
@@ -1051,7 +1051,7 @@ export function DeviceInformationContent() {
           <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
             {canViewOtherUsers && orgId && currentUserId && (
               <div className="relative group w-full sm:w-[360px]">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-6 group-focus-within:text-primary transition-colors">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-dark-6 group-focus-within:text-zelify-midnight transition-colors">
                   <Search className="h-4 w-4" />
                 </div>
                 <input
@@ -1059,18 +1059,18 @@ export function DeviceInformationContent() {
                   placeholder={translations.table.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded-xl border border-stroke bg-white pl-11 pr-4 py-3 text-sm font-bold text-dark transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 dark:border-dark-3 dark:bg-dark-3 dark:text-white outline-none"
+                  className="w-full rounded-xl border border-gray-200 bg-white pl-11 pr-4 py-3 text-sm font-light text-dark transition-all focus:border-zelify-midnight outline-none"
                 />
               </div>
             )}
             <button
               onClick={handleReloadData}
               disabled={isLoading}
-              className="group relative flex h-11 items-center justify-center gap-3 rounded-xl border border-stroke bg-white px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark shadow-sm transition-all hover:border-dark hover:bg-dark hover:text-white dark:border-dark-3 dark:bg-dark-3 dark:text-white dark:hover:border-white dark:hover:bg-white dark:hover:text-dark active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="group relative flex h-11 items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-6 text-[10px] font-light uppercase tracking-[0.15em] text-dark transition-all hover:bg-gray-50 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <RotateCcw className={cn(
                 "h-4 w-4 transition-all duration-500",
-                isLoading ? "animate-spin text-primary group-hover:text-inherit" : "group-hover:rotate-180"
+                isLoading ? "animate-spin text-zelify-green" : "group-hover:rotate-180"
               )} />
               <span>{isLoading ? translations.reloadButton.loading : translations.reloadButton.default}</span>
             </button>
@@ -1084,16 +1084,16 @@ export function DeviceInformationContent() {
           </div>
         )}
 
-        <div className="overflow-hidden rounded-2xl border border-stroke dark:border-dark-3 shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-gray-100 dark:border-dark-3">
           <Table>
             <TableHeader>
-              <TableRow className="border-none bg-gray-2 dark:bg-dark-3">
-                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6">{translations.table.user}</TableHead>
-                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6">{translations.table.date}</TableHead>
-                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6 text-center">{translations.table.device}</TableHead>
-                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6">{translations.table.ipAddress}</TableHead>
-                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6 text-center">{translations.table.risk}</TableHead>
-                <TableHead className="py-5 px-6 text-[10px] font-bold uppercase tracking-[0.15em] text-dark-6 text-right">{translations.table.actions}</TableHead>
+              <TableRow className="border-b border-gray-100 bg-transparent">
+                <TableHead className="py-5 px-6 text-[10px] font-light uppercase tracking-[0.15em] text-dark-6">{translations.table.user}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-light uppercase tracking-[0.15em] text-dark-6">{translations.table.date}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-light uppercase tracking-[0.15em] text-dark-6 text-center">{translations.table.device}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-light uppercase tracking-[0.15em] text-dark-6">{translations.table.ipAddress}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-light uppercase tracking-[0.15em] text-dark-6 text-center">{translations.table.risk}</TableHead>
+                <TableHead className="py-5 px-6 text-[10px] font-light uppercase tracking-[0.15em] text-dark-6 text-right">{translations.table.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1117,23 +1117,23 @@ export function DeviceInformationContent() {
                      <TableRow
                        key={event.id}
                        onClick={() => handleSelectEvent(event)}
-                      className="group cursor-pointer border-b border-stroke hover:bg-gray-2/50 dark:border-dark-3 dark:hover:bg-dark-3/50 transition-all font-semibold"
+                      className="group cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-all font-light"
                       data-tour-id={isFirstRow ? "tour-device-information-first-row" : undefined}
                     >
                       <TableCell className="py-6 px-6">
                         <div className="flex items-center gap-3">
-                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-2 text-dark-6 group-hover:bg-primary group-hover:text-white transition-all dark:bg-dark-3">
+                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-dark-6 group-hover:bg-zelify-midnight group-hover:text-white transition-all">
                               <User className="h-5 w-5" />
                            </div>
                            <div className="max-w-[140px] truncate">
-                              <p className="text-sm font-semibold text-dark dark:text-white leading-none">{event.userName || translations.common.unknown}</p>
-                              <p className="mt-1.5 text-[10px] font-semibold text-dark-6 truncate">{event.userEmail || "—"}</p>
+                              <p className="text-sm font-normal text-dark dark:text-white leading-none">{event.userName || translations.common.unknown}</p>
+                              <p className="mt-1.5 text-[10px] font-light text-dark-6 truncate">{event.userEmail || "—"}</p>
                            </div>
                         </div>
                       </TableCell>
                       <TableCell className="py-6 px-6">
-                        <p className="text-xs font-bold text-dark dark:text-white uppercase leading-none">{event.date}</p>
-                        <div className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-dark-6 uppercase tracking-wider">
+                        <p className="text-xs font-light text-dark dark:text-white uppercase leading-none">{event.date}</p>
+                        <div className="mt-2 flex items-center gap-1.5 text-[10px] font-light text-dark-6 uppercase tracking-wider">
                            <Clock className="h-3 w-3" />
                            {dayjs(event.timestamp).fromNow()}
                         </div>
@@ -1145,7 +1145,7 @@ export function DeviceInformationContent() {
                             ) : (
                               <Monitor className="h-5 w-5 text-dark-6" />
                             )}
-                            <span className="text-[9px] font-bold uppercase text-dark-6 leading-tight">
+                            <span className="text-[9px] font-light uppercase text-dark-6 leading-tight">
                               {event.details?.os || "Desktop"}
                             </span>
                          </div>
@@ -1153,7 +1153,7 @@ export function DeviceInformationContent() {
                       <TableCell className="py-6 px-6">
                         <div className="flex flex-col gap-1.5">
                            <CopyableIP ip={event.ipAddress} translations={translations} />
-                           <div className="flex items-center gap-1.5 text-[10px] font-bold text-dark-6 uppercase tracking-wider">
+                           <div className="flex items-center gap-1.5 text-[10px] font-light text-dark-6 uppercase tracking-wider">
                               <span>{getCountryFlag(event.countryCode)}</span>
                               <span className="max-w-[120px] truncate">{event.city || "—"}, {event.country || "—"}</span>
                            </div>
@@ -1162,17 +1162,17 @@ export function DeviceInformationContent() {
                       <TableCell className="py-6 px-6 text-center">
                         <div className="flex justify-center">
                           {event.details?.vpn === undefined ? (
-                            <div className="flex items-center gap-1 w-fit rounded-full bg-gray-2 px-2 py-1 text-[9px] font-bold uppercase text-dark-6 border border-stroke dark:bg-dark-3">
+                            <div className="flex items-center gap-1 w-fit rounded-lg bg-gray-100 px-2 py-1 text-[9px] font-light uppercase text-dark-6 border border-gray-200">
                               <Clock className="h-3 w-3" />
                               PENDING
                             </div>
                           ) : event.details?.vpn ? (
-                            <div className="flex items-center gap-1 w-fit rounded-full bg-red/10 px-2 py-1 text-[9px] font-bold uppercase text-red border border-red/10">
+                            <div className="flex items-center gap-1 w-fit rounded-lg bg-red-50 px-2.5 py-1 text-[9px] font-light uppercase text-red-600 border border-red-100">
                               <ShieldAlert className="h-3 w-3" />
                               VPN
                             </div>
                           ) : (
-                            <div className="flex items-center gap-1 w-fit rounded-full bg-green/10 px-2 py-1 text-[9px] font-bold uppercase text-green border border-green/10">
+                            <div className="flex items-center gap-1 w-fit rounded-lg bg-zelify-midnight px-2.5 py-1 text-[9px] font-light uppercase text-zelify-green border border-zelify-black/30">
                               <ShieldCheck className="h-3 w-3" />
                               SAFE
                             </div>
@@ -1180,7 +1180,7 @@ export function DeviceInformationContent() {
                         </div>
                       </TableCell>
                       <TableCell className="py-6 px-6 text-right">
-                         <button className="group/action inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gray-2 text-dark-6 shadow-sm transition-all hover:bg-primary hover:text-white dark:bg-dark-3 dark:hover:bg-primary">
+                         <button className="group/action inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-dark-6 shadow-sm transition-all hover:bg-zelify-midnight hover:text-white">
                             <Search className="h-4.5 w-4.5 group-hover/action:scale-110 transition-transform" />
                          </button>
                       </TableCell>
