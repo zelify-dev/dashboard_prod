@@ -1115,26 +1115,26 @@ export function DeviceInformationContent() {
                       className="group cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-all font-light"
                       data-tour-id={isFirstRow ? "tour-device-information-first-row" : undefined}
                     >
-                      <TableCell className="py-6 px-6">
+                      <TableCell className="py-3 px-6">
                         <div className="flex items-center gap-3">
                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-dark-6 group-hover:bg-zelify-midnight group-hover:text-white transition-all">
                               <User className="h-5 w-5" />
                            </div>
                            <div className="max-w-[140px] truncate">
                               <p className="text-sm font-normal text-dark dark:text-white leading-none">{event.userName || translations.common.unknown}</p>
-                              <p className="mt-1.5 text-[10px] font-light text-dark-6 truncate">{event.userEmail || "—"}</p>
+                              <p className="mt-1 text-[10px] font-light text-dark-6 truncate">{event.userEmail || "—"}</p>
                            </div>
                         </div>
                       </TableCell>
-                      <TableCell className="py-6 px-6">
+                      <TableCell className="py-3 px-6">
                         <p className="text-xs font-light text-dark dark:text-white uppercase leading-none">{event.date}</p>
-                        <div className="mt-2 flex items-center gap-1.5 text-[10px] font-light text-dark-6 uppercase tracking-wider">
+                        <div className="mt-1 flex items-center gap-1.5 text-[10px] font-light text-dark-6 uppercase tracking-wider">
                            <Clock className="h-3 w-3" />
                            {dayjs(event.timestamp).fromNow()}
                         </div>
                       </TableCell>
-                      <TableCell className="py-6 px-6 text-center">
-                         <div className="inline-flex flex-col items-center gap-1.5">
+                      <TableCell className="py-3 px-6 text-center">
+                         <div className="inline-flex flex-col items-center gap-1">
                             {event.details?.device?.toLowerCase() === "mobile" ? (
                               <Smartphone className="h-5 w-5 text-dark-6" />
                             ) : (
@@ -1145,16 +1145,17 @@ export function DeviceInformationContent() {
                             </span>
                          </div>
                       </TableCell>
-                      <TableCell className="py-6 px-6">
-                        <div className="flex flex-col gap-1.5">
+                      <TableCell className="py-3 px-6">
+                        <div className="flex items-center gap-2">
                            <CopyableIP ip={event.ipAddress} translations={translations} />
                            <div className="flex items-center gap-1.5 text-[10px] font-light text-dark-6 uppercase tracking-wider">
+                              <span>·</span>
                               <span>{getCountryFlag(event.countryCode)}</span>
                               <span className="max-w-[120px] truncate">{event.city || "—"}, {event.country || "—"}</span>
                            </div>
                         </div>
                       </TableCell>
-                      <TableCell className="py-6 px-6 text-center">
+                      <TableCell className="py-3 px-6 text-center">
                         <div className="flex justify-center">
                           {event.details?.vpn === undefined ? (
                             <div className="flex items-center gap-1 w-fit rounded-lg bg-gray-100 px-2 py-1 text-[9px] font-light uppercase text-dark-6 border border-gray-200">
@@ -1174,7 +1175,7 @@ export function DeviceInformationContent() {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="py-6 px-6 text-right">
+                      <TableCell className="py-3 px-6 text-right">
                          <button className="group/action inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100 text-dark-6 shadow-sm transition-all hover:bg-zelify-midnight hover:text-white">
                             <Search className="h-4.5 w-4.5 group-hover/action:scale-110 transition-transform" />
                          </button>
