@@ -460,15 +460,15 @@ export function Sidebar() {
           isCollapsed && !isMobile ? "px-3" : "pl-[25px] pr-[7px]"
         )}>
           <div className={cn(
-            "relative flex items-center pr-4.5",
-            isCollapsed && !isMobile ? "justify-center pr-0" : "justify-between"
+            "relative flex items-center justify-center w-full",
+            isCollapsed && !isMobile ? "pr-0" : "pr-[18px]"
           )}>
             <Link
               href={"/"}
               onClick={() => isMobile && toggleSidebar()}
               className={cn(
                 "transition-all duration-300 flex items-center justify-center",
-                isCollapsed && !isMobile ? "w-10 overflow-hidden" : "px-0 py-2.5 min-[850px]:py-0"
+                isCollapsed && !isMobile ? "w-10 overflow-hidden" : "py-2.5 min-[850px]:py-0"
               )}
             >
               <Logo collapsed={isCollapsed && !isMobile} />
