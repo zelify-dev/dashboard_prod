@@ -80,37 +80,37 @@ export function SimpleSelect({
       borderColor: hasError
         ? '#EF4444'
         : (isDarkMode ? '#374151' : '#E5E7EB'),
-      borderRadius: '0.5rem',
+      borderRadius: '0.75rem',
       padding: '0.25rem 0.5rem',
       minHeight: '38px',
       fontSize: '0.875rem',
       boxShadow: state.isFocused
         ? (hasError
           ? '0 0 0 1px #EF4444'
-          : (isDarkMode ? '0 0 0 1px #004492' : '0 0 0 1px #004492'))
+          : (isDarkMode ? '0 0 0 1px #000016' : '0 0 0 1px #000016'))
         : 'none',
       '&:hover': {
-        borderColor: hasError ? '#EF4444' : (isDarkMode ? '#004492' : '#004492'),
+        borderColor: hasError ? '#EF4444' : (isDarkMode ? '#000016' : '#000016'),
       },
     }),
     menu: (base: any) => ({
       ...base,
       backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
-      borderRadius: '0.5rem',
+      borderRadius: '0.75rem',
       boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
       zIndex: 50,
     }),
     option: (base: any, state: any) => ({
       ...base,
       backgroundColor: state.isSelected
-        ? (isDarkMode ? '#004492' : '#004492')
+        ? (isDarkMode ? '#000016' : '#000016')
         : state.isFocused
           ? (isDarkMode ? '#374151' : '#F3F4F6')
           : 'transparent',
       color: state.isSelected ? '#FFFFFF' : (isDarkMode ? '#FFFFFF' : '#111827'),
       fontSize: '0.875rem',
       '&:hover': {
-        backgroundColor: state.isSelected ? '#004492' : (isDarkMode ? '#374151' : '#F3F4F6'),
+        backgroundColor: state.isSelected ? '#000016' : (isDarkMode ? '#374151' : '#F3F4F6'),
         color: state.isSelected ? '#FFFFFF' : (isDarkMode ? '#FFFFFF' : '#111827'),
       },
     }),

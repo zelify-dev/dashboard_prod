@@ -140,9 +140,9 @@ function VerificationStatus({
 export function AMLValidationsList({ validations, onSelectValidation, onCreateNew, loading = false }: AMLValidationsListProps) {
   const translations = useAMLTranslations();
   return (
-    <div className="mt-6">
-      <div className="rounded-2xl bg-white p-8 border border-gray-100 dark:bg-dark-2">
-        <div className="mb-6 flex items-center justify-between" data-tour-id="tour-aml-validations-list">
+    <div className="mt-4">
+      <div className="rounded-2xl bg-white py-5 px-6 border border-gray-100 dark:bg-dark-2">
+        <div className="mb-4 flex items-center justify-between" data-tour-id="tour-aml-validations-list">
           <div>
             <h2 className="text-xl font-light text-dark dark:text-white">{translations.validationsTitle}</h2>
             <p className="text-sm font-light text-dark-6">

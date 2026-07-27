@@ -159,6 +159,12 @@ export default function AMLValidationPage() {
         min_score: g.min_score
       }));
       setGroups(mappedGroups);
+      setSelectedGroupId((prev) => {
+        if (prev && mappedGroups.some((g) => g.id === prev)) {
+          return prev;
+        }
+        return mappedGroups.length > 0 ? mappedGroups[0].id : null;
+      });
     } catch (err) {
       console.error("❌ Error fetching groups:", err);
     }

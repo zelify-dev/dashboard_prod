@@ -142,9 +142,9 @@ export function AMLListConfig({
   };
 
   return (
-    <div className="mt-8 space-y-6">
+    <div className="mt-4 space-y-4">
       {/* Cabecera Principal */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-4">
         <div>
           <h2 className="text-3xl font-light tracking-tight text-dark">
             {translations.config.title}
@@ -258,7 +258,7 @@ export function AMLListConfig({
       
       {/* Banner de Instrucción */}
       {!selectedGroupId && !isLoading && (
-        <div className="flex items-center gap-3 rounded-2xl border border-zelify-midnight/10 bg-gray-50/50 p-6">
+        <div className="flex items-center gap-3 rounded-2xl border border-zelify-midnight/10 bg-gray-50/50 py-3 px-5">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-zelify-midnight/10 text-zelify-midnight">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -277,7 +277,7 @@ export function AMLListConfig({
       {isLoading && lists.length === 0 ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-6">
+            <div key={i} className="animate-pulse rounded-2xl border border-gray-100 bg-white p-4">
               <div className="mb-4 flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-gray-100"></div>
                 <div className="flex-1 space-y-2">
@@ -296,7 +296,7 @@ export function AMLListConfig({
           ))}
         </div>
       ) : lists.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 py-20">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 py-10">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-dark-6">
             <svg className="h-8 w-8 text-dark-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -359,7 +359,7 @@ export function AMLListConfig({
               <div
                 key={list.id}
                 className={cn(
-                  "relative flex h-full flex-col rounded-2xl border bg-white p-6 transition-all hover:border-gray-200/80",
+                  "relative flex h-full flex-col rounded-2xl border bg-white p-4 transition-all hover:border-gray-200/80",
                   listEnabled ? "border-zelify-midnight bg-gray-50/10" : "border-gray-100",
                   (!listEnabled || !selectedGroupId) && "opacity-80",
                   isPending && "ring-1 ring-zelify-midnight/35",
@@ -378,7 +378,7 @@ export function AMLListConfig({
                   </div>
                 )}
 
-                <div className="mb-4 flex items-start justify-between">
+                <div className="mb-3 flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100/50 text-xs font-light text-dark-6">
                       {getJurisdictionIcon(list.country)}
@@ -394,11 +394,11 @@ export function AMLListConfig({
                   </div>
                 </div>
   
-                <p className="mb-4 text-xs font-light text-dark-6 line-clamp-3 leading-relaxed">
+                <p className="mb-3 text-xs font-light text-dark-6 line-clamp-3 leading-relaxed">
                   {list.description}
                 </p>
   
-                <div className="mt-auto space-y-4">
+                <div className="mt-auto space-y-3">
                   <div className="flex flex-wrap gap-2">
                      {list.number_of_entries && (
                        <span className="rounded-lg bg-gray-100 px-2 py-0.5 text-[10px] font-light text-dark-6 border border-gray-200/50">
@@ -407,7 +407,7 @@ export function AMLListConfig({
                      )}
                   </div>
                   
-                  <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-3">
                     <div className="flex items-center gap-2">
                       <Toggle enabled={listEnabled} onChange={handleToggle} loading={isPending} />
                       <span className="text-xs font-light text-dark-6">
