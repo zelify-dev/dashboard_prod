@@ -326,11 +326,11 @@ export function WebhooksPageContent() {
 
   return (
     <div className="space-y-6">
-      {orgLoading && <p className="text-sm text-dark-6 dark:text-dark-6">{t.loadingAccess}</p>}
+      {orgLoading && <p className="text-xs font-light text-dark-6">{t.loadingAccess}</p>}
       {!orgLoading && !canUseWebhooks && (
         <div
           role="status"
-          className="rounded-lg border border-primary/25 bg-primary/10 px-4 py-3 text-sm text-dark dark:text-white/90 dark:border-primary/40 dark:bg-primary/15"
+          className="rounded-2xl border border-rose-200 bg-rose-50/50 px-4 py-3 text-xs font-light text-rose-800"
         >
           {t.lockedUntilOnboarding}
         </div>
@@ -342,30 +342,30 @@ export function WebhooksPageContent() {
           type="button"
           onClick={handleNewWebhook}
           disabled={webhooksLocked}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+          className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-zelify-midnight/90 active:scale-95 disabled:opacity-50"
         >
           {t.newWebhook}
         </button>
       </div>
 
       {showNewWebhook && canUseWebhooks && (
-        <div className="space-y-6 rounded-lg border border-stroke bg-white p-6 shadow-sm dark:border-dark-3 dark:bg-dark-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-dark dark:text-white">{t.configureWebhook}</h3>
+        <div className="space-y-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+            <h3 className="text-sm font-normal text-dark">{t.configureWebhook}</h3>
             <button
               onClick={closeNewWebhook}
-              className="text-sm text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
+              className="text-xs font-light text-dark-6 hover:text-dark"
             >
               {t.cancel}
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
-              <h4 className="mb-2 text-base font-semibold text-dark dark:text-white">
+              <h4 className="mb-1 text-xs font-light uppercase tracking-wider text-dark-6">
                 {t.sections.event.title}
               </h4>
-              <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">
+              <p className="mb-3 text-xs font-light text-dark-6">
                 {t.sections.event.description}
               </p>
               <SimpleSelect
@@ -376,19 +376,19 @@ export function WebhooksPageContent() {
                 className={errors.event ? "react-select-error" : ""}
               />
               {errors.event && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.event}</p>
+                <p className="mt-1.5 text-xs text-red-600">{errors.event}</p>
               )}
             </div>
             {formData.event && (
-              <div className="rounded-lg border border-stroke bg-gray-1/70 p-4 text-sm dark:border-dark-3 dark:bg-dark">
-                <p className="font-medium text-dark dark:text-white">
+              <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-xs font-light text-dark-6">
+                <p className="font-normal text-dark">
                   {eventDetail?.name || selectedEventDescription || formData.event}
                 </p>
                 {selectedEventDescription && (
-                  <p className="mt-1 text-dark-6 dark:text-dark-6">{selectedEventDescription}</p>
+                  <p className="mt-1">{selectedEventDescription}</p>
                 )}
                 {eventDetailLoading && (
-                  <p className="mt-2 text-xs text-dark-6 dark:text-dark-6">
+                  <p className="mt-2 text-[10px] animate-pulse text-dark-6">
                     {t.detailModal.loading}
                   </p>
                 )}
@@ -396,8 +396,8 @@ export function WebhooksPageContent() {
             )}
           </div>
 
-          <div className="space-y-3">
-            <h4 className="text-base font-semibold text-dark dark:text-white">
+          <div className="space-y-4">
+            <h4 className="text-xs font-light uppercase tracking-wider text-dark-6">
               {t.sections.webhook.title}
             </h4>
             <div className="flex gap-3">
@@ -407,14 +407,14 @@ export function WebhooksPageContent() {
                   placeholder={t.sections.webhook.endpointPlaceholder}
                   value={formData.endpoint}
                   onChange={(e) => handleInputChange("endpoint", e.target.value)}
-                  className={`w-full rounded-lg border px-4 py-2.5 text-sm font-medium text-dark shadow-sm outline-none transition-all placeholder:text-dark-6 focus:border-primary focus:ring-2 focus:ring-primary/20 dark:bg-dark dark:text-white dark:placeholder:text-dark-6 dark:focus:border-primary ${
+                  className={`w-full rounded-xl border px-4 py-2 text-xs font-light text-dark outline-none transition-all placeholder:text-dark-6 ${
                     errors.endpoint
-                      ? "border-red-500 bg-red-50 dark:border-red-500 dark:bg-red-900/20"
-                      : "border-stroke bg-white dark:border-dark-3"
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-100 bg-gray-50/50 focus:border-gray-200"
                   }`}
                 />
                 {errors.endpoint && (
-                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
+                  <p className="mt-1.5 text-xs text-red-600">
                     {errors.endpoint}
                   </p>
                 )}
@@ -422,20 +422,20 @@ export function WebhooksPageContent() {
               <button
                 onClick={handleConfigure}
                 disabled={isSaving}
-                className="rounded-lg border border-stroke bg-white px-6 py-2.5 text-sm font-medium text-dark transition hover:bg-gray-50 disabled:pointer-events-none disabled:opacity-50 dark:border-dark-3 dark:bg-dark dark:text-white dark:hover:bg-dark-3"
+                className="rounded-xl border border-gray-200 bg-white px-5 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95"
               >
                 {t.sections.webhook.configureButton}
               </button>
             </div>
             {eventDetail && (
-              <div className="grid gap-3 rounded-lg border border-stroke bg-gray-1/70 p-4 text-sm dark:border-dark-3 dark:bg-dark">
+              <div className="grid gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-xs font-light text-dark-6">
                 <div>
-                  <p className="font-semibold text-dark dark:text-white">{t.detailModal.headers}</p>
+                  <p className="font-normal text-dark">{t.detailModal.headers}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {eventDetail.headers.map((header) => (
                       <code
                         key={header}
-                        className="rounded bg-white px-2 py-1 text-xs text-dark dark:bg-dark-2 dark:text-white"
+                        className="rounded-lg border border-gray-100 bg-white px-2 py-1 text-[11px] text-dark font-mono"
                       >
                         {header}
                       </code>
@@ -443,8 +443,8 @@ export function WebhooksPageContent() {
                   </div>
                 </div>
                 <div>
-                  <p className="font-semibold text-dark dark:text-white">{t.detailModal.signature}</p>
-                  <p className="mt-1 text-dark-6 dark:text-dark-6">
+                  <p className="font-normal text-dark">{t.detailModal.signature}</p>
+                  <p className="mt-1">
                     {eventDetail.signatureScheme.algorithm} · {eventDetail.signatureScheme.header}
                   </p>
                 </div>
@@ -455,99 +455,106 @@ export function WebhooksPageContent() {
       )}
 
       {canUseWebhooks && !isLoading && webhooks.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-stroke bg-white shadow-sm dark:border-dark-3 dark:bg-dark-2">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-none bg-gray-1 dark:bg-dark-3 [&>th]:py-4 [&>th]:text-sm [&>th]:font-semibold [&>th]:text-dark [&>th]:dark:text-white">
-                <TableHead>{t.table.endpoint}</TableHead>
-                <TableHead>{t.table.events}</TableHead>
-                <TableHead>{t.table.created}</TableHead>
-                <TableHead>{t.table.signingSecret}</TableHead>
-                <TableHead className="text-right">{t.table.actions}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm max-w-full">
+          <div className="overflow-x-auto">
+            <div className="min-w-[1100px] flex flex-col">
+              
+              {/* Header Row */}
+              <div className="flex items-center gap-4 border-b border-gray-100 bg-gray-50/50 px-5 py-3 text-[10px] font-light uppercase tracking-wider text-dark-6">
+                <span className="flex-1">{t.table.endpoint}</span>
+                <span className="w-64">{t.table.events}</span>
+                <span className="w-48">{t.table.created}</span>
+                <span className="w-56">{t.table.signingSecret}</span>
+                <span className="w-24 text-right">{t.table.actions}</span>
+              </div>
+
+              {/* Body Rows */}
               {webhooks.map((webhook) => (
-                <TableRow key={webhook.id} className="text-sm text-dark dark:text-white">
-                  <TableCell className="font-medium">{webhook.url}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span>{eventLabel(webhook)}</span>
-                      <button
-                        type="button"
-                        onClick={() => setDetailWebhookId(webhook.id)}
-                        className="inline-flex rounded-full border border-stroke p-1 text-dark-6 transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-dark-6 dark:hover:text-primary"
-                        title={t.detailModal.openAria}
-                        aria-label={t.detailModal.openAria}
-                      >
-                        <CircleHelp size={18} strokeWidth={1.75} aria-hidden />
-                      </button>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-dark-6 dark:text-dark-6">
+                <div 
+                  key={webhook.id} 
+                  className="flex items-center gap-4 border-b border-gray-100/60 px-5 py-3 hover:bg-gray-50/30 transition text-xs font-light text-dark-6"
+                >
+                  <span className="flex-1 font-normal text-dark truncate">
+                    {webhook.url}
+                  </span>
+                  
+                  <span className="w-64 flex items-center gap-2 overflow-hidden">
+                    <span className="truncate">{eventLabel(webhook)}</span>
+                    <button
+                      type="button"
+                      onClick={() => setDetailWebhookId(webhook.id)}
+                      className="inline-flex rounded-full p-1 text-dark-6 hover:bg-gray-100 hover:text-dark transition"
+                      title={t.detailModal.openAria}
+                      aria-label={t.detailModal.openAria}
+                    >
+                      <CircleHelp size={14} strokeWidth={1.5} />
+                    </button>
+                  </span>
+
+                  <span className="w-48 text-[11px] text-dark-6">
                     {formatLocalDateTime(getWebhookCreatedAt(webhook))}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="relative flex items-center gap-2 rounded-md bg-gray-1 px-3 py-1.5 font-mono text-xs dark:bg-dark-3">
-                        <span className="max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap text-dark-6 dark:text-dark-6">
-                          {revealedSecrets.has(webhook.id) && webhook.secret
-                            ? webhook.secret
-                            : "••••••••••••••••••••••••"}
-                        </span>
-                        <div className="flex items-center gap-1 border-l border-stroke pl-2 dark:border-dark-4">
-                          <button
-                            onClick={() => handleToggleSecret(webhook.id)}
-                            className="text-dark-6 hover:text-primary dark:text-dark-6 dark:hover:text-primary"
-                            title={revealedSecrets.has(webhook.id) ? t.detailModal.hide : t.detailModal.show}
-                          >
-                            {revealedSecrets.has(webhook.id) ? <EyeOff size={14} /> : <Eye size={14} />}
-                          </button>
-                          <button
-                            onClick={() => handleCopy(webhook.secret)}
-                            className="text-dark-6 hover:text-primary dark:text-dark-6 dark:hover:text-primary"
-                            title={t.detailModal.copySecret}
-                          >
-                            <Copy size={14} />
-                          </button>
-                        </div>
+                  </span>
+
+                  <div className="w-56 flex items-center gap-2">
+                    <div className="relative flex items-center gap-2 rounded-xl border border-gray-100 bg-gray-50/50 px-3 py-1 font-mono text-[11px] font-light text-dark-6">
+                      <span className="max-w-[120px] overflow-hidden text-ellipsis whitespace-nowrap">
+                        {revealedSecrets.has(webhook.id) && webhook.secret
+                          ? webhook.secret
+                          : "••••••••••••••••••••••••"}
+                      </span>
+                      <div className="flex items-center gap-1 border-l border-gray-200 pl-2">
+                        <button
+                          onClick={() => handleToggleSecret(webhook.id)}
+                          className="text-dark-6 hover:text-dark transition"
+                          title={revealedSecrets.has(webhook.id) ? t.detailModal.hide : t.detailModal.show}
+                        >
+                          {revealedSecrets.has(webhook.id) ? <EyeOff size={12} /> : <Eye size={12} />}
+                        </button>
+                        <button
+                          onClick={() => handleCopy(webhook.secret)}
+                          className="text-dark-6 hover:text-dark transition"
+                          title={t.detailModal.copySecret}
+                        >
+                          <Copy size={12} />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => handleRotate(webhook.id)}
-                        disabled={!!isRotating}
-                        className={`text-dark-6 hover:text-primary dark:text-dark-6 dark:hover:text-primary ${
-                          isRotating === webhook.id ? "animate-spin" : ""
-                        }`}
-                        title={t.detailModal.rotateSecret}
-                      >
-                        <RefreshCw size={14} />
-                      </button>
                     </div>
-                  </TableCell>
-                  <TableCell className="text-right">
+                    <button
+                      onClick={() => handleRotate(webhook.id)}
+                      disabled={!!isRotating}
+                      className={`text-dark-6 hover:text-dark transition ${
+                        isRotating === webhook.id ? "animate-spin" : ""
+                      }`}
+                      title={t.detailModal.rotateSecret}
+                    >
+                      <RefreshCw size={12} />
+                    </button>
+                  </div>
+
+                  <div className="w-24 text-right">
                     <button
                       onClick={() => setShowDeleteModal(webhook.id)}
-                      className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:border-red-800 dark:bg-dark dark:text-red-400 dark:hover:bg-red-900/20"
+                      className="rounded-xl border border-red-100 bg-white px-3 py-1.5 text-xs font-light text-red-600 hover:bg-red-50 transition active:scale-95"
                     >
                       {t.table.delete}
                     </button>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+          </div>
         </div>
       )}
 
       {canUseWebhooks && !isLoading && webhooks.length === 0 && !showNewWebhook && (
-        <div className="rounded-lg border border-stroke bg-white p-12 text-center shadow-sm dark:border-dark-3 dark:bg-dark-2">
-          <p className="text-dark-6 dark:text-dark-6">{t.empty.message}</p>
+        <div className="rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-sm">
+          <p className="text-xs font-light text-dark-6">{t.empty.message}</p>
         </div>
       )}
 
       {detailWebhookId && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-300 animate-in fade-in"
           role="dialog"
           aria-modal="true"
           aria-labelledby="webhook-detail-title"
@@ -555,14 +562,14 @@ export function WebhooksPageContent() {
             if (e.target === e.currentTarget) setDetailWebhookId(null);
           }}
         >
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg border border-stroke bg-white p-6 shadow-lg dark:border-dark-3 dark:bg-dark-2">
+          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 id="webhook-detail-title" className="text-lg font-semibold text-dark dark:text-white">
+                <h3 id="webhook-detail-title" className="text-sm font-normal text-dark">
                   {t.detailModal.title}
                 </h3>
                 {detailWebhook && (
-                  <p className="mt-1 text-sm text-dark-6 dark:text-dark-6">
+                  <p className="mt-1 text-xs font-light text-dark-6">
                     {eventLabel(detailWebhook)}
                   </p>
                 )}
@@ -570,20 +577,20 @@ export function WebhooksPageContent() {
               <button
                 type="button"
                 onClick={() => setDetailWebhookId(null)}
-                className="text-sm text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
+                className="text-xs font-light text-dark-6 hover:text-dark"
               >
                 {t.detailModal.close}
               </button>
             </div>
 
-            <div className="mt-5 flex gap-2 border-b border-stroke pb-3 dark:border-dark-3">
+            <div className="mt-5 flex gap-2 border-b border-gray-100 pb-3">
               <button
                 type="button"
                 onClick={() => setDetailTab("overview")}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+                className={`rounded-xl px-3 py-1.5 text-xs font-light transition ${
                   detailTab === "overview"
-                    ? "bg-primary text-white"
-                    : "bg-gray-1 text-dark hover:bg-gray-2 dark:bg-dark-3 dark:text-white"
+                    ? "bg-zelify-midnight text-white"
+                    : "border border-gray-100 bg-gray-50/50 text-dark hover:bg-gray-100/50"
                 }`}
               >
                 {t.detailModal.overviewTab}
@@ -591,10 +598,10 @@ export function WebhooksPageContent() {
               <button
                 type="button"
                 onClick={() => setDetailTab("deliveries")}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+                className={`rounded-xl px-3 py-1.5 text-xs font-light transition ${
                   detailTab === "deliveries"
-                    ? "bg-primary text-white"
-                    : "bg-gray-1 text-dark hover:bg-gray-2 dark:bg-dark-3 dark:text-white"
+                    ? "bg-zelify-midnight text-white"
+                    : "border border-gray-100 bg-gray-50/50 text-dark hover:bg-gray-100/50"
                 }`}
               >
                 {t.detailModal.deliveriesTab}
@@ -835,10 +842,10 @@ export function WebhooksPageContent() {
             {!detailLoading && detailTab === "deliveries" && (
               <div className="mt-5 space-y-4">
                 {deliveriesLoading && (
-                  <p className="text-sm text-dark-6 dark:text-dark-6">{t.detailModal.loading}</p>
+                  <p className="text-xs font-light text-dark-6 animate-pulse">{t.detailModal.loading}</p>
                 )}
                 {!deliveriesLoading && deliveries.length === 0 && (
-                  <div className="rounded-lg border border-stroke bg-gray-1/70 p-4 text-sm text-dark-6 dark:border-dark-3 dark:bg-dark dark:text-dark-6">
+                  <div className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-xs font-light text-dark-6">
                     {t.detailModal.noDeliveries}
                   </div>
                 )}
@@ -846,56 +853,56 @@ export function WebhooksPageContent() {
                   deliveries.map((delivery) => (
                     <div
                       key={delivery.deliveryId}
-                      className="rounded-lg border border-stroke bg-gray-1/70 p-4 dark:border-dark-3 dark:bg-dark"
+                      className="rounded-xl border border-gray-100 bg-gray-50/50 p-4 text-xs font-light text-dark-6"
                     >
                       <div className="grid gap-3 md:grid-cols-4">
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-dark-6 dark:text-dark-6">
+                          <p className="text-[10px] uppercase tracking-wider text-dark-6">
                             {t.detailModal.deliveryStatus}
                           </p>
-                          <p className="mt-1 text-sm font-medium text-dark dark:text-white">
+                          <p className="mt-1 font-normal text-dark">
                             {delivery.status}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-dark-6 dark:text-dark-6">
+                          <p className="text-[10px] uppercase tracking-wider text-dark-6">
                             {t.detailModal.statusCode}
                           </p>
-                          <p className="mt-1 text-sm font-medium text-dark dark:text-white">
+                          <p className="mt-1 font-normal text-dark">
                             {delivery.statusCode}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-dark-6 dark:text-dark-6">
+                          <p className="text-[10px] uppercase tracking-wider text-dark-6">
                             {t.detailModal.attempt}
                           </p>
-                          <p className="mt-1 text-sm font-medium text-dark dark:text-white">
+                          <p className="mt-1 font-normal text-dark">
                             {delivery.attempt}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-dark-6 dark:text-dark-6">
+                          <p className="text-[10px] uppercase tracking-wider text-dark-6">
                             {t.detailModal.responseTime}
                           </p>
-                          <p className="mt-1 text-sm font-medium text-dark dark:text-white">
+                          <p className="mt-1 font-normal text-dark">
                             {delivery.responseTimeMs} ms
                           </p>
                         </div>
                       </div>
                       <div className="mt-4 grid gap-4 md:grid-cols-2">
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-dark-6 dark:text-dark-6">
+                          <p className="text-[10px] uppercase tracking-wider text-dark-6">
                             {t.detailModal.requestId}
                           </p>
-                          <code className="mt-1 block break-all rounded bg-white px-2 py-1 text-xs text-dark dark:bg-dark-2 dark:text-white">
+                          <code className="mt-1 block break-all rounded-lg border border-gray-100 bg-white px-2 py-1 text-[11px] font-mono text-dark">
                             {delivery.requestId}
                           </code>
                         </div>
                         <div>
-                          <p className="text-xs uppercase tracking-wide text-dark-6 dark:text-dark-6">
+                          <p className="text-[10px] uppercase tracking-wider text-dark-6">
                             {t.detailModal.created}
                           </p>
-                          <p className="mt-1 text-sm text-dark dark:text-white">
+                          <p className="mt-1 font-normal text-dark">
                             {formatLocalDateTime(delivery.createdAt)}
                           </p>
                         </div>
@@ -903,30 +910,30 @@ export function WebhooksPageContent() {
                       <div className="mt-4 grid gap-4 md:grid-cols-2">
                         <div>
                           <div className="mb-2 flex items-center justify-between gap-2">
-                            <p className="font-semibold text-dark dark:text-white">
+                            <p className="font-normal text-dark">
                               {t.detailModal.payloadExample}
                             </p>
                             <button
                               type="button"
                               onClick={() => handleCopy(stringifyJson(delivery.payload))}
-                              className="rounded-md border border-stroke px-2 py-1 text-xs font-medium text-primary hover:bg-gray-50 dark:border-dark-3 dark:hover:bg-dark-3"
+                              className="rounded-xl border border-gray-200 bg-white px-2 py-1 text-xs font-light text-dark hover:bg-gray-50 transition active:scale-95"
                             >
                               {t.detailModal.copyJson}
                             </button>
                           </div>
-                          <pre className="max-h-[28vh] overflow-auto rounded-md border border-stroke bg-white p-3 text-left text-xs leading-relaxed text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white">
+                          <pre className="max-h-[28vh] overflow-auto rounded-xl border border-gray-100 bg-white p-3 text-left text-[11px] font-mono leading-relaxed text-dark">
                             {stringifyJson(delivery.payload)}
                           </pre>
                         </div>
                         <div>
-                          <p className="font-semibold text-dark dark:text-white">
+                          <p className="font-normal text-dark">
                             {t.detailModal.responseBody}
                           </p>
-                          <pre className="mt-2 max-h-[28vh] overflow-auto rounded-md border border-stroke bg-white p-3 text-left text-xs leading-relaxed text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white">
+                          <pre className="mt-2 max-h-[28vh] overflow-auto rounded-xl border border-gray-100 bg-white p-3 text-left text-[11px] font-mono leading-relaxed text-dark">
                             {delivery.responseBody || t.detailModal.notAvailable}
                           </pre>
                           {delivery.errorMessage && (
-                            <p className="mt-3 text-sm text-red-600 dark:text-red-400">
+                            <p className="mt-3 text-xs text-red-600">
                               {delivery.errorMessage}
                             </p>
                           )}
@@ -941,24 +948,24 @@ export function WebhooksPageContent() {
       )}
 
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg border border-stroke bg-white p-6 shadow-lg dark:border-dark-3 dark:bg-dark-2">
-            <h3 className="mb-4 text-lg font-semibold text-dark dark:text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-300 animate-in fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
+            <h3 className="mb-2 text-sm font-normal text-dark">
               {t.deleteModal.title}
             </h3>
-            <p className="mb-6 text-sm text-dark-6 dark:text-dark-6">
+            <p className="mb-6 text-xs font-light text-dark-6">
               {t.deleteModal.description}
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowDeleteModal(null)}
-                className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark transition hover:bg-gray-50 dark:border-dark-3 dark:bg-dark dark:text-white dark:hover:bg-dark-3"
+                className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark hover:bg-gray-50 transition active:scale-95"
               >
                 {t.deleteModal.cancel}
               </button>
               <button
                 onClick={handleDeleteConfirm}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                className="rounded-xl bg-red-600 px-4 py-2 text-xs font-light text-white hover:bg-red-700 transition active:scale-95"
               >
                 {t.deleteModal.delete}
               </button>
