@@ -115,7 +115,7 @@ function DnsCellWithCopy({
   return (
     <div className={cn("flex min-w-0 items-center gap-1", maxClass)}>
       <span
-        className={cn("min-w-0 truncate", mono && "font-mono text-xs")}
+        className={cn("min-w-0 truncate font-light text-xs", mono && "font-mono text-[11px] bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100/50 text-dark-6")}
         title={show ? text : undefined}
       >
         {show ? text : "—"}
@@ -219,25 +219,24 @@ export function NotificationsDomainsPanel({
     <fieldset
       disabled={disabled}
       className={cn(
-        "m-0 min-w-0 rounded-3xl border border-stroke bg-white p-6 shadow-lg dark:border-dark-3 dark:bg-dark-2",
+        "m-0 min-w-0 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm",
         "disabled:cursor-not-allowed disabled:opacity-[0.88]",
       )}
     >
-      <div className="flex flex-col gap-3 border-b border-stroke pb-6 dark:border-dark-3 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-3 border-b border-gray-100 pb-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-primary/80">{t.domainsLabel}</p>
-          <h2 className="text-2xl font-semibold text-dark dark:text-white">{t.pageTitle}</h2>
-          <p className="text-sm text-dark-5 dark:text-dark-6">{t.pageSubtitle}</p>
+          <p className="text-[10px] uppercase tracking-wider text-dark-6">{t.domainsLabel}</p>
+          <h2 className="text-xl font-normal text-dark">{t.pageTitle}</h2>
+          <p className="text-xs font-light text-dark-6">{t.pageSubtitle}</p>
         </div>
         {!setting && organizationId && (
-          <Button
+          <button
             type="button"
-            variant="primary"
-            shape="full"
-            size="small"
-            label={t.addDomainButton}
             onClick={handleOpenModal}
-          />
+            className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-zelify-midnight/90 active:scale-95"
+          >
+            {t.addDomainButton}
+          </button>
         )}
       </div>
 
@@ -258,28 +257,26 @@ export function NotificationsDomainsPanel({
       )}
 
       {organizationId && !loading && !setting && !loadMessage && (
-        <div className="mt-8 rounded-2xl border border-dashed border-stroke bg-slate-50/60 p-8 text-center dark:border-dark-3 dark:bg-dark">
-          <h3 className="text-lg font-semibold text-dark dark:text-white">{t.emptyTitle}</h3>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-dark-5 dark:text-dark-6">{t.emptyDescription}</p>
-          <Button
+        <div className="mt-8 rounded-2xl border border-dashed border-gray-200 bg-gray-50/20 p-8 text-center">
+          <h3 className="text-sm font-normal text-dark">{t.emptyTitle}</h3>
+          <p className="mx-auto mt-2 max-w-xl text-xs font-light text-dark-6">{t.emptyDescription}</p>
+          <button
             type="button"
-            className="mt-6"
-            variant="primary"
-            shape="full"
-            size="small"
-            label={t.addDomainButton}
             onClick={handleOpenModal}
-          />
+            className="mt-6 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-zelify-midnight/90 active:scale-95"
+          >
+            {t.addDomainButton}
+          </button>
         </div>
       )}
 
       {setting && (
         <div className="mt-8 space-y-8">
-          <div className="flex flex-col gap-4 rounded-2xl border border-stroke bg-slate-50/50 p-5 dark:border-dark-3 dark:bg-dark sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-gray-50/50 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-widest text-dark-6 dark:text-dark-6">{t.domainLabel}</p>
-              <p className="text-xl font-semibold text-dark dark:text-white">{setting.domain}</p>
-              <p className="mt-1 text-xs text-dark-5 dark:text-dark-6">
+              <p className="text-[10px] uppercase tracking-wider text-dark-6">{t.domainLabel}</p>
+              <p className="text-lg font-normal text-dark">{setting.domain}</p>
+              <p className="mt-1 text-[10px] font-light text-dark-6">
                 {t.createdLabel}: {formatDateTime(setting.created_at, locale)} · {t.updatedLabel}:{" "}
                 {formatDateTime(setting.updated_at, locale)}
               </p>
@@ -289,7 +286,7 @@ export function NotificationsDomainsPanel({
                 type="button"
                 onClick={() => void loadSetting(false)}
                 disabled={loading || verifying}
-                className="rounded-full border border-stroke px-4 py-2 text-xs font-semibold text-dark transition hover:border-primary hover:text-primary disabled:opacity-50 dark:border-dark-3 dark:text-white"
+                className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 disabled:opacity-50 active:scale-95"
               >
                 {loading ? "…" : t.refreshFromServer}
               </button>
@@ -297,7 +294,7 @@ export function NotificationsDomainsPanel({
                 type="button"
                 onClick={() => void loadSetting(true)}
                 disabled={loading || verifying}
-                className="rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-zelify-midnight/90 disabled:opacity-50 active:scale-95"
               >
                 {verifying ? t.verifyDnsLoading : t.verifyDnsButton}
               </button>
@@ -305,11 +302,11 @@ export function NotificationsDomainsPanel({
           </div>
 
           <div>
-            <h3 className="text-base font-semibold text-dark dark:text-white">{t.dnsRecordsTableTitle}</h3>
-            <p className="mb-3 text-xs text-dark-6 dark:text-dark-6">{t.dnsTitle}</p>
-            <div className="overflow-x-auto rounded-2xl border border-stroke dark:border-dark-3">
-              <table className="min-w-full text-left text-sm">
-                <thead className="bg-slate-100/80 text-xs uppercase tracking-wide text-dark-6 dark:bg-dark dark:text-dark-6">
+            <h3 className="text-sm font-normal text-dark">{t.dnsRecordsTableTitle}</h3>
+            <p className="mb-3 text-xs font-light text-dark-6">{t.dnsTitle}</p>
+            <div className="overflow-x-auto rounded-2xl border border-gray-100">
+              <table className="min-w-full text-left text-xs">
+                <thead className="bg-gray-50/50 border-b border-gray-100 text-[10px] uppercase tracking-wider text-dark-6">
                   <tr>
                     <th className="px-3 py-2 font-medium">{t.tableCategory}</th>
                     <th className="px-3 py-2 font-medium">{t.tableType}</th>
@@ -320,7 +317,7 @@ export function NotificationsDomainsPanel({
                     <th className="px-3 py-2 font-medium">{t.tableStatus}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stroke dark:divide-dark-3">
+                <tbody className="divide-y divide-gray-100/60 font-light text-dark-6">
                   {dnsRows.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="px-3 py-6 text-center text-dark-6 dark:text-dark-6">
@@ -329,8 +326,8 @@ export function NotificationsDomainsPanel({
                     </tr>
                   ) : (
                     dnsRows.map((row: DnsRecordV2) => (
-                      <tr key={row.id || `${row.type}-${row.name}`} className="bg-white/80 dark:bg-dark-2/80">
-                        <td className="px-3 py-2 text-dark dark:text-white">{row.category ?? "—"}</td>
+                      <tr key={row.id || `${row.type}-${row.name}`} className="hover:bg-gray-50/30 transition">
+                        <td className="px-3 py-2 text-dark">{row.category ?? "—"}</td>
                         <td className="max-w-[min(140px,28vw)] px-3 py-2">
                           <DnsCellWithCopy
                             text={row.type}
@@ -364,7 +361,7 @@ export function NotificationsDomainsPanel({
                           {row.status ? (
                             <span
                               className={cn(
-                                "inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold",
+                                "inline-block rounded-xl border px-2.5 py-0.5 text-[10px] font-light",
                                 recordStatusClass(row.status),
                               )}
                             >
@@ -424,33 +421,33 @@ export function NotificationsDomainsPanel({
                     {setting.dns_public_verification.by_record.map((r) => {
                       const observed = [r.observed_txt, r.observed_mx].filter(Boolean).join(" / ") || "—";
                       return (
-                        <tr key={r.id || r.lookup_fqdn || r.name} className="bg-white/80 dark:bg-dark-2/80">
-                          <td className="px-3 py-2 font-mono text-xs">{r.type}</td>
-                          <td className="max-w-[120px] truncate px-3 py-2 font-mono text-xs" title={r.name}>
+                        <tr key={r.id || r.lookup_fqdn || r.name} className="hover:bg-gray-50/30 transition">
+                          <td className="px-3 py-2 font-mono text-[11px] text-dark-6">{r.type}</td>
+                          <td className="max-w-[120px] truncate px-3 py-2 font-mono text-[11px]" title={r.name}>
                             {r.name}
                           </td>
                           <td
-                            className="max-w-[200px] truncate px-3 py-2 font-mono text-[11px]"
+                            className="max-w-[200px] truncate px-3 py-2 font-mono text-[11px] text-dark-6"
                             title={r.lookup_fqdn}
                           >
                             {r.lookup_fqdn ?? "—"}
                           </td>
-                          <td className="px-3 py-2 font-medium">
+                          <td className="px-3 py-2 font-normal">
                             {r.matches_expected_configuration ? t.status.yes : t.status.no}
                           </td>
                           <td
-                            className="max-w-[min(280px,35vw)] truncate px-3 py-2 font-mono text-xs"
+                            className="max-w-[min(280px,35vw)] truncate px-3 py-2 font-mono text-[11px]"
                             title={r.expected_value}
                           >
                             {r.expected_value ?? "—"}
                           </td>
                           <td
-                            className="max-w-[min(280px,35vw)] truncate px-3 py-2 font-mono text-xs"
+                            className="max-w-[min(280px,35vw)] truncate px-3 py-2 font-mono text-[11px]"
                             title={observed}
                           >
                             {observed}
                           </td>
-                          <td className="max-w-[200px] truncate px-3 py-2 text-xs text-rose-700 dark:text-rose-300" title={r.lookup_error}>
+                          <td className="max-w-[200px] truncate px-3 py-2 text-xs text-rose-700" title={r.lookup_error}>
                             {r.lookup_error ?? "—"}
                           </td>
                         </tr>
@@ -466,7 +463,7 @@ export function NotificationsDomainsPanel({
 
       {modalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-300 animate-in fade-in"
           role="dialog"
           aria-modal="true"
           aria-labelledby="domains-modal-title"
@@ -477,12 +474,12 @@ export function NotificationsDomainsPanel({
             if (e.key === "Escape") setModalOpen(false);
           }}
         >
-          <div className="w-full max-w-md rounded-2xl border border-stroke bg-white p-6 shadow-xl dark:border-dark-3 dark:bg-dark-2">
-            <h3 id="domains-modal-title" className="text-lg font-semibold text-dark dark:text-white">
+          <div className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
+            <h3 id="domains-modal-title" className="text-sm font-normal text-dark">
               {t.modalTitle}
             </h3>
-            <p className="mt-2 text-sm text-dark-5 dark:text-dark-6">{t.modalHint}</p>
-            <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-dark-6 dark:text-dark-6">
+            <p className="mt-2 text-xs font-light text-dark-6">{t.modalHint}</p>
+            <label className="mt-4 block text-[10px] uppercase tracking-wider text-dark-6">
               {t.domainSubdomainLabel}
             </label>
             <input
@@ -491,10 +488,10 @@ export function NotificationsDomainsPanel({
               onChange={(e) => setDomainInput(e.target.value)}
               placeholder={t.domainSubdomainPlaceholder}
               autoComplete="off"
-              className="mt-1 w-full rounded-xl border border-stroke px-4 py-2.5 text-sm outline-none focus:border-primary dark:border-dark-3 dark:bg-dark dark:text-white"
+              className="mt-1 w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none focus:border-gray-200"
             />
             {createMessage && (
-              <p className="mt-3 text-sm text-rose-700 dark:text-rose-300" role="alert">
+              <p className="mt-3 text-xs text-rose-500" role="alert">
                 {createMessage}
               </p>
             )}
@@ -502,7 +499,7 @@ export function NotificationsDomainsPanel({
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="rounded-full border border-stroke px-4 py-2 text-sm font-semibold text-dark dark:border-dark-3 dark:text-white"
+                className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark hover:bg-gray-50 transition active:scale-95"
               >
                 {t.modalCancel}
               </button>
@@ -510,7 +507,7 @@ export function NotificationsDomainsPanel({
                 type="button"
                 onClick={() => void handleCreate()}
                 disabled={createSubmitting || !domainInput.trim()}
-                className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-zelify-midnight px-5 py-2 text-xs font-light text-white hover:bg-zelify-midnight/90 disabled:opacity-50 active:scale-95 transition"
               >
                 {createSubmitting ? t.modalCreating : t.modalCreate}
               </button>
