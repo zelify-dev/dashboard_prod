@@ -37,14 +37,14 @@ function FieldReadOnly({
   const isEmpty = value === undefined || value === "";
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-dark-6 dark:text-dark-6">
+      <label className="mb-1.5 block text-[10px] font-light uppercase tracking-wider text-dark-6">
         {label}
       </label>
       <div
         className={cn(
-          "min-h-[2.75rem] rounded-lg border border-stroke bg-gray-2/60 px-4 py-2.5 text-sm dark:border-dark-3 dark:bg-dark-2/80 flex items-center",
+          "min-h-[2.5rem] rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-sm font-light text-dark flex items-center",
           mono && "font-mono text-xs",
-          isEmpty && "text-dark-5 dark:text-dark-6"
+          isEmpty && "text-dark-5"
         )}
       >
         {isEmpty ? emptyLabel : value}
@@ -82,28 +82,25 @@ export default function Page() {
       <Breadcrumb pageName={profilePage.title} />
 
       <div className="w-full">
-        {/* Solo descripción; el título ya va en el breadcrumb */}
-        <p className="mb-6 text-sm text-body">
+        <p className="mb-4 text-xs font-light text-dark-6">
           {profilePage.description}
         </p>
 
         {/* Form Section */}
-        <div className="rounded-[10px] bg-white p-8 shadow-1 dark:bg-gray-dark dark:shadow-card">
+        <div className="rounded-2xl border border-gray-100 bg-white p-6">
           <form onSubmit={(e) => e.preventDefault()}>
-            {/* Organización — solo lectura, datos de GET /api/organizations/:id */}
+            {/* Organización — solo lectura */}
             <div className="mb-8">
-              <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-dark dark:text-white">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </span>
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-normal text-dark border-b border-gray-100 pb-3">
+                <svg className="h-4 w-4 text-dark-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
                 {profilePage.form.organizationSection}
               </h3>
               {orgLoading ? (
-                <p className="text-sm text-dark-6 dark:text-dark-6">{profilePage.form.loading}</p>
+                <p className="text-xs font-light text-dark-6">{profilePage.form.loading}</p>
               ) : orgError ? (
-                <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">{orgError}</p>
+                <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs font-light text-red-600">{orgError}</p>
               ) : organization ? (
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <FieldReadOnly label={profilePage.form.businessName} value={organization.name} />
@@ -120,18 +117,16 @@ export default function Page() {
                   />
                 </div>
               ) : (
-                <p className="text-sm text-dark-6 dark:text-dark-6">—</p>
+                <p className="text-xs font-light text-dark-6">—</p>
               )}
             </div>
 
             {/* Cuenta — solo lectura */}
             <div>
-              <h3 className="mb-4 flex items-center gap-2 text-base font-semibold text-dark dark:text-white">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </span>
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-normal text-dark border-b border-gray-100 pb-3">
+                <svg className="h-4 w-4 text-dark-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
                 {profilePage.form.accountSection}
               </h3>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
