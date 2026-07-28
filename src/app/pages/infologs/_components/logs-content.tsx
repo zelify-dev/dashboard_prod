@@ -100,12 +100,40 @@ export function LogsPageContent() {
   };
 
   const getResponseCodeBadge = (code: string | number | undefined) => {
-    if (code === undefined) return <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-dark-3 dark:text-dark-6">N/A</span>;
+    if (code === undefined) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-light bg-gray-100 text-gray-500">
+          N/A
+        </span>
+      );
+    }
     const c = String(code);
-    if (c.startsWith("2")) return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100/80 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 shadow-sm"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>{code}</span>;
-    if (c.startsWith("4")) return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100/80 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 shadow-sm"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>{code}</span>;
-    if (c.startsWith("5")) return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100/80 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 shadow-sm"><ServerCrash className="w-3 h-3 mr-1" />{code}</span>;
-    return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-dark-3 dark:text-dark-6 border border-gray-200 dark:border-dark-4">{code}</span>;
+    if (c.startsWith("2")) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-light bg-emerald-50 text-emerald-700 border border-emerald-100">
+          {code}
+        </span>
+      );
+    }
+    if (c.startsWith("4")) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-light bg-amber-50 text-amber-700 border border-amber-100">
+          {code}
+        </span>
+      );
+    }
+    if (c.startsWith("5")) {
+      return (
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-light bg-rose-50 text-rose-700 border border-rose-100">
+          {code}
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-light bg-gray-100 text-gray-700 border border-gray-200">
+        {code}
+      </span>
+    );
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -118,43 +146,59 @@ export function LogsPageContent() {
   };
 
   const getEnvBadge = (env: string | undefined) => {
-    if (env === "PRODUCTION") return <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 px-2 py-1 rounded border border-purple-200 dark:border-purple-500/20"><Sparkles className="w-3 h-3" /> PROD</span>;
-    if (env === "SANDBOX") return <span className="inline-flex items-center gap-1 text-[11px] font-bold tracking-wider uppercase text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-2 py-1 rounded border border-blue-200 dark:border-blue-500/20"><Box className="w-3 h-3" /> SANDBOX</span>;
-    return <span className="text-xs text-dark-5 dark:text-dark-6">{env || "N/A"}</span>;
-  }
+    if (env === "PRODUCTION") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded bg-zelify-midnight px-1.5 py-0.5 text-[9px] font-light tracking-wider text-zelify-green uppercase">
+          PROD
+        </span>
+      );
+    }
+    if (env === "SANDBOX") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded bg-gray-50 border border-gray-100 px-1.5 py-0.5 text-[9px] font-light tracking-wider text-dark-6 uppercase">
+          SANDBOX
+        </span>
+      );
+    }
+    return <span className="text-[10px] font-light text-dark-6">{env || "N/A"}</span>;
+  };
 
   const logServiceLabel = (service: string | undefined) => {
     if (!service) return null;
-    switch (service) {
-      case "API request": return <XStack alignItems="center" gap="$1.5"><Zap className="w-3.5 h-3.5 text-orange-500" /> <Text fontSize="$2" color="$color11">{t.values.logTypes.apiRequest}</Text></XStack>;
-      case "Webhook": return <XStack alignItems="center" gap="$1.5"><Zap className="w-3.5 h-3.5 text-blue-500" /> <Text fontSize="$2" color="$color11">{t.values.logTypes.webhook}</Text></XStack>;
-      case "Link event": return <XStack alignItems="center" gap="$1.5"><Zap className="w-3.5 h-3.5 text-green-500" /> <Text fontSize="$2" color="$color11">{t.values.logTypes.linkEvent}</Text></XStack>;
-      default: return <Text fontSize="$2" color="$color11" fontWeight="500" numberOfLines={1}>{service}</Text>;
-    }
+    let label = service;
+    if (service === "API request") label = t.values.logTypes.apiRequest;
+    if (service === "Webhook") label = t.values.logTypes.webhook;
+    if (service === "Link event") label = t.values.logTypes.linkEvent;
+    return (
+      <span className="flex items-center gap-1.5 text-xs text-dark font-light">
+        <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
+        {label}
+      </span>
+    );
   };
 
   return (
-    <YStack className="min-w-0 relative">
+    <div className="relative min-w-0">
       {/* Payload Modal Viewer (Glassmorphism) */}
       {selectedPayload && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-300 animate-in fade-in zoom-in-95">
-          <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden rounded-2xl bg-white/95 dark:bg-dark-2/95 shadow-2xl border border-white/20 dark:border-white/10 ring-1 ring-black/5">
-            <div className="flex items-center justify-between border-b border-slate-200/50 dark:border-dark-3/50 px-6 py-4 bg-slate-50/50 dark:bg-dark-3/30">
+          <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden rounded-3xl bg-white shadow-2xl border border-gray-100">
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 bg-gray-50/50">
               <div className="flex items-center gap-2">
-                <Code2 className="w-5 h-5 text-indigo-500" />
-                <h3 className="text-lg font-bold text-slate-800 dark:text-white font-mono tracking-tight">Payload.json</h3>
+                <Code2 className="w-4 h-4 text-indigo-500" />
+                <h3 className="text-sm font-normal text-dark font-mono">Payload.json</h3>
               </div>
               <button
                 onClick={() => setSelectedPayload(null)}
-                className="p-1.5 rounded-full bg-slate-100 dark:bg-dark-3 text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-4 hover:text-slate-800 dark:hover:text-white transition-colors"
+                className="p-1.5 rounded-full hover:bg-gray-100 text-dark-6 hover:text-dark transition-colors"
                 title="Close"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex-1 overflow-auto p-6 bg-[#0d1117]">
+            <div className="flex-1 overflow-auto p-6 bg-slate-950">
               <pre 
-                className="text-[13px] leading-relaxed font-mono text-[#e6edf3] whitespace-pre-wrap break-all"
+                className="text-[12px] leading-relaxed font-mono text-slate-100 whitespace-pre-wrap break-all"
                 dangerouslySetInnerHTML={{
                   __html: JSON.stringify(selectedPayload, null, 2)
                     .replace(/&/g, '&amp;')
@@ -163,10 +207,10 @@ export function LogsPageContent() {
                     .replace(/:\s*("[^"]*")/g, ': <span style="color: #a5d6ff">$1</span>')
                 }}
               />
-              <div className="mt-6 flex items-start gap-2 p-3 rounded-lg bg-[#161b22] border border-[#30363d]">
+              <div className="mt-6 flex items-start gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800">
                 <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-                <p className="text-xs text-[#8b949e]">
-                  Data obfuscation is active. Sensitive credential values or PII may have been masked as <code className="bg-[#21262d] px-1 rounded text-red-400">[***]</code> organically by the edge prior to storage.
+                <p className="text-[11px] font-light text-slate-400">
+                  Data obfuscation is active. Sensitive credential values or PII may have been masked as <code className="bg-slate-800 px-1 rounded text-rose-400">[***]</code> organically by the edge prior to storage.
                 </p>
               </div>
             </div>
@@ -175,10 +219,10 @@ export function LogsPageContent() {
       )}
 
       {orgLoading && (
-        <p className="text-sm text-dark-6 animate-pulse">{webhooksUi.loadingAccess}</p>
+        <p className="text-xs font-light text-dark-6 animate-pulse mb-4">{webhooksUi.loadingAccess}</p>
       )}
       {!orgLoading && !canUseLogs && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50/50 px-4 py-4 text-sm text-rose-800 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300 shadow-sm flex items-center gap-3">
+        <div className="rounded-2xl border border-rose-200 bg-rose-50/50 px-4 py-4 text-xs font-light text-rose-800 shadow-sm flex items-center gap-3 mb-6">
            <Zap className="w-5 h-5 shrink-0" />
            {webhooksUi.lockedUntilOnboarding}
         </div>
@@ -191,242 +235,195 @@ export function LogsPageContent() {
           logsLocked && "disabled:cursor-not-allowed disabled:opacity-[0.88]",
         )}
       >
-      {/* Search Bar & Filters Wrapper */}
-      <YStack className="gap-4 bg-white dark:bg-dark-2 p-4 rounded-xl border border-slate-200 dark:border-dark-3 shadow-sm mb-6">
-        <XStack className="gap-2 relative min-w-0" alignItems="center">
-          <div className="absolute left-3 z-10 text-slate-400 flex items-center justify-center pointer-events-none">
-            <Search className="w-4 h-4" />
+        {/* Search Bar & Filters Wrapper */}
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 mb-6 shadow-sm">
+          <div className="mb-4 flex items-center gap-2">
+            <div className="relative flex-1">
+              <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-dark-6">
+                <Search className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search traces, IDs or metadata..."
+                value={filters.search}
+                onChange={(e) => {
+                  setFilters({ ...filters, search: e.target.value });
+                  setCurrentPage(1);
+                }}
+                className="w-full rounded-xl border border-gray-100 bg-gray-50/50 py-2 pl-10 pr-4 text-xs font-light text-dark outline-none transition focus:border-gray-200"
+              />
+            </div>
           </div>
-          <Input
-            flex={1}
-            paddingLeft="$8"
-            placeholder="Search traces, IDs or metadata..."
-            value={filters.search}
-            onChangeText={(text) => {
-              setFilters({ ...filters, search: text });
-              setCurrentPage(1);
-            }}
-            backgroundColor="$gray2"
-            focusStyle={{ borderColor: "$blue8", backgroundColor: "$background", borderWidth: 2 }}
-            borderWidth={1}
-            borderColor="$gray5"
-            borderRadius="$4"
-            className="text-sm dark:bg-dark-3/50 dark:border-dark-3"
-          />
-        </XStack>
 
-        {/* Filters Base */}
-        <XStack className="flex-wrap gap-3 items-center">
-          <SimpleSelect
-            options={[
-              { value: "", label: t.filters.type },
-              ...ACTION_TYPES.map((type) => ({ value: type, label: type })),
-            ]}
-            value={filters.type}
-            onChange={(value) => { setFilters({ ...filters, type: value }); setCurrentPage(1); }}
-            className="min-w-[140px]"
-          />
+          {/* Filters Base */}
+          <div className="flex flex-wrap gap-3 items-center">
+            <SimpleSelect
+              options={[
+                { value: "", label: t.filters.type },
+                ...ACTION_TYPES.map((type) => ({ value: type, label: type })),
+              ]}
+              value={filters.type}
+              onChange={(value) => { setFilters({ ...filters, type: value }); setCurrentPage(1); }}
+              className="min-w-[140px]"
+            />
 
-          <SimpleSelect
-            options={[
-              { value: "", label: "All Environments" },
-              ...ENVIRONMENTS,
-            ]}
-            value={filters.environment}
-            onChange={(value) => { setFilters({ ...filters, environment: value }); setCurrentPage(1); }}
-            className="min-w-[150px]"
-          />
+            <SimpleSelect
+              options={[
+                { value: "", label: "All Environments" },
+                ...ENVIRONMENTS,
+              ]}
+              value={filters.environment}
+              onChange={(value) => { setFilters({ ...filters, environment: value }); setCurrentPage(1); }}
+              className="min-w-[150px]"
+            />
 
-          <SimpleSelect
-            options={[
-              { value: "", label: "Status" },
-              ...RESPONSE_CODES.map((code) => ({ value: code, label: code })),
-            ]}
-            value={filters.status_code}
-            onChange={(value) => { setFilters({ ...filters, status_code: value }); setCurrentPage(1); }}
-            className="min-w-[120px]"
-          />
+            <SimpleSelect
+              options={[
+                { value: "", label: "Status" },
+                ...RESPONSE_CODES.map((code) => ({ value: code, label: code })),
+              ]}
+              value={filters.status_code}
+              onChange={(value) => { setFilters({ ...filters, status_code: value }); setCurrentPage(1); }}
+              className="min-w-[120px]"
+            />
 
-          <XStack className="bg-slate-50 dark:bg-dark-3/50 border border-slate-200 dark:border-dark-3 rounded-lg overflow-hidden shadow-sm focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all">
-             <input
-               type="date"
-               title="From date"
-               value={filters.from_date}
-               onChange={(e) => { setFilters({ ...filters, from_date: e.target.value }); setCurrentPage(1); }}
-               className="px-3 py-2 text-xs sm:text-sm text-slate-700 bg-transparent outline-none dark:text-slate-300 border-r border-slate-200 dark:border-dark-3 focus:bg-indigo-50/50 dark:focus:bg-indigo-500/10 hover:bg-slate-100 dark:hover:bg-dark-3 transition-colors cursor-pointer"
-             />
-             <input
-               type="date"
-               title="To date"
-               value={filters.to_date}
-               onChange={(e) => { setFilters({ ...filters, to_date: e.target.value }); setCurrentPage(1); }}
-               className="px-3 py-2 text-xs sm:text-sm text-slate-700 bg-transparent outline-none dark:text-slate-300 focus:bg-indigo-50/50 dark:focus:bg-indigo-500/10 hover:bg-slate-100 dark:hover:bg-dark-3 transition-colors cursor-pointer"
-             />
-          </XStack>
+            <div className="flex rounded-xl border border-gray-100 bg-gray-50/50 overflow-hidden">
+               <input
+                 type="date"
+                 title="From date"
+                 value={filters.from_date}
+                 onChange={(e) => { setFilters({ ...filters, from_date: e.target.value }); setCurrentPage(1); }}
+                 className="px-3 py-1.5 text-xs text-dark bg-transparent outline-none border-r border-gray-100 hover:bg-gray-100/50 transition cursor-pointer font-light"
+               />
+               <input
+                 type="date"
+                 title="To date"
+                 value={filters.to_date}
+                 onChange={(e) => { setFilters({ ...filters, to_date: e.target.value }); setCurrentPage(1); }}
+                 className="px-3 py-1.5 text-xs text-dark bg-transparent outline-none hover:bg-gray-100/50 transition cursor-pointer font-light"
+               />
+            </div>
 
-          <Button
-            size="$3"
-            icon={RefreshCw}
-            circular
-            backgroundColor="$background"
-            borderWidth={1}
-            borderColor="$gray5"
-            hoverStyle={{ backgroundColor: "$gray3" }}
-            onPress={handleResetFilters}
-            aria-label="Reset Filters"
-          />
-        </XStack>
-      </YStack>
-
-      {/* Tamagui Grid Table Container */}
-      <YStack 
-        className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-dark-3 dark:bg-dark-2 ring-1 ring-slate-900/5 max-w-full"
-      >
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <YStack minWidth={1000} flex={1}>
-            
-            {/* Header Row */}
-            <XStack 
-              backgroundColor="$gray2" 
-              className="dark:bg-dark-3/80 border-b border-slate-200 dark:border-dark-3"
-              height={44}
-              alignItems="center"
-              paddingHorizontal="$4"
-              gap="$3"
+            <button
+              onClick={handleResetFilters}
+              className="flex h-8 w-8 items-center justify-center rounded-xl border border-gray-100 bg-white text-dark hover:bg-gray-50 active:scale-95 transition"
+              aria-label="Reset Filters"
             >
-              <Text width={100} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">ID Trace</Text>
-              <Text width={170} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.type}</Text>
-              <Text flex={1} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Event Detail</Text>
-              <Text width={110} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.env}</Text>
-              <Text width={110} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">{t.table.response}</Text>
-              <Text width={150} fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Date & Time</Text>
-              <Text width={90} textAlign="center" fontSize="$2" fontWeight="bold" color="$gray11" textTransform="uppercase">Metadata</Text>
-            </XStack>
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
 
-            {/* Body Rows */}
-            {loadingLogs ? (
-               <YStack height={120} justifyContent="center" alignItems="center">
-                 <XStack gap="$2" alignItems="center">
-                   <RefreshCw className="w-4 h-4 animate-spin text-indigo-500" />
-                   <Text color="$gray10">Loading...</Text>
-                 </XStack>
-               </YStack>
-            ) : logs.length === 0 ? (
-              <YStack height={180} justifyContent="center" alignItems="center" backgroundColor="$gray1" className="dark:bg-dark-3/10">
-                <YStack alignItems="center" gap="$3">
-                  <YStack width={48} height={48} borderRadius="$10" backgroundColor="$gray3" className="dark:bg-dark-3" justifyContent="center" alignItems="center">
-                    <Search className="w-5 h-5 text-slate-400" />
-                  </YStack>
-                  <Text fontSize="$3" fontWeight="bold" color="$color12">
-                    {t.table.emptyTitle}
-                  </Text>
-                  <Text fontSize="$2" color="$gray10" maxWidth={300} textAlign="center">
-                    {t.table.emptySubtitle}
-                  </Text>
-                </YStack>
-              </YStack>
-            ) : (
-              logs.map((log) => (
-                <XStack 
-                  key={log.id} 
-                  className="border-b border-slate-100 dark:border-dark-3/50 cursor-default"
-                  minHeight={50}
-                  alignItems="center"
-                  paddingHorizontal="$4"
-                  gap="$3"
-                  hoverStyle={{ backgroundColor: "$color3" }}
-                >
-                  <Text width={100} fontFamily="$mono" fontSize="$2" color="$gray10" numberOfLines={1}>
-                    {log.id.slice(0, 8)}...
-                  </Text>
-                  
-                  <YStack width={170} overflow="hidden">
-                    {logServiceLabel(log.type || log.service)}
-                  </YStack>
-                  
-                  <YStack flex={1} overflow="hidden" paddingRight="$4">
-                    <XStack backgroundColor="$gray3" className="dark:bg-dark-3/50 px-2 py-0.5 rounded" alignSelf="flex-start" maxWidth="100%">
-                      <Text fontSize="$2" color="$color11" fontWeight="500" numberOfLines={1}>
+        {/* Table Container */}
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm max-w-full">
+          <div className="overflow-x-auto">
+            <div className="min-w-[1100px] flex flex-col">
+              
+              {/* Header Row */}
+              <div className="flex items-center gap-4 border-b border-gray-100 bg-gray-50/50 px-5 py-3 text-[10px] font-light uppercase tracking-wider text-dark-6">
+                <span className="w-[110px]">ID Trace</span>
+                <span className="w-[180px]">{t.table.type}</span>
+                <span className="flex-1">Event Detail</span>
+                <span className="w-[90px]">{t.table.env}</span>
+                <span className="w-[90px]">{t.table.response}</span>
+                <span className="w-[160px]">Date & Time</span>
+                <span className="w-[90px] text-center">Metadata</span>
+              </div>
+
+              {/* Body Rows */}
+              {loadingLogs ? (
+                 <div className="flex h-32 items-center justify-center">
+                   <div className="flex items-center gap-2">
+                     <RefreshCw className="w-4 h-4 animate-spin text-dark-6" />
+                     <span className="text-xs font-light text-dark-6">Loading...</span>
+                   </div>
+                 </div>
+              ) : logs.length === 0 ? (
+                <div className="flex h-44 flex-col items-center justify-center bg-gray-50/30 p-6">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-100 bg-white mb-3">
+                    <Search className="w-4 h-4 text-dark-6" />
+                  </div>
+                  <p className="text-xs font-normal text-dark mb-1">{t.table.emptyTitle}</p>
+                  <p className="text-[11px] font-light text-dark-6 max-w-xs text-center">{t.table.emptySubtitle}</p>
+                </div>
+              ) : (
+                logs.map((log) => (
+                  <div 
+                    key={log.id} 
+                    className="flex items-center gap-4 border-b border-gray-100/60 px-5 py-2 hover:bg-gray-50/30 transition-colors text-xs font-light text-dark-6"
+                  >
+                    <span className="w-[110px] font-mono text-[11px] text-dark">
+                      {log.id.slice(0, 8)}...
+                    </span>
+                    
+                    <span className="w-[180px] overflow-hidden">
+                      {logServiceLabel(log.type || log.service)}
+                    </span>
+                    
+                    <span className="flex-1 overflow-hidden pr-4 flex items-center">
+                      <span className="rounded-lg bg-gray-100 px-2 py-0.5 font-mono text-[11px] text-dark font-normal">
                         {log.operation}
-                      </Text>
-                    </XStack>
-                  </YStack>
+                      </span>
+                    </span>
 
-                  <YStack width={110}>
-                    {getEnvBadge(log.environment)}
-                  </YStack>
+                    <span className="w-[90px]">
+                      {getEnvBadge(log.environment)}
+                    </span>
 
-                  <YStack width={110}>
-                    {getResponseCodeBadge(log.status_code)}
-                  </YStack>
+                    <span className="w-[90px]">
+                      {getResponseCodeBadge(log.status_code)}
+                    </span>
 
-                  <Text width={150} fontSize="$2" color="$gray10" numberOfLines={1}>
-                    {formatTimestamp(log.created_at)}
-                  </Text>
+                    <span className="w-[160px] text-[11px] text-dark-6">
+                      {formatTimestamp(log.created_at)}
+                    </span>
 
-                  <YStack width={90} alignItems="center">
-                    {log.metadata && Object.keys(log.metadata).length > 0 ? (
-                      <Button
-                        size="$2"
-                        icon={<Code2 className="w-3.5 h-3.5" />}
-                        backgroundColor="$blue3"
-                        borderColor="$blue5"
-                        borderWidth={1}
-                        hoverStyle={{ backgroundColor: "$blue9", borderColor: "transparent" }}
-                        pressStyle={{ scale: 0.95 }}
-                        onPress={() => setSelectedPayload(log.metadata!)}
-                      >
-                        View
-                      </Button>
-                    ) : (
-                      <Text color="$gray8">-</Text>
-                    )}
-                  </YStack>
-                </XStack>
-              ))
-            )}
-          </YStack>
-        </ScrollView>
-      </YStack>
+                    <div className="w-[90px] flex justify-center">
+                      {log.metadata && Object.keys(log.metadata).length > 0 ? (
+                        <button
+                          onClick={() => setSelectedPayload(log.metadata!)}
+                          className="flex items-center gap-1 rounded-xl border border-gray-100 bg-white px-2.5 py-1 text-[11px] text-indigo-600 hover:bg-gray-50 active:scale-95 transition"
+                        >
+                          <Code2 className="w-3 h-3" />
+                          View
+                        </button>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
 
-      {/* Pagination Footer */}
-      {logs.length > 0 && (
-         <XStack className="mt-4 pt-2 border-t border-transparent px-1" justifyContent="space-between" alignItems="center">
-           <Text fontSize="$2" color="$gray11" fontWeight="500">
-             Showing page {currentPage} of {totalPages}
-           </Text>
-           
-           <XStack gap="$2" alignItems="center">
-             <Button
-               size="$3"
-               icon={ChevronLeft}
-               disabled={currentPage === 1 || loadingLogs}
-               opacity={currentPage === 1 || loadingLogs ? 0.5 : 1}
-               onPress={() => setCurrentPage((p) => Math.max(1, p - 1))}
-               backgroundColor="$background"
-               borderColor="$gray5"
-               borderWidth={1}
-               hoverStyle={currentPage === 1 || loadingLogs ? undefined : { backgroundColor: "$gray3" }}
-             >
-               Previous
-             </Button>
-             <Button
-               size="$3"
-               iconAfter={ChevronRight}
-               disabled={currentPage === totalPages || loadingLogs}
-               opacity={currentPage === totalPages || loadingLogs ? 0.5 : 1}
-               onPress={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-               backgroundColor="$background"
-               borderColor="$gray5"
-               borderWidth={1}
-               hoverStyle={currentPage === totalPages || loadingLogs ? undefined : { backgroundColor: "$gray3" }}
-             >
-               Next
-             </Button>
-           </XStack>
-         </XStack>
-      )}
+        {/* Pagination Footer */}
+        {logs.length > 0 && (
+           <div className="mt-4 flex items-center justify-between px-1">
+             <span className="text-xs font-light text-dark-6">
+               Showing page {currentPage} of {totalPages}
+             </span>
+             
+             <div className="flex items-center gap-2">
+               <button
+                 disabled={currentPage === 1 || loadingLogs}
+                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                 className="rounded-xl border border-gray-100 bg-white px-3 py-1.5 text-xs font-light text-dark hover:bg-gray-50 disabled:opacity-50 active:scale-95 transition"
+               >
+                 Previous
+               </button>
+               <button
+                 disabled={currentPage === totalPages || loadingLogs}
+                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                 className="rounded-xl border border-gray-100 bg-white px-3 py-1.5 text-xs font-light text-dark hover:bg-gray-50 disabled:opacity-50 active:scale-95 transition"
+               >
+                 Next
+               </button>
+             </div>
+           </div>
+        )}
       </fieldset>
-    </YStack>
+    </div>
   );
 }

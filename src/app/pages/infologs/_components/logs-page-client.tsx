@@ -8,7 +8,7 @@ export function LogsPageClient() {
   const translations = useUiTranslations();
 
   return (
-    <div className="mx-auto w-full max-w-[1000px]">
+    <div className="mx-auto w-full max-w-[1280px]">
       <Breadcrumb pageName={translations.sidebar.menuItems.logs} />
       <LogsPageContent />
     </div>
