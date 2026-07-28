@@ -1004,14 +1004,14 @@ export function NotificationsPageContent() {
       )}
 
       {!locked && <div className="space-y-8">
-        <header className="rounded-3xl border border-transparent bg-white p-6 dark:border-dark-3 dark:bg-dark-2">
+        <header className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-widest text-primary dark:text-primary/70">
+              <p className="text-[10px] uppercase tracking-wider text-dark-6">
                 {translations.header.templatesBadge}
               </p>
-              <h1 className="mt-1 text-3xl font-semibold text-dark dark:text-white">{translations.pageTitle}</h1>
-              <p className="mt-2 max-w-2xl text-sm text-dark-5 dark:text-dark-6">{translations.pageDescription}</p>
+              <h1 className="mt-1 text-2xl font-light text-dark">{translations.pageTitle}</h1>
+              <p className="mt-2 max-w-2xl text-xs font-light text-dark-6">{translations.pageDescription}</p>
             </div>
           </div>
         </header>
@@ -1022,42 +1022,29 @@ export function NotificationsPageContent() {
               key={card.channel}
               onClick={() => handleChannelChange(card.channel)}
               className={cn(
-                "group relative overflow-hidden rounded-3xl border-2 p-5 text-left shadow-lg transition-all",
-                card.isSelected ? "bg-white text-dark" : "bg-[#1F4D93] text-white",
-                card.isSelected ? "border-white ring-0" : "border-transparent opacity-80 hover:opacity-100",
+                "group relative overflow-hidden rounded-2xl border p-5 text-left transition-all active:scale-[0.99] duration-200 shadow-sm",
+                card.isSelected 
+                  ? "bg-white border-gray-150 text-dark" 
+                  : "bg-gray-50/50 border-gray-100 text-dark hover:bg-gray-100/50",
               )}
             >
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p
-                    className={cn(
-                      "text-xs uppercase tracking-wider",
-                      card.isSelected ? "text-black/70" : "text-white/80",
-                    )}
-                  >
+                  <p className="text-[10px] uppercase tracking-wider text-dark-6">
                     {translations.categorySelector.title}
                   </p>
-                  <h2 className={cn("mt-2 text-2xl font-semibold", card.isSelected ? "text-black" : "text-white")}>{card.info.label}</h2>
-                  <p className={cn("mt-2 max-w-sm text-sm", card.isSelected ? "text-black/70" : card.styles.accent)}>
+                  <h2 className="mt-2 text-lg font-light text-dark">{card.info.label}</h2>
+                  <p className="mt-2 max-w-sm text-xs font-light text-dark-6">
                     {card.info.description}
                   </p>
                 </div>
-                <div className={cn("text-right", card.isSelected ? "text-black" : "text-white")}>
-                  <p className="text-3xl font-bold">{card.items.length}</p>
-                  <p
-                    className={cn(
-                      "text-xs uppercase tracking-widest",
-                      card.isSelected ? "text-black/70" : "text-white/80",
-                    )}
-                  >
+                <div className="text-right">
+                  <p className="text-2xl font-light text-dark">{card.items.length}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-dark-6">
                     {translations.summaryCards.total}
                   </p>
                   {card.active && (
-                    <span className={cn(
-                      "mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold",
-                      card.styles.badge,
-                      card.isSelected && "bg-black/10 text-black",
-                    )}>
+                    <span className="mt-3 inline-flex rounded-xl bg-gray-100 px-3 py-0.5 text-[10px] font-light text-dark">
                       {translations.summaryCards.active}: {card.active.category}
                     </span>
                   )}
@@ -1118,16 +1105,16 @@ export function NotificationsPageContent() {
                       key={group.id}
                       onClick={() => setSelectedGroupId(group.id)}
                       className={cn(
-                        "w-[280px] flex-shrink-0 rounded-3xl border p-5 text-left transition hover:-translate-y-1 hover:border-primary hover:shadow-lg dark:border-dark-3 dark:bg-dark-2",
-                        group.id === selectedGroup?.id ? "border-primary shadow-lg" : "border-stroke bg-white",
+                        "w-[240px] flex-shrink-0 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-gray-200 hover:shadow-md",
+                        group.id === selectedGroup?.id ? "border-gray-200 shadow-sm bg-gray-50/30" : "border-gray-100 bg-white",
                       )}
                     >
-                      <p className="text-xs uppercase tracking-widest text-dark-5 dark:text-dark-6">
+                      <p className="text-[9px] uppercase tracking-wider text-dark-6">
                         {translations.categories.card.label}
                       </p>
-                      <h3 className="mt-1 text-xl font-semibold text-dark dark:text-white">{displayName}</h3>
-                      <p className="mt-2 text-sm text-dark-5 dark:text-dark-6">{displayDescription}</p>
-                      <p className="mt-4 text-xs text-dark-5 dark:text-dark-6">
+                      <h3 className="mt-1 text-sm font-normal text-dark">{displayName}</h3>
+                      <p className="mt-1 text-[11px] font-light leading-relaxed text-dark-6">{displayDescription}</p>
+                      <p className="mt-3 text-[10px] font-light text-dark-6">
                         {translations.categories.card.templatesCount(remoteCount)}
                       </p>
                     </button>
@@ -1430,10 +1417,10 @@ export function NotificationsPageContent() {
             </div>
           </section>
         ) : (
-          <section className="space-y-2 rounded-3xl border border-dashed border-stroke bg-white p-6 text-sm text-dark-6 dark:border-dark-3 dark:bg-dark-2 dark:text-dark-6">
-            <p className="text-xs uppercase tracking-widest text-dark-6 dark:text-dark-6">{translations.createTemplate.badge}</p>
-            <h3 className="text-2xl font-semibold text-dark dark:text-white">{translations.createTemplate.titleFallback}</h3>
-            <p className="text-sm text-dark-5 dark:text-dark-6">{translations.createTemplate.noCategory}</p>
+          <section className="space-y-2 rounded-2xl border border-dashed border-gray-200 bg-white p-6 text-xs text-dark-6">
+            <p className="text-[10px] uppercase tracking-wider text-dark-6">{translations.createTemplate.badge}</p>
+            <h3 className="text-sm font-normal text-dark">{translations.createTemplate.titleFallback}</h3>
+            <p className="text-xs font-light text-dark-6">{translations.createTemplate.noCategory}</p>
           </section>
         )}
 
