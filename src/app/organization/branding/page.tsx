@@ -9,6 +9,7 @@ import { getStoredOrganization, getStoredRoles } from "@/lib/auth-api";
 import { getOrganizationBranding, uploadOrganizationLogo, updateOrganizationBranding, AuthError } from "@/lib/auth-api";
 import type { OrganizationBranding, BrandingLogoType } from "@/lib/auth-api";
 import { isOwner, userHasRole, TEAM_ROLE } from "@/app/organization/teams/_constants/team-roles";
+import { cn } from "@/lib/utils";
 import { ShowcaseSection } from "@/components/Layouts/showcase-section";
 
 const HEX_REGEX = /^#[0-9A-Fa-f]{6}$/;
@@ -27,6 +28,112 @@ function withCacheBust(url: string | null | undefined, version: number): string 
     const separator = url.includes("?") ? "&" : "?";
     return `${url}${separator}v=${version}`;
   }
+}
+
+function LogoUploadZone({
+  label,
+  description,
+  url,
+  type,
+  logoUploading,
+  onFileChange,
+}: {
+  label: string;
+  description: string;
+  url: string | null | undefined;
+  type: BrandingLogoType;
+  logoUploading: boolean;
+  onFileChange: (file: File, type: BrandingLogoType) => void;
+}) {
+  const [isDragActive, setIsDragActive] = useState(false);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setIsDragActive(true);
+    } else if (e.type === "dragleave") {
+      setIsDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (file.type === "image/png") {
+        onFileChange(file, type);
+      } else {
+        toast.error("Solo se permiten archivos PNG.");
+      }
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      onFileChange(e.target.files[0], type);
+    }
+  };
+
+  // Checkerboard background sutil para ver transparencias y contraste
+  const checkerboardStyle = {
+    backgroundImage: `linear-gradient(45deg, #f9f9f9 25%, transparent 25%), 
+                      linear-gradient(-45deg, #f9f9f9 25%, transparent 25%), 
+                      linear-gradient(45deg, transparent 75%, #f9f9f9 75%), 
+                      linear-gradient(-45deg, transparent 75%, #f9f9f9 75%)`,
+    backgroundSize: '16px 16px',
+    backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+    backgroundColor: '#ffffff'
+  };
+
+  return (
+    <div
+      onDragEnter={handleDrag}
+      onDragOver={handleDrag}
+      onDragLeave={handleDrag}
+      onDrop={handleDrop}
+      className={cn(
+        "relative flex flex-col items-center justify-center rounded-2xl border border-dashed p-6 transition-all duration-200 bg-white min-h-[220px]",
+        isDragActive ? "border-zelify-green bg-zelify-green/5" : "border-gray-200 hover:border-gray-300"
+      )}
+    >
+      <div className="w-full text-center">
+        <p className="text-[10px] font-light uppercase tracking-wider text-dark-6 mb-1">{label}</p>
+        <p className="text-xs font-light text-dark-6 mb-4">{description}</p>
+      </div>
+
+      {url ? (
+        <div 
+          className="relative mb-4 flex items-center justify-center rounded-xl overflow-hidden border border-gray-100 p-4 max-w-full min-h-[110px]"
+          style={checkerboardStyle}
+        >
+          <img
+            src={url}
+            alt={label}
+            className="max-h-20 max-w-[200px] object-contain select-none"
+          />
+        </div>
+      ) : (
+        <div className="mb-4 flex h-[110px] w-full items-center justify-center rounded-xl border border-gray-100 bg-gray-50/50 text-xs font-light text-dark-6">
+          Sin archivo cargado
+        </div>
+      )}
+
+      <label className="relative cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95">
+        <span>Seleccionar archivo</span>
+        <input
+          type="file"
+          accept=".png,image/png"
+          onChange={handleChange}
+          disabled={logoUploading}
+          className="sr-only"
+        />
+      </label>
+    </div>
+  );
 }
 
 export default function OrganizationBrandingPage() {
@@ -81,10 +188,8 @@ export default function OrganizationBrandingPage() {
     fetchBranding();
   }, [canSeeBranding, fetchBranding, router]);
 
-  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>, type: BrandingLogoType) => {
-    const file = e.target.files?.[0];
-    if (!file || !org?.id) return;
-    e.target.value = "";
+  const handleLogoUpload = async (file: File, type: BrandingLogoType) => {
+    if (!org?.id) return;
     setLogoError("");
     if (file.type !== "image/png") {
       setLogoError("Solo se permiten archivos PNG para los logos de branding.");
@@ -172,124 +277,48 @@ export default function OrganizationBrandingPage() {
             <p className="mb-4 text-xs font-light text-dark-6">
               Solo archivos PNG. Cada vista previa usa un fondo oscuro de referencia para que puedas distinguir mejor logos claros, blancos o con transparencia.
             </p>
-
             {/* Logo principal — solo arriba */}
             <div className="mb-8">
-              <p className="mb-1 text-[10px] font-light uppercase tracking-wider text-dark-6">Logo principal</p>
-              <p className="mb-3 text-xs font-light leading-5 text-dark-6">
-                Acepta PNG. El fondo de vista previa es referencial y ayuda a validar la legibilidad del logo cargado.
-              </p>
-              <div className="rounded-xl border border-gray-100 p-4 bg-white">
-                {branding?.url_log ? (
-                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-sm">
-                    <img
-                      src={withCacheBust(branding.url_log, assetVersion)}
-                      alt="Logo principal"
-                      className="h-20 w-auto max-w-[200px] object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-xs font-light text-slate-300 shadow-sm">
-                    Sin logo
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept=".png,image/png"
-                  onChange={(e) => handleLogoChange(e, "logo")}
-                  disabled={logoUploading}
-                  className="block w-full text-xs text-dark-6 file:mr-2 file:rounded-xl file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-light file:text-dark file:hover:bg-gray-50 file:transition-all file:cursor-pointer"
-                />
-              </div>
+              <LogoUploadZone
+                label="Logo principal"
+                description="Acepta PNG. El fondo de vista previa incluye un patrón de tablero sutil para validar la transparencia y legibilidad."
+                url={branding?.url_log ? withCacheBust(branding.url_log, assetVersion) : undefined}
+                type="logo"
+                logoUploading={logoUploading}
+                onFileChange={handleLogoUpload}
+              />
             </div>
 
             {/* Logos fondo claro y oscuro — dos columnas */}
-            <p className="mb-3 text-[10px] font-light uppercase tracking-wider text-dark-6">
-              Logos para fondos claro y oscuro (formato cuadrado recomendado)
-            </p>
             <div className="mb-8 grid gap-6 sm:grid-cols-2">
-              <div className="rounded-xl border border-gray-100 bg-white p-4">
-                <p className="mb-1 text-[10px] font-light uppercase tracking-wider text-dark-6">Logo fondo claro</p>
-                <p className="mb-3 text-xs font-light leading-5 text-dark-6">
-                  Acepta PNG. La vista previa usa un fondo gris neutro de referencia para comprobar que el archivo se vea con claridad.
-                </p>
-                {branding?.url_log_light ? (
-                  <div className="mb-3 inline-flex rounded-xl border border-slate-300 bg-slate-400/70 px-4 py-5 shadow-sm">
-                    <img
-                      src={withCacheBust(branding.url_log_light, assetVersion)}
-                      alt="Logo light"
-                      className="h-20 w-20 object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="mb-3 rounded-xl border border-slate-300 bg-slate-400/70 px-4 py-5 text-xs font-light text-slate-700 shadow-sm">
-                    Sin logo
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept=".png,image/png"
-                  onChange={(e) => handleLogoChange(e, "logoLight")}
-                  disabled={logoUploading}
-                  className="block w-full text-xs text-dark-6 file:mr-2 file:rounded-xl file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-light file:text-dark file:hover:bg-gray-50 file:transition-all file:cursor-pointer"
-                />
-              </div>
-              <div className="rounded-xl border border-gray-100 bg-white p-4">
-                <p className="mb-1 text-[10px] font-light uppercase tracking-wider text-dark-6">Logo fondo oscuro</p>
-                <p className="mb-3 text-xs font-light leading-5 text-dark-6">
-                  Acepta PNG. El fondo oscuro es referencial y sirve para verificar contraste si el logo es blanco o tiene transparencia.
-                </p>
-                {branding?.url_log_dark ? (
-                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-sm">
-                    <img
-                      src={withCacheBust(branding.url_log_dark, assetVersion)}
-                      alt="Logo dark"
-                      className="h-20 w-20 object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-xs font-light text-slate-300 shadow-sm">
-                    Sin logo
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept=".png,image/png"
-                  onChange={(e) => handleLogoChange(e, "logoDark")}
-                  disabled={logoUploading}
-                  className="block w-full text-xs text-dark-6 file:mr-2 file:rounded-xl file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-light file:text-dark file:hover:bg-gray-50 file:transition-all file:cursor-pointer"
-                />
-              </div>
+              <LogoUploadZone
+                label="Logo fondo claro"
+                description="Acepta PNG. Formato cuadrado recomendado. El fondo permite comprobar la legibilidad del archivo sobre superficies claras."
+                url={branding?.url_log_light ? withCacheBust(branding.url_log_light, assetVersion) : undefined}
+                type="logoLight"
+                logoUploading={logoUploading}
+                onFileChange={handleLogoUpload}
+              />
+              <LogoUploadZone
+                label="Logo fondo oscuro"
+                description="Acepta PNG. Formato cuadrado recomendado. Útil para verificar el contraste en logos claros o blancos."
+                url={branding?.url_log_dark ? withCacheBust(branding.url_log_dark, assetVersion) : undefined}
+                type="logoDark"
+                logoUploading={logoUploading}
+                onFileChange={handleLogoUpload}
+              />
             </div>
 
             {/* Ícono */}
-            <div>
-              <p className="mb-1 text-[10px] font-light uppercase tracking-wider text-dark-6">Ícono</p>
-              <p className="mb-3 text-xs font-light leading-5 text-dark-6">
-                Se usa para las notificaciones push y representación de la app en dispositivos. Acepta PNG.
-              </p>
-              <div className="rounded-xl border border-gray-100 p-4 bg-white">
-                {branding?.url_icon ? (
-                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-sm">
-                    <img
-                      src={withCacheBust(branding.url_icon, assetVersion)}
-                      alt="Icono"
-                      className="h-14 w-14 object-contain"
-                    />
-                  </div>
-                ) : (
-                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-xs font-light text-slate-300 shadow-sm">
-                    Sin ícono
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept=".png,image/png"
-                  onChange={(e) => handleLogoChange(e, "icon")}
-                  disabled={logoUploading}
-                  className="block w-full text-xs text-dark-6 file:mr-2 file:rounded-xl file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-light file:text-dark file:hover:bg-gray-50 file:transition-all file:cursor-pointer"
-                />
-              </div>
+            <div className="mb-8">
+              <LogoUploadZone
+                label="Ícono"
+                description="Se usa para las notificaciones push y la representación de la aplicación en dispositivos móviles. Acepta PNG."
+                url={branding?.url_icon ? withCacheBust(branding.url_icon, assetVersion) : undefined}
+                type="icon"
+                logoUploading={logoUploading}
+                onFileChange={handleLogoUpload}
+              />
             </div>
 
             {logoUploading && <p className="mt-4 text-xs font-light text-dark-6">Subiendo…</p>}
