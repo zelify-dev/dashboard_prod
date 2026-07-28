@@ -185,8 +185,10 @@ export function LogsPageContent() {
           <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden rounded-3xl bg-white shadow-2xl border border-gray-100">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4 bg-gray-50/50">
               <div className="flex items-center gap-2">
-                <Code2 className="w-4 h-4 text-indigo-500" />
-                <h3 className="text-sm font-normal text-dark font-mono">Payload.json</h3>
+                <svg className="w-4 h-4 text-dark-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                </svg>
+                <h3 className="text-sm font-normal text-dark font-mono">payload.json</h3>
               </div>
               <button
                 onClick={() => setSelectedPayload(null)}
@@ -207,10 +209,12 @@ export function LogsPageContent() {
                     .replace(/:\s*("[^"]*")/g, ': <span style="color: #a5d6ff">$1</span>')
                 }}
               />
-              <div className="mt-6 flex items-start gap-2 p-3 rounded-xl bg-slate-900 border border-slate-800">
-                <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-                <p className="text-[11px] font-light text-slate-400">
-                  Data obfuscation is active. Sensitive credential values or PII may have been masked as <code className="bg-slate-800 px-1 rounded text-rose-400">[***]</code> organically by the edge prior to storage.
+              <div className="mt-6 flex items-start gap-2 p-3 rounded-xl border border-slate-800 bg-slate-900/40">
+                <svg className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                </svg>
+                <p className="text-[11px] font-light leading-normal text-slate-400">
+                  Data obfuscation is active. Sensitive credential values or PII may have been masked as <code className="bg-slate-950 px-1 py-0.5 rounded text-rose-400 font-mono text-[10px]">[***]</code> organically by the edge prior to storage.
                 </p>
               </div>
             </div>
