@@ -157,25 +157,31 @@ export default function OrganizationBrandingPage() {
       <Breadcrumb pageName={title} />
 
       {loading ? (
-        <p className="text-dark-6 dark:text-dark-6">Cargando…</p>
+        <p className="text-xs font-light text-dark-6">Cargando…</p>
       ) : error ? (
-        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <p className="text-xs font-light text-red-600">{error}</p>
       ) : (
         <>
-          <ShowcaseSection title="Logos e ícono" className="!p-6">
-            <p className="mb-6 text-sm text-dark-6 dark:text-dark-6">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 mb-6">
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-normal text-dark border-b border-gray-100 pb-3">
+              <svg className="h-4 w-4 text-dark-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              Logos e ícono
+            </h3>
+            <p className="mb-4 text-xs font-light text-dark-6">
               Solo archivos PNG. Cada vista previa usa un fondo oscuro de referencia para que puedas distinguir mejor logos claros, blancos o con transparencia.
             </p>
 
             {/* Logo principal — solo arriba */}
             <div className="mb-8">
-              <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo principal</p>
-              <p className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">
+              <p className="mb-1 text-[10px] font-light uppercase tracking-wider text-dark-6">Logo principal</p>
+              <p className="mb-3 text-xs font-light leading-5 text-dark-6">
                 Acepta PNG. El fondo de vista previa es referencial y ayuda a validar la legibilidad del logo cargado.
               </p>
-              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
+              <div className="rounded-xl border border-gray-100 p-4 bg-white">
                 {branding?.url_log ? (
-                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-sm">
                     <img
                       src={withCacheBust(branding.url_log, assetVersion)}
                       alt="Logo principal"
@@ -183,7 +189,7 @@ export default function OrganizationBrandingPage() {
                     />
                   </div>
                 ) : (
-                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-xs font-light text-slate-300 shadow-sm">
                     Sin logo
                   </div>
                 )}
@@ -192,23 +198,23 @@ export default function OrganizationBrandingPage() {
                   accept=".png,image/png"
                   onChange={(e) => handleLogoChange(e, "logo")}
                   disabled={logoUploading}
-                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
+                  className="block w-full text-xs text-dark-6 file:mr-2 file:rounded-xl file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-light file:text-dark file:hover:bg-gray-50 file:transition-all file:cursor-pointer"
                 />
               </div>
             </div>
 
-            {/* Logos fondo claro y oscuro — dos columnas, formato cuadrado pequeño */}
-            <p className="mb-2 text-xs font-medium text-dark-6 dark:text-dark-6">
-              Logos para fondos claro y oscuro (recomendado formato cuadrado y pequeño)
+            {/* Logos fondo claro y oscuro — dos columnas */}
+            <p className="mb-3 text-[10px] font-light uppercase tracking-wider text-dark-6">
+              Logos para fondos claro y oscuro (formato cuadrado recomendado)
             </p>
             <div className="mb-8 grid gap-6 sm:grid-cols-2">
-              <div className="rounded-lg border border-stroke bg-white p-4 dark:border-dark-3 dark:bg-dark-2">
-                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo claro</p>
-                <p className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">
+              <div className="rounded-xl border border-gray-100 bg-white p-4">
+                <p className="mb-1 text-[10px] font-light uppercase tracking-wider text-dark-6">Logo fondo claro</p>
+                <p className="mb-3 text-xs font-light leading-5 text-dark-6">
                   Acepta PNG. La vista previa usa un fondo gris neutro de referencia para comprobar que el archivo se vea con claridad.
                 </p>
                 {branding?.url_log_light ? (
-                  <div className="mb-3 inline-flex rounded-xl border border-slate-300 bg-slate-400/70 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 inline-flex rounded-xl border border-slate-300 bg-slate-400/70 px-4 py-5 shadow-sm">
                     <img
                       src={withCacheBust(branding.url_log_light, assetVersion)}
                       alt="Logo light"
@@ -216,7 +222,7 @@ export default function OrganizationBrandingPage() {
                     />
                   </div>
                 ) : (
-                  <div className="mb-3 rounded-xl border border-slate-300 bg-slate-400/70 px-4 py-5 text-sm text-slate-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 rounded-xl border border-slate-300 bg-slate-400/70 px-4 py-5 text-xs font-light text-slate-700 shadow-sm">
                     Sin logo
                   </div>
                 )}
@@ -225,16 +231,16 @@ export default function OrganizationBrandingPage() {
                   accept=".png,image/png"
                   onChange={(e) => handleLogoChange(e, "logoLight")}
                   disabled={logoUploading}
-                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
+                  className="block w-full text-xs text-dark-6 file:mr-2 file:rounded-xl file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-light file:text-dark file:hover:bg-gray-50 file:transition-all file:cursor-pointer"
                 />
               </div>
-              <div className="rounded-lg border border-stroke bg-slate-600/18 p-4 dark:border-dark-3 dark:bg-slate-500/12">
-                <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Logo fondo oscuro</p>
-                <p className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">
+              <div className="rounded-xl border border-gray-100 bg-white p-4">
+                <p className="mb-1 text-[10px] font-light uppercase tracking-wider text-dark-6">Logo fondo oscuro</p>
+                <p className="mb-3 text-xs font-light leading-5 text-dark-6">
                   Acepta PNG. El fondo oscuro es referencial y sirve para verificar contraste si el logo es blanco o tiene transparencia.
                 </p>
                 {branding?.url_log_dark ? (
-                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-sm">
                     <img
                       src={withCacheBust(branding.url_log_dark, assetVersion)}
                       alt="Logo dark"
@@ -242,7 +248,7 @@ export default function OrganizationBrandingPage() {
                     />
                   </div>
                 ) : (
-                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-xs font-light text-slate-300 shadow-sm">
                     Sin logo
                   </div>
                 )}
@@ -251,20 +257,20 @@ export default function OrganizationBrandingPage() {
                   accept=".png,image/png"
                   onChange={(e) => handleLogoChange(e, "logoDark")}
                   disabled={logoUploading}
-                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
+                  className="block w-full text-xs text-dark-6 file:mr-2 file:rounded-xl file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-light file:text-dark file:hover:bg-gray-50 file:transition-all file:cursor-pointer"
                 />
               </div>
             </div>
 
-            {/* Ícono — solo, con descripción */}
+            {/* Ícono */}
             <div>
-              <p className="mb-2 text-xs font-medium uppercase text-dark-6 dark:text-dark-6">Ícono</p>
-              <p className="mb-3 text-sm text-dark-6 dark:text-dark-6">
-                Se usa para las notificaciones push y representación de la app en dispositivos. Acepta PNG y el fondo de vista previa es referencial para distinguir mejor el icono.
+              <p className="mb-1 text-[10px] font-light uppercase tracking-wider text-dark-6">Ícono</p>
+              <p className="mb-3 text-xs font-light leading-5 text-dark-6">
+                Se usa para las notificaciones push y representación de la app en dispositivos. Acepta PNG.
               </p>
-              <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
+              <div className="rounded-xl border border-gray-100 p-4 bg-white">
                 {branding?.url_icon ? (
-                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 inline-flex rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 shadow-sm">
                     <img
                       src={withCacheBust(branding.url_icon, assetVersion)}
                       alt="Icono"
@@ -272,7 +278,7 @@ export default function OrganizationBrandingPage() {
                     />
                   </div>
                 ) : (
-                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                  <div className="mb-3 rounded-xl border border-slate-700/60 bg-slate-900 px-4 py-5 text-xs font-light text-slate-300 shadow-sm">
                     Sin ícono
                   </div>
                 )}
@@ -281,20 +287,26 @@ export default function OrganizationBrandingPage() {
                   accept=".png,image/png"
                   onChange={(e) => handleLogoChange(e, "icon")}
                   disabled={logoUploading}
-                  className="block w-full text-sm text-dark-6 file:mr-2 file:rounded file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:text-white"
+                  className="block w-full text-xs text-dark-6 file:mr-2 file:rounded-xl file:border file:border-gray-200 file:bg-white file:px-3 file:py-1.5 file:text-xs file:font-light file:text-dark file:hover:bg-gray-50 file:transition-all file:cursor-pointer"
                 />
               </div>
             </div>
 
-            {logoUploading && <p className="mt-4 text-sm text-dark-6">Subiendo…</p>}
-            {logoError && <p className="mt-4 text-sm text-red-600 dark:text-red-400">{logoError}</p>}
-          </ShowcaseSection>
+            {logoUploading && <p className="mt-4 text-xs font-light text-dark-6">Subiendo…</p>}
+            {logoError && <p className="mt-4 text-xs font-light text-red-600">{logoError}</p>}
+          </div>
 
-          <ShowcaseSection title="Colores" className="mt-6 !p-6">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6">
+            <h3 className="mb-4 flex items-center gap-2 text-sm font-normal text-dark border-b border-gray-100 pb-3">
+              <svg className="h-4 w-4 text-dark-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.344l2.122-2.122a2 2 0 012.828 0l2.828 2.828a2 2 0 010 2.828l-2.122 2.122M11 7.344L9.879 8.464M14.828 11.172l-1.121 1.121M13.707 12.293l-4.243 4.243a1 1 0 01-1.414 0l-1.414-1.414a1 1 0 010-1.414l4.243-4.243" />
+              </svg>
+              Colores
+            </h3>
             <form onSubmit={handleSaveBranding} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
+                  <label className="mb-2 block text-[10px] font-light uppercase tracking-wider text-dark-6">
                     Color primario
                   </label>
                   <div className="flex items-center gap-3">
@@ -302,19 +314,19 @@ export default function OrganizationBrandingPage() {
                       type="color"
                       value={colorA}
                       onChange={(e) => setColorA(e.target.value)}
-                      className="h-10 w-14 cursor-pointer rounded border border-stroke dark:border-dark-3"
+                      className="h-10 w-14 cursor-pointer rounded-xl border border-gray-100 bg-transparent"
                     />
                     <input
                       type="text"
                       value={colorA}
                       onChange={(e) => setColorA(e.target.value)}
                       placeholder="#RRGGBB"
-                      className="flex-1 rounded-lg border border-stroke bg-gray-2/60 px-3 py-2 font-mono text-sm dark:border-dark-3 dark:bg-dark-2/80 dark:text-white"
+                      className="flex-1 rounded-xl border border-gray-100 bg-gray-50/50 px-3 py-2 font-mono text-xs font-light text-dark focus:outline-none focus:border-gray-200"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
+                  <label className="mb-2 block text-[10px] font-light uppercase tracking-wider text-dark-6">
                     Color secundario
                   </label>
                   <div className="flex items-center gap-3">
@@ -322,35 +334,35 @@ export default function OrganizationBrandingPage() {
                       type="color"
                       value={colorB}
                       onChange={(e) => setColorB(e.target.value)}
-                      className="h-10 w-14 cursor-pointer rounded border border-stroke dark:border-dark-3"
+                      className="h-10 w-14 cursor-pointer rounded-xl border border-gray-100 bg-transparent"
                     />
                     <input
                       type="text"
                       value={colorB}
                       onChange={(e) => setColorB(e.target.value)}
                       placeholder="#RRGGBB"
-                      className="flex-1 rounded-lg border border-stroke bg-gray-2/60 px-3 py-2 font-mono text-sm dark:border-dark-3 dark:bg-dark-2/80 dark:text-white"
+                      className="flex-1 rounded-xl border border-gray-100 bg-gray-50/50 px-3 py-2 font-mono text-xs font-light text-dark focus:outline-none focus:border-gray-200"
                     />
                   </div>
                 </div>
               </div>
               {!isValidHex(colorA.trim()) || !isValidHex(colorB.trim()) ? (
-                <p className="text-sm text-amber-600 dark:text-amber-400">
+                <p className="text-xs font-light text-amber-600">
                   Usa formato hex #RRGGBB (ej: #D6FF12).
                 </p>
               ) : null}
               {brandingError && (
-                <p className="text-sm text-red-600 dark:text-red-400">{brandingError}</p>
+                <p className="text-xs font-light text-red-600">{brandingError}</p>
               )}
               <button
                 type="submit"
                 disabled={brandingSaving || !isValidHex(colorA.trim()) || !isValidHex(colorB.trim())}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-opacity-90 disabled:opacity-70"
+                className="flex items-center gap-2 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-zelify-midnight/90 active:scale-95 disabled:opacity-50"
               >
                 {brandingSaving ? "Guardando…" : "Guardar branding"}
               </button>
             </form>
-          </ShowcaseSection>
+          </div>
         </>
       )}
     </div>

@@ -411,16 +411,13 @@ export default function TeamsPage() {
     }
   };
 
-  const m = translations.membersManagement;
-
-  return (
+  const m = translations.membersManagement;  return (
     <div className="mx-auto w-full max-w-[1200px]">
       <Breadcrumb pageName={translations.sidebar.menuItems.subItems.teams} />
-
       {canManageMembers && orgId ? (
         <>
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-heading-4 font-semibold text-dark dark:text-white">
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl font-light text-dark">
               {m.tableTitle}
             </h1>
             <button
@@ -430,15 +427,18 @@ export default function TeamsPage() {
                 setAddError("");
                 setAddModalOpen(true);
               }}
-              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-opacity-90"
+              className="flex items-center gap-2 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-zelify-midnight/90 active:scale-95"
             >
+              <svg className="h-4 w-4 text-zelify-green" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
               {m.addMember}
             </button>
           </div>
 
-          <ShowcaseSection title={m.tableTitle} className="!p-6">
+          <div className="rounded-2xl border border-gray-100 bg-white py-5 px-6">
             {membersError && (
-              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-light text-red-600">
                 {membersError}
               </div>
             )}
@@ -459,7 +459,7 @@ export default function TeamsPage() {
               onResetPassword={(u) => setResetUser(u)}
               loading={membersLoading}
             />
-          </ShowcaseSection>
+          </div>
         </>
       ) : canViewMembers ? (
         <>

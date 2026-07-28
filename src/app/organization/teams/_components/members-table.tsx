@@ -77,27 +77,27 @@ export function MembersTable({
     if (user.status === "DISABLED") {
       return {
         label: m.statusDisabled,
-        className: "text-dark-6 dark:text-dark-6",
+        className: "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider bg-gray-100 text-dark-6 border border-gray-200/50",
       };
     }
 
     if (user.must_change_password) {
       return {
         label: m.pendingBadge,
-        className: "text-amber-600 dark:text-amber-400",
+        className: "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-200/40",
       };
     }
 
     if (user.status === "PENDING") {
       return {
         label: m.statusPending,
-        className: "text-amber-600 dark:text-amber-400",
+        className: "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-200/40",
       };
     }
 
     return {
       label: m.statusActive,
-      className: "text-green-600 dark:text-green-400",
+      className: "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider bg-zelify-midnight text-zelify-green",
     };
   };
 
@@ -121,9 +121,7 @@ export function MembersTable({
     setMenuPosition(null);
   };
 
-  const activeUser = items.find((user) => user.id === openActionsId) ?? null;
-
-  return (
+  const activeUser = items.find((user) => user.id === openActionsId) ?? null;  return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <input
@@ -131,12 +129,12 @@ export function MembersTable({
           placeholder={m.searchPlaceholder}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="max-w-xs rounded-lg border border-stroke bg-white px-3 py-2 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+          className="max-w-xs rounded-xl border border-gray-100 bg-gray-50/50 px-3 py-1.5 text-xs font-light text-dark placeholder:text-dark-6 focus:outline-none focus:border-gray-200"
         />
         <select
           value={statusFilter}
           onChange={(e) => onStatusFilterChange(e.target.value as OrgUserStatus | "")}
-          className="rounded-lg border border-stroke bg-white px-3 py-2 text-sm dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+          className="rounded-xl border border-gray-100 bg-gray-50/50 px-3 py-1.5 text-xs font-light text-dark focus:outline-none focus:border-gray-200"
         >
           <option value="">{m.filterStatus}</option>
           <option value="ACTIVE">{m.statusActive}</option>
@@ -145,28 +143,28 @@ export function MembersTable({
         </select>
       </div>
 
-      <div className="relative overflow-visible rounded-xl border border-stroke dark:border-dark-3">
+      <div className="relative overflow-visible border-b border-gray-100">
         <div className="relative overflow-x-auto overflow-y-visible">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-stroke bg-gray-2/60 dark:border-dark-3 dark:bg-dark-2/80">
-              <th className="px-4 py-3 font-medium text-dark dark:text-white">{m.colEmail}</th>
-              <th className="px-4 py-3 font-medium text-dark dark:text-white">{m.colFullName}</th>
-              <th className="px-4 py-3 font-medium text-dark dark:text-white">{m.colTeamRole}</th>
-              <th className="px-4 py-3 font-medium text-dark dark:text-white">{m.colStatus}</th>
-              <th className="w-24 px-4 py-3 font-medium text-dark dark:text-white">{m.colActions}</th>
+            <tr className="border-b border-gray-100">
+              <th className="px-4 py-3 text-xs font-light uppercase tracking-wider text-dark-6">{m.colEmail}</th>
+              <th className="px-4 py-3 text-xs font-light uppercase tracking-wider text-dark-6">{m.colFullName}</th>
+              <th className="px-4 py-3 text-xs font-light uppercase tracking-wider text-dark-6">{m.colTeamRole}</th>
+              <th className="px-4 py-3 text-xs font-light uppercase tracking-wider text-dark-6">{m.colStatus}</th>
+              <th className="w-24 px-4 py-3 text-xs font-light uppercase tracking-wider text-dark-6">{m.colActions}</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">
+                <td colSpan={5} className="px-4 py-8 text-center text-xs font-light text-dark-6">
                   Loading…
                 </td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-dark-6 dark:text-dark-6">
+                <td colSpan={5} className="px-4 py-8 text-center text-xs font-light text-dark-6">
                   {m.noMembers}
                 </td>
               </tr>
@@ -174,12 +172,12 @@ export function MembersTable({
               items.map((user) => (
                 <tr
                   key={user.id}
-                  className="border-b border-stroke dark:border-dark-3 dark:bg-dark-2/40"
+                  className="border-b border-gray-100 transition hover:bg-gray-50/50"
                 >
-                  <td className="px-4 py-3 text-dark dark:text-white">{user.email}</td>
-                  <td className="px-4 py-3 text-dark dark:text-white">{user.full_name}</td>
+                  <td className="px-4 py-3 text-sm font-light text-dark-6">{user.email}</td>
+                  <td className="px-4 py-3 text-sm font-normal text-dark">{user.full_name}</td>
                   <td className="px-4 py-3">
-                    <span className="text-dark dark:text-white">{getRoleDisplay(user)}</span>
+                    <span className="text-sm font-light text-dark-6">{getRoleDisplay(user)}</span>
                   </td>
                   <td className="px-4 py-3">
                     {(() => {
@@ -195,7 +193,7 @@ export function MembersTable({
                     <button
                       type="button"
                       onClick={(event) => toggleActions(user.id, event)}
-                      className="rounded p-1 hover:bg-gray-100 dark:hover:bg-dark-3"
+                      className="rounded-lg p-1 hover:bg-gray-50 transition"
                       aria-label="Actions"
                     >
                       <svg className="h-5 w-5 text-dark-6" fill="currentColor" viewBox="0 0 20 20">
@@ -212,8 +210,8 @@ export function MembersTable({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-dark-6 dark:text-dark-6">
+        <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+          <p className="text-xs font-light text-dark-6">
             Page {page} of {totalPages} ({total} total)
           </p>
           <div className="flex gap-2">
@@ -221,7 +219,7 @@ export function MembersTable({
               type="button"
               disabled={page <= 1}
               onClick={() => onPageChange(page - 1)}
-              className="rounded border border-stroke px-3 py-1.5 text-sm disabled:opacity-50 dark:border-dark-3"
+              className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark-6 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Previous
             </button>
@@ -229,7 +227,7 @@ export function MembersTable({
               type="button"
               disabled={page >= totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="rounded border border-stroke px-3 py-1.5 text-sm disabled:opacity-50 dark:border-dark-3"
+              className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark-6 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>
@@ -242,12 +240,12 @@ export function MembersTable({
             <>
               <div className="fixed inset-0 z-[9998]" aria-hidden onClick={closeActions} />
               <div
-                className="fixed z-[9999] w-48 rounded-lg border border-stroke bg-white py-1 shadow-lg dark:border-dark-3 dark:bg-gray-dark"
+                className="fixed z-[9999] w-48 rounded-xl border border-gray-100 bg-white py-1.5 shadow-xl animate-in fade-in duration-100"
                 style={{ top: menuPosition.top, left: menuPosition.left }}
               >
                 <button
                   type="button"
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                  className="w-full px-4 py-2 text-left text-xs font-light text-dark-6 hover:bg-gray-50 hover:text-dark transition"
                   onClick={() => {
                     onEdit(activeUser);
                     closeActions();
@@ -257,7 +255,7 @@ export function MembersTable({
                 </button>
                 <button
                   type="button"
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                  className="w-full px-4 py-2 text-left text-xs font-light text-dark-6 hover:bg-gray-50 hover:text-dark transition"
                   onClick={() => {
                     onEditRoles(activeUser);
                     closeActions();
@@ -268,7 +266,7 @@ export function MembersTable({
                 {activeUser.status === "ACTIVE" ? (
                   <button
                     type="button"
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                    className="w-full px-4 py-2 text-left text-xs font-light text-dark-6 hover:bg-gray-50 hover:text-dark transition"
                     onClick={() => {
                       onDisable(activeUser);
                       closeActions();
@@ -279,7 +277,7 @@ export function MembersTable({
                 ) : (
                   <button
                     type="button"
-                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                    className="w-full px-4 py-2 text-left text-xs font-light text-dark-6 hover:bg-gray-50 hover:text-dark transition"
                     onClick={() => {
                       onEnable(activeUser);
                       closeActions();
@@ -290,7 +288,7 @@ export function MembersTable({
                 )}
                 <button
                   type="button"
-                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-dark-3"
+                  className="w-full px-4 py-2 text-left text-xs font-light text-dark-6 hover:bg-gray-50 hover:text-dark transition"
                   onClick={() => {
                     onResetPassword(activeUser);
                     closeActions();
