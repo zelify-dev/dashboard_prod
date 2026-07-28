@@ -14,10 +14,10 @@ export default function IssuedCardsPage() {
   return (
     <div className="mx-auto w-full max-w-[1400px]">
       <Breadcrumb pageName={t.pageTitle} />
-      <div className="mt-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-dark dark:text-white">{t.title}</h2>
-          <p className="mt-2 text-sm text-dark-6 dark:text-dark-6">{t.desc}</p>
+      <div className="mt-4">
+        <div className="mb-4">
+          <h2 className="text-2xl font-light text-dark">{t.title}</h2>
+          <p className="mt-1.5 text-xs font-light text-dark-6">{t.desc}</p>
         </div>
         <IssuedCardsTable cards={cards} />
       </div>

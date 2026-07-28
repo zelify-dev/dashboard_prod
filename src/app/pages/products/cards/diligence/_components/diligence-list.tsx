@@ -109,18 +109,18 @@ export function DiligenceList({ diligences, onDiligenceClick }: DiligenceListPro
   };
 
   return (
-    <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5" data-tour-id="tour-cards-diligence-list">
+    <div className="rounded-2xl border border-gray-100 bg-white py-5 px-6" data-tour-id="tour-cards-diligence-list">
       <Table>
         <TableHeader>
-          <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
-            <TableHead className="min-w-[150px] xl:pl-7.5">{t.table.cardholder}</TableHead>
-            <TableHead className="min-w-[120px]">{t.table.card}</TableHead>
-            <TableHead>{t.table.status}</TableHead>
-            <TableHead>{t.table.riskLevel}</TableHead>
-            <TableHead>{t.table.submittedDate}</TableHead>
-            <TableHead>{t.table.reviewedDate}</TableHead>
-            <TableHead>{t.table.reviewer}</TableHead>
-            <TableHead className="text-right xl:pr-7.5">{t.table.documents}</TableHead>
+          <TableRow className="border-b border-gray-100">
+            <TableHead className="min-w-[150px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.cardholder}</TableHead>
+            <TableHead className="min-w-[120px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.card}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.status}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.riskLevel}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.submittedDate}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.reviewedDate}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.reviewer}</TableHead>
+            <TableHead className="text-right text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.documents}</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -128,73 +128,78 @@ export function DiligenceList({ diligences, onDiligenceClick }: DiligenceListPro
           {diligences.map((diligence) => (
             <TableRow
               key={diligence.id}
-              className="cursor-pointer border-[#eee] dark:border-dark-3 hover:bg-gray-50 dark:hover:bg-dark-2"
+              className="cursor-pointer border-b border-gray-100 transition hover:bg-gray-50/50"
               onClick={() => onDiligenceClick(diligence)}
             >
-              <TableCell className="min-w-[150px] xl:pl-7.5">
-                <p className="font-medium text-dark dark:text-white">
+              <TableCell className="min-w-[150px] py-3">
+                <p className="text-sm font-normal text-dark">
                   {diligence.cardholderName}
                 </p>
               </TableCell>
 
-              <TableCell className="min-w-[120px]">
-                <p className="text-dark dark:text-white">{diligence.cardNumber}</p>
+              <TableCell className="min-w-[120px] py-3">
+                <p className="text-sm font-light text-dark-6">{diligence.cardNumber}</p>
               </TableCell>
 
-              <TableCell>
+              <TableCell className="py-3">
                 <div
                   className={cn(
-                    "max-w-fit rounded-full px-3.5 py-1 text-sm font-medium capitalize",
-                    getStatusColor(diligence.status)
+                    "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider",
+                    diligence.status === "approved" ? "bg-zelify-midnight text-zelify-green" :
+                    diligence.status === "in_review" ? "bg-orange-50 text-orange-600 border border-orange-200/40" :
+                    diligence.status === "rejected" ? "bg-red-50 text-red-600 border border-red-200/40" :
+                    "bg-gray-100 text-dark-6 border border-gray-200/50"
                   )}
                 >
                   {t.status[diligence.status] ?? diligence.status}
                 </div>
               </TableCell>
 
-              <TableCell>
+              <TableCell className="py-3">
                 <div
                   className={cn(
-                    "max-w-fit rounded-full px-3.5 py-1 text-sm font-medium capitalize",
-                    getRiskLevelColor(diligence.riskLevel)
+                    "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider",
+                    diligence.riskLevel === "low" ? "bg-zelify-midnight text-zelify-green" :
+                    diligence.riskLevel === "medium" ? "bg-orange-50 text-orange-600 border border-orange-200/40" :
+                    "bg-red-50 text-red-600 border border-red-200/40"
                   )}
                 >
                   {t.risk[diligence.riskLevel]} {t.risk.suffix}
                 </div>
               </TableCell>
 
-              <TableCell>
-                <p className="text-dark dark:text-white">
+              <TableCell className="py-3">
+                <p className="text-xs font-light text-dark">
                   {formatLocalDateOnly(diligence.submittedDate)}
                 </p>
-                <p className="mt-[3px] text-body-sm text-dark-6 dark:text-dark-6">
+                <p className="mt-[3px] text-xs font-light text-dark-6">
                   {formatLocalTimeOnly(diligence.submittedDate)}
                 </p>
               </TableCell>
 
-              <TableCell>
+              <TableCell className="py-3">
                 {diligence.reviewedDate ? (
                   <>
-                    <p className="text-dark dark:text-white">
+                    <p className="text-xs font-light text-dark">
                       {formatLocalDateOnly(diligence.reviewedDate)}
                     </p>
-                    <p className="mt-[3px] text-body-sm text-dark-6 dark:text-dark-6">
+                    <p className="mt-[3px] text-xs font-light text-dark-6">
                       {formatLocalTimeOnly(diligence.reviewedDate)}
                     </p>
                   </>
                 ) : (
-                  <p className="text-dark-6 dark:text-dark-6">-</p>
+                  <p className="text-xs font-light text-dark-6">-</p>
                 )}
               </TableCell>
 
-              <TableCell>
-                <p className="text-dark dark:text-white">
+              <TableCell className="py-3">
+                <p className="text-sm font-light text-dark-6">
                   {diligence.reviewer || "-"}
                 </p>
               </TableCell>
 
-              <TableCell className="text-right xl:pr-7.5">
-                <span className="text-sm text-dark-6 dark:text-dark-6">
+              <TableCell className="text-right py-3">
+                <span className="text-xs font-light text-dark-6">
                   {diligence.documents} {t.filesSuffix}
                 </span>
               </TableCell>

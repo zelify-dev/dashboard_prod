@@ -131,17 +131,17 @@ export function TransactionsTable({ onTransactionClick }: TransactionsTableProps
   };
 
   return (
-    <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+    <div className="rounded-2xl border border-gray-100 bg-white py-5 px-6">
       <Table>
         <TableHeader>
-          <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
-            <TableHead className="min-w-[120px] xl:pl-7.5">{t.table.card}</TableHead>
-            <TableHead className="min-w-[150px]">{t.table.merchant}</TableHead>
-            <TableHead>{t.table.category}</TableHead>
-            <TableHead>{t.table.amount}</TableHead>
-            <TableHead>{t.table.date}</TableHead>
-            <TableHead>{t.table.status}</TableHead>
-            <TableHead className="text-right xl:pr-7.5">{t.table.type}</TableHead>
+          <TableRow className="border-b border-gray-100">
+            <TableHead className="min-w-[120px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.card}</TableHead>
+            <TableHead className="min-w-[150px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.merchant}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.category}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.amount}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.date}</TableHead>
+            <TableHead className="text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.status}</TableHead>
+            <TableHead className="text-right text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.type}</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -149,54 +149,57 @@ export function TransactionsTable({ onTransactionClick }: TransactionsTableProps
           {mockTransactions.map((transaction) => (
             <TableRow
               key={transaction.id}
-              className="cursor-pointer border-[#eee] dark:border-dark-3 hover:bg-gray-50 dark:hover:bg-dark-2"
+              className="cursor-pointer border-b border-gray-100 transition hover:bg-gray-50/50"
               onClick={() => onTransactionClick(transaction)}
             >
-              <TableCell className="min-w-[120px] xl:pl-7.5">
-                <h5 className="text-dark dark:text-white">{transaction.cardNumber}</h5>
-                <p className="mt-[3px] text-body-sm font-medium text-dark-6 dark:text-dark-6">
+              <TableCell className="min-w-[120px] py-3">
+                <h5 className="text-sm font-normal text-dark">{transaction.cardNumber}</h5>
+                <p className="mt-[3px] text-xs font-light text-dark-6">
                   {transaction.cardholderName}
                 </p>
               </TableCell>
 
-              <TableCell className="min-w-[150px]">
-                <p className="text-dark dark:text-white">{transaction.merchant}</p>
+              <TableCell className="min-w-[150px] py-3">
+                <p className="text-sm font-light text-dark-6">{transaction.merchant}</p>
               </TableCell>
 
-              <TableCell>
-                <p className="text-dark-6 dark:text-dark-6">
+              <TableCell className="py-3">
+                <p className="text-xs font-light text-dark-6">
                   {t.categories[transaction.category] ?? transaction.category}
                 </p>
               </TableCell>
 
-              <TableCell>
-                <p className="font-medium text-dark dark:text-white">
+              <TableCell className="py-3">
+                <p className="text-sm font-normal text-dark">
                   {formatAmount(transaction.amount, transaction.currency)}
                 </p>
               </TableCell>
 
-              <TableCell>
-                <p className="text-dark dark:text-white">
+              <TableCell className="py-3">
+                <p className="text-xs font-light text-dark">
                   {formatLocalDateOnly(transaction.date)}
                 </p>
-                <p className="mt-[3px] text-body-sm text-dark-6 dark:text-dark-6">
+                <p className="mt-[3px] text-xs font-light text-dark-6">
                   {formatLocalTimeOnly(transaction.date)}
                 </p>
               </TableCell>
 
-              <TableCell>
+              <TableCell className="py-3">
                 <div
                   className={cn(
-                    "max-w-fit rounded-full px-3.5 py-1 text-sm font-medium capitalize",
-                    getStatusColor(transaction.status)
+                    "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider",
+                    transaction.status === "completed" ? "bg-zelify-midnight text-zelify-green" :
+                    transaction.status === "pending" ? "bg-orange-50 text-orange-600 border border-orange-200/40" :
+                    transaction.status === "declined" ? "bg-red-50 text-red-600 border border-red-200/40" :
+                    "bg-gray-100 text-dark-6 border border-gray-200/50"
                   )}
                 >
                   {t.status[transaction.status] ?? transaction.status}
                 </div>
               </TableCell>
 
-              <TableCell className="text-right xl:pr-7.5">
-                <span className="text-sm capitalize text-dark-6 dark:text-dark-6">
+              <TableCell className="text-right py-3">
+                <span className="text-xs font-light text-dark-6">
                   {t.types[transaction.type] ?? transaction.type}
                 </span>
               </TableCell>

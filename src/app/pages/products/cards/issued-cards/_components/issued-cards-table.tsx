@@ -97,23 +97,23 @@ export function IssuedCardsTable({ cards }: IssuedCardsTableProps) {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[10px] border border-stroke bg-white p-4 shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card sm:p-7.5">
+      <div className="rounded-2xl border border-gray-100 bg-white py-5 px-6">
         <Table>
           <TableHeader>
-            <TableRow className="border-none bg-[#F7F9FC] dark:bg-dark-2 [&>th]:py-4 [&>th]:text-base [&>th]:text-dark [&>th]:dark:text-white">
-              <TableHead className="min-w-[140px] xl:pl-7.5">{t.table.card}</TableHead>
-              <TableHead className="min-w-[160px]">{t.table.user}</TableHead>
-              <TableHead className="min-w-[130px]">{t.table.identification}</TableHead>
-              <TableHead className="min-w-[160px]">{t.table.affinityGroup}</TableHead>
-              <TableHead className="min-w-[110px]">{t.table.createdAt}</TableHead>
-              <TableHead className="min-w-[110px]">{t.table.activation}</TableHead>
-              <TableHead className="min-w-[120px] xl:pr-7.5">{t.table.status}</TableHead>
+            <TableRow className="border-b border-gray-100">
+              <TableHead className="min-w-[140px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.card}</TableHead>
+              <TableHead className="min-w-[160px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.user}</TableHead>
+              <TableHead className="min-w-[130px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.identification}</TableHead>
+              <TableHead className="min-w-[160px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.affinityGroup}</TableHead>
+              <TableHead className="min-w-[110px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.createdAt}</TableHead>
+              <TableHead className="min-w-[110px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.activation}</TableHead>
+              <TableHead className="min-w-[120px] text-xs font-light uppercase tracking-wider text-dark-6 py-3">{t.table.status}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {cards.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-12 text-center text-dark-6 dark:text-dark-6">
+                <TableCell colSpan={7} className="py-12 text-center text-xs font-light text-dark-6">
                   {t.table.noData}
                 </TableCell>
               </TableRow>
@@ -121,35 +121,37 @@ export function IssuedCardsTable({ cards }: IssuedCardsTableProps) {
             {pageItems.map((row) => (
               <TableRow
                 key={row.id}
-                className="border-[#eee] dark:border-dark-3 hover:bg-gray-50 dark:hover:bg-dark-2"
+                className="border-b border-gray-100 transition hover:bg-gray-50/50"
               >
-                <TableCell className="align-top xl:pl-7.5">
-                  <p className="font-medium tracking-wide text-dark dark:text-white">•••• {row.lastFour}</p>
-                  <p className="mt-1 text-body-sm text-dark-6 dark:text-dark-6">{row.productSummary}</p>
+                <TableCell className="align-top py-3">
+                  <p className="font-normal text-dark">•••• {row.lastFour}</p>
+                  <p className="mt-1 text-xs font-light text-dark-6">{row.productSummary}</p>
                 </TableCell>
-                <TableCell className="align-top">
-                  <p className="text-dark dark:text-white">{row.userName}</p>
+                <TableCell className="align-top py-3">
+                  <p className="text-sm font-light text-dark-6">{row.userName}</p>
                 </TableCell>
-                <TableCell className="align-top">
-                  <p className="text-dark dark:text-white">{row.idNumber}</p>
-                  <p className="mt-1 text-body-sm font-medium text-dark-6 dark:text-dark-6">{row.idDocType}</p>
+                <TableCell className="align-top py-3">
+                  <p className="text-sm font-normal text-dark">{row.idNumber}</p>
+                  <p className="mt-1 text-xs font-light text-dark-6">{row.idDocType}</p>
                 </TableCell>
-                <TableCell className="align-top">
-                  <p className="text-dark dark:text-white">{row.affinityGroup}</p>
+                <TableCell className="align-top py-3">
+                  <p className="text-sm font-light text-dark-6">{row.affinityGroup}</p>
                 </TableCell>
-                <TableCell className="align-top">
-                  <p className="text-dark dark:text-white">{formatDayMonthYear(row.createdAt)}</p>
+                <TableCell className="align-top py-3">
+                  <p className="text-xs font-light text-dark-6">{formatDayMonthYear(row.createdAt)}</p>
                 </TableCell>
-                <TableCell className="align-top">
-                  <p className="text-dark dark:text-white">
+                <TableCell className="align-top py-3">
+                  <p className="text-xs font-light text-dark-6">
                     {row.activationAt ? formatDayMonthYear(row.activationAt) : t.activationNone}
                   </p>
                 </TableCell>
-                <TableCell className="align-top xl:pr-7.5">
+                <TableCell className="align-top py-3">
                   <div
                     className={cn(
-                      "max-w-fit rounded-full px-3.5 py-1 text-sm font-medium",
-                      statusBadgeClass(row.status)
+                      "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider",
+                      row.status === "enabled"
+                        ? "bg-zelify-midnight text-zelify-green"
+                        : "bg-gray-100 text-dark-6 border border-gray-200/50"
                     )}
                   >
                     {t.cardStatus[row.status]}
@@ -162,35 +164,22 @@ export function IssuedCardsTable({ cards }: IssuedCardsTableProps) {
       </div>
 
       {cards.length > 0 ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 px-1 sm:px-7.5">
-          <p className="text-sm text-dark-6 dark:text-dark-6">{t.pagination.pageOf(safePage, totalPages)}</p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-3">
+          <p className="text-xs font-light text-dark-6">{t.pagination.pageOf(safePage, totalPages)}</p>
           <div className="flex items-center gap-2">
             <button
               type="button"
               disabled={safePage <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className={cn(
-                "rounded-lg border border-stroke px-3 py-1.5 text-sm font-medium transition dark:border-dark-3",
-                safePage <= 1
-                  ? "cursor-not-allowed opacity-50"
-                  : "text-dark hover:bg-gray-50 dark:text-white dark:hover:bg-dark-2"
-              )}
+              className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark-6 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t.pagination.previous}
             </button>
-            <span className="flex h-9 min-w-[2.25rem] items-center justify-center rounded-lg bg-[#F7F9FC] text-sm font-semibold text-dark dark:bg-dark-2 dark:text-white">
-              {safePage}
-            </span>
             <button
               type="button"
               disabled={safePage >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className={cn(
-                "rounded-lg border border-stroke px-3 py-1.5 text-sm font-medium transition dark:border-dark-3",
-                safePage >= totalPages
-                  ? "cursor-not-allowed opacity-50"
-                  : "text-dark hover:bg-gray-50 dark:text-white dark:hover:bg-dark-2"
-              )}
+              className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark-6 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {t.pagination.next}
             </button>

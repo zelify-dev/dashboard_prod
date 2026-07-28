@@ -32,28 +32,16 @@ export default function CardsDiligencePage() {
   return (
     <div className="mx-auto w-full max-w-[1400px]">
       <Breadcrumb pageName={t.pageTitle} />
-      <div className="mt-6">
-        <div className="mb-6 flex items-center justify-end">
+      <div className="mt-4">
+        <div className="mb-4 flex items-center justify-end">
           <button
             onClick={handleCreateNew}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90"
+            className="flex items-center gap-2 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-zelify-midnight/90 active:scale-95"
           >
-            <span className="flex items-center gap-2">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              {t.newButton}
-            </span>
+            <svg className="h-4 w-4 text-zelify-green" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            {t.newButton}
           </button>
         </div>
         <DiligenceList
