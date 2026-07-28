@@ -15,7 +15,7 @@ export function ZelifyKeysPageContent() {
       <div className="mx-auto w-full max-w-[1080px]">
       <Breadcrumb pageName={translations.breadcrumb} />
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-[26px] font-bold leading-[30px] text-dark dark:text-white">
+        <h2 className="text-2xl font-light text-dark">
           {translations.pageTitle}
         </h2>
       </div>

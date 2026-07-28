@@ -142,20 +142,20 @@ function ZelifySecretsSandboxContent() {
 
   if (loading && keys.length === 0) {
     return (
-      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">
-        <p className="text-dark-6 dark:text-dark-6">{translations.zelifySecrets.loading}</p>
+      <div className="rounded-2xl border border-gray-100 bg-white p-6">
+        <p className="text-xs font-light text-dark-6">{translations.zelifySecrets.loading}</p>
       </div>
     );
   }
 
   if (error && keys.length === 0) {
     return (
-      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">
-        <p className="mb-4 text-red-600 dark:text-red-400">{error}</p>
+      <div className="rounded-2xl border border-gray-100 bg-white p-6">
+        <p className="mb-4 text-xs font-light text-red-600">{error}</p>
         <button
           type="button"
           onClick={() => fetchKeys()}
-          className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+          className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50"
         >
           {translations.zelifySecrets.retry}
         </button>
@@ -165,16 +165,16 @@ function ZelifySecretsSandboxContent() {
 
   if (keys.length === 0) {
     return (
-      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">
-        <h3 className="text-lg font-semibold text-dark dark:text-white">
+      <div className="rounded-2xl border border-gray-100 bg-white p-6">
+        <h3 className="text-sm font-normal text-dark">
           {translations.zelifySecrets.title}
         </h3>
-        <p className="mt-2 text-dark-6 dark:text-dark-6">{translations.zelifySecrets.noKeys}</p>
+        <p className="mt-2 text-xs font-light text-dark-6">{translations.zelifySecrets.noKeys}</p>
         <button
           type="button"
           onClick={confirmRotate}
           disabled={rotating}
-          className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-50"
+          className="mt-4 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-zelify-midnight/90 active:scale-95 disabled:opacity-50"
         >
           {rotating ? translations.zelifySecrets.loading : translations.zelifySecrets.generateKey}
         </button>
@@ -186,46 +186,44 @@ function ZelifySecretsSandboxContent() {
   const displaySecret = showSecret && revealedSecret ? revealedSecret : MASKED_PLACEHOLDER;
 
   return (
-    <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-            <svg
-              className="h-6 w-6 text-blue-600 dark:text-blue-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-              />
-            </svg>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-dark dark:text-white">
-              {translations.zelifySecrets.title}
-            </h3>
-            <p className="text-sm text-dark-6 dark:text-dark-6">{translations.zelifySecrets.sandbox}</p>
-          </div>
-        </div>
-        <button
-          onClick={() => setShowRotateConfirm(true)}
-          disabled={rotating}
-          className="flex items-center gap-2 rounded-lg border border-stroke bg-white px-3 py-1.5 text-sm font-medium text-dark transition hover:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3 disabled:opacity-50"
-        >
+    <div className="rounded-2xl border border-gray-100 bg-white p-6">
+      <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
+        <div className="flex items-center gap-2">
           <svg
-            className="h-4 w-4"
+            className="h-4 w-4 text-dark-6"
             fill="none"
             stroke="currentColor"
+            strokeWidth={1.5}
             viewBox="0 0 24 24"
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+            />
+          </svg>
+          <div>
+            <h3 className="text-sm font-normal text-dark">
+              {translations.zelifySecrets.title}
+            </h3>
+            <p className="text-xs font-light text-dark-6">{translations.zelifySecrets.sandbox}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowRotateConfirm(true)}
+          disabled={rotating}
+          className="flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
+        >
+          <svg
+            className="h-3.5 w-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
             />
           </svg>
@@ -234,37 +232,37 @@ function ZelifySecretsSandboxContent() {
       </div>
 
       {error && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-light text-red-600">
           {error}
         </div>
       )}
 
       {successMessage && (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200">
+        <div className="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-xs font-light text-green-700">
           {successMessage}
         </div>
       )}
 
       {showRotateConfirm && (
-        <div className="mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
-          <p className="mb-2 text-sm font-medium text-dark dark:text-white">
+        <div className="mb-4 rounded-xl border border-yellow-200 bg-yellow-50/50 p-4">
+          <p className="mb-1 text-sm font-normal text-dark">
             {translations.zelifySecrets.rotateConfirm.title}
           </p>
-          <p className="mb-3 text-xs text-dark-6 dark:text-dark-6">
+          <p className="mb-3 text-xs font-light text-dark-6">
             {translations.zelifySecrets.rotateWarning}
           </p>
           <div className="flex gap-2">
             <button
               onClick={confirmRotate}
               disabled={rotating}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-50"
+              className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-zelify-midnight/90 active:scale-95 disabled:opacity-50"
             >
               {rotating ? translations.zelifySecrets.loading : translations.zelifySecrets.rotateConfirm.yesRotate}
             </button>
             <button
               onClick={() => setShowRotateConfirm(false)}
               disabled={rotating}
-              className="rounded-lg border border-stroke bg-white px-4 py-2 text-sm font-medium text-dark transition hover:bg-gray-2 dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:hover:bg-dark-3"
+              className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95"
             >
               {translations.zelifySecrets.rotateConfirm.cancel}
             </button>
@@ -274,7 +272,7 @@ function ZelifySecretsSandboxContent() {
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
+          <label className="mb-1.5 block text-[10px] font-light uppercase tracking-wider text-dark-6">
             {translations.zelifySecrets.keyName}
           </label>
           <div className="relative">
@@ -282,20 +280,20 @@ function ZelifySecretsSandboxContent() {
               type="text"
               value={displayKeyName}
               readOnly
-              className="w-full rounded-lg border border-stroke bg-gray-2 px-4 py-3 pr-12 text-sm text-dark outline-none dark:border-dark-3 dark:bg-dark dark:text-white"
+              className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 pr-12 text-sm font-light text-dark outline-none"
             />
             <button
               onClick={handleCopyName}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-dark-6 transition hover:bg-gray-50 hover:text-dark"
               aria-label={translations.zelifySecrets.copyToClipboard}
             >
               {copiedName ? (
-                <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               )}
             </button>
@@ -303,7 +301,7 @@ function ZelifySecretsSandboxContent() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark dark:text-white">
+          <label className="mb-1.5 block text-[10px] font-light uppercase tracking-wider text-dark-6">
             {translations.zelifySecrets.secretKey}
           </label>
           <div className="relative">
@@ -311,42 +309,42 @@ function ZelifySecretsSandboxContent() {
               type={showSecret ? "text" : "password"}
               value={displaySecret}
               readOnly
-              className="w-full rounded-lg border border-stroke bg-gray-2 px-4 py-3 pr-24 text-sm text-dark outline-none dark:border-dark-3 dark:bg-dark dark:text-white"
+              className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 pr-24 text-sm font-light text-dark outline-none"
             />
             <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
               <button
                 onClick={handleToggleSecret}
                 disabled={revealingSecret}
-                className="text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white disabled:opacity-50"
+                className="rounded-lg p-1 text-dark-6 transition hover:bg-gray-50 hover:text-dark disabled:opacity-50"
                 aria-label={showSecret ? translations.zelifySecrets.hide : translations.zelifySecrets.show}
               >
                 {revealingSecret ? (
-                  <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-zelify-green border-t-transparent" />
                 ) : showSecret ? (
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                   </svg>
                 ) : (
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 )}
               </button>
               <button
                 onClick={handleCopySecret}
                 disabled={!revealedSecret}
-                className="text-dark-6 hover:text-dark dark:text-dark-6 dark:hover:text-white disabled:opacity-50"
+                className="rounded-lg p-1 text-dark-6 transition hover:bg-gray-50 hover:text-dark disabled:opacity-50"
                 aria-label={translations.zelifySecrets.copyToClipboard}
                 title={!revealedSecret ? translations.zelifySecrets.revealToCopy : undefined}
               >
                 {copiedSecret ? (
-                  <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 ) : (
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                 )}
               </button>
@@ -354,7 +352,7 @@ function ZelifySecretsSandboxContent() {
           </div>
         </div>
 
-        <div className="space-y-2 text-sm text-dark-6 dark:text-dark-6">
+        <div className="space-y-2 text-xs font-light text-dark-6 mt-4">
           <p>
             {translations.zelifySecrets.issuedOn}{" "}
             {currentKey?.created_at ? formatIssuedDate(currentKey.created_at, locale) : "—"}
