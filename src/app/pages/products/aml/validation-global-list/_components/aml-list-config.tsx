@@ -108,8 +108,37 @@ export function AMLListConfig({
   const [showNoGroupModal, setShowNoGroupModal] = useState(false);
 
   const getJurisdictionIcon = (countryCode: string) => {
-    if (!countryCode || countryCode === "ND") return "[ND]";
-    return `[${countryCode.toUpperCase()}]`;
+    const code = countryCode?.toUpperCase() || "ND";
+    if (code === "ND") {
+      return (
+        <span className="text-[10px] font-light text-dark-6">[ND]</span>
+      );
+    }
+    if (code === "INT" || code === "GL") {
+      return (
+        <svg className="h-5 w-5 text-dark-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      );
+    }
+    if (code === "EU") {
+      return (
+        <svg className="h-5 w-5 text-dark-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7l1 2.5h2.5l-2 1.5l1 2.5l-2.5-2l-2.5 2l1-2.5l-2-1.5h2.5z" fill="currentColor" />
+        </svg>
+      );
+    }
+    return (
+      <img
+        src={`https://flagcdn.com/w40/${code.toLowerCase()}.png`}
+        alt={code}
+        className="w-5 h-3.5 object-cover rounded-sm border border-gray-100"
+        onError={(e) => {
+          (e.target as HTMLElement).style.display = 'none';
+        }}
+      />
+    );
   };
 
   const handleCreateGroup = async () => {

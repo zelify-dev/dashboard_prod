@@ -95,35 +95,29 @@ interface WorkflowsListProps {
 
 function VerificationIcons({ verification }: { verification: Workflow["verification"] }) {
   return (
-    <div className="flex items-center gap-4">
-      {/* Approved - Green */}
-      <div className="flex flex-col items-center gap-1">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-          <svg className="h-3.5 w-3.5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span className="text-xs font-medium text-green-600 dark:text-green-400">{verification.approved}</span>
+    <div className="flex items-center gap-3">
+      {/* Approved */}
+      <div className="flex items-center gap-1.5 rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-1">
+        <svg className="h-3.5 w-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+        <span className="text-[11px] font-light text-dark">{verification.approved}</span>
       </div>
       
-      {/* Pending - Orange */}
-      <div className="flex flex-col items-center gap-1">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/20">
-          <svg className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <span className="text-xs font-medium text-orange-600 dark:text-orange-400">{verification.pending}</span>
+      {/* Pending */}
+      <div className="flex items-center gap-1.5 rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-1">
+        <svg className="h-3.5 w-3.5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span className="text-[11px] font-light text-dark">{verification.pending}</span>
       </div>
       
-      {/* Rejected - Red */}
-      <div className="flex flex-col items-center gap-1">
-        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
-          <svg className="h-3.5 w-3.5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </div>
-        <span className="text-xs font-medium text-red-600 dark:text-red-400">{verification.rejected}</span>
+      {/* Rejected */}
+      <div className="flex items-center gap-1.5 rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-1">
+        <svg className="h-3.5 w-3.5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span className="text-[11px] font-light text-dark">{verification.rejected}</span>
       </div>
     </div>
   );
@@ -178,14 +172,14 @@ export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListPr
 
   const getStatusBadge = (status: Workflow["status"]) => {
     const styles = {
-      active: "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
-      inactive: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400",
-      draft: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+      active: "bg-zelify-midnight text-zelify-green",
+      inactive: "bg-gray-100 text-dark-6 border border-gray-200/50",
+      draft: "bg-orange-50 text-orange-600 border border-orange-200/40",
     };
 
     return (
       <span
-        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${styles[status]}`}
+        className={`inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider ${styles[status]}`}
       >
         {listTexts.statusLabels[status]}
       </span>
@@ -193,20 +187,20 @@ export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListPr
   };
 
   return (
-    <div className="mt-6">
-      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="mt-4">
+      <div className="rounded-2xl border border-gray-100 bg-white py-5 px-6">
+        <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-dark dark:text-white">{listTexts.title}</h2>
-            <p className="text-sm text-dark-6 dark:text-dark-6">{listTexts.subtitle}</p>
+            <h2 className="text-xl font-light text-dark">{listTexts.title}</h2>
+            <p className="text-xs font-light text-dark-6">{listTexts.subtitle}</p>
           </div>
           <button
             onClick={onCreateNew}
             data-tour-id="tour-identity-new-workflow-button"
-            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+            className="flex items-center gap-2 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-zelify-midnight/90 active:scale-95"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            <svg className="h-4 w-4 text-zelify-green" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             {listTexts.newButton}
           </button>
@@ -214,32 +208,32 @@ export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListPr
 
         <div className="overflow-x-auto">
           {orgLoading ? (
-            <p className="px-4 py-8 text-center text-sm text-dark-6 dark:text-dark-6">
-              Loading…
+            <p className="px-4 py-8 text-center text-xs font-light text-dark-6">
+              Cargando...
             </p>
           ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-stroke dark:border-dark-3">
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">
+              <tr className="border-b border-gray-100">
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">
                   {listTexts.tableHeaders.name}
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">
                   {listTexts.tableHeaders.country}
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">
                   {listTexts.tableHeaders.status}
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">
                   {listTexts.tableHeaders.verification}
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">
                   {listTexts.tableHeaders.created}
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">
+                <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">
                   {listTexts.tableHeaders.updated}
                 </th>
-                <th className="px-4 py-3 text-right text-sm font-semibold text-dark dark:text-white">
+                <th className="px-4 py-3 text-right text-xs font-light uppercase tracking-wider text-dark-6">
                   {listTexts.tableHeaders.actions}
                 </th>
               </tr>
@@ -247,7 +241,7 @@ export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListPr
             <tbody>
               {workflows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-dark-6 dark:text-dark-6">
+                  <td colSpan={7} className="px-4 py-8 text-center text-xs font-light text-dark-6">
                     {listTexts.emptyState}
                   </td>
                 </tr>
@@ -256,23 +250,23 @@ export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListPr
                   <tr
                     key={workflow.id}
                     onClick={() => onSelectWorkflow(workflow.id)}
-                    className="cursor-pointer border-b border-stroke transition hover:bg-gray-50 dark:border-dark-3 dark:hover:bg-dark-3"
+                    className="cursor-pointer border-b border-gray-100 transition hover:bg-gray-50/50"
                   >
                     <td className="px-4 py-3">
-                      <p className="text-sm font-medium text-dark dark:text-white">{workflow.name}</p>
+                      <p className="text-sm font-normal text-dark">{workflow.name}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-sm text-dark-6 dark:text-dark-6">{workflow.country}</p>
+                      <p className="text-xs font-light text-dark-6">{workflow.country}</p>
                     </td>
                     <td className="px-4 py-3">{getStatusBadge(workflow.status)}</td>
                     <td className="px-4 py-3">
                       <VerificationIcons verification={workflow.verification} />
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-sm text-dark-6 dark:text-dark-6">{workflow.createdAt}</p>
+                      <p className="text-xs font-light text-dark-6">{workflow.createdAt}</p>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="text-sm text-dark-6 dark:text-dark-6">{workflow.updatedAt}</p>
+                      <p className="text-xs font-light text-dark-6">{workflow.updatedAt}</p>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
@@ -280,7 +274,7 @@ export function WorkflowsList({ onSelectWorkflow, onCreateNew }: WorkflowsListPr
                           e.stopPropagation();
                           onSelectWorkflow(workflow.id);
                         }}
-                        className="rounded-lg px-3 py-1.5 text-sm font-medium text-primary transition hover:bg-primary/10"
+                        className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-xs font-light text-dark-6 transition hover:bg-gray-50 hover:text-dark"
                       >
                         Edit
                       </button>

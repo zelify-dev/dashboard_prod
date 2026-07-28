@@ -78,12 +78,12 @@ export function IdentityUsersAndStats() {
   if (!canSee || !org?.id) return null;
 
   return (
-    <div className="mt-8">
-      <div className="rounded-lg bg-white p-6 shadow-sm dark:bg-dark-2">
+    <div className="mt-4">
+      <div className="rounded-2xl border border-gray-100 bg-white py-5 px-6">
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-xl font-bold text-dark dark:text-white">{usersT.title}</h2>
-            <p className="text-sm text-dark-6 dark:text-dark-6">{usersT.subtitle}</p>
+            <h2 className="text-xl font-light text-dark">{usersT.title}</h2>
+            <p className="text-xs font-light text-dark-6">{usersT.subtitle}</p>
           </div>
           <div className="w-full sm:w-72">
             <label htmlFor="app-users-search" className="sr-only">
@@ -91,8 +91,8 @@ export function IdentityUsersAndStats() {
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-6">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </span>
               <input
@@ -101,76 +101,77 @@ export function IdentityUsersAndStats() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder={usersT.searchPlaceholder}
-                className="w-full rounded-lg border border-stroke bg-gray-2/60 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary dark:border-dark-3 dark:bg-dark-2/80 dark:text-white dark:focus:border-primary"
+                className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-3 text-xs font-light text-dark outline-none transition focus:border-zelify-midnight"
               />
             </div>
           </div>
         </div>
         {usersLoading ? (
-          <p className="py-4 text-sm text-dark-6 dark:text-dark-6">Cargando…</p>
+          <p className="py-4 text-xs font-light text-dark-6">Cargando...</p>
         ) : usersError ? (
-          <p className="py-4 text-sm text-red-600 dark:text-red-400">{usersError}</p>
+          <p className="py-4 text-xs font-light text-red-600">{usersError}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-stroke dark:border-dark-3">
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">{usersT.email}</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">{usersT.fullName}</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">{usersT.status}</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">{usersT.verificationStatus}</th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-dark dark:text-white">{usersT.verifiedAt}</th>
+                <tr className="border-b border-gray-100">
+                  <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{usersT.email}</th>
+                  <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{usersT.fullName}</th>
+                  <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{usersT.status}</th>
+                  <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{usersT.verificationStatus}</th>
+                  <th className="px-4 py-3 text-left text-xs font-light uppercase tracking-wider text-dark-6">{usersT.verifiedAt}</th>
                 </tr>
               </thead>
               <tbody>
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-sm text-dark-6 dark:text-dark-6">
+                    <td colSpan={5} className="px-4 py-8 text-center text-xs font-light text-dark-6">
                       {usersT.emptyState}
                     </td>
                   </tr>
                 ) : (
-                  users.map((u) => (
-                    <tr
-                      key={u.id}
-                      onClick={() => handleRowClick(u.id)}
-                      className="group cursor-pointer border-b border-stroke transition hover:bg-gray-2 dark:border-dark-3 dark:hover:bg-dark-3/50"
-                    >
-                      <td className="px-4 py-3 text-sm text-dark dark:text-white">{u.email}</td>
-                      <td className="px-4 py-3 text-sm text-dark dark:text-white">{u.full_name || "—"}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={
-                            u.status === "ACTIVE"
-                              ? "inline-flex rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400"
-                              : "inline-flex rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-400"
-                          }
-                        >
-                          {u.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        {u.identity_verified ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                            {usersT.verified}
+                  users.map((u) => {
+                    const statusStyle = u.status === "ACTIVE"
+                      ? "bg-zelify-midnight text-zelify-green"
+                      : "bg-gray-100 text-dark-6 border border-gray-200/50";
+                    return (
+                      <tr
+                        key={u.id}
+                        onClick={() => handleRowClick(u.id)}
+                        className="group cursor-pointer border-b border-gray-100 transition hover:bg-gray-50/50"
+                      >
+                        <td className="px-4 py-3 text-sm font-normal text-dark">{u.email}</td>
+                        <td className="px-4 py-3 text-sm font-light text-dark-6">{u.full_name || "—"}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider ${statusStyle}`}
+                          >
+                            {u.status}
                           </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
-                            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {usersT.pending}
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-dark-6 dark:text-dark-6">
-                        {u.identity_verified_at ? formatLocalDateOnly(u.identity_verified_at) : "—"}
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="px-4 py-3">
+                          {u.identity_verified ? (
+                            <span className="inline-flex items-center gap-1 rounded-lg bg-zelify-midnight px-2.5 py-1 text-[10px] font-light uppercase tracking-wider text-zelify-green">
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                              {usersT.verified}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-lg bg-gray-100 border border-gray-200/50 px-2.5 py-1 text-[10px] font-light uppercase tracking-wider text-dark-6">
+                              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              {usersT.pending}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-xs font-light text-dark-6">
+                          {u.identity_verified_at ? formatLocalDateOnly(u.identity_verified_at) : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -178,8 +179,8 @@ export function IdentityUsersAndStats() {
         )}
         {/* Paginación: siempre visible cuando hay datos o total > 0 */}
         {(usersTotal > 0 || users.length > 0) && (
-          <div className="mt-3 flex flex-col gap-3 border-t border-stroke pt-3 dark:border-dark-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-dark-6 dark:text-dark-6">
+          <div className="mt-3 flex flex-col gap-3 border-t border-gray-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs font-light text-dark-6">
               {usersT.showing}{" "}
               {usersTotal === 0 ? 0 : (usersPage - 1) * PAGE_SIZE + 1}–
               {Math.min(usersPage * PAGE_SIZE, usersTotal)} {usersT.pageOf} {usersTotal}
@@ -189,7 +190,7 @@ export function IdentityUsersAndStats() {
                 type="button"
                 disabled={usersPage <= 1 || usersLoading}
                 onClick={() => setUsersPage((p) => p - 1)}
-                className="rounded-lg border border-stroke px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 dark:border-dark-3 hover:bg-gray-2 dark:hover:bg-dark-3"
+                className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark-6 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {usersT.previous}
               </button>
@@ -197,7 +198,7 @@ export function IdentityUsersAndStats() {
                 type="button"
                 disabled={usersPage * PAGE_SIZE >= usersTotal || usersLoading}
                 onClick={() => setUsersPage((p) => p + 1)}
-                className="rounded-lg border border-stroke px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 dark:border-dark-3 hover:bg-gray-2 dark:hover:bg-dark-3"
+                className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark-6 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {usersT.next}
               </button>
