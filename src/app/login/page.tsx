@@ -99,10 +99,10 @@ const COLORS = {
   rightPanelBorderDark: "#1e293b",
 
   // Button colors
-  buttonPrimaryLight: "#004195", // Zelify Midnight Blue
-  buttonPrimaryLightHover: "#003375",
-  buttonPrimaryDark: "#004195",
-  buttonPrimaryDarkHover: "#003375",
+  buttonPrimaryLight: "#000016", // Zelify Midnight
+  buttonPrimaryLightHover: "#000000",
+  buttonPrimaryDark: "#000016",
+  buttonPrimaryDarkHover: "#000000",
 
   // Error colors
   errorBorder: "#dd2f2c",

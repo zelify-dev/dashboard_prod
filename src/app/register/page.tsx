@@ -324,7 +324,7 @@ export default function RegisterPage() {
                     </div>
                   )}
 
-                  <p className="mb-4 text-[10px] font-normal uppercase tracking-wider text-primary">
+                  <p className="mb-4 text-[10px] font-normal uppercase tracking-wider text-dark dark:text-white">
                     {t.sectionOrganization}
                   </p>
                   <div className="mb-4 grid gap-4 sm:grid-cols-2">
@@ -434,7 +434,7 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <p className="mb-4 text-[10px] font-normal uppercase tracking-wider text-primary">
+                  <p className="mb-4 text-[10px] font-normal uppercase tracking-wider text-dark dark:text-white">
                     {t.sectionYourDetails}
                   </p>
                   <div className="mb-4">
