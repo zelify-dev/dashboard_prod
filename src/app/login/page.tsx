@@ -589,10 +589,10 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <h1 className="mb-2 text-center text-2xl font-bold text-dark dark:text-white sm:text-heading-3">
+                <h1 className="mb-1 text-center text-xl font-normal text-dark dark:text-white">
                   {step === 1 ? t.welcome : t.otpTitle}
                 </h1>
-                <p className="mb-8 text-center text-sm text-dark-6 dark:text-dark-6">
+                <p className="mb-6 text-center text-xs font-light text-dark-6 dark:text-dark-6">
                   {step === 1 ? t.subWelcome : t.otpSub}
                 </p>
 
@@ -600,12 +600,10 @@ export default function LoginPage() {
                   {/* Mensaje de error */}
                   {error && (
                     <div
-                      className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/20"
+                      className="mb-4 rounded-xl border border-red-100 bg-red-50/40 p-3 text-xs text-red-600"
                       style={{
-                        borderColor: isDarkMode
-                          ? COLORS.errorBorder
-                          : undefined,
-                        color: isDarkMode ? COLORS.errorBorder : undefined,
+                        borderColor: isDarkMode ? "rgba(239, 68, 68, 0.2)" : undefined,
+                        color: isDarkMode ? "#ef4444" : undefined,
                       }}
                     >
                       {error}
@@ -614,107 +612,130 @@ export default function LoginPage() {
 
                   {step === 1 ? (
                     <>
-                      <InputGroup
-                        type="email"
-                        label={t.email}
-                        className={`mb-4 [&_input]:py-[15px] ${
-                          formErrors.email
-                            ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
-                            : ""
-                        }`}
-                        placeholder={t.placeholderEmail}
-                        name="email"
-                        handleChange={handleChange}
-                        value={data.email}
-                        icon={<EmailIcon />}
-                        required
-                      />
-                      {formErrors.email && (
-                        <p className="mb-4 mt-[-10px] text-sm text-red-500">
-                          {formErrors.email}
-                        </p>
-                      )}
+                      <div className="mb-4">
+                        <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                          {t.email}
+                          <span className="ml-1 text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="email"
+                            placeholder={t.placeholderEmail}
+                            name="email"
+                            onChange={handleChange}
+                            value={data.email}
+                            required
+                            className={`w-full rounded-xl border bg-gray-50/50 pl-4 pr-10 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                              formErrors.email ? "border-red-500 focus:border-red-500" : "border-gray-100"
+                            }`}
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-6 pointer-events-none">
+                            <EmailIcon />
+                          </span>
+                        </div>
+                        {formErrors.email && (
+                          <p className="mt-1 text-[11px] text-red-500 font-light">
+                            {formErrors.email}
+                          </p>
+                        )}
+                      </div>
 
-                      <InputGroup
-                        type={showPassword ? "text" : "password"}
-                        label={t.password}
-                        className={`mb-5 [&_input]:py-[15px] ${
-                          formErrors.password
-                            ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
-                            : ""
-                        }`}
-                        placeholder={t.placeholderPassword}
-                        name="password"
-                        handleChange={handleChange}
-                        value={data.password}
-                        icon={<PasswordIcon />}
-                        iconPosition="left"
-                        endAdornment={
+                      <div className="mb-5">
+                        <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                          {t.password}
+                          <span className="ml-1 text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder={t.placeholderPassword}
+                            name="password"
+                            onChange={handleChange}
+                            value={data.password}
+                            required
+                            className={`w-full rounded-xl border bg-gray-50/50 pl-4 pr-16 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                              formErrors.password ? "border-red-500 focus:border-red-500" : "border-gray-100"
+                            }`}
+                          />
+                          <span className="absolute right-12 top-1/2 -translate-y-1/2 text-dark-6 pointer-events-none">
+                            <PasswordIcon />
+                          </span>
                           <button
                             type="button"
                             aria-label={showPassword ? t.hidePasswordAria : t.showPasswordAria}
-                            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-md text-dark-5 outline-none transition hover:bg-gray-100 hover:text-dark dark:hover:bg-white/10 dark:hover:text-white"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-dark-5 outline-none transition hover:bg-gray-100 dark:hover:bg-white/10"
                             onClick={() => setShowPassword((v) => !v)}
                           >
                             {showPassword ? (
-                              <EyeClosedIcon className="opacity-90" />
+                              <EyeClosedIcon className="opacity-80" />
                             ) : (
-                              <EyeOpenIcon className="opacity-90" />
+                              <EyeOpenIcon className="opacity-80" />
                             )}
                           </button>
-                        }
-                        required
-                      />
-                      {formErrors.password && (
-                        <p className="mb-5 mt-[-15px] text-sm text-red-500">
-                          {formErrors.password}
-                        </p>
-                      )}
+                        </div>
+                        {formErrors.password && (
+                          <p className="mt-1 text-[11px] text-red-500 font-light">
+                            {formErrors.password}
+                          </p>
+                        )}
+                      </div>
 
                       {requiresOrganizationId && (
                         <>
-                          <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+                          <div className="mb-4 rounded-xl border border-amber-100 bg-amber-50/50 p-3 text-xs text-amber-700">
                             {t.organizationIdHelp}
                           </div>
-                          <InputGroup
-                            type="text"
-                            label={t.organizationId}
-                            className={`mb-4 [&_input]:py-[15px] ${
-                              formErrors.organization_id
-                                ? "[&_input]:border-red-500 focus:[&_input]:border-red-500"
-                                : ""
-                            }`}
-                            placeholder={t.organizationIdPlaceholder}
-                            name="organization_id"
-                            handleChange={handleChange}
-                            value={data.organization_id}
-                            required
-                          />
-                          {formErrors.organization_id && (
-                            <p className="mb-4 mt-[-10px] text-sm text-red-500">
-                              {formErrors.organization_id}
-                            </p>
-                          )}
+                          <div className="mb-4">
+                            <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                              {t.organizationId}
+                              <span className="ml-1 text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              placeholder={t.organizationIdPlaceholder}
+                              name="organization_id"
+                              onChange={handleChange}
+                              value={data.organization_id}
+                              required
+                              className={`w-full rounded-xl border bg-gray-50/50 px-4 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                                formErrors.organization_id ? "border-red-500 focus:border-red-500" : "border-gray-100"
+                              }`}
+                            />
+                            {formErrors.organization_id && (
+                              <p className="mt-1 text-[11px] text-red-500 font-light">
+                                {formErrors.organization_id}
+                              </p>
+                            )}
+                          </div>
                         </>
                       )}
                     </>
                   ) : (
                     <>
-                      <InputGroup
-                        type="text"
-                        label={t.otpLabel}
-                        className={`mb-5 [&_input]:py-[15px]`}
-                        placeholder={t.otpPlaceholder}
-                        name="otp"
-                        handleChange={(e) => setOtp(e.target.value)}
-                        value={otp}
-                        icon={<PasswordIcon />}
-                        required
-                      />
+                      <div className="mb-4">
+                        <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                          {t.otpLabel}
+                          <span className="ml-1 text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder={t.otpPlaceholder}
+                            name="otp"
+                            onChange={(e) => setOtp(e.target.value)}
+                            value={otp}
+                            required
+                            className="w-full rounded-xl border border-gray-100 bg-gray-50/50 pl-4 pr-10 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white"
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-6 pointer-events-none">
+                            <PasswordIcon />
+                          </span>
+                        </div>
+                      </div>
                       <button
                         type="button"
                         onClick={() => setStep(1)}
-                        className="mb-4 text-sm font-medium text-primary hover:underline"
+                        className="mb-4 text-xs font-light text-primary hover:underline"
                       >
                         {language === "en" ? "Change email/password" : "Cambiar correo/contraseña"}
                       </button>
@@ -726,7 +747,7 @@ export default function LoginPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl p-4 font-normal text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-light text-white transition hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
                         backgroundColor: COLORS.buttonPrimaryLight,
                         color: "#ffffff",
@@ -743,7 +764,7 @@ export default function LoginPage() {
                       {loading ? (
                         <>
                           {step === 1 ? t.signingIn : t.verifying}
-                          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-white border-t-transparent" />
+                          <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-solid border-white border-t-transparent" />
                         </>
                       ) : (
                         step === 1 ? t.signIn : t.verify
@@ -751,9 +772,9 @@ export default function LoginPage() {
                     </button>
                   </div>
 
-                  <p className="text-center text-sm text-dark-6 dark:text-dark-6">
+                  <p className="text-center text-xs font-light text-dark-6 dark:text-dark-6">
                     {t.noAccount}
-                    <Link href="/register" className="font-medium text-primary hover:underline">
+                    <Link href="/register" className="font-normal text-primary hover:underline ml-1">
                       {t.createAccount}
                     </Link>
                   </p>

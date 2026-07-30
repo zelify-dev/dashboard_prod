@@ -307,13 +307,13 @@ export default function RegisterPage() {
                 <form onSubmit={handleSubmit}>
                   {error && (
                     <div
-                      className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300"
+                      className="mb-6 rounded-xl border border-red-100 bg-red-50/40 p-3 text-xs text-red-600"
                       style={{ borderColor: COLORS.errorBorder }}
                     >
                       {error}
                       {emailAlreadyExists && (
                         <p className="mt-2">
-                          <Link href="/login" className="font-medium underline hover:no-underline">
+                          <Link href="/login" className="font-normal underline hover:no-underline">
                             {t.signIn}
                           </Link>
                         </p>
@@ -321,35 +321,42 @@ export default function RegisterPage() {
                     </div>
                   )}
 
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-primary dark:text-primary">
+                  <p className="mb-4 text-[10px] font-normal uppercase tracking-wider text-primary">
                     {t.sectionOrganization}
                   </p>
-                  <div className="mb-6 grid gap-4 sm:grid-cols-2">
+                  <div className="mb-4 grid gap-4 sm:grid-cols-2">
                     <div>
-                      <InputGroup
+                      <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                        {t.companyName}
+                        <span className="ml-1 text-red-500">*</span>
+                      </label>
+                      <input
                         type="text"
-                        label={t.companyName}
                         name="organization_name"
                         placeholder={t.placeholderCompanyName}
                         value={data.organization_name}
-                        handleChange={handleChange}
-                        className={`[&_input]:rounded-xl [&_input]:py-3 ${formErrors.organization_name ? "[&_input]:border-red-500 focus:[&_input]:border-red-500" : ""}`}
+                        onChange={handleChange}
+                        className={`w-full rounded-xl border bg-gray-50/50 px-4 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                          formErrors.organization_name ? "border-red-500 focus:border-red-500" : "border-gray-100"
+                        }`}
                         required
                       />
                       {formErrors.organization_name && (
-                        <p className="mt-1 text-sm text-red-500">{formErrors.organization_name}</p>
+                        <p className="mt-1 text-[11px] text-red-500 font-light">{formErrors.organization_name}</p>
                       )}
                     </div>
                     <div>
-                      <label className="text-body-sm font-medium text-dark dark:text-white">
+                      <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
                         {t.country}
-                        <span className="ml-1 select-none text-red">*</span>
+                        <span className="ml-1 text-red-500">*</span>
                       </label>
                       <select
                         name="country"
                         value={data.country}
                         onChange={handleChange}
-                        className={`mt-3 w-full rounded-xl border border-stroke bg-gray-2 py-3 pl-4 pr-10 text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-3 dark:bg-dark-2 dark:text-white ${formErrors.country ? "border-red-500" : ""}`}
+                        className={`w-full rounded-xl border bg-gray-50/50 px-4 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                          formErrors.country ? "border-red-500" : "border-gray-100"
+                        }`}
                         aria-label={t.country}
                       >
                         {COUNTRY_CODES.map((code) => (
@@ -359,50 +366,58 @@ export default function RegisterPage() {
                         ))}
                       </select>
                       {formErrors.country && (
-                        <p className="mt-1 text-sm text-red-500">{formErrors.country}</p>
+                        <p className="mt-1 text-[11px] text-red-500 font-light">{formErrors.country}</p>
                       )}
                     </div>
                   </div>
 
-                  <InputGroup
-                    type="text"
-                    label={t.legalName}
-                    name="company_legal_name"
-                    placeholder={t.placeholderLegalName}
-                    value={data.company_legal_name}
-                    handleChange={handleChange}
-                    className={`mb-4 [&_input]:rounded-xl [&_input]:py-3 ${formErrors.company_legal_name ? "[&_input]:border-red-500 focus:[&_input]:border-red-500" : ""}`}
-                    required
-                  />
-                  {formErrors.company_legal_name && (
-                    <p className="mb-4 mt-1 text-sm text-red-500">{formErrors.company_legal_name}</p>
-                  )}
+                  <div className="mb-4">
+                    <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                      {t.legalName}
+                      <span className="ml-1 text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="company_legal_name"
+                      placeholder={t.placeholderLegalName}
+                      value={data.company_legal_name}
+                      onChange={handleChange}
+                      className={`w-full rounded-xl border bg-gray-50/50 px-4 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                        formErrors.company_legal_name ? "border-red-500 focus:border-red-500" : "border-gray-100"
+                      }`}
+                      required
+                    />
+                    {formErrors.company_legal_name && (
+                      <p className="mt-1 text-[11px] text-red-500 font-light">{formErrors.company_legal_name}</p>
+                    )}
+                  </div>
 
-                  <div className="mb-6 grid gap-4 sm:grid-cols-2">
+                  <div className="mb-4 grid gap-4 sm:grid-cols-2">
                     <div>
-                      <InputGroup
+                      <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                        {t.website}
+                      </label>
+                      <input
                         type="url"
-                        label={t.website}
                         name="website"
                         placeholder={t.placeholderWebsite}
                         value={data.website}
-                        handleChange={handleChange}
-                        className="[&_input]:rounded-xl [&_input]:py-3"
+                        onChange={handleChange}
+                        className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white"
                       />
-                      {formErrors.website && (
-                        <p className="mt-1 text-sm text-red-500">{formErrors.website}</p>
-                      )}
                     </div>
                     <div>
-                      <label className="text-body-sm font-medium text-dark dark:text-white">
+                      <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
                         {t.industry}
-                        <span className="ml-1 select-none text-red">*</span>
+                        <span className="ml-1 text-red-500">*</span>
                       </label>
                       <select
                         name="industry"
                         value={data.industry}
                         onChange={handleChange}
-                        className={`mt-3 w-full rounded-xl border border-stroke bg-gray-2 py-3 pl-4 pr-10 text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-3 dark:bg-dark-2 dark:text-white ${formErrors.industry ? "border-red-500" : ""}`}
+                        className={`w-full rounded-xl border bg-gray-50/50 px-4 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                          formErrors.industry ? "border-red-500" : "border-gray-100"
+                        }`}
                       >
                         {INDUSTRY_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>
@@ -411,59 +426,84 @@ export default function RegisterPage() {
                         ))}
                       </select>
                       {formErrors.industry && (
-                        <p className="mt-1 text-sm text-red-500">{formErrors.industry}</p>
+                        <p className="mt-1 text-[11px] text-red-500 font-light">{formErrors.industry}</p>
                       )}
                     </div>
                   </div>
 
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-primary dark:text-primary">
+                  <p className="mb-4 text-[10px] font-normal uppercase tracking-wider text-primary">
                     {t.sectionYourDetails}
                   </p>
-                  <InputGroup
-                    type="text"
-                    label={t.fullName}
-                    name="full_name"
-                    placeholder={t.placeholderFullName}
-                    value={data.full_name}
-                    handleChange={handleChange}
-                    className={`mb-4 [&_input]:rounded-xl [&_input]:py-3 ${formErrors.full_name ? "[&_input]:border-red-500 focus:[&_input]:border-red-500" : ""}`}
-                    required
-                  />
-                  {formErrors.full_name && (
-                    <p className="mb-4 mt-1 text-sm text-red-500">{formErrors.full_name}</p>
-                  )}
+                  <div className="mb-4">
+                    <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                      {t.fullName}
+                      <span className="ml-1 text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="full_name"
+                      placeholder={t.placeholderFullName}
+                      value={data.full_name}
+                      onChange={handleChange}
+                      className={`w-full rounded-xl border bg-gray-50/50 px-4 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                        formErrors.full_name ? "border-red-500 focus:border-red-500" : "border-gray-100"
+                      }`}
+                      required
+                    />
+                    {formErrors.full_name && (
+                      <p className="mt-1 text-[11px] text-red-500 font-light">{formErrors.full_name}</p>
+                    )}
+                  </div>
 
                   <div className="mb-6 grid gap-4 sm:grid-cols-2">
                     <div>
-                      <InputGroup
-                        type="email"
-                        label={t.email}
-                        name="email"
-                        placeholder={t.placeholderEmail}
-                        value={data.email}
-                        handleChange={handleChange}
-                        icon={<EmailIcon />}
-                        className={`[&_input]:rounded-xl [&_input]:py-3 ${formErrors.email ? "[&_input]:border-red-500 focus:[&_input]:border-red-500" : ""}`}
-                        required
-                      />
+                      <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                        {t.email}
+                        <span className="ml-1 text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="email"
+                          name="email"
+                          placeholder={t.placeholderEmail}
+                          value={data.email}
+                          onChange={handleChange}
+                          className={`w-full rounded-xl border bg-gray-50/50 pl-4 pr-10 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                            formErrors.email ? "border-red-500 focus:border-red-500" : "border-gray-100"
+                          }`}
+                          required
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-6 pointer-events-none">
+                          <EmailIcon />
+                        </span>
+                      </div>
                       {formErrors.email && (
-                        <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
+                        <p className="mt-1 text-[11px] text-red-500 font-light">{formErrors.email}</p>
                       )}
                     </div>
                     <div>
-                      <InputGroup
-                        type="password"
-                        label={t.password}
-                        name="password"
-                        placeholder={t.placeholderPassword}
-                        value={data.password}
-                        handleChange={handleChange}
-                        icon={<PasswordIcon />}
-                        className={`[&_input]:rounded-xl [&_input]:py-3 ${formErrors.password ? "[&_input]:border-red-500 focus:[&_input]:border-red-500" : ""}`}
-                        required
-                      />
+                      <label className="text-[10px] uppercase tracking-wider font-light text-dark-6 block mb-1">
+                        {t.password}
+                        <span className="ml-1 text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="password"
+                          name="password"
+                          placeholder={t.placeholderPassword}
+                          value={data.password}
+                          onChange={handleChange}
+                          className={`w-full rounded-xl border bg-gray-50/50 pl-4 pr-10 py-2.5 text-xs font-light text-dark outline-none transition focus:border-gray-200 dark:border-gray-800 dark:bg-dark-3/50 dark:text-white ${
+                            formErrors.password ? "border-red-500 focus:border-red-500" : "border-gray-100"
+                          }`}
+                          required
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-6 pointer-events-none">
+                          <PasswordIcon />
+                        </span>
+                      </div>
                       {formErrors.password && (
-                        <p className="mt-1 text-sm text-red-500">{formErrors.password}</p>
+                        <p className="mt-1 text-[11px] text-red-500 font-light">{formErrors.password}</p>
                       )}
                     </div>
                   </div>
@@ -471,7 +511,7 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-4 font-normal text-white transition hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-light text-white transition hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       backgroundColor: COLORS.buttonPrimaryLight,
                       color: "#ffffff",
@@ -479,7 +519,7 @@ export default function RegisterPage() {
                   >
                     {loading ? t.submitting : t.submit}
                     {loading && (
-                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-t-transparent" />
+                      <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-solid border-current border-t-transparent" />
                     )}
                   </button>
                 </form>
