@@ -3,6 +3,8 @@
 import { EmailIcon, EyeClosedIcon, EyeOpenIcon, PasswordIcon } from "@/assets/icons";
 import Image from "next/image";
 import Link from "next/link";
+import zelifyLogoDark from "../../../public/images/logo/zelifyLogo_dark.svg";
+import zelifyLogoLight from "../../../public/images/logo/zelifyLogo_ligth.svg";
 import { useState, useEffect, useRef } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe, type AuthSuccessResponse } from "@/lib/auth-api";
@@ -112,11 +114,7 @@ const COLORS = {
 // ============================================================================
 // CONSTANTS - Logo URLs (Cambia las URLs de los logos aquí)
 // ============================================================================
-const LOGO_URLS = {
-  dark: "https://flowchart-diagrams-zelify.s3.us-east-1.amazonaws.com/zelifyLogo_dark.svg",
-  light:
-    "https://flowchart-diagrams-zelify.s3.us-east-1.amazonaws.com/zelifyLogo_ligth.svg",
-} as const;
+
 
 function AnimatedHalftoneBackdrop({ isDarkMode }: { isDarkMode: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -574,17 +572,19 @@ export default function LoginPage() {
                   <div className="inline-block">
                     <Image
                       className="hidden dark:block"
-                      src={LOGO_URLS.dark}
+                      src={zelifyLogoDark}
                       alt="Zelify Logo"
-                      width={176}
-                      height={32}
+                      width={140}
+                      height={26}
+                      quality={100}
                     />
                     <Image
                       className="dark:hidden"
-                      src={LOGO_URLS.light}
+                      src={zelifyLogoLight}
                       alt="Zelify Logo"
-                      width={176}
-                      height={32}
+                      width={140}
+                      height={26}
+                      quality={100}
                     />
                   </div>
                 </div>
@@ -735,7 +735,7 @@ export default function LoginPage() {
                       <button
                         type="button"
                         onClick={() => setStep(1)}
-                        className="mb-4 text-xs font-light text-primary hover:underline"
+                        className="mb-4 text-xs font-light text-dark dark:text-white hover:underline"
                       >
                         {language === "en" ? "Change email/password" : "Cambiar correo/contraseña"}
                       </button>
@@ -774,7 +774,7 @@ export default function LoginPage() {
 
                   <p className="text-center text-xs font-light text-dark-6 dark:text-dark-6">
                     {t.noAccount}
-                    <Link href="/register" className="font-normal text-primary hover:underline ml-1">
+                    <Link href="/register" className="font-normal text-dark dark:text-white hover:underline ml-1">
                       {t.createAccount}
                     </Link>
                   </p>

@@ -3,28 +3,26 @@
 import { EmailIcon, PasswordIcon } from "@/assets/icons";
 import Image from "next/image";
 import Link from "next/link";
+import zelifyLogoDark from "../../../public/images/logo/zelifyLogo_dark.svg";
+import zelifyLogoLight from "../../../public/images/logo/zelifyLogo_ligth.svg";
 import { useState, useEffect } from "react";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { register as apiRegister, persistAuthSession, AuthError, syncMe } from "@/lib/auth-api";
 import { getAuthErrorMessage } from "@/lib/auth-error-messages";
 
-const LOGO_URLS = {
-  dark: "https://flowchart-diagrams-zelify.s3.us-east-1.amazonaws.com/zelifyLogo_dark.svg",
-  light:
-    "https://flowchart-diagrams-zelify.s3.us-east-1.amazonaws.com/zelifyLogo_ligth.svg",
-} as const;
+
 
 const COLORS = {
   backgroundLight: "#f8fafc",
   backgroundDark: "#020617",
   cardLight: "#ffffff",
   cardDark: "#0b0f19",
-  rightPanelBg: "#0f172a", // Slate oscuro en vez de verde chillón
+  rightPanelBg: "#0f172a",
   rightPanelBorderDark: "#1e293b",
-  buttonPrimaryLight: "#004195",
-  buttonPrimaryLightHover: "#003375",
-  buttonPrimaryDark: "#004195",
-  buttonPrimaryDarkHover: "#003375",
+  buttonPrimaryLight: "#000016", // Zelify Midnight
+  buttonPrimaryLightHover: "#000000",
+  buttonPrimaryDark: "#000016",
+  buttonPrimaryDarkHover: "#000000",
   errorBorder: "#dd2f2c",
 } as const;
 
@@ -284,17 +282,19 @@ export default function RegisterPage() {
                 <Link href="/" className="mb-8 inline-block">
                   <Image
                     className="hidden dark:block"
-                    src={LOGO_URLS.dark}
+                    src={zelifyLogoDark}
                     alt="Logo"
-                    width={176}
-                    height={32}
+                    width={140}
+                    height={26}
+                    quality={100}
                   />
                   <Image
                     className="dark:hidden"
-                    src={LOGO_URLS.light}
+                    src={zelifyLogoLight}
                     alt="Logo"
-                    width={176}
-                    height={32}
+                    width={140}
+                    height={26}
+                    quality={100}
                   />
                 </Link>
                 <h1 className="mb-1.5 text-2xl font-bold tracking-tight text-dark dark:text-white sm:text-3xl">
@@ -524,9 +524,9 @@ export default function RegisterPage() {
                   </button>
                 </form>
 
-                <p className="mt-8 text-center text-sm text-dark-6 dark:text-dark-6">
+                <p className="mt-8 text-center text-xs font-light text-dark-6 dark:text-dark-6">
                   {t.haveAccount}{" "}
-                  <Link href="/login" className="font-semibold text-primary hover:underline">
+                  <Link href="/login" className="font-normal text-dark dark:text-white hover:underline ml-1">
                     {t.signIn}
                   </Link>
                 </p>
