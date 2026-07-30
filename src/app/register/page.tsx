@@ -15,16 +15,16 @@ const LOGO_URLS = {
 } as const;
 
 const COLORS = {
-  backgroundLight: "#f1f5f9",
-  backgroundDark: "#001832",
+  backgroundLight: "#f8fafc",
+  backgroundDark: "#020617",
   cardLight: "#ffffff",
-  cardDark: "#0d1224",
-  rightPanelBg: "rgb(170, 255, 59)",
-  rightPanelBorderDark: "#04335A",
+  cardDark: "#0b0f19",
+  rightPanelBg: "#0f172a", // Slate oscuro en vez de verde chillón
+  rightPanelBorderDark: "#1e293b",
   buttonPrimaryLight: "#004195",
-  buttonPrimaryLightHover: "#0a56c2",
-  buttonPrimaryDark: "#66ff00",
-  buttonPrimaryDarkHover: "#ffffff",
+  buttonPrimaryLightHover: "#003375",
+  buttonPrimaryDark: "#004195",
+  buttonPrimaryDarkHover: "#003375",
   errorBorder: "#dd2f2c",
 } as const;
 
@@ -273,7 +273,7 @@ export default function RegisterPage() {
 
       <div className="relative z-10 w-full max-w-[1000px]">
         <div
-          className="overflow-hidden rounded-2xl shadow-xl ring-1 ring-black/5 dark:ring-white/5"
+          className="overflow-hidden rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm"
           style={{
             backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight,
           }}
@@ -471,12 +471,10 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-4 font-semibold text-white shadow-lg transition hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-4 font-normal text-white transition hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
-                      backgroundColor: isDarkMode
-                        ? COLORS.buttonPrimaryDark
-                        : COLORS.buttonPrimaryLight,
-                      color: isDarkMode ? "#000000" : "#ffffff",
+                      backgroundColor: COLORS.buttonPrimaryLight,
+                      color: "#ffffff",
                     }}
                   >
                     {loading ? t.submitting : t.submit}
@@ -503,13 +501,13 @@ export default function RegisterPage() {
                   borderColor: isDarkMode ? COLORS.rightPanelBorderDark : "transparent",
                 }}
               >
-                <p className="mb-2 text-sm font-medium uppercase tracking-widest text-dark">
+                <p className="mb-2 text-xs font-light uppercase tracking-wider text-white/60">
                   {t.rightTitle}
                 </p>
-                <h2 className="mb-4 text-3xl font-bold tracking-tight text-dark">
+                <h2 className="mb-4 text-2xl font-light tracking-tight text-white">
                   {t.rightSubtitle}
                 </h2>
-                <p className="max-w-[320px] text-base leading-relaxed text-dark-4">
+                <p className="max-w-[320px] text-xs font-light leading-relaxed text-white/70">
                   {t.rightDesc}
                 </p>
               </div>

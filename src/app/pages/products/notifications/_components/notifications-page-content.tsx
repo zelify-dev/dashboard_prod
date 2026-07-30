@@ -277,7 +277,7 @@ export function NotificationsPageContent() {
   const [forceCreateMode, setForceCreateMode] = useState(false);
   const renderedTemplateHtml = useMemo(() => {
     if (newTemplateHtml.trim()) return newTemplateHtml;
-    return `<html><body style="font-family: Arial, sans-serif; padding: 40px; background: #f4f6fb;">
+    return `<html><body style="font-family: 'Nata Sans', sans-serif; padding: 40px; background: #f4f6fb;">
       <h2 style="margin-top:0;">${translations.createTemplate.previewFallbackTitle}</h2>
       <p>${translations.createTemplate.previewFallbackBody}</p>
     </body></html>`;

@@ -84,29 +84,29 @@ const TRANSLATIONS = {
 // ============================================================================
 const COLORS = {
   // Background colors
-  backgroundLight: "#f1f5f9", // Light mode background
-  backgroundDark: "#001832", // Dark mode background
+  backgroundLight: "#f8fafc", // Light mode background
+  backgroundDark: "#020617", // Dark mode background (Deep slate)
 
   // Card colors
   cardLight: "#ffffff", // Light mode card
-  cardDark: "#0d1224", // Dark mode card
+  cardDark: "#0b0f19", // Dark mode card
 
   // Right panel colors
-  rightPanelBg: "rgb(170, 255, 59)", // Color verde del panel derecho
-  rightPanelBorderDark: "#04335A", // Borde del panel derecho en dark mode
+  rightPanelBg: "#0f172a", // Dark Slate
+  rightPanelBorderDark: "#1e293b",
 
   // Button colors
-  buttonPrimaryLight: "#004195", // Botón en light mode
-  buttonPrimaryLightHover: "#0a56c2", // Hover del botón en light mode
-  buttonPrimaryDark: "#66ff00", // Botón en dark mode (verde)
-  buttonPrimaryDarkHover: "#ffffff", // Hover del botón en dark mode
+  buttonPrimaryLight: "#004195", // Zelify Midnight Blue
+  buttonPrimaryLightHover: "#003375",
+  buttonPrimaryDark: "#004195",
+  buttonPrimaryDarkHover: "#003375",
 
   // Error colors
-  errorBorder: "#dd2f2c", // Color del borde de error
+  errorBorder: "#dd2f2c",
 
-  // Animation colors (para la animación halftone)
-  halftoneLight: "rgb(12, 13, 14)", // Color de puntos en light mode
-  halftoneDark: "rgba(255, 255, 255, 1)", // Color de puntos en dark mode
+  // Animation colors
+  halftoneLight: "rgba(15, 23, 42, 0.08)",
+  halftoneDark: "rgba(255, 255, 255, 0.06)",
 } as const;
 
 // ============================================================================
@@ -555,12 +555,12 @@ export default function LoginPage() {
       {/* CONTENEDOR PRINCIPAL - solo formulario */}
       <div className="relative z-10 w-full max-w-[440px]">
         <div
-          className="rounded-[10px] shadow-1 dark:shadow-card"
+          className="rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm"
           style={{
             backgroundColor: isDarkMode ? COLORS.cardDark : COLORS.cardLight,
           }}
         >
-          <div className="w-full p-4 sm:p-10">
+          <div className="w-full p-6 sm:p-10">
                 {sessionExpiredInfo ? (
                   <div
                     className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/30 dark:text-amber-100"
@@ -726,24 +726,18 @@ export default function LoginPage() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg p-4 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl p-4 font-normal text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
-                        backgroundColor: isDarkMode
-                          ? COLORS.buttonPrimaryDark
-                          : COLORS.buttonPrimaryLight,
-                        color: isDarkMode ? "#000000" : "#ffffff",
+                        backgroundColor: COLORS.buttonPrimaryLight,
+                        color: "#ffffff",
                       }}
                       onMouseEnter={(e) => {
                         if (!loading) {
-                          e.currentTarget.style.backgroundColor = isDarkMode
-                            ? COLORS.buttonPrimaryDarkHover
-                            : COLORS.buttonPrimaryLightHover;
+                          e.currentTarget.style.backgroundColor = COLORS.buttonPrimaryLightHover;
                         }
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = isDarkMode
-                          ? COLORS.buttonPrimaryDark
-                          : COLORS.buttonPrimaryLight;
+                        e.currentTarget.style.backgroundColor = COLORS.buttonPrimaryLight;
                       }}
                     >
                       {loading ? (
