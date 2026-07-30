@@ -6,6 +6,7 @@ import Link from "next/link";
 import zelifyLogoDark from "../../../public/images/logo/zelifyLogo_dark.svg";
 import zelifyLogoLight from "../../../public/images/logo/zelifyLogo_ligth.svg";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { login, verifyDashboardOtp, persistAuthSession, AuthError, syncMe, type AuthSuccessResponse } from "@/lib/auth-api";
 import { getLoginAuthErrorDisplay } from "@/lib/auth-error-messages";
@@ -221,6 +222,7 @@ function EdgeFadeOverlay({ isDarkMode }: { isDarkMode: boolean }) {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   const [data, setData] = useState({
     email: "",
     password: "",
@@ -498,14 +500,14 @@ export default function LoginPage() {
           : COLORS.backgroundLight,
       }}
     >
-      <div className="absolute top-6 left-6 z-50 transition-transform duration-300 hover:scale-105">
-        <Link
-          href="https://www.zelify.com"
-          className="flex items-center justify-center rounded-lg border-2 border-dark px-3 py-1.5 font-bold text-dark dark:border-white dark:text-white bg-white/10 backdrop-blur-sm"
-          aria-label={t.backToHome}
+      <div className="absolute top-6 left-6 z-50">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex items-center justify-center rounded-xl border border-gray-100 bg-white/80 px-4 py-1.5 text-xs font-light text-dark shadow-sm hover:bg-gray-50 active:scale-95 transition backdrop-blur-sm dark:border-gray-800 dark:bg-dark-2/80 dark:text-white"
         >
           {t.back}
-        </Link>
+        </button>
       </div>
       <div className="absolute top-6 right-6 z-50 transition-transform duration-300 hover:scale-105">
         <button

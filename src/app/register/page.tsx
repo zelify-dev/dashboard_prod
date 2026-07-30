@@ -6,6 +6,7 @@ import Link from "next/link";
 import zelifyLogoDark from "../../../public/images/logo/zelifyLogo_dark.svg";
 import zelifyLogoLight from "../../../public/images/logo/zelifyLogo_ligth.svg";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import InputGroup from "@/components/FormElements/InputGroup";
 import { register as apiRegister, persistAuthSession, AuthError, syncMe } from "@/lib/auth-api";
 import { getAuthErrorMessage } from "@/lib/auth-error-messages";
@@ -110,6 +111,7 @@ const TRANSLATIONS = {
 };
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [data, setData] = useState({
     organization_name: "",
     country: "US",
@@ -251,12 +253,13 @@ export default function RegisterPage() {
           : "linear-gradient(160deg, #f1f5f9 0%, #e2e8f0 50%, #f1f5f9 100%)",
       }}
     >
-      <Link
-        href="/login"
-        className="absolute top-6 left-6 z-50 rounded-lg border-2 border-dark/20 bg-white/90 px-3 py-2 font-semibold text-dark shadow-sm transition hover:scale-[1.02] hover:shadow dark:border-white/20 dark:bg-dark-2/90 dark:text-white"
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="absolute top-6 left-6 z-50 rounded-xl border border-gray-100 bg-white/80 px-4 py-1.5 text-xs font-light text-dark shadow-sm hover:bg-gray-50 active:scale-95 transition backdrop-blur-sm dark:border-gray-800 dark:bg-dark-2/80 dark:text-white"
       >
         {t.back}
-      </Link>
+      </button>
       <button
         type="button"
         onClick={() => {
