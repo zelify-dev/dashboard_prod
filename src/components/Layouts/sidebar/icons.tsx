@@ -207,6 +207,32 @@ export function TransfersIcon(props: PropsType) {
   );
 }
 
+export function PaymentDisbursementIcon(props: PropsType) {
+  return (
+    <svg
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M12 3v11" />
+      <path d="M8.5 10.5 12 14l3.5-3.5" />
+      <path d="M5 19h.01" />
+      <path d="M12 19h.01" />
+      <path d="M19 19h.01" />
+      <path d="M12 16.5v2.5" />
+      <path d="M12 16.5H5v2.5" />
+      <path d="M12 16.5h7v2.5" />
+      <path d="M8.5 5.5h7" />
+    </svg>
+  );
+}
+
 export function TxIcon(props: PropsType) {
   return (
     <svg

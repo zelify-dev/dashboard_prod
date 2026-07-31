@@ -36,6 +36,7 @@ export type UiTranslations = {
       tx: string;
       ai: string;
       payments: string;
+      paymentDisbursement: string;
       notifications: string;
       discountsCoupons: string;
       insurance: string;
@@ -64,6 +65,7 @@ export type UiTranslations = {
         diligence: string;
         basicService: string;
         transfers: string;
+        paymentDisbursement: string;
         paymentsWorkflow: string;
         internationalTransfers: string;
         internationalTransfersWorkflow: string;
@@ -534,6 +536,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         tx: "Tx",
         ai: "AI",
         payments: "Payments and Transfers",
+        paymentDisbursement: "Payment disbursement",
         notifications: "Notifications",
         discountsCoupons: "Discounts & Coupons",
         insurance: "Insurance",
@@ -562,6 +565,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           diligence: "Diligence",
           basicService: "Basic Service",
           transfers: "Transfers",
+          paymentDisbursement: "Payment disbursement",
           paymentsWorkflow: "Monitoring",
           internationalTransfers: "International transfers",
           internationalTransfersWorkflow: "Monitoring",
@@ -1030,6 +1034,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         tx: "Tx",
         ai: "IA",
         payments: "Pagos y transferencias",
+        paymentDisbursement: "Dispersión de pagos",
         notifications: "Notificaciones",
         discountsCoupons: "Descuentos y Cupones",
         insurance: "Seguros",
@@ -1058,6 +1063,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
           diligence: "Diligencia",
           basicService: "Servicios Básicos",
           transfers: "Transferencias",
+          paymentDisbursement: "Dispersión de pagos",
           paymentsWorkflow: "WorkFlow",
           internationalTransfers: "Transferencias internacionales",
           internationalTransfersWorkflow: "WorkFlow",

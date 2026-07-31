@@ -3,11 +3,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 function getRemoteBaseUrl(): string {
-  // Por convención del dashboard, usamos el mismo backend configurado en NEXT_PUBLIC_AUTH_API_URL.
-  // (Fallback opcional a ZELIFY_TRANSFERS_SERVICE_URL si alguien lo configuró legacy).
+  // Transferencias puede vivir en un backend distinto al de auth.
   const raw =
-    process.env.NEXT_PUBLIC_AUTH_API_URL ??
     process.env.ZELIFY_TRANSFERS_SERVICE_URL ??
+    process.env.NEXT_PUBLIC_AUTH_API_URL ??
     "http://localhost:8080";
   return raw.replace(/\/$/, "");
 }
@@ -55,7 +54,7 @@ async function forward(
 
     const method = request.method.toUpperCase();
     const hasBody = method !== "GET" && method !== "HEAD";
-    const body = hasBody ? await request.text().catch(() => "") : undefined;
+    const body = hasBody ? await request.arrayBuffer().catch(() => undefined) : undefined;
 
     const upstream = await fetch(targetUrl, {
       method,
