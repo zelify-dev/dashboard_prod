@@ -163,7 +163,7 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Verificación de correo</title>
   </head>
-  <body style="margin:0; padding:0; background-color:#cfd4dd; font-family:'Helvetica Neue', Arial, sans-serif;">
+  <body style="margin:0; padding:0; background-color:#cfd4dd; font-family:'Nata Sans', sans-serif;">
     <div style="display:none; max-height:0; overflow:hidden;">Tu código para continuar con Zelify es \${code}</div>
     <center style="width:100%; background-color:#cfd4dd;">
       <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:760px; margin:0 auto;">
@@ -227,7 +227,7 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Email verification</title>
   </head>
-  <body style="margin:0; padding:0; background-color:#cfd4dd; font-family:'Helvetica Neue', Arial, sans-serif;">
+  <body style="margin:0; padding:0; background-color:#cfd4dd; font-family:'Nata Sans', sans-serif;">
     <div style="display:none; max-height:0; overflow:hidden;">Your code to continue with Zelify is \${code}</div>
     <center style="width:100%; background-color:#cfd4dd;">
       <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:760px; margin:0 auto;">
@@ -327,7 +327,7 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
       es: `
 <!DOCTYPE html>
 <html lang="es">
-  <body style="margin:0; padding:32px; font-family:'Inter', Arial, sans-serif; background:#0f172a;">
+  <body style="margin:0; padding:32px; font-family:'Nata Sans', sans-serif; background:#0f172a;">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; margin:0 auto; background:linear-gradient(180deg,#111f3b 0%,#0a1323 100%); border-radius:28px; color:#e2e8f0; box-shadow:0 24px 50px rgba(0,0,0,0.35); overflow:hidden;">
       <tr>
         <td style="padding:40px 48px;">
@@ -357,7 +357,7 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
       en: `
 <!DOCTYPE html>
 <html lang="en">
-  <body style="margin:0; padding:32px; font-family:'Inter', Arial, sans-serif; background:#0f172a;">
+  <body style="margin:0; padding:32px; font-family:'Nata Sans', sans-serif; background:#0f172a;">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px; margin:0 auto; background:linear-gradient(180deg,#111f3b 0%,#0a1323 100%); border-radius:28px; color:#e2e8f0; box-shadow:0 24px 50px rgba(0,0,0,0.35); overflow:hidden;">
       <tr>
         <td style="padding:40px 48px;">
@@ -404,7 +404,7 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
       es: `
 <!DOCTYPE html>
 <html>
-  <body style="font-family: Inter, Arial, sans-serif; background:#0f172a; padding:32px; color:#f8fafc;">
+  <body style="font-family: 'Nata Sans', sans-serif; background:#0f172a; padding:32px; color:#f8fafc;">
     <div style="max-width:520px; margin:0 auto; border-radius:18px; background:#1e293b; padding:32px;">
       <p style="letter-spacing:0.2em; color:#f97316; font-size:11px; text-transform:uppercase;">Alerta de seguridad</p>
       <h1 style="font-size:28px; margin:12px 0;">Detectamos un acceso inusual</h1>
@@ -420,7 +420,7 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
       en: `
 <!DOCTYPE html>
 <html>
-  <body style="font-family: Inter, Arial, sans-serif; background:#0f172a; padding:32px; color:#f8fafc;">
+  <body style="font-family: 'Nata Sans', sans-serif; background:#0f172a; padding:32px; color:#f8fafc;">
     <div style="max-width:520px; margin:0 auto; border-radius:18px; background:#1e293b; padding:32px;">
       <p style="letter-spacing:0.2em; color:#f97316; font-size:11px; text-transform:uppercase;">Security alert</p>
       <h1 style="font-size:28px; margin:12px 0;">Unusual access detected</h1>
@@ -453,7 +453,7 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
       es: `
 <!DOCTYPE html>
 <html>
-  <body style="font-family: 'Space Grotesk', Arial, sans-serif; background:#eef2ff; padding:32px;">
+  <body style="font-family: 'Nata Sans', sans-serif; background:#eef2ff; padding:32px;">
     <div style="max-width:560px; margin:0 auto; background:#ffffff; padding:32px; border-radius:20px;">
       <h2 style="margin:0; font-size:24px; color:#1d4ed8;">Tu resumen del mes</h2>
       <p style="margin-top:12px; color:#475467; font-size:15px;">
@@ -475,7 +475,7 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
       en: `
 <!DOCTYPE html>
 <html>
-  <body style="font-family: 'Space Grotesk', Arial, sans-serif; background:#eef2ff; padding:32px;">
+  <body style="font-family: 'Nata Sans', sans-serif; background:#eef2ff; padding:32px;">
     <div style="max-width:560px; margin:0 auto; background:#ffffff; padding:32px; border-radius:20px;">
       <h2 style="margin:0; font-size:24px; color:#1d4ed8;">Your monthly summary</h2>
       <p style="margin-top:12px; color:#475467; font-size:15px;">
@@ -512,12 +512,12 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
     },
     html: {
       es: `
-<div style="font-family: 'Inter', system-ui; padding:16px;">
+<div style="font-family: 'Nata Sans', sans-serif; padding:16px;">
   <p style="margin:0; color:#0f172a; font-size:16px; font-weight:600;">Transferencia enviada ✅</p>
   <p style="margin:6px 0 0 0; color:#334155;">Tu cash-out a {{destination}} se acreditó por {{amount}}. Guarda el comprobante {{transactionId}}.</p>
 </div>`.trim(),
       en: `
-<div style="font-family: 'Inter', system-ui; padding:16px;">
+<div style="font-family: 'Nata Sans', sans-serif; padding:16px;">
   <p style="margin:0; color:#0f172a; font-size:16px; font-weight:600;">Transfer sent ✅</p>
   <p style="margin:6px 0 0 0; color:#334155;">Your cash-out to {{destination}} was processed for {{amount}}. Save receipt {{transactionId}}.</p>
 </div>`.trim(),
@@ -539,12 +539,12 @@ const DEMO_NOTIFICATION_TEMPLATES: NotificationTemplate[] = [
     },
     html: {
       es: `
-<div style="font-family: 'Inter', system-ui; padding:16px;">
+<div style="font-family: 'Nata Sans', sans-serif; padding:16px;">
   <p style="margin:0; color:#991b1b; font-size:16px; font-weight:600;">Revisa este retiro inusual ⚠️</p>
   <p style="margin:6px 0 0 0; color:#475467;">Detectamos un intento de cash-out por {{amount}} a {{destination}}. Confirma si reconoces la operación.</p>
 </div>`.trim(),
       en: `
-<div style="font-family: 'Inter', system-ui; padding:16px;">
+<div style="font-family: 'Nata Sans', sans-serif; padding:16px;">
   <p style="margin:0; color:#991b1b; font-size:16px; font-weight:600;">Unusual cash-out detected ⚠️</p>
   <p style="margin:6px 0 0 0; color:#475467;">We detected a cash-out attempt of {{amount}} to {{destination}}. Confirm if you made this transaction.</p>
 </div>`.trim(),

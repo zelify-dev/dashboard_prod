@@ -234,7 +234,7 @@ export default function RequestCredentialsModal({
         ] || formData.pais;
 
       const emailHtml = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
+        <div style="font-family: 'Nata Sans', sans-serif; max-width: 600px; margin: 0 auto; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
           
           <!-- Header -->
           <div style="background-color: #ffffff; padding: 25px 40px; text-align: center; border-bottom: 4px solid #AAFF3B;">
