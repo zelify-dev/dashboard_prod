@@ -991,7 +991,12 @@ export function Sidebar() {
                                   >
                                     <span className="truncate">{item.title}</span>
                                     {onboardingPercent != null && (
-                                      <span className="shrink-0 text-[10px] font-semibold tabular-nums text-primary dark:text-primary/90">
+                                      <span
+                                        className={cn(
+                                          "shrink-0 text-[10px] font-semibold tabular-nums",
+                                          pathname === href ? "text-zelify-green" : "text-dark-6 dark:text-dark-6"
+                                        )}
+                                      >
                                         {onboardingPercent}%
                                       </span>
                                     )}

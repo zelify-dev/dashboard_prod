@@ -214,7 +214,7 @@ function FileUploadArea({
             variant="primary"
             size="small"
             shape="rounded"
-            className="pointer-events-none mb-3 !bg-[#004196] hover:!bg-[#004196]/90"
+            className="pointer-events-none mb-3 !bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
             type="button"
           />
           {file ? (
@@ -351,7 +351,7 @@ export function TechnicalDocumentationPageContent() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-[1080px]">
+    <div className="w-full space-y-6">
       <Breadcrumb pageName="Documentación técnica" />
 
       <div className="mb-6">
@@ -360,7 +360,7 @@ export function TechnicalDocumentationPageContent() {
         </p>
       </div>
 
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-8 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
         {!technicalVisible && (
           <div
             className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
@@ -374,7 +374,7 @@ export function TechnicalDocumentationPageContent() {
         <h2 className="text-xl font-bold leading-[30px] text-blue-700 dark:text-white">
           Documentación técnica
         </h2>
-        <div className="mb-6 flex items-start gap-3 rounded-lg bg-[#EBF5FF] px-4 py-3 text-[#1C64F2] dark:bg-blue-900/30 dark:text-blue-400">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/40 p-4 text-xs font-light text-blue-700">
           <InfoIcon className="mt-0.5 shrink-0" />
           <div className="text-sm">
             <span className="font-semibold block mb-0.5">
@@ -458,7 +458,7 @@ export function TechnicalDocumentationPageContent() {
             variant="primary"
             onClick={handleSaveSandbox}
             disabled={!technicalVisible || savingDev || (!statusLoading && tf.developmentEnvironmentsLocked)}
-            className="w-full sm:w-auto !bg-[#004196] hover:!bg-[#004196]/90 disabled:opacity-60"
+            className="w-full sm:w-auto !bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition disabled:opacity-60"
             shape="rounded"
           />
         </div>
@@ -565,7 +565,7 @@ export function TechnicalDocumentationPageContent() {
             className={`w-full sm:w-auto ${
               !technicalVisible || !canSubmit || submittingDocs
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
-                : "!bg-[#004196] hover:!bg-[#004196]/90"
+                : "!bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
             }`}
             disabled={!technicalVisible || !canSubmit || submittingDocs || statusLoading}
             shape="rounded"

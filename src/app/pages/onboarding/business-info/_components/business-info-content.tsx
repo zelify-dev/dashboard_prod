@@ -160,10 +160,10 @@ export function BusinessInfoContent() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1080px]">
+    <div className="w-full space-y-6">
       <Breadcrumb pageName="Business Plan" />
 
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-8 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
         {!businessPlanVisible ? (
           <div
             className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
@@ -175,7 +175,7 @@ export function BusinessInfoContent() {
 
         <h3 className="mb-4 text-base font-medium text-black dark:text-white">Carga de Business Plan</h3>
 
-        <div className="mb-6 flex items-start gap-3 rounded-lg bg-[#EBF5FF] px-4 py-3 text-[#1C64F2] dark:bg-blue-900/30 dark:text-blue-400">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/40 p-4 text-xs font-light text-blue-700">
           <InfoIcon className="mt-0.5 shrink-0" />
           <div className="text-sm">
             <span className="font-semibold block mb-0.5">Informacion importante</span>
@@ -206,7 +206,7 @@ export function BusinessInfoContent() {
         ) : null}
 
         {uploaded ? (
-          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100">
+          <div className="mb-6 rounded-xl border border-emerald-100 bg-emerald-50/40 p-4 text-xs font-light text-emerald-700">
             <span className="font-semibold">Business Plan ya cargado.</span>
           </div>
         ) : null}
@@ -215,7 +215,7 @@ export function BusinessInfoContent() {
 
         <div
           className={cn(
-            "relative mb-6 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-[#E2E8F0] py-12 dark:border-strokedark",
+            "relative mb-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 p-8 transition bg-white",
             uploaded || !businessPlanVisible ? "cursor-not-allowed bg-gray-50/80 opacity-70 dark:bg-boxdark/50" : "hover:bg-gray-50 dark:hover:bg-boxdark-2",
           )}
         >
@@ -240,7 +240,7 @@ export function BusinessInfoContent() {
               variant="primary"
               size="small"
               shape="rounded"
-              className="pointer-events-none mb-3 !bg-[#004196] hover:!bg-[#004196]/90"
+              className="pointer-events-none mb-3 !bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
               type="button"
             />
             {file ? <p className="text-sm text-green-500 font-medium">{file.name}</p> : <p className="text-xs text-[#6B7280]">{acceptedLabel}</p>}
@@ -262,7 +262,7 @@ export function BusinessInfoContent() {
             label={uploading ? "Enviando..." : "Enviar Business Plan"}
             variant="primary"
             onClick={onSubmit}
-            className={`w-full sm:w-auto ${!businessPlanVisible || !file || uploading || uploaded || loadingStatus ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white" : "!bg-[#004196] hover:!bg-[#004196]/90"}`}
+            className={`w-full sm:w-auto ${!businessPlanVisible || !file || uploading || uploaded || loadingStatus ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white" : "!bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"}`}
             disabled={!businessPlanVisible || !file || uploading || uploaded || loadingStatus}
             shape="rounded"
           />

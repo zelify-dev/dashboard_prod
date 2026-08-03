@@ -90,7 +90,7 @@ export function AmlPageContent() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1080px]">
+    <div className="w-full space-y-6">
       <Breadcrumb pageName="Documentación AML" />
 
       <div className="mb-6">
@@ -101,7 +101,7 @@ export function AmlPageContent() {
         </p>
       </div>
 
-      <div className="rounded-sm border border-stroke bg-white px-5 pb-8 pt-6 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5">
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
         {!amlOnboardingEnabled && (
           <div
             className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
@@ -119,7 +119,7 @@ export function AmlPageContent() {
 
           {locked && (
             <div
-              className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-100"
+              className="mb-6 rounded-xl border border-emerald-100 bg-emerald-50/40 p-4 text-xs font-light text-emerald-700"
               role="status"
             >
               <span className="font-semibold">Documentación AML ya enviada.</span>{" "}
@@ -130,7 +130,7 @@ export function AmlPageContent() {
             </div>
           )}
 
-          <div className="mb-6 flex items-start gap-3 rounded-lg bg-[#EBF5FF] px-4 py-3 text-[#1C64F2] dark:bg-blue-900/30 dark:text-blue-400">
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/40 p-4 text-xs font-light text-blue-700">
             <InfoIcon className="mt-0.5 shrink-0" />
             <div className="text-sm">
               <span className="font-semibold block mb-0.5">
@@ -144,7 +144,7 @@ export function AmlPageContent() {
           </div>
 
           <div className="mb-6 grid gap-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
+            <div className="rounded-xl border border-gray-100 bg-gray-50/40 p-4">
               <h4 className="mb-2 text-sm font-semibold text-black dark:text-white">
                 Sección 2 - Documentación PLD/AML y tratamiento de datos personales
               </h4>
@@ -193,7 +193,7 @@ export function AmlPageContent() {
                 variant="primary"
                 size="small"
                 shape="rounded"
-                className="pointer-events-none mb-3 !bg-[#004196] hover:!bg-[#004196]/90"
+                className="pointer-events-none mb-3 !bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
                 type="button"
               />
 
@@ -229,7 +229,7 @@ export function AmlPageContent() {
             className={`w-full sm:w-auto ${
               !amlOnboardingEnabled || !file || submitting
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
-                : "!bg-[#004196] hover:!bg-[#004196]/90"
+                : "!bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
             }`}
             disabled={!amlOnboardingEnabled || locked || !file || submitting}
             shape="rounded"
