@@ -113,9 +113,13 @@ export function MembersTable({
     }
 
     const rect = event.currentTarget.getBoundingClientRect();
+    const menuHeight = 260;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUpwards = spaceBelow < menuHeight && rect.top > menuHeight;
+
     setMenuPosition({
-      top: rect.bottom + 8,
-      left: Math.max(12, rect.right - 192),
+      top: openUpwards ? rect.top - menuHeight - 8 : rect.bottom + 8,
+      left: Math.max(12, rect.right - 210),
     });
     setOpenActionsId(userId);
   };

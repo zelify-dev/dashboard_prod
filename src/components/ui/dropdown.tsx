@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { cn } from "@/lib/utils";
 import { SetStateActionType } from "@/types/set-state-action-type";
@@ -9,12 +10,14 @@ import {
   useContext,
   useEffect,
   useRef,
+  useState,
 } from "react";
 
 type DropdownContextType = {
   isOpen: boolean;
   handleOpen: () => void;
   handleClose: () => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
 };
 
 const DropdownContext = createContext<DropdownContextType | null>(null);
@@ -35,6 +38,7 @@ type DropdownProps = {
 
 export function Dropdown({ children, isOpen, setIsOpen }: DropdownProps) {
   const triggerRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Escape") {
@@ -45,11 +49,7 @@ export function Dropdown({ children, isOpen, setIsOpen }: DropdownProps) {
   useEffect(() => {
     if (isOpen) {
       triggerRef.current = document.activeElement as HTMLElement;
-
-      document.body.style.pointerEvents = "none";
     } else {
-      document.body.style.removeProperty("pointer-events");
-
       setTimeout(() => {
         triggerRef.current?.focus();
       }, 0);
@@ -65,8 +65,8 @@ export function Dropdown({ children, isOpen, setIsOpen }: DropdownProps) {
   }
 
   return (
-    <DropdownContext.Provider value={{ isOpen, handleOpen, handleClose }}>
-      <div className="relative" onKeyDown={handleKeyDown}>
+    <DropdownContext.Provider value={{ isOpen, handleOpen, handleClose, containerRef }}>
+      <div ref={containerRef} className="relative inline-block" onKeyDown={handleKeyDown}>
         {children}
       </div>
     </DropdownContext.Provider>
@@ -84,32 +84,80 @@ export function DropdownContent({
   align = "center",
   className,
 }: DropdownContentProps) {
-  const { isOpen, handleClose } = useDropdownContext();
+  const { isOpen, handleClose, containerRef } = useDropdownContext();
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
 
   const contentRef = useClickOutside<HTMLDivElement>(() => {
     if (isOpen) handleClose();
   });
 
+  const updatePosition = () => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const menuElement = contentRef.current;
+    const menuHeight = menuElement?.offsetHeight || 280;
+    const menuWidth = menuElement?.offsetWidth || 200;
+
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUpwards = spaceBelow < menuHeight && rect.top > menuHeight;
+
+    let top = openUpwards ? rect.top - menuHeight - 8 : rect.bottom + 8;
+    // Asegurar que no se salga del tope de la pantalla
+    if (top < 12) top = 12;
+
+    let left = rect.left;
+    if (align === "end") {
+      left = rect.right - menuWidth;
+    } else if (align === "center") {
+      left = rect.left + rect.width / 2 - menuWidth / 2;
+    }
+
+    // Ajustar límites de pantalla horizontales
+    left = Math.max(12, Math.min(left, window.innerWidth - menuWidth - 12));
+
+    setCoords({ top, left });
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    updatePosition();
+    // Recalcular posición después de un frame para tener la altura real cargada
+    const frameId = requestAnimationFrame(updatePosition);
+
+    const handleScrollOrResize = () => updatePosition();
+    window.addEventListener("resize", handleScrollOrResize);
+    window.addEventListener("scroll", handleScrollOrResize, true);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", handleScrollOrResize);
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  return (
+  const contentMarkup = (
     <div
       ref={contentRef}
       role="menu"
       aria-orientation="vertical"
+      style={coords ? { top: `${coords.top}px`, left: `${coords.left}px` } : { visibility: "hidden" }}
       className={cn(
-        "fade-in-0 zoom-in-95 pointer-events-auto absolute z-99 mt-2 min-w-[8rem] origin-top-right rounded-lg",
-        {
-          "animate-in right-0": align === "end",
-          "left-0": align === "start",
-          "left-1/2 -translate-x-1/2": align === "center",
-        },
+        "fixed z-[99999] pointer-events-auto rounded-2xl shadow-2xl transition-all duration-150 animate-in fade-in zoom-in-95",
         className,
       )}
     >
       {children}
     </div>
   );
+
+  if (typeof document !== "undefined") {
+    return createPortal(contentMarkup, document.body);
+  }
+
+  return null;
 }
 
 type DropdownTriggerProps = React.HTMLAttributes<HTMLButtonElement> & {
