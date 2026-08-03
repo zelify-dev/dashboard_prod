@@ -173,12 +173,12 @@ export function BusinessInfoContent() {
           </div>
         ) : null}
 
-        <h3 className="mb-4 text-xs font-normal text-dark">Carga de Business Plan</h3>
+        <h3 className="mb-4 text-sm font-medium text-dark">Carga de Business Plan</h3>
 
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4 text-xs font-light text-dark-6">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs font-normal text-slate-700">
           <InfoIcon className="mt-0.5 shrink-0" />
           <div className="text-sm">
-            <span className="font-semibold block mb-0.5">Informacion importante</span>
+            <span className="font-medium text-dark block mb-0.5">Informacion importante</span>
             Sube el archivo de Business Plan para Mexico en formato PDF, DOC o
             DOCX. Debe incluir la descripcion del negocio, productos o
             servicios, mercado objetivo, modelo de ingresos, equipo directivo,
@@ -190,10 +190,10 @@ export function BusinessInfoContent() {
         </div>
 
         <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
-          <h4 className="mb-2 text-xs font-normal text-dark">
+          <h4 className="mb-2 text-sm font-medium text-dark">
             Sección 4 - Business plan y financiero
           </h4>
-          <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
+          <ul className="list-inside list-disc text-xs font-normal text-slate-700 pl-1 space-y-1.5">
             <li>Business Plan cargado en la plataforma Zelify</li>
             <li>Descripción del negocio, productos o servicios, mercado objetivo, modelo de ingresos y equipo directivo</li>
             <li>Proyecciones financieras, forecast, flujo de caja y P&amp;L proyectado</li>
@@ -229,7 +229,7 @@ export function BusinessInfoContent() {
 
           <div className="flex flex-col items-center justify-center text-center">
             <div className="mb-3 rounded-full bg-gray-100 p-3 dark:bg-meta-4">
-              <FileIcon className="text-dark-6" />
+              <FileIcon className="text-zelify-midnight shrink-0" />
             </div>
             <div className="mb-1 text-base text-[#111928] dark:text-white">
               <span className="font-normal">Arrastra y suelta tu Business Plan aqui</span>

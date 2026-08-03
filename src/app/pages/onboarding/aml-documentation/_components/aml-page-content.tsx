@@ -130,10 +130,10 @@ export function AmlPageContent() {
             </div>
           )}
 
-          <div className="mb-6 flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4 text-xs font-light text-dark-6">
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs font-normal text-slate-700">
             <InfoIcon className="mt-0.5 shrink-0" />
             <div className="text-sm">
-              <span className="font-semibold block mb-0.5">
+              <span className="font-medium text-dark block mb-0.5">
                 Información importante
               </span>
               Cargue la documentación relacionada con medidas Anti-Lavado de
@@ -145,10 +145,10 @@ export function AmlPageContent() {
 
           <div className="mb-6 grid gap-4">
             <div className="rounded-xl border border-gray-100 bg-gray-50/40 p-4">
-              <h4 className="mb-2 text-xs font-normal text-dark">
+              <h4 className="mb-2 text-sm font-medium text-dark">
                 Sección 2 - Documentación PLD/AML y tratamiento de datos personales
               </h4>
-              <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
+              <ul className="list-inside list-disc text-xs font-normal text-slate-700 pl-1 space-y-1.5">
                 <li>Política de PLD/AML de la empresa</li>
                 <li>Política de tratamiento de datos personales</li>
               </ul>
@@ -177,7 +177,7 @@ export function AmlPageContent() {
 
             <div className="flex flex-col items-center justify-center text-center">
               <div className="mb-3 rounded-full bg-gray-100 p-3 dark:bg-meta-4">
-                <ShieldCheckIcon className="text-dark-6" />
+                <ShieldCheckIcon className="text-zelify-midnight shrink-0" />
               </div>
 
               <div className="mb-1 text-base text-[#111928] dark:text-white">

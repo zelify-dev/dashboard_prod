@@ -374,10 +374,10 @@ export function TechnicalDocumentationPageContent() {
         <h2 className="text-xl font-bold leading-[30px] text-blue-700 dark:text-white">
           Documentación técnica
         </h2>
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4 text-xs font-light text-dark-6">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-xs font-normal text-slate-700">
           <InfoIcon className="mt-0.5 shrink-0" />
           <div className="text-sm">
-            <span className="font-semibold block mb-0.5">
+            <span className="font-medium text-dark block mb-0.5">
               Información importante
             </span>
             Cargue la documentación técnica requerida para la integración en
@@ -393,15 +393,15 @@ export function TechnicalDocumentationPageContent() {
           </div>
         </div>
 
-        <h3 className="mb-4 text-xs font-normal text-dark">
+        <h3 className="mb-4 text-sm font-medium text-dark">
           Ambientes de desarrollo
         </h3>
 
         <div className="mb-4 rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
-          <h4 className="mb-2 text-xs font-normal text-dark">
+          <h4 className="mb-2 text-sm font-medium text-dark">
             Sección 3.1 - Ambientes de desarrollo
           </h4>
-          <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
+          <ul className="list-inside list-disc text-xs font-normal text-slate-700 pl-1 space-y-1.5">
             <li>URLs de desarrollo registradas en el panel Zelify</li>
             <li>API Keys de desarrollo configuradas</li>
           </ul>
@@ -465,15 +465,15 @@ export function TechnicalDocumentationPageContent() {
 
         <div className="my-8 border-t border-stroke dark:border-strokedark"></div>
 
-        <h3 className="mb-4 text-xs font-normal text-dark">
+        <h3 className="mb-4 text-sm font-medium text-dark">
           Documentos requeridos
         </h3>
 
         <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
-          <h4 className="mb-2 text-xs font-normal text-dark">
+          <h4 className="mb-2 text-sm font-medium text-dark">
             Sección 3.2 - Documentos técnicos requeridos
           </h4>
-          <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
+          <ul className="list-inside list-disc text-xs font-normal text-slate-700 pl-1 space-y-1.5">
             <li>Diagrama de flujo de datos</li>
             <li>Política de seguridad</li>
             <li>Certificaciones aplicables (PCI DSS, ISO 27001, SOC 2, entre otras)</li>
@@ -487,7 +487,7 @@ export function TechnicalDocumentationPageContent() {
           subLabel="ZIP"
           accept=".pdf,.doc,.docx,.zip"
           icon={
-            <FlowChartIcon className="text-dark-6" />
+            <FlowChartIcon className="text-zelify-midnight shrink-0" />
           }
           file={diagramFile}
           onFileChange={setDiagramFile}
@@ -499,7 +499,7 @@ export function TechnicalDocumentationPageContent() {
           label="Política de seguridad"
           accept=".pdf,.doc,.docx" // Image says max 20MB
           icon={
-            <LockIcon className="text-dark-6" />
+            <LockIcon className="text-zelify-midnight shrink-0" />
           }
           file={securityFile}
           onFileChange={setSecurityFile}
@@ -510,14 +510,14 @@ export function TechnicalDocumentationPageContent() {
 
         {/* Certificaciones */}
         <div className="mb-6">
-          <h3 className="mb-4 text-xs font-normal text-dark">
+          <h3 className="mb-4 text-sm font-medium text-dark">
             Certificaciones
           </h3>
           <FileUploadArea
             label="" // Empty label as header is above
             accept=".pdf,.doc,.docx"
             icon={
-              <CheckCircleIcon className="text-dark-6" />
+              <CheckCircleIcon className="text-zelify-midnight shrink-0" />
             }
             file={certificationFile}
             onFileChange={setCertificationFile}
@@ -530,14 +530,14 @@ export function TechnicalDocumentationPageContent() {
 
         {/* Documentacion de procesos */}
         <div className="mb-6">
-          <h3 className="mb-4 text-xs font-normal text-dark">
+          <h3 className="mb-4 text-sm font-medium text-dark">
             Documentación de procesos
           </h3>
           <FileUploadArea
             label=""
             accept=".pdf,.doc,.docx"
             icon={
-              <ClipboardIcon className="text-dark-6" />
+              <ClipboardIcon className="text-zelify-midnight shrink-0" />
             }
             file={processFile}
             onFileChange={setProcessFile}
