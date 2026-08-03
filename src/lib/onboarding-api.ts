@@ -647,11 +647,15 @@ export type OnboardingVisibilityPatchPayload = {
   business_plan: boolean;
 };
 
-/** GET /api/organizations/:organizationId/onboarding-visibility */
+/** GET /api/organizations/onboarding/visibility con header x-org-id */
 export async function getOrganizationOnboardingVisibility(
   organizationId: string
 ): Promise<OnboardingVisibility> {
-  const res = await fetchWithAuth(`/api/organizations/${encodeURIComponent(organizationId)}/onboarding-visibility`);
+  const res = await fetchWithAuth(`/api/organizations/onboarding/visibility`, {
+    headers: {
+      "x-org-id": organizationId,
+    },
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new AuthError(
@@ -663,17 +667,22 @@ export async function getOrganizationOnboardingVisibility(
   return parseOnboardingVisibilityPayload(data);
 }
 
-/** PATCH /api/organizations/:organizationId/onboarding-visibility */
+/** PATCH /api/organizations/onboarding/visibility con header x-org-id */
 export async function updateOrganizationOnboardingVisibility(
   organizationId: string,
   payload: OnboardingVisibilityPatchPayload
 ): Promise<{ ok: boolean }> {
   const res = await fetchWithAuth(
-    `/api/organizations/${encodeURIComponent(organizationId)}/onboarding-visibility`,
+    `/api/organizations/onboarding/visibility`,
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers: { 
+        "Content-Type": "application/json",
+        "x-org-id": organizationId,
+      },
+      body: JSON.stringify({
+        onboarding_visibility: payload,
+      }),
     }
   );
   const data = await res.json().catch(() => ({}));
