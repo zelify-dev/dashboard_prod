@@ -141,7 +141,7 @@ const applyBrandingPreview = (
   },
 ) => {
   const url = (branding.logoUrl ?? "").trim();
-  const primaryColor = (branding.primaryColor ?? "").trim() || "#004195";
+  const primaryColor = (branding.primaryColor ?? "").trim() || "#000016";
   const secondaryColor = (branding.secondaryColor ?? "").trim() || "#6AFF00";
   const companyName = (branding.companyName ?? "").trim() || "Zelify S.A";
   const year = String(new Date().getFullYear());
@@ -1072,7 +1072,7 @@ export function NotificationsPageContent() {
 	                  const presetDescription = CATEGORY_PRESETS.find((item) => item.name === value)?.description ?? "";
 	                  if (presetDescription) setNewGroupDescription(presetDescription);
 	                }}
-	                className="flex-1 rounded-full border border-stroke bg-white px-4 py-2 text-sm text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+	                className="flex-1 rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none focus:border-gray-200"
 	              >
 	                <option value="">{translations.categories.newNamePlaceholder}</option>
 	                {CATEGORY_PRESETS.map((preset) => (
@@ -1084,7 +1084,7 @@ export function NotificationsPageContent() {
 	              <button
 	                onClick={handleCreateGroup}
 	                disabled={!newGroupName.trim()}
-	                className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
+	                className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95"
 	              >
 	                {translations.categories.createButton}
 	              </button>
@@ -1253,7 +1253,7 @@ export function NotificationsPageContent() {
                 <button
                   type="button"
                   onClick={handleStartNewTemplate}
-                  className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/90"
+                  className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95"
                 >
                   {translations.createTemplate.newButton}
                 </button>
@@ -1284,8 +1284,7 @@ export function NotificationsPageContent() {
                   readOnly={isEditingTemplate}
                   className={cn(
                     "w-full rounded-full border border-stroke px-4 py-2 text-sm outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white",
-                    isEditingTemplate &&
-                      "cursor-not-allowed bg-slate-50 text-dark/70 dark:bg-dark-3 dark:text-white/70 focus:border-stroke",
+                    isEditingTemplate && "cursor-not-allowed bg-gray-100/60 text-dark-6 focus:border-gray-100",
                   )}
                   placeholder={translations.createTemplate.templateNamePlaceholder}
                 />
@@ -1300,7 +1299,7 @@ export function NotificationsPageContent() {
                 <input
                   value={previewFrom}
                   onChange={(event) => setPreviewFrom(event.target.value)}
-                  className="w-full rounded-full border border-stroke px-4 py-2 text-sm outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                  className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none focus:border-gray-200"
                   placeholder="notifications@zelify.com"
                 />
               </div>
@@ -1311,7 +1310,7 @@ export function NotificationsPageContent() {
                 <input
                   value={previewSubject}
                   onChange={(event) => setPreviewSubject(event.target.value)}
-                  className="w-full rounded-full border border-stroke px-4 py-2 text-sm outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                  className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none focus:border-gray-200"
                 />
               </div>
             </div>
@@ -1383,7 +1382,7 @@ export function NotificationsPageContent() {
             <button
               onClick={handleCreateTemplate}
               disabled={templateSubmitStatus === "loading"}
-              className="rounded-full bg-primary px-6 py-2 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/40"
+              className="rounded-xl bg-zelify-midnight px-5 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
             >
               {templateSubmitStatus === "loading"
                 ? translations.createTemplate.saving

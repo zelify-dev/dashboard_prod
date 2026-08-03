@@ -464,7 +464,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={() => router.push("/pages/products/notifications")}
-          className="inline-flex items-center gap-2 rounded-full border border-stroke px-4 py-2 text-sm font-semibold text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white dark:hover:border-primary"
+          className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95"
         >
           ← {translations.categorySelector.title}
         </button>
@@ -472,14 +472,14 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="rounded-full border border-rose-400 px-5 py-2 text-sm font-semibold text-rose-500 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-500 dark:text-rose-200"
+            className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-xs font-light text-rose-600 transition hover:bg-rose-50 active:scale-95 disabled:opacity-50"
           >
             {isDeleting ? t.deleteProgress : translations.previewPanel.delete}
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="rounded-full border border-stroke px-5 py-2 text-sm font-semibold text-dark transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 dark:border-dark-3 dark:text-white dark:hover:border-primary"
+            className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
           >
             {isSaving ? t.saveProgress : translations.previewPanel.save}
           </button>
@@ -487,10 +487,10 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
             onClick={handleActivate}
             disabled={isActivating || isActive}
             className={cn(
-              "rounded-full px-6 py-2 text-sm font-semibold text-white transition",
+              "rounded-xl px-4 py-2 text-xs font-light text-white transition active:scale-95",
               isActive
                 ? "bg-emerald-500 cursor-not-allowed"
-                : "bg-primary hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-primary/50",
+                : "bg-zelify-midnight hover:bg-black text-white disabled:opacity-50",
             )}
           >
             {isActivating ? t.activateProgress : translations.previewPanel.activate}
@@ -571,7 +571,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
                 <input
                   value={previewFrom}
                   onChange={(event) => setPreviewFrom(event.target.value)}
-                  className="w-full rounded-full border border-white/20 bg-transparent px-4 py-2 text-sm text-white outline-none focus:border-primary"
+                  className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-light text-white outline-none focus:border-white/40"
                   placeholder="notifications@zelify.com"
                 />
               </div>
@@ -580,7 +580,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
                 <input
                   value={previewSubject}
                   onChange={(event) => setPreviewSubject(event.target.value)}
-                  className="w-full rounded-full border border-white/20 bg-transparent px-4 py-2 text-sm text-white outline-none focus:border-primary"
+                  className="w-full rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-xs font-light text-white outline-none focus:border-white/40"
                   placeholder={translations.createTemplate.subjectPlaceholder}
                 />
               </div>
