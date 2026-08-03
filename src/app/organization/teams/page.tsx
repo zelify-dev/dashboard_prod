@@ -409,10 +409,30 @@ export default function TeamsPage() {
     } catch {
       setEditRolesUser(null);
     }
+  };  const handleSendInviteEmail = async (user: OrgUserListItem) => {
+    if (!orgId) return;
+    try {
+      await sendDashboardMemberInviteEmail(orgId, user.id, {});
+      setMembersError("");
+    } catch (err: unknown) {
+      setMembersError(err instanceof Error ? err.message : "Error al enviar correo de invitación.");
+    }
   };
 
-  const m = translations.membersManagement;  return (
-    <div className="mx-auto w-full max-w-[1200px]">
+  const handleSendResetEmail = async (user: OrgUserListItem) => {
+    if (!orgId) return;
+    try {
+      await sendDashboardMemberResetPasswordEmail(orgId, user.id, {});
+      setMembersError("");
+    } catch (err: unknown) {
+      setMembersError(err instanceof Error ? err.message : "Error al enviar correo de restablecimiento.");
+    }
+  };
+
+  const m = translations.membersManagement;
+
+  return (
+    <div className="w-full space-y-6">
       <Breadcrumb pageName={translations.sidebar.menuItems.subItems.teams} />
       {canManageMembers && orgId ? (
         <>
@@ -427,7 +447,7 @@ export default function TeamsPage() {
                 setAddError("");
                 setAddModalOpen(true);
               }}
-              className="flex items-center gap-2 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-zelify-midnight/90 active:scale-95"
+              className="flex items-center gap-2 rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition-all hover:bg-black active:scale-95"
             >
               <svg className="h-4 w-4 text-zelify-green" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -438,7 +458,7 @@ export default function TeamsPage() {
 
           <div className="rounded-2xl border border-gray-100 bg-white py-5 px-6">
             {membersError && (
-              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-light text-red-600">
+              <div className="mb-4 rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs font-light text-rose-600">
                 {membersError}
               </div>
             )}
@@ -457,6 +477,8 @@ export default function TeamsPage() {
               onDisable={handleDisable}
               onEnable={handleEnable}
               onResetPassword={(u) => setResetUser(u)}
+              onSendInviteEmail={handleSendInviteEmail}
+              onSendResetEmail={handleSendResetEmail}
               loading={membersLoading}
             />
           </div>

@@ -20,6 +20,8 @@ type MembersTableProps = {
   onDisable: (user: OrgUserListItem) => void;
   onEnable: (user: OrgUserListItem) => void;
   onResetPassword: (user: OrgUserListItem) => void;
+  onSendInviteEmail?: (user: OrgUserListItem) => void;
+  onSendResetEmail?: (user: OrgUserListItem) => void;
   loading?: boolean;
 };
 
@@ -38,6 +40,8 @@ export function MembersTable({
   onDisable,
   onEnable,
   onResetPassword,
+  onSendInviteEmail,
+  onSendResetEmail,
   loading = false,
 }: MembersTableProps) {
   const t = useUiTranslations();
@@ -77,27 +81,27 @@ export function MembersTable({
     if (user.status === "DISABLED") {
       return {
         label: m.statusDisabled,
-        className: "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider bg-gray-100 text-dark-6 border border-gray-200/50",
+        className: "inline-flex items-center rounded-xl px-2.5 py-0.5 text-[10px] font-normal uppercase tracking-wider bg-white text-slate-400 border border-gray-200/80",
       };
     }
 
-    if (user.must_change_password) {
+    if (user.pending_first_login || user.must_change_password) {
       return {
-        label: m.pendingBadge,
-        className: "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-200/40",
+        label: "Requiere cambio de contraseña",
+        className: "inline-flex items-center rounded-xl px-2.5 py-0.5 text-[10px] font-normal uppercase tracking-wider bg-white text-amber-600 border border-gray-200/80",
       };
     }
 
     if (user.status === "PENDING") {
       return {
         label: m.statusPending,
-        className: "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider bg-orange-50 text-orange-600 border border-orange-200/40",
+        className: "inline-flex items-center rounded-xl px-2.5 py-0.5 text-[10px] font-normal uppercase tracking-wider bg-white text-amber-600 border border-gray-200/80",
       };
     }
 
     return {
       label: m.statusActive,
-      className: "inline-flex items-center rounded-lg px-2.5 py-1 text-[10px] font-light uppercase tracking-wider bg-zelify-midnight text-zelify-green",
+      className: "inline-flex items-center rounded-xl px-2.5 py-0.5 text-[10px] font-normal uppercase tracking-wider bg-white text-emerald-600 border border-gray-200/80",
     };
   };
 
@@ -180,14 +184,21 @@ export function MembersTable({
                     <span className="text-sm font-light text-dark-6">{getRoleDisplay(user)}</span>
                   </td>
                   <td className="px-4 py-3">
-                    {(() => {
-                      const statusDisplay = getStatusDisplay(user);
-                      return (
-                        <span className={statusDisplay.className}>
-                          {statusDisplay.label}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {(() => {
+                        const statusDisplay = getStatusDisplay(user);
+                        return (
+                          <span className={statusDisplay.className}>
+                            {statusDisplay.label}
+                          </span>
+                        );
+                      })()}
+                      {user.dashboard_otp_enabled && (
+                        <span className="inline-flex items-center rounded-xl border border-blue-200/40 bg-white px-2 py-0.5 text-[9px] font-normal text-blue-600 uppercase">
+                          OTP Activo
                         </span>
-                      );
-                    })()}
+                      )}
+                    </div>
                   </td>
                   <td className="relative px-4 py-3">
                     <button
@@ -240,7 +251,7 @@ export function MembersTable({
             <>
               <div className="fixed inset-0 z-[9998]" aria-hidden onClick={closeActions} />
               <div
-                className="fixed z-[9999] w-48 rounded-xl border border-gray-100 bg-white py-1.5 shadow-xl animate-in fade-in duration-100"
+                className="fixed z-[9999] w-52 rounded-xl border border-gray-100 bg-white py-1.5 shadow-xl animate-in fade-in duration-100"
                 style={{ top: menuPosition.top, left: menuPosition.left }}
               >
                 <button
@@ -296,6 +307,30 @@ export function MembersTable({
                 >
                   {m.resetPassword}
                 </button>
+                {onSendInviteEmail && (
+                  <button
+                    type="button"
+                    className="w-full px-4 py-2 text-left text-xs font-light text-dark-6 hover:bg-gray-50 hover:text-dark transition"
+                    onClick={() => {
+                      onSendInviteEmail(activeUser);
+                      closeActions();
+                    }}
+                  >
+                    Enviar invitación por correo
+                  </button>
+                )}
+                {onSendResetEmail && (
+                  <button
+                    type="button"
+                    className="w-full px-4 py-2 text-left text-xs font-light text-dark-6 hover:bg-gray-50 hover:text-dark transition"
+                    onClick={() => {
+                      onSendResetEmail(activeUser);
+                      closeActions();
+                    }}
+                  >
+                    Enviar correo de restablecimiento
+                  </button>
+                )}
               </div>
             </>,
             document.body
