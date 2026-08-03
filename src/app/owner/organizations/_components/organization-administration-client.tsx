@@ -282,17 +282,17 @@ export function OrganizationAdministrationClient() {
         <div className="overflow-hidden rounded-xl border border-stroke dark:border-dark-3">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1120px] text-left text-xs">
-              <thead className="bg-gray-50/50 border-b border-gray-100 text-[10px] uppercase tracking-wider text-dark-6">
+              <thead className="bg-gray-50/50 border-b border-gray-100 text-[10px] uppercase tracking-wider text-dark">
                 <tr>
-                  <th className="px-4 py-3 font-normal">Organizacion</th>
-                  <th className="px-4 py-3 font-normal">Tipo</th>
-                  <th className="px-4 py-3 font-normal">Estado</th>
-                  <th className="px-4 py-3 font-normal">Entorno</th>
-                  <th className="px-4 py-3 font-normal">Pais / Moneda</th>
-                  <th className="px-4 py-3 font-normal">Legal / Fiscal</th>
-                  <th className="px-4 py-3 font-normal">Permisos</th>
-                  <th className="px-4 py-3 font-normal">Onboarding</th>
-                  <th className="px-4 py-3 font-normal text-right pr-6">Acciones</th>
+                  <th className="px-4 py-3 font-semibold">Organizacion</th>
+                  <th className="px-4 py-3 font-semibold">Tipo</th>
+                  <th className="px-4 py-3 font-semibold">Estado</th>
+                  <th className="px-4 py-3 font-semibold">Entorno</th>
+                  <th className="px-4 py-3 font-semibold">Pais / Moneda</th>
+                  <th className="px-4 py-3 font-semibold">Legal / Fiscal</th>
+                  <th className="px-4 py-3 font-semibold">Permisos</th>
+                  <th className="px-4 py-3 font-semibold">Onboarding</th>
+                  <th className="px-4 py-3 font-semibold text-right pr-6">Acciones</th>
                 </tr>
               </thead>
               <tbody>
