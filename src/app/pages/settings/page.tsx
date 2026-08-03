@@ -10,10 +10,10 @@ export default function SettingsPage() {
   const translations = useUiTranslations();
 
   return (
-    <div className="mx-auto max-w-270">
+    <div className="w-full space-y-6">
       <Breadcrumb pageName={translations.settings.pageTitle} />
 
-      <div className="grid grid-cols-5 gap-8 items-stretch">
+      <div className="grid grid-cols-5 gap-6 items-stretch">
         <div className="col-span-5 xl:col-span-3 flex flex-col">
           <PersonalInfoForm />
         </div>

@@ -188,110 +188,110 @@ export function PersonalInfoForm() {
       <ShowcaseSection 
         title={translations.settings.personalInformation} 
         rootClassName="h-full"
-        className="!p-7 h-full flex flex-col"
+        className="!p-6 h-full flex flex-col"
       >
         {(error || success) && (
           <div className={cn(
-            "mb-6 rounded-lg p-4 text-sm font-medium",
-            error ? "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400" : "bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400"
+            "mb-6 rounded-xl p-3 text-xs font-light border",
+            error ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
           )}>
             {error || success}
           </div>
         )}
 
-        <form onSubmit={handleBasicUpdate} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputGroup
-              type="text"
-              name="fullName"
-              label={translations.settings.fullName}
-              placeholder="Nombre Completo"
-              defaultValue={userData?.full_name || ""}
-              icon={<UserIcon />}
-              iconPosition="left"
-              height="sm"
-              required
-            />
-            
-            <InputGroup
-              type="text"
-              name="username"
-              label={translations.settings.username}
-              placeholder="usuario"
-              defaultValue={(userData as any).username || ""}
-              icon={<UserIcon />}
-              iconPosition="left"
-              height="sm"
-              readOnly
-              customInputClassName="bg-gray-2 dark:bg-dark-3"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-dark dark:text-white">
-                  {translations.settings.phoneNumber}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPhoneModal(true);
-                    setOtpStep(1);
-                  }}
-                  className="text-xs font-semibold text-primary hover:underline"
-                >
-                  Cambiar
-                </button>
-              </div>
+        <form onSubmit={handleBasicUpdate} className="space-y-6 flex-grow flex flex-col justify-between">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputGroup
-                label=""
-                placeholder=""
                 type="text"
-                readOnly
-                value={(userData as any)?.phone || "No proporcionado"}
-                icon={<CallIcon />}
+                name="fullName"
+                label={translations.settings.fullName}
+                placeholder="Nombre Completo"
+                defaultValue={userData?.full_name || ""}
+                icon={<UserIcon />}
                 iconPosition="left"
                 height="sm"
-                customInputClassName="bg-gray-2 dark:bg-dark-3"
+                required
+              />
+              
+              <InputGroup
+                type="text"
+                name="username"
+                label={translations.settings.username}
+                placeholder="usuario"
+                defaultValue={(userData as any).username || ""}
+                icon={<UserIcon />}
+                iconPosition="left"
+                height="sm"
+                readOnly
+                customInputClassName="bg-gray-50/50 text-dark-6 border-gray-100"
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-dark dark:text-white">
-                  {translations.settings.emailAddress}
-                </label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmailModal(true);
-                    setOtpStep(1);
-                  }}
-                  className="text-xs font-semibold text-primary hover:underline"
-                >
-                  Cambiar
-                </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-normal text-dark">
+                    {translations.settings.phoneNumber}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPhoneModal(true);
+                      setOtpStep(1);
+                    }}
+                    className="text-xs font-light text-dark-6 hover:text-dark hover:underline transition"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+                <InputGroup
+                  label=""
+                  placeholder=""
+                  type="text"
+                  readOnly
+                  value={(userData as any)?.phone || "No proporcionado"}
+                  icon={<CallIcon />}
+                  iconPosition="left"
+                  height="sm"
+                  customInputClassName="bg-gray-50/50 text-dark-6 border-gray-100"
+                />
               </div>
-              <InputGroup
-                label=""
-                placeholder=""
-                type="email"
-                readOnly
-                value={userData?.email || ""}
-                icon={<EmailIcon />}
-                iconPosition="left"
-                height="sm"
-                customInputClassName="bg-gray-2 dark:bg-dark-3"
-              />
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-normal text-dark">
+                    {translations.settings.emailAddress}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmailModal(true);
+                      setOtpStep(1);
+                    }}
+                    className="text-xs font-light text-dark-6 hover:text-dark hover:underline transition"
+                  >
+                    Cambiar
+                  </button>
+                </div>
+                <InputGroup
+                  label=""
+                  placeholder=""
+                  type="email"
+                  readOnly
+                  value={userData?.email || ""}
+                  icon={<EmailIcon />}
+                  iconPosition="left"
+                  height="sm"
+                  customInputClassName="bg-gray-50/50 text-dark-6 border-gray-100"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="flex-grow" />
-
-          <div className="mt-8 flex justify-end gap-3 border-t border-stroke pt-6 dark:border-dark-3">
+          <div className="mt-8 flex justify-end gap-3 border-t border-gray-100 pt-6">
             <button
-              className="rounded-lg border border-stroke px-8 py-[9px] text-sm font-semibold text-dark hover:bg-gray-2 transition-all dark:border-dark-3 dark:text-white dark:hover:bg-dark-3"
+              className="rounded-xl border border-gray-200 bg-white px-5 py-2 text-xs font-light text-dark hover:bg-gray-50 transition active:scale-95"
               type="button"
               onClick={() => window.location.reload()}
             >
@@ -299,7 +299,7 @@ export function PersonalInfoForm() {
             </button>
 
             <button
-              className="flex items-center justify-center rounded-lg bg-primary px-8 py-[9px] text-sm font-semibold text-white shadow-sm transition-all hover:bg-opacity-90 disabled:opacity-50"
+              className="flex items-center justify-center rounded-xl bg-zelify-midnight px-5 py-2 text-xs font-light text-white transition active:scale-95 hover:bg-black disabled:opacity-50"
               type="submit"
               disabled={saving}
             >

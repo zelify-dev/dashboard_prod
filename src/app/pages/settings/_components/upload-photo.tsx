@@ -55,91 +55,92 @@ export function UploadPhotoForm() {
     <ShowcaseSection 
       title={translations.settings.yourPhoto} 
       rootClassName="h-full"
-      className="!p-7 h-full flex flex-col"
+      className="!p-6 h-full flex flex-col justify-between"
     >
-      <div className="mb-6 flex items-center gap-4">
-        <div className="relative size-16 overflow-hidden rounded-full border-2 border-stroke dark:border-dark-3 bg-gray-2 dark:bg-dark-3 flex items-center justify-center shadow-sm">
-          {photoUrl ? (
-            <Image
-              src={photoUrl}
-              fill
-              alt="User"
-              className="object-cover"
-              quality={90}
-              unoptimized={photoUrl.startsWith("http")}
-            />
-          ) : (
-            <div className="text-dark-6">
-              <UserIcon className="size-10" />
-            </div>
-          )}
-          {isUploading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-              <svg className="h-6 w-6 animate-spin text-white" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-            </div>
-          )}
-        </div>
-
-        <div>
-          <span className="mb-1 block text-lg font-bold text-dark dark:text-white">
-            {translations.settings.editYourPhoto}
-          </span>
-          <span className="flex gap-4">
-            <button 
-              type="button" 
-              className="text-sm font-semibold text-dark-6 hover:text-red transition-colors"
-              onClick={() => setError("Funcionalidad de eliminar pronto disponible")}
-            >
-              {translations.settings.delete}
-            </button>
-            <label 
-              htmlFor="profilePhoto" 
-              className="cursor-pointer text-sm font-semibold text-primary hover:underline transition-all"
-            >
-              {translations.settings.update}
-            </label>
-          </span>
-        </div>
-      </div>
-
-      <div className={cn(
-        "relative mb-6 block w-full rounded-2xl border-2 border-dashed border-gray-4 bg-gray-2 transition-all hover:border-primary hover:bg-gray-3 dark:border-dark-3 dark:bg-dark-2 dark:hover:border-primary dark:hover:bg-dark-3",
-        isUploading && "opacity-50 pointer-events-none"
-      )}>
-        <input
-          type="file"
-          name="profilePhoto"
-          id="profilePhoto"
-          accept="image/png, image/jpg, image/jpeg, image/webp"
-          onChange={handleFileChange}
-          hidden
-        />
-
-        <label
-          htmlFor="profilePhoto"
-          className="flex cursor-pointer flex-col items-center justify-center py-12 px-4"
-        >
-          <div className="flex size-14 items-center justify-center rounded-2xl border border-stroke bg-white dark:border-dark-3 dark:bg-gray-dark shadow-sm group-hover:scale-110 transition-transform">
-            <UploadIcon className="text-primary" />
+      <div>
+        <div className="mb-6 flex items-center gap-4">
+          <div className="relative size-14 overflow-hidden rounded-full border border-gray-200 bg-gray-50 flex items-center justify-center">
+            {photoUrl ? (
+              <Image
+                src={photoUrl}
+                fill
+                alt="User"
+                className="object-cover"
+                quality={90}
+                unoptimized={photoUrl.startsWith("http")}
+              />
+            ) : (
+              <div className="text-dark-6">
+                <UserIcon className="size-8" />
+              </div>
+            )}
+            {isUploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                <svg className="h-5 w-5 animate-spin text-white" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              </div>
+            )}
           </div>
 
-          <p className="mt-4 text-sm font-bold">
-            <span className="text-primary">{translations.settings.clickToUpload}</span> 
-            <span className="text-dark-6 ml-1 font-medium">{translations.settings.orDragAndDrop}</span>
-          </p>
+          <div>
+            <span className="mb-1 block text-sm font-normal text-dark">
+              {translations.settings.editYourPhoto}
+            </span>
+            <span className="flex gap-3">
+              <button 
+                type="button" 
+                className="text-xs font-light text-dark-6 hover:text-rose-600 transition-colors"
+                onClick={() => setError("Funcionalidad de eliminar pronto disponible")}
+              >
+                {translations.settings.delete}
+              </button>
+              <label 
+                htmlFor="profilePhoto" 
+                className="cursor-pointer text-xs font-normal text-dark hover:underline transition-all"
+              >
+                {translations.settings.update}
+              </label>
+            </span>
+          </div>
+        </div>
 
-          <p className="mt-2 text-xs text-dark-6 font-medium">
-            {translations.settings.fileFormats} (Max 4.5MB)
-          </p>
-        </label>
+        <div className={cn(
+          "relative mb-4 block w-full rounded-2xl border border-dashed border-gray-200 bg-gray-50/40 transition-all hover:bg-gray-50",
+          isUploading && "opacity-50 pointer-events-none"
+        )}>
+          <input
+            type="file"
+            name="profilePhoto"
+            id="profilePhoto"
+            accept="image/png, image/jpg, image/jpeg, image/webp"
+            onChange={handleFileChange}
+            hidden
+          />
+
+          <label
+            htmlFor="profilePhoto"
+            className="flex cursor-pointer flex-col items-center justify-center py-8 px-4 text-center"
+          >
+            <div className="flex size-11 items-center justify-center rounded-xl border border-gray-100 bg-white shadow-sm mb-3">
+              <UploadIcon className="text-zelify-midnight size-5" />
+            </div>
+
+            <p className="text-xs font-normal text-dark">
+              {translations.settings.clickToUpload} <span className="text-dark-6 font-light">{translations.settings.orDragAndDrop}</span>
+            </p>
+
+            <p className="mt-1 text-[11px] font-light text-dark-6">
+              {translations.settings.fileFormats} (Max 4.5MB)
+            </p>
+          </label>
+        </div>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-lg bg-red-50 p-3 text-xs font-semibold text-red-600 flex items-center gap-2 dark:bg-red-900/20 dark:text-red-400">
-          <div className="size-1.5 rounded-full bg-red-500" />
+        <div className="mt-2 rounded-xl bg-rose-50 p-2.5 text-xs font-light text-rose-600 border border-rose-100 flex items-center gap-2">
+          <div className="size-1.5 rounded-full bg-rose-500" />
           {error}
         </div>
       )}
