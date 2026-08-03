@@ -232,8 +232,8 @@ const IDENTITY_BIOMETRY_OPTIONS: SelectOption[] = [
   { value: "selfie_video", label: "selfie_video - Selfie con video" },
 ];
 const ADMIN_FORM_CONTROL_CLASS =
-  "h-7 w-full rounded-xl border border-stroke bg-white px-3.5 text-sm text-dark outline-none transition placeholder:text-dark-6 focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:placeholder:text-dark-6";
-const ADMIN_FORM_LABEL_CLASS = "block text-[12px] font-medium text-dark dark:text-white";
+  "w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200";
+const ADMIN_FORM_LABEL_CLASS = "block text-[10px] uppercase tracking-wider font-light text-dark-6 mb-1";
 
 function buildDefaultWorkflowFormState(): IdentityWorkflowFormState {
   return {
@@ -246,9 +246,9 @@ function buildDefaultWorkflowFormState(): IdentityWorkflowFormState {
 
 function statusBadgeClass(status: string | null | undefined): string {
   const normalized = (status ?? "").trim().toUpperCase();
-  if (normalized === "ACTIVE") return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300";
-  if (normalized === "PENDING") return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
-  return "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+  if (normalized === "ACTIVE") return "bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
+  if (normalized === "PENDING") return "bg-amber-50 border border-amber-100 text-amber-700 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
+  return "bg-gray-50 border border-gray-100 text-slate-600 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
 }
 
 function prettifyJson(value: unknown): string {
@@ -1588,7 +1588,7 @@ export function OrganizationAdministrationDetailClient() {
       <div className="mx-auto w-full max-w-[1440px]">
         <Breadcrumb pageName={PAGE_TITLE} />
         <div className="flex min-h-[40vh] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-zelify-midnight border-t-transparent" />
         </div>
       </div>
     );
@@ -1599,7 +1599,7 @@ export function OrganizationAdministrationDetailClient() {
       <div className="mx-auto w-full max-w-[1440px] space-y-4">
         <Breadcrumb pageName={PAGE_TITLE} />
         <ErrorAlert message={organizationError || "Organizacion no encontrada."} />
-        <Link href="/owner/organizations" className="text-sm font-medium text-primary hover:underline">
+        <Link href="/owner/organizations" className="text-xs font-light text-dark hover:underline">
           Volver al directorio global
         </Link>
       </div>
@@ -1617,7 +1617,7 @@ export function OrganizationAdministrationDetailClient() {
             <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusBadgeClass(organization.status)}`}>
               {organization.status}
             </span>
-            <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+            <span className="inline-block font-mono text-[10px] text-dark-6 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100/50">
               {organization.organization_type || "Sin tipo"}
             </span>
           </div>
@@ -1628,7 +1628,7 @@ export function OrganizationAdministrationDetailClient() {
         </div>
         <Link
           href="/owner/organizations"
-          className="rounded-lg border border-stroke px-4 py-2.5 text-sm font-medium text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
+          className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95"
         >
           Volver al directorio
         </Link>
@@ -1640,10 +1640,10 @@ export function OrganizationAdministrationDetailClient() {
             key={tab.id}
             type="button"
             onClick={() => updateTab(tab.id)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+            className={`rounded-xl px-4 py-2 text-xs font-light transition active:scale-95 ${
               activeTab === tab.id
-                ? "bg-primary text-white"
-                : "border border-stroke text-dark hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
+                ? "bg-zelify-midnight text-white"
+                : "border border-gray-200 bg-white text-dark hover:bg-gray-50"
             }`}
           >
             {tab.label}
@@ -1725,7 +1725,7 @@ export function OrganizationAdministrationDetailClient() {
                   onChange={(e) => toggleEnvironment(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-dark-3 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-primary"></div>
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-dark-3 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-slate-600 peer-checked:bg-zelify-midnight"></div>
               </label>
             </div>
             {generalError ? <ErrorAlert message={generalError} /> : null}
@@ -1733,7 +1733,7 @@ export function OrganizationAdministrationDetailClient() {
               <button
                 type="submit"
                 disabled={generalSaving}
-                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
               >
                 {generalSaving ? "Guardando..." : "Guardar información"}
               </button>
@@ -1808,7 +1808,7 @@ export function OrganizationAdministrationDetailClient() {
                   <button
                     type="submit"
                     disabled={brandingSaving}
-                    className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
                   >
                     {brandingSaving ? "Guardando..." : "Guardar marca"}
                   </button>
@@ -1869,7 +1869,7 @@ export function OrganizationAdministrationDetailClient() {
                   setMemberActionError("");
                   setMemberCreateOpen(true);
                 }}
-                className="rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white transition hover:bg-opacity-90"
+                className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95"
               >
                 Agregar miembro
               </button>
@@ -1915,7 +1915,7 @@ export function OrganizationAdministrationDetailClient() {
                   <thead className="bg-gray-2/70 dark:bg-dark-2/80">
                     <tr className="border-b border-stroke dark:border-dark-3">
                       <th className="px-4 py-3">
-                        <input type="checkbox" checked={allMembersOnPageSelected} onChange={toggleSelectAllMembersOnPage} className="h-4 w-4 rounded accent-primary" />
+                        <input type="checkbox" checked={allMembersOnPageSelected} onChange={toggleSelectAllMembersOnPage} className="h-4 w-4 rounded accent-zelify-midnight" />
                       </th>
                       <th className="px-4 py-3 font-medium text-dark dark:text-white">Miembro</th>
                       <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
@@ -1940,7 +1940,7 @@ export function OrganizationAdministrationDetailClient() {
                         return (
                           <tr key={member.id} className="border-b border-stroke transition hover:bg-gray-1/50 dark:border-dark-3 dark:hover:bg-dark-2/60">
                           <td className="px-4 py-4 align-top">
-                            <input type="checkbox" checked={selectedMemberIds.includes(member.id)} onChange={() => toggleMemberSelection(member.id)} className="mt-1 h-4 w-4 rounded accent-primary" />
+                            <input type="checkbox" checked={selectedMemberIds.includes(member.id)} onChange={() => toggleMemberSelection(member.id)} className="mt-1 h-4 w-4 rounded accent-zelify-midnight" />
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex items-start gap-3">
@@ -2215,7 +2215,7 @@ export function OrganizationAdministrationDetailClient() {
                     }
                   }}
                   disabled={scopesSaving || !selectedAssignableScope || availableScopesLoading}
-                  className="h-10 w-full sm:w-auto rounded-xl bg-primary hover:bg-opacity-90 text-white font-semibold px-5 text-xs transition disabled:opacity-50"
+                  className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
                 >
                   {scopesSaving ? "Asignando..." : "Asignar Permiso"}
                 </button>
@@ -2523,7 +2523,7 @@ export function OrganizationAdministrationDetailClient() {
                         <button
                           type="submit"
                           disabled={workflowSaving}
-                          className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                          className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
                         >
                           {workflowSaving
                             ? "Guardando..."
@@ -2553,7 +2553,7 @@ export function OrganizationAdministrationDetailClient() {
               type="button"
               onClick={() => void rotateKeys()}
               disabled={apiKeyActionLoading === "rotate"}
-              className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+              className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
             >
               {apiKeyActionLoading === "rotate" ? "Rotando..." : "Rotar claves API"}
             </button>
@@ -2667,7 +2667,7 @@ export function OrganizationAdministrationDetailClient() {
                       <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-dark-3 overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            item.val === 100 ? "bg-emerald-500" : "bg-primary"
+                            item.val === 100 ? "bg-emerald-500" : "bg-zelify-midnight"
                           }`}
                           style={{ width: `${item.val}%` }}
                         />
@@ -2893,7 +2893,7 @@ export function OrganizationAdministrationDetailClient() {
                 <button
                   type="submit"
                   disabled={memberActionLoading}
-                  className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
                 >
                   {memberActionLoading ? "Creando..." : "Crear miembro"}
                 </button>
@@ -3028,7 +3028,7 @@ export function OrganizationAdministrationDetailClient() {
                     type="button"
                     onClick={() => void executeMemberBatchAction()}
                     disabled={memberBatchLoading}
-                    className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
                   >
                     {memberBatchLoading ? "Procesando..." : memberBatchActionLabel(memberBatchAction)}
                   </button>
@@ -3216,7 +3216,7 @@ export function OrganizationAdministrationDetailClient() {
                         type="button"
                         onClick={() => void saveSelectedMember()}
                         disabled={memberActionLoading}
-                        className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                        className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95 disabled:opacity-50"
                       >
                         Guardar perfil
                       </button>
@@ -3746,7 +3746,7 @@ function ToggleField({
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="h-4 w-4 accent-primary"
+        className="h-4 w-4 accent-zelify-midnight"
       />
     </label>
   );
