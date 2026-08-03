@@ -214,7 +214,7 @@ function FileUploadArea({
             variant="primary"
             size="small"
             shape="rounded"
-            className="pointer-events-none mb-3 !bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
+            className="pointer-events-none mb-3 bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
             type="button"
           />
           {file ? (
@@ -458,7 +458,7 @@ export function TechnicalDocumentationPageContent() {
             variant="primary"
             onClick={handleSaveSandbox}
             disabled={!technicalVisible || savingDev || (!statusLoading && tf.developmentEnvironmentsLocked)}
-            className="w-full sm:w-auto !bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition disabled:opacity-60"
+            className="w-full sm:w-auto bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition disabled:opacity-60"
             shape="rounded"
           />
         </div>
@@ -565,7 +565,7 @@ export function TechnicalDocumentationPageContent() {
             className={`w-full sm:w-auto ${
               !technicalVisible || !canSubmit || submittingDocs
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
-                : "!bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
+                : "bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
             }`}
             disabled={!technicalVisible || !canSubmit || submittingDocs || statusLoading}
             shape="rounded"

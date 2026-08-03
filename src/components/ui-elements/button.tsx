@@ -2,27 +2,27 @@ import { cva, VariantProps } from "class-variance-authority";
 import type { ButtonHTMLAttributes } from "react";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2.5 text-center font-medium hover:bg-opacity-90 font-medium transition focus:outline-none",
+  "inline-flex items-center justify-center gap-2 text-center font-light transition active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
-        primary: "bg-primary text-white",
-        green: "bg-green text-white",
-        dark: "bg-dark text-white dark:bg-white/10",
+        primary: "bg-zelify-midnight hover:bg-black text-white",
+        green: "bg-emerald-600 hover:bg-emerald-700 text-white",
+        dark: "bg-dark hover:bg-black text-white",
         outlinePrimary:
-          "border border-primary hover:bg-primary/10 text-primary",
-        outlineGreen: "border border-green hover:bg-green/10 text-green",
+          "border border-gray-200 bg-white hover:bg-gray-50 text-dark",
+        outlineGreen: "border border-emerald-200 bg-white hover:bg-emerald-50 text-emerald-600",
         outlineDark:
-          "border border-dark hover:bg-dark/10 text-dark dark:hover:bg-white/10 dark:border-white/25 dark:text-white",
+          "border border-gray-200 bg-white hover:bg-gray-50 text-dark",
       },
       shape: {
-        default: "",
-        rounded: "rounded-[5px]",
-        full: "rounded-full",
+        default: "rounded-xl",
+        rounded: "rounded-xl",
+        full: "rounded-xl",
       },
       size: {
-        default: "py-3.5 px-10 py-3.5 lg:px-8 xl:px-10",
-        small: "py-[11px] px-6",
+        default: "py-2.5 px-5 text-xs",
+        small: "py-2 px-4 text-xs",
       },
     },
     defaultVariants: {

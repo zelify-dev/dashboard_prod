@@ -333,7 +333,7 @@ export function KybPageContent() {
                 variant="primary"
                 size="small"
                 shape="rounded"
-                className="pointer-events-none mb-3 !bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
+                className="pointer-events-none mb-3 bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
                 type="button"
               />
 
@@ -369,7 +369,7 @@ export function KybPageContent() {
             className={`w-full sm:w-auto ${
               !kybVisible || !KYB_DASHBOARD_UPLOAD_ENABLED || !file || submitting
                 ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white"
-                : "!bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
+                : "bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
             }`}
             disabled={
               !kybVisible || !KYB_DASHBOARD_UPLOAD_ENABLED || locked || !file || submitting

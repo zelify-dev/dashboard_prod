@@ -240,7 +240,7 @@ export function BusinessInfoContent() {
               variant="primary"
               size="small"
               shape="rounded"
-              className="pointer-events-none mb-3 !bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
+              className="pointer-events-none mb-3 bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
               type="button"
             />
             {file ? <p className="text-sm text-green-500 font-medium">{file.name}</p> : <p className="text-xs text-[#6B7280]">{acceptedLabel}</p>}
@@ -262,7 +262,7 @@ export function BusinessInfoContent() {
             label={uploading ? "Enviando..." : "Enviar Business Plan"}
             variant="primary"
             onClick={onSubmit}
-            className={`w-full sm:w-auto ${!businessPlanVisible || !file || uploading || uploaded || loadingStatus ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white" : "!bg-zelify-midnight hover:!bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"}`}
+            className={`w-full sm:w-auto ${!businessPlanVisible || !file || uploading || uploaded || loadingStatus ? "bg-[#9CA3AF] hover:bg-opacity-100 cursor-not-allowed border-none text-white" : "bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"}`}
             disabled={!businessPlanVisible || !file || uploading || uploaded || loadingStatus}
             shape="rounded"
           />
