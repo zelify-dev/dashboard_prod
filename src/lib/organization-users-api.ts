@@ -28,6 +28,7 @@ export type OrgUserListItem = {
   full_name: string;
   status: OrgUserStatus;
   must_change_password: boolean;
+  pending_first_login?: boolean;
   dashboard_otp_enabled?: boolean;
   balance?: string;
   created_at?: string;
@@ -83,7 +84,7 @@ export type CreateDashboardMemberResponse = {
 };
 
 export type SendTemporaryPasswordEmailBody = {
-  temporary_password: string;
+  temporary_password?: string;
 };
 
 /**
