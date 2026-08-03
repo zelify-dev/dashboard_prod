@@ -1744,33 +1744,44 @@ export function OrganizationAdministrationDetailClient() {
 
       {activeTab === "branding" ? (
         <div className="space-y-6">
-          <ShowcaseSection title="Carga de Logos" className="!p-6">
-            <div className="grid gap-4 xl:grid-cols-2">
+          <ShowcaseSection title="Logos e ícono" className="!p-6">
+            <p className="mb-4 text-xs font-light text-dark-6">
+              Solo archivos PNG. Cada vista previa usa un patrón sutil de ajedrez para distinguir mejor los logos y verificar su transparencia y contraste.
+            </p>
+            {/* Logo principal arriba */}
+            <div className="mb-6">
               <LogoUploadCard
                 label="Logo principal"
-                description="Acepta PNG. La vista previa usa un fondo oscuro de referencia para distinguir mejor el archivo cargado."
+                description="Acepta PNG. El fondo de vista previa incluye un patrón de tablero sutil para validar la transparencia y legibilidad."
                 src={withCacheBust(branding?.url_log, brandingAssetVersion)}
                 loading={brandingUploading === "logo"}
                 onChange={(file) => void uploadBrandingAsset("logo", file)}
               />
-              <LogoUploadCard
-                label="Logo para fondos oscuros"
-                description="Acepta PNG. Este bloque mantiene un fondo oscuro de referencia para validar contraste y legibilidad."
-                src={withCacheBust(branding?.url_log_dark, brandingAssetVersion)}
-                loading={brandingUploading === "logoDark"}
-                onChange={(file) => void uploadBrandingAsset("logoDark", file)}
-              />
+            </div>
+
+            {/* Logos fondo claro y oscuro en 2 columnas */}
+            <div className="mb-6 grid gap-6 sm:grid-cols-2">
               <LogoUploadCard
                 label="Logo para fondos claros"
-                description="Acepta PNG. La vista previa usa un fondo gris neutro de referencia para que el logo se distinga con claridad."
+                description="Acepta PNG. Formato recomendado para superficies claras."
                 src={withCacheBust(branding?.url_log_light, brandingAssetVersion)}
-                previewClassName="border-slate-300 bg-slate-400/70"
                 loading={brandingUploading === "logoLight"}
                 onChange={(file) => void uploadBrandingAsset("logoLight", file)}
               />
               <LogoUploadCard
-                label="Icono de la aplicacion"
-                description="Acepta PNG. El fondo de referencia ayuda a verificar el icono aunque tenga zonas claras o transparentes."
+                label="Logo para fondos oscuros"
+                description="Acepta PNG. Útil para verificar el contraste en logos claros o blancos sobre superficies oscuras."
+                src={withCacheBust(branding?.url_log_dark, brandingAssetVersion)}
+                loading={brandingUploading === "logoDark"}
+                onChange={(file) => void uploadBrandingAsset("logoDark", file)}
+              />
+            </div>
+
+            {/* Ícono abajo */}
+            <div>
+              <LogoUploadCard
+                label="Ícono de la aplicación"
+                description="Se usa para las notificaciones y representación de la aplicación. Acepta PNG."
                 src={withCacheBust(branding?.url_icon, brandingAssetVersion)}
                 loading={brandingUploading === "icon"}
                 onChange={(file) => void uploadBrandingAsset("icon", file)}
@@ -3756,7 +3767,6 @@ function LogoUploadCard({
   label,
   description,
   src,
-  previewClassName,
   loading,
   onChange,
 }: {
@@ -3767,33 +3777,53 @@ function LogoUploadCard({
   loading: boolean;
   onChange: (file: File | null) => void;
 }) {
-  const previewSurfaceClassName =
-    previewClassName ??
-    "border-slate-700/60 bg-slate-900";
+  const checkerboardStyle = {
+    backgroundImage: `linear-gradient(45deg, #f9f9f9 25%, transparent 25%), 
+                      linear-gradient(-45deg, #f9f9f9 25%, transparent 25%), 
+                      linear-gradient(45deg, transparent 75%, #f9f9f9 75%), 
+                      linear-gradient(-45deg, transparent 75%, #f9f9f9 75%)`,
+    backgroundSize: '16px 16px',
+    backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+    backgroundColor: '#ffffff'
+  };
 
   return (
-    <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-      <div className="mb-2 text-sm font-semibold">{label}</div>
-      <div className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">{description}</div>
+    <div className="relative flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 p-6 transition-all duration-200 bg-white min-h-[200px]">
+      <div className="w-full text-center">
+        <p className="text-[10px] font-light uppercase tracking-wider text-dark-6 mb-1">{label}</p>
+        <p className="text-xs font-light text-dark-6 mb-4">{description}</p>
+      </div>
+
       {src ? (
-        <div className={`mb-3 rounded-xl border px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${previewSurfaceClassName}`}>
-          <img src={src} alt={label} className="h-16 w-auto max-w-[180px] object-contain" />
+        <div 
+          className="relative mb-4 flex items-center justify-center rounded-xl overflow-hidden border border-gray-100 p-4 max-w-full min-h-[110px]"
+          style={checkerboardStyle}
+        >
+          <img
+            src={src}
+            alt={label}
+            className="max-h-20 max-w-[200px] object-contain select-none"
+          />
         </div>
       ) : (
-        <div className={`mb-3 rounded-xl border px-4 py-5 text-sm text-slate-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${previewSurfaceClassName}`}>
-          No hay archivo cargado.
+        <div className="mb-4 flex h-[110px] w-full items-center justify-center rounded-xl border border-gray-100 bg-gray-50/50 text-xs font-light text-dark-6">
+          Sin archivo cargado
         </div>
       )}
-      <input
-        type="file"
-        accept=".png,image/png"
-        onChange={(event) => {
-          onChange(event.target.files?.[0] ?? null);
-          event.currentTarget.value = "";
-        }}
-        className="block w-full text-sm text-dark-6 file:mr-3 file:rounded file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
-      />
-      {loading ? <div className="mt-2 text-xs text-dark-6 dark:text-dark-6">Cargando...</div> : null}
+
+      <label className="relative cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95">
+        <span>{loading ? "Subiendo..." : "Seleccionar archivo"}</span>
+        <input
+          type="file"
+          accept=".png,image/png"
+          onChange={(event) => {
+            onChange(event.target.files?.[0] ?? null);
+            event.currentTarget.value = "";
+          }}
+          disabled={loading}
+          className="sr-only"
+        />
+      </label>
     </div>
   );
 }
@@ -3810,18 +3840,21 @@ function UploadBlock({
   onChange: (file: File | null) => Promise<unknown>;
 }) {
   return (
-    <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-      <div className="text-sm font-semibold">{title}</div>
-      <div className="mt-1 text-sm text-dark-6 dark:text-dark-6">{hint}</div>
-      <input
-        type="file"
-        onChange={(event) => {
-          void onChange(event.target.files?.[0] ?? null);
-          event.currentTarget.value = "";
-        }}
-        className="mt-3 block w-full text-sm text-dark-6 file:mr-3 file:rounded file:border-0 file:bg-primary file:px-3 file:py-2 file:text-xs file:font-medium file:text-white"
-      />
-      {loading ? <div className="mt-2 text-xs text-dark-6 dark:text-dark-6">Cargando...</div> : null}
+    <div className="rounded-2xl border border-gray-100 bg-white p-6">
+      <div className="text-xs font-normal text-dark">{title}</div>
+      <div className="mt-1 text-xs font-light text-dark-6 mb-3">{hint}</div>
+      <label className="relative inline-block cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95">
+        <span>{loading ? "Cargando..." : "Seleccionar archivo"}</span>
+        <input
+          type="file"
+          onChange={(event) => {
+            void onChange(event.target.files?.[0] ?? null);
+            event.currentTarget.value = "";
+          }}
+          disabled={loading}
+          className="sr-only"
+        />
+      </label>
     </div>
   );
 }
