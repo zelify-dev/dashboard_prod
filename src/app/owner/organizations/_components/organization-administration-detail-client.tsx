@@ -1822,7 +1822,7 @@ export function OrganizationAdministrationDetailClient() {
       {activeTab === "members" ? (
         <div className="space-y-6">
           <ShowcaseSection title="Directorio de Miembros" className="!p-6">
-            <div className="mb-4 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-700 dark:border-sky-900/60 dark:bg-sky-900/20 dark:text-sky-300">
+            <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50/40 px-4 py-3 text-xs font-light text-blue-700">
               OWNER opera miembros de cualquier organizacion desde aqui. `ORG_ADMIN` mantiene una experiencia separada y limitada a su propia organizacion.
             </div>
             <div className="mb-4 grid gap-3 xl:grid-cols-[minmax(0,1.4fr)_180px_180px_auto]">
@@ -1834,7 +1834,7 @@ export function OrganizationAdministrationDetailClient() {
                   setMembersPage(1);
                 }}
                 placeholder="Buscar por email o nombre completo"
-                className="rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                className="rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
               />
               <select
                 value={memberStatusFilter}
@@ -1842,7 +1842,7 @@ export function OrganizationAdministrationDetailClient() {
                   setMemberStatusFilter(event.target.value as OrgUserStatus | "");
                   setMembersPage(1);
                 }}
-                className="rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                className="rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
               >
                 <option value="">Todos los estados</option>
                 <option value="ACTIVE">ACTIVE</option>
@@ -1854,7 +1854,7 @@ export function OrganizationAdministrationDetailClient() {
                   setMemberRoleFilter(event.target.value);
                   setMembersPage(1);
                 }}
-                className="rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                className="rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
               >
                 <option value="">Todos los roles locales</option>
                 {assignableRoleCodes.map((roleCode) => (
@@ -1888,23 +1888,23 @@ export function OrganizationAdministrationDetailClient() {
               <div className="rounded-xl border border-stroke bg-gray-1/60 p-4 dark:border-dark-3 dark:bg-dark-2/60">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <div className="text-sm font-medium text-dark dark:text-white">
+                    <div className="text-sm font-semibold">
                       Acciones batch
                     </div>
                     <div className="text-xs text-dark-6 dark:text-dark-6">
                       Selecciona varios miembros para ejecutar cambios en lote.
                     </div>
                   </div>
-                  <div className="text-sm font-medium text-dark dark:text-white">
+                  <div className="text-sm font-semibold">
                     {selectedMemberIds.length} seleccionado(s)
                   </div>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("activate")} className="rounded-md border border-stroke px-3 py-2 text-xs font-medium text-dark transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-3 dark:text-white">Activar</button>
-                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("disable")} className="rounded-md border border-stroke px-3 py-2 text-xs font-medium text-dark transition hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-3 dark:text-white">Desactivar</button>
-                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("assign-roles")} className="rounded-md border border-stroke px-3 py-2 text-xs font-medium text-dark transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-3 dark:text-white">Asignar roles</button>
-                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("remove-roles")} className="rounded-md border border-stroke px-3 py-2 text-xs font-medium text-dark transition hover:border-rose-500 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-3 dark:text-white">Remover roles</button>
-                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("reset-password")} className="rounded-md border border-stroke px-3 py-2 text-xs font-medium text-dark transition hover:border-rose-500 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-3 dark:text-white">Resetear contraseña</button>
+                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("activate")} className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50">Activar</button>
+                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("disable")} className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50">Desactivar</button>
+                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("assign-roles")} className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50">Asignar roles</button>
+                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("remove-roles")} className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50">Remover roles</button>
+                  <button type="button" disabled={selectedMemberIds.length === 0} onClick={() => openMemberBatchAction("reset-password")} className="rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50">Resetear contraseña</button>
                 </div>
               </div>
             </div>
@@ -1912,17 +1912,17 @@ export function OrganizationAdministrationDetailClient() {
             <div className="overflow-hidden rounded-xl border border-stroke dark:border-dark-3">
               <div className="overflow-x-auto min-h-[250px]">
                 <table className="w-full min-w-[980px] text-left text-sm">
-                  <thead className="bg-gray-2/70 dark:bg-dark-2/80">
-                    <tr className="border-b border-stroke dark:border-dark-3">
+                  <thead className="bg-gray-50/50 border-b border-gray-100 text-[10px] uppercase tracking-wider text-dark">
+                    <tr>
                       <th className="px-4 py-3">
                         <input type="checkbox" checked={allMembersOnPageSelected} onChange={toggleSelectAllMembersOnPage} className="h-4 w-4 rounded accent-zelify-midnight" />
                       </th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Miembro</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Roles</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Actualizado</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">OTP</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Acciones</th>
+                      <th className="px-4 py-3 font-semibold">Miembro</th>
+                      <th className="px-4 py-3 font-semibold">Estado</th>
+                      <th className="px-4 py-3 font-semibold">Roles</th>
+                      <th className="px-4 py-3 font-semibold">Actualizado</th>
+                      <th className="px-4 py-3 font-semibold">OTP</th>
+                      <th className="px-4 py-3 font-semibold">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1948,7 +1948,7 @@ export function OrganizationAdministrationDetailClient() {
                                 {member.full_name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "U"}
                               </div>
                               <div className="space-y-1">
-                                <div className="font-medium text-dark dark:text-white">{member.full_name}</div>
+                                <div className="font-semibold">{member.full_name}</div>
                                 <div className="text-xs text-dark-6 dark:text-dark-6">{member.email}</div>
                               </div>
                             </div>
@@ -2180,7 +2180,7 @@ export function OrganizationAdministrationDetailClient() {
                       value={selectedAssignableScope}
                       onChange={(e) => setSelectedAssignableScope(e.target.value)}
                       disabled={scopesSaving}
-                      className="h-10 w-full rounded-xl border border-stroke bg-white px-3 text-xs text-dark outline-none focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+                      className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
                     >
                       <option value="">-- Selecciona un permiso para asignar --</option>
                       {availableScopes
@@ -2335,15 +2335,15 @@ export function OrganizationAdministrationDetailClient() {
             <div className="overflow-hidden rounded-xl border border-stroke dark:border-dark-3">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[920px] text-left text-sm">
-                  <thead className="bg-gray-2/70 dark:bg-dark-2/80">
-                    <tr className="border-b border-stroke dark:border-dark-3">
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Workflow</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Documento</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Biometria</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Creado</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Actualizado</th>
-                      <th className="px-4 py-3 font-medium text-dark dark:text-white">Acciones</th>
+                  <thead className="bg-gray-50/50 border-b border-gray-100 text-[10px] uppercase tracking-wider text-dark">
+                    <tr>
+                      <th className="px-4 py-3 font-semibold">Workflow</th>
+                      <th className="px-4 py-3 font-semibold">Documento</th>
+                      <th className="px-4 py-3 font-semibold">Biometria</th>
+                      <th className="px-4 py-3 font-semibold">Estado</th>
+                      <th className="px-4 py-3 font-semibold">Creado</th>
+                      <th className="px-4 py-3 font-semibold">Actualizado</th>
+                      <th className="px-4 py-3 font-semibold">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2364,7 +2364,7 @@ export function OrganizationAdministrationDetailClient() {
                         <tr key={workflow.id} className="border-b border-stroke dark:border-dark-3">
                           <td className="px-4 py-4">
                             <div className="space-y-1">
-                              <div className="font-medium text-dark dark:text-white">{workflow.name}</div>
+                              <div className="font-semibold">{workflow.name}</div>
                               <div className="font-mono text-xs text-dark-6 dark:text-dark-6">{workflow.id}</div>
                             </div>
                           </td>
@@ -2392,7 +2392,7 @@ export function OrganizationAdministrationDetailClient() {
                               <button
                                 type="button"
                                 onClick={() => openEditWorkflowEditor(workflow)}
-                                className="rounded-md border border-stroke px-3 py-1.5 text-xs font-medium text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
+                                className="rounded-xl border border-gray-250 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95"
                               >
                                 Editar
                               </button>
@@ -2400,7 +2400,7 @@ export function OrganizationAdministrationDetailClient() {
                                 type="button"
                                 onClick={() => void activateWorkflow(workflow)}
                                 disabled={workflow.is_active || workflowActionLoading === workflow.id}
-                                className="rounded-md border border-stroke px-3 py-1.5 text-xs font-medium text-dark transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 dark:border-dark-3 dark:text-white"
+                                className="rounded-xl border border-gray-250 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
                               >
                                 Activar
                               </button>
@@ -2495,7 +2495,7 @@ export function OrganizationAdministrationDetailClient() {
                       />
 
                       <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                        <div className="mb-3 text-sm font-medium text-dark dark:text-white">
+                        <div className="mb-3 text-sm font-semibold">
                           Payload resultante
                         </div>
                         <pre className="overflow-auto rounded-lg bg-dark px-4 py-4 text-xs text-white">
@@ -2569,12 +2569,12 @@ export function OrganizationAdministrationDetailClient() {
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-gray-2/70 dark:bg-dark-2/80">
                   <tr className="border-b border-stroke dark:border-dark-3">
-                    <th className="px-4 py-3 font-medium text-dark dark:text-white">Clave</th>
-                    <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
-                    <th className="px-4 py-3 font-medium text-dark dark:text-white">Creada</th>
-                    <th className="px-4 py-3 font-medium text-dark dark:text-white">Ultimo uso</th>
-                    <th className="px-4 py-3 font-medium text-dark dark:text-white">Secret</th>
-                    <th className="px-4 py-3 font-medium text-dark dark:text-white">Acciones</th>
+                    <th className="px-4 py-3 font-semibold">Clave</th>
+                    <th className="px-4 py-3 font-semibold">Estado</th>
+                    <th className="px-4 py-3 font-semibold">Creada</th>
+                    <th className="px-4 py-3 font-semibold">Ultimo uso</th>
+                    <th className="px-4 py-3 font-semibold">Secret</th>
+                    <th className="px-4 py-3 font-semibold">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2610,7 +2610,7 @@ export function OrganizationAdministrationDetailClient() {
                               type="button"
                               onClick={() => void revealSecret(apiKey.id)}
                               disabled={apiKeyActionLoading === apiKey.id}
-                              className="rounded-md border border-stroke px-3 py-1.5 text-xs font-medium text-dark transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-70 dark:border-dark-3 dark:text-white"
+                              className="rounded-xl border border-gray-250 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95 disabled:opacity-50"
                             >
                               Revelar secreto
                             </button>
@@ -2856,7 +2856,7 @@ export function OrganizationAdministrationDetailClient() {
               <FormField label="Nombre completo" value={memberCreateForm.full_name} onChange={(value) => setMemberCreateForm((current) => ({ ...current, full_name: value }))} required />
               <FormField label="Email" value={memberCreateForm.email} onChange={(value) => setMemberCreateForm((current) => ({ ...current, email: value }))} required />
               <div className="space-y-3">
-                <div className="text-sm font-medium text-dark dark:text-white">Roles locales</div>
+                <div className="text-sm font-semibold">Roles locales</div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {assignableRoleCodes.map((roleCode) => {
                     const checked = memberCreateForm.roles.includes(roleCode);
@@ -2916,7 +2916,7 @@ export function OrganizationAdministrationDetailClient() {
             </div>
             <div className="space-y-5 p-6">
               <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-                <div className="mb-3 text-sm font-medium text-dark dark:text-white">
+                <div className="mb-3 text-sm font-semibold">
                   Miembros seleccionados
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -2930,7 +2930,7 @@ export function OrganizationAdministrationDetailClient() {
 
               {memberBatchAction === "assign-roles" || memberBatchAction === "remove-roles" ? (
                 <div className="space-y-3">
-                  <div className="text-sm font-medium text-dark dark:text-white">Roles</div>
+                  <div className="text-sm font-semibold">Roles</div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {assignableRoleCodes.map((roleCode) => {
                       const checked = memberBatchRoleCodes.includes(roleCode);
@@ -2975,9 +2975,9 @@ export function OrganizationAdministrationDetailClient() {
                       <table className="w-full min-w-[680px] text-left text-sm">
                         <thead className="bg-gray-2/70 dark:bg-dark-2/80">
                           <tr className="border-b border-stroke dark:border-dark-3">
-                            <th className="px-4 py-3 font-medium text-dark dark:text-white">Usuario</th>
-                            <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
-                            <th className="px-4 py-3 font-medium text-dark dark:text-white">Detalle</th>
+                            <th className="px-4 py-3 font-semibold">Usuario</th>
+                            <th className="px-4 py-3 font-semibold">Estado</th>
+                            <th className="px-4 py-3 font-semibold">Detalle</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -2986,7 +2986,7 @@ export function OrganizationAdministrationDetailClient() {
                             return (
                               <tr key={result.user_id} className="border-b border-stroke dark:border-dark-3">
                                 <td className="px-4 py-3">
-                                  <div className="font-medium text-dark dark:text-white">
+                                  <div className="font-semibold">
                                     {member?.full_name ?? result.user_id}
                                   </div>
                                   <div className="text-xs text-dark-6 dark:text-dark-6">
@@ -3091,7 +3091,7 @@ export function OrganizationAdministrationDetailClient() {
                     </div>
 
                     <div className="rounded-xl border border-stroke p-5 dark:border-dark-3">
-                      <div className="mb-4 text-sm font-medium text-dark dark:text-white">
+                      <div className="mb-4 text-sm font-semibold">
                         Perfil
                       </div>
                       <div className="grid gap-4">
@@ -3161,7 +3161,7 @@ export function OrganizationAdministrationDetailClient() {
                     </div>
 
                     <div className="rounded-xl border border-stroke p-5 dark:border-dark-3">
-                      <div className="mb-2 text-sm font-medium text-dark dark:text-white">
+                      <div className="mb-2 text-sm font-semibold">
                         Roles asignados
                       </div>
                       <p className="mb-4 text-xs text-dark-6 dark:text-dark-6">
@@ -3195,7 +3195,7 @@ export function OrganizationAdministrationDetailClient() {
                               key={roleCode}
                               type="button"
                               onClick={() => void addRoleToSelectedMember(roleCode)}
-                              className="rounded-md border border-stroke px-3 py-1.5 text-xs font-medium text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
+                              className="rounded-xl border border-gray-250 bg-white px-3 py-1.5 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95"
                             >
                               Asignar {roleCode}
                             </button>
@@ -3471,7 +3471,7 @@ function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
       <div className="text-xs font-medium uppercase tracking-[0.18em] text-dark-6 dark:text-dark-6">{label}</div>
-      <div className="mt-2 text-sm font-medium text-dark dark:text-white">{value}</div>
+      <div className="mt-2 text-sm font-semibold">{value}</div>
     </div>
   );
 }
@@ -3480,7 +3480,7 @@ function SnapshotRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between rounded-lg border border-stroke px-4 py-3 dark:border-dark-3">
       <span className="text-sm text-dark-6 dark:text-dark-6">{label}</span>
-      <span className="text-sm font-medium text-dark dark:text-white">{value}</span>
+      <span className="text-sm font-semibold">{value}</span>
     </div>
   );
 }
@@ -3518,7 +3518,7 @@ function ProgressRow({ label, value }: { label: string; value: number | null }) 
   return (
     <div className="space-y-2 rounded-lg border border-stroke p-4 dark:border-dark-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-dark dark:text-white">{label}</span>
+        <span className="text-sm font-semibold">{label}</span>
         <span className="text-sm text-dark-6 dark:text-dark-6">{display}</span>
       </div>
       <div className="h-2 rounded-full bg-gray-2 dark:bg-dark-2">
@@ -3532,7 +3532,7 @@ function OnboardingAssetRow({ asset }: { asset: OnboardingUploadedAsset }) {
   return (
     <div className="rounded-lg border border-stroke p-3 dark:border-dark-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-sm font-medium text-dark dark:text-white">{asset.label}</span>
+        <span className="text-sm font-semibold">{asset.label}</span>
         <span
           className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
             asset.uploaded
@@ -3646,7 +3646,7 @@ function SimpleBrandingColorField({
         {open ? (
           <div className="absolute bottom-[calc(100%+12px)] left-0 z-30 w-[320px] rounded-2xl border border-stroke bg-white p-4 shadow-2xl dark:border-dark-3 dark:bg-dark-2">
             <div className="mb-3 flex items-center justify-between gap-3">
-              <div className="text-sm font-medium text-dark dark:text-white">{label}</div>
+              <div className="text-sm font-semibold">{label}</div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -3773,7 +3773,7 @@ function LogoUploadCard({
 
   return (
     <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-      <div className="mb-2 text-sm font-medium text-dark dark:text-white">{label}</div>
+      <div className="mb-2 text-sm font-semibold">{label}</div>
       <div className="mb-3 text-xs leading-5 text-dark-6 dark:text-dark-6">{description}</div>
       {src ? (
         <div className={`mb-3 rounded-xl border px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] ${previewSurfaceClassName}`}>
@@ -3811,7 +3811,7 @@ function UploadBlock({
 }) {
   return (
     <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-      <div className="text-sm font-medium text-dark dark:text-white">{title}</div>
+      <div className="text-sm font-semibold">{title}</div>
       <div className="mt-1 text-sm text-dark-6 dark:text-dark-6">{hint}</div>
       <input
         type="file"
@@ -3845,7 +3845,7 @@ function TechnicalDocumentationBlock({
 
   return (
     <div className="rounded-lg border border-stroke p-4 dark:border-dark-3">
-      <div className="text-sm font-medium text-dark dark:text-white">Documentacion tecnica</div>
+      <div className="text-sm font-semibold">Documentacion tecnica</div>
       <div className="mt-3 grid gap-3">
         <FilePicker label="Diagrama de flujo" onChange={setDiagram} />
         <FilePicker label="Politica de seguridad" onChange={setSecurityPolicy} />
@@ -3873,7 +3873,7 @@ function FilePicker({
 }) {
   return (
     <label className="space-y-2">
-      <span className="block text-sm font-medium text-dark dark:text-white">{label}</span>
+      <span className="block text-sm font-semibold">{label}</span>
       <input
         type="file"
         onChange={(event) => onChange(event.target.files?.[0] ?? null)}
