@@ -43,9 +43,9 @@ function normalizeText(value: string | null | undefined): string {
 
 function statusBadgeClass(status: string | null | undefined): string {
   const normalized = normalizeText(status);
-  if (normalized === "active") return "bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
-  if (normalized === "pending") return "bg-amber-50 border border-amber-100 text-amber-700 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
-  return "bg-gray-50 border border-gray-100 text-slate-600 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
+  if (normalized === "active") return "bg-white border border-gray-200/80 text-emerald-600 rounded-xl px-2.5 py-0.5 text-[10px] font-normal";
+  if (normalized === "pending") return "bg-white border border-gray-200/80 text-amber-600 rounded-xl px-2.5 py-0.5 text-[10px] font-normal";
+  return "bg-white border border-gray-200/80 text-slate-400 rounded-xl px-2.5 py-0.5 text-[10px] font-normal";
 }
 
 export function OrganizationAdministrationClient() {
@@ -335,10 +335,10 @@ export function OrganizationAdministrationClient() {
                       </td>
                       <td className="px-4 py-3.5">
                         <span
-                          className={`inline-flex rounded-xl border px-2.5 py-0.5 text-[10px] font-light uppercase ${
+                          className={`inline-flex rounded-xl border border-gray-200/80 px-2.5 py-0.5 text-[10px] font-normal uppercase ${
                             organization.environment === "PRODUCTION"
-                              ? "bg-emerald-50 border-emerald-100 text-emerald-700"
-                              : "bg-amber-50 border-amber-100 text-amber-700"
+                              ? "bg-white text-emerald-600"
+                              : "bg-white text-amber-600"
                           }`}
                         >
                           {organization.environment === "PRODUCTION" ? "Producción" : "Sandbox"}

@@ -246,9 +246,9 @@ function buildDefaultWorkflowFormState(): IdentityWorkflowFormState {
 
 function statusBadgeClass(status: string | null | undefined): string {
   const normalized = (status ?? "").trim().toUpperCase();
-  if (normalized === "ACTIVE") return "bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
-  if (normalized === "PENDING") return "bg-amber-50 border border-amber-100 text-amber-700 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
-  return "bg-gray-50 border border-gray-100 text-slate-600 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
+  if (normalized === "ACTIVE") return "bg-white border border-gray-200/80 text-emerald-600 rounded-xl px-2.5 py-0.5 text-[10px] font-normal";
+  if (normalized === "PENDING") return "bg-white border border-gray-200/80 text-amber-600 rounded-xl px-2.5 py-0.5 text-[10px] font-normal";
+  return "bg-white border border-gray-200/80 text-slate-400 rounded-xl px-2.5 py-0.5 text-[10px] font-normal";
 }
 
 function prettifyJson(value: unknown): string {
