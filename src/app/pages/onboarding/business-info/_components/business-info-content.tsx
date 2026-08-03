@@ -173,9 +173,9 @@ export function BusinessInfoContent() {
           </div>
         ) : null}
 
-        <h3 className="mb-4 text-base font-medium text-black dark:text-white">Carga de Business Plan</h3>
+        <h3 className="mb-4 text-xs font-normal text-dark">Carga de Business Plan</h3>
 
-        <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/40 p-4 text-xs font-light text-blue-700">
+        <div className="mb-6 flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4 text-xs font-light text-dark-6">
           <InfoIcon className="mt-0.5 shrink-0" />
           <div className="text-sm">
             <span className="font-semibold block mb-0.5">Informacion importante</span>
@@ -190,10 +190,10 @@ export function BusinessInfoContent() {
         </div>
 
         <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-strokedark dark:bg-boxdark">
-          <h4 className="mb-2 text-sm font-semibold text-black dark:text-white">
+          <h4 className="mb-2 text-xs font-normal text-dark">
             Sección 4 - Business plan y financiero
           </h4>
-          <ul className="list-inside list-disc space-y-1 pl-1 text-xs text-body-color dark:text-body-color-dark">
+          <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
             <li>Business Plan cargado en la plataforma Zelify</li>
             <li>Descripción del negocio, productos o servicios, mercado objetivo, modelo de ingresos y equipo directivo</li>
             <li>Proyecciones financieras, forecast, flujo de caja y P&amp;L proyectado</li>
@@ -229,7 +229,7 @@ export function BusinessInfoContent() {
 
           <div className="flex flex-col items-center justify-center text-center">
             <div className="mb-3 rounded-full bg-gray-100 p-3 dark:bg-meta-4">
-              <FileIcon className="text-[#9CA3AF] dark:text-body-color-dark" />
+              <FileIcon className="text-dark-6" />
             </div>
             <div className="mb-1 text-base text-[#111928] dark:text-white">
               <span className="font-normal">Arrastra y suelta tu Business Plan aqui</span>

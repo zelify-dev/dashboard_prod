@@ -189,7 +189,7 @@ export function KybPageContent() {
         )}
 
         <div className="mb-6">
-          <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/40 p-4 text-xs font-light text-blue-700">
+          <div className="mb-6 flex items-start gap-3 rounded-xl border border-gray-100 bg-gray-50/60 p-4 text-xs font-light text-dark-6">
             <InfoIcon className="mt-0.5 shrink-0" />
             <div className="text-sm">
               <span className="font-semibold block mb-0.5">
@@ -217,7 +217,7 @@ export function KybPageContent() {
             </div>
           )}
 
-          <h3 className="mb-4 text-base font-medium text-black dark:text-white">
+          <h3 className="mb-4 text-xs font-normal text-dark">
             Documentación requerida para México
           </h3>
 
@@ -225,12 +225,12 @@ export function KybPageContent() {
             {/* Datos básicos de la empresa */}
             <div className="rounded-xl border border-gray-100 bg-gray-50/40 p-4">
               <div className="mb-2 flex items-center gap-2">
-                <PageIcon className="text-blue-600" />
-                <h4 className="font-semibold text-black dark:text-white text-sm">
+                <PageIcon className="text-dark-6" />
+                <h4 className="font-normal text-dark text-xs">
                   Sección 1.1 - Datos básicos de la empresa
                 </h4>
               </div>
-              <ul className="list-inside list-disc text-xs text-body-color dark:text-body-color-dark pl-1 space-y-1">
+              <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
                 <li>Denominación social</li>
                 <li>Identificación fiscal (RFC - Registro Federal de Contribuyentes)</li>
                 <li>Tipo de entidad (S.A. de C.V., SAPI de C.V., LLC, SRL u otra)</li>
@@ -244,12 +244,12 @@ export function KybPageContent() {
             {/* Representante legal */}
             <div className="rounded-xl border border-gray-100 bg-gray-50/40 p-4">
               <div className="mb-2 flex items-center gap-2">
-                <UserIcon className="text-green-500" />
-                <h4 className="font-semibold text-black dark:text-white text-sm">
+                <UserIcon className="text-dark-6" />
+                <h4 className="font-normal text-dark text-xs">
                   Sección 1.2 - Representante legal
                 </h4>
               </div>
-              <ul className="list-inside list-disc text-xs text-body-color dark:text-body-color-dark pl-1 space-y-1">
+              <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
                 <li>Nombre completo del representante</li>
                 <li>Fecha de nacimiento</li>
                 <li>Nacionalidad y país de residencia</li>
@@ -263,12 +263,12 @@ export function KybPageContent() {
             {/* Propietarios y directivos */}
             <div className="rounded-xl border border-gray-100 bg-gray-50/40 p-4">
               <div className="mb-2 flex items-center gap-2">
-                <CertificateIcon className="text-purple-500" />
-                <h4 className="font-semibold text-black dark:text-white text-sm">
+                <CertificateIcon className="text-dark-6" />
+                <h4 className="font-normal text-dark text-xs">
                   Sección 1.3 - Propietarios y directivos
                 </h4>
               </div>
-              <ul className="list-inside list-disc text-xs text-body-color dark:text-body-color-dark pl-1 space-y-1">
+              <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
                 <li>Información de socios o accionistas con 25% o más de participación</li>
                 <li>Identificación de cargos de control: CEO</li>
                 <li>Identificación de cargos de control: CFO</li>
@@ -281,12 +281,12 @@ export function KybPageContent() {
             {/* Documentos legales */}
             <div className="rounded-xl border border-gray-100 bg-gray-50/40 p-4">
               <div className="mb-2 flex items-center gap-2">
-                <BuildingIcon className="text-orange-500" />
-                <h4 className="font-semibold text-black dark:text-white text-sm">
+                <BuildingIcon className="text-dark-6" />
+                <h4 className="font-normal text-dark text-xs">
                   Sección 1.4 - Documentos legales
                 </h4>
               </div>
-              <ul className="list-inside list-disc text-xs text-body-color dark:text-body-color-dark pl-1 space-y-1">
+              <ul className="list-inside list-disc text-xs font-light text-dark-6 pl-1 space-y-1">
                 <li>Acta constitutiva y últimas modificaciones societarias</li>
                 <li>Constancia de Situación Fiscal (CSF)</li>
                 <li>Licencias, permisos o autorizaciones regulatorias aplicables al giro</li>
@@ -317,7 +317,7 @@ export function KybPageContent() {
 
             <div className="flex flex-col items-center justify-center text-center">
               <div className="mb-3 rounded-full bg-gray-100 p-3 dark:bg-meta-4">
-                <FileTextIcon className="text-[#9CA3AF] dark:text-body-color-dark" />
+                <FileTextIcon className="text-dark-6" />
               </div>
 
               <div className="mb-1 text-base text-[#111928] dark:text-white">
