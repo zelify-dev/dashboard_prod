@@ -26,9 +26,9 @@ export function SessionExpiredModal({ onContinue }: SessionExpiredModalProps) {
   const t = COPY[language] ?? COPY.es;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-300 animate-in fade-in">
       <div
-        className="w-full max-w-md rounded-xl border border-stroke bg-white p-6 shadow-xl dark:border-dark-3 dark:bg-gray-dark dark:shadow-card"
+        className="w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95"
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="session-expired-title"
@@ -36,17 +36,17 @@ export function SessionExpiredModal({ onContinue }: SessionExpiredModalProps) {
       >
         <h2
           id="session-expired-title"
-          className="text-heading-5 font-bold text-dark dark:text-white"
+          className="text-sm font-normal text-dark"
         >
           {t.title}
         </h2>
-        <p id="session-expired-desc" className="mt-3 text-sm leading-relaxed text-dark-6 dark:text-dark-6">
+        <p id="session-expired-desc" className="mt-3 text-xs font-light leading-relaxed text-dark-6">
           {t.body}
         </p>
         <button
           type="button"
           onClick={onContinue}
-          className="mt-6 w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-primary/90"
+          className="mt-6 w-full rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95"
         >
           {t.cta}
         </button>
