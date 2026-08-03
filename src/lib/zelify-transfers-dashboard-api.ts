@@ -80,3 +80,23 @@ export async function zelifyPost<T = unknown>(
   return body as T;
 }
 
+export async function zelifyPostForm<T = unknown>(
+  path: string,
+  formData: FormData,
+  query?: Record<string, string | number | boolean | undefined | null>,
+): Promise<T> {
+  const res = await fetch(buildUrl(path, query), {
+    method: "POST",
+    body: formData,
+    cache: "no-store",
+  });
+  const body = await parseResponse(res);
+  if (!res.ok) {
+    const message =
+      (typeof body === "object" && body && "message" in body && typeof (body as any).message === "string")
+        ? (body as any).message
+        : `Error consultando ${path} (${res.status})`;
+    throw new ZelifyTransfersApiError(message, res.status, body);
+  }
+  return body as T;
+}

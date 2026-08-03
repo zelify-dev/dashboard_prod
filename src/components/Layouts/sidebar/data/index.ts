@@ -4,10 +4,37 @@ import { ZENDESK_SUPPORT_MENU_HREF } from "@/lib/zendesk-widget";
 import { getDashboardActorFromRoles } from "@/lib/dashboard-routing";
 import { DEFAULT_ONBOARDING_VISIBILITY, type OnboardingVisibility } from "@/lib/onboarding-api";
 
+type ProductSubItem = {
+  title: string;
+  url: string;
+  scopePrefix?: string | string[];
+};
+
+type ProductItem = {
+  scopePrefix: string | string[];
+  title: string;
+  icon: unknown;
+  items: ProductSubItem[];
+};
+
+function matchesScopePrefix(scopePrefix: string, grantedScope: string): boolean {
+  if (grantedScope.startsWith(scopePrefix)) return true;
+  if (!grantedScope.endsWith("*")) return false;
+  const wildcardBase = grantedScope.slice(0, -1);
+  return scopePrefix.startsWith(wildcardBase);
+}
+
 /** Verifica si al menos un scope de la org coincide con el prefijo (o con alguno de los prefijos). */
 function hasScope(scopePrefix: string | string[], scopeStrings: string[]): boolean {
   const prefixes = Array.isArray(scopePrefix) ? scopePrefix : [scopePrefix];
-  return prefixes.some((p) => scopeStrings.some((s) => s.startsWith(p)));
+  return prefixes.some((p) => scopeStrings.some((s) => matchesScopePrefix(p, s)));
+}
+
+function hasBroadScope(scopePrefix: string | string[], scopeStrings: string[]): boolean {
+  const prefixes = Array.isArray(scopePrefix) ? scopePrefix : [scopePrefix];
+  return prefixes.some((p) =>
+    scopeStrings.some((s) => s === p || s === `${p}*`)
+  );
 }
 
 export function getNavData(
@@ -26,12 +53,7 @@ export function getNavData(
   const onboardingVisibility = options?.onboardingVisibility ?? DEFAULT_ONBOARDING_VISIBILITY;
   const actor = getDashboardActorFromRoles(options?.roles);
 
-  const productItems: Array<{
-    scopePrefix: string | string[];
-    title: string;
-    icon: unknown;
-    items: unknown[];
-  }> = [
+  const productItems: ProductItem[] = [
     {
       scopePrefix: "auth.",
       title: translations.sidebar.menuItems.auth,
@@ -116,22 +138,38 @@ export function getNavData(
         {
           title: translations.sidebar.menuItems.subItems.basicService,
           url: "/pages/products/payments/servicios-basicos",
+          scopePrefix: "payments.basic_services.",
         },
         {
           title: translations.sidebar.menuItems.subItems.transfers,
           url: "/pages/products/payments/transfers",
+          scopePrefix: ["payments.transfers.", "transfers."],
         },
         {
           title: translations.sidebar.menuItems.subItems.paymentsWorkflow,
           url: "/pages/products/payments/workflow",
+          scopePrefix: "payments.workflow.",
         },
         {
           title: translations.sidebar.menuItems.subItems.customKeys,
           url: "/pages/products/payments/custom-keys",
+          scopePrefix: "payments.custom_keys.",
         },
         {
           title: translations.sidebar.menuItems.subItems.qr,
           url: "/pages/products/payments/qr",
+          scopePrefix: "payments.qr.",
+        },
+      ],
+    },
+    {
+      scopePrefix: ["payments.disbursements.", "payments.", "transfers."],
+      title: translations.sidebar.menuItems.paymentDisbursement,
+      icon: Icons.PaymentDisbursementIcon,
+      items: [
+        {
+          title: translations.sidebar.menuItems.subItems.generalPanel,
+          url: "/pages/products/payments/disbursement",
         },
       ],
     },
@@ -225,11 +263,25 @@ export function getNavData(
     actor === "owner" || actor === "unknown" || actor === "organization";
   const filteredProductItems =
     shouldShowProductsSection && organizationScopes != null && Array.isArray(organizationScopes)
-      ? productItems.filter((item) => hasScope(item.scopePrefix, organizationScopes))
+      ? productItems
+          .map((item) => {
+            const hasParentScope = hasScope(item.scopePrefix, organizationScopes);
+            const hasBroadParentScope = hasBroadScope(item.scopePrefix, organizationScopes);
+            const scopedItems = item.items.filter((subItem) =>
+              subItem.scopePrefix
+                ? hasScope(subItem.scopePrefix, organizationScopes) || hasBroadParentScope
+                : hasParentScope
+            );
+            return { ...item, items: scopedItems };
+          })
+          .filter((item) => item.items.length > 0)
       : shouldShowProductsSection
         ? productItems
         : [];
-  const productsSectionItems = filteredProductItems.map(({ scopePrefix: _p, ...item }) => item);
+  const productsSectionItems = filteredProductItems.map(({ scopePrefix: _p, items, ...item }) => ({
+    ...item,
+    items: items.map(({ scopePrefix: _subScope, ...subItem }) => subItem),
+  }));
   const hasAnyScopes = Array.isArray(organizationScopes) && organizationScopes.length > 0;
   const shouldPinOnboardingToTop = actor === "organization" && Array.isArray(organizationScopes) && !hasAnyScopes;
 
