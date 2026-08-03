@@ -458,7 +458,7 @@ function NotificationTemplateEditorInner({ templateId }: NotificationTemplateEdi
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1400px]">
+    <div className="w-full space-y-6">
       <Breadcrumb pageName={`${translations.breadcrumb} / ${templateName}`} />
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">

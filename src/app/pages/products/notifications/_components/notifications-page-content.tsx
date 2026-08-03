@@ -989,7 +989,7 @@ export function NotificationsPageContent() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1150px] ">
+    <div className="w-full space-y-6">
       <Breadcrumb pageName={translations.breadcrumb} />
       {orgLoading && (
         <p className="text-sm text-dark-6 dark:text-dark-6">{ui.webhooksPage.loadingAccess}</p>

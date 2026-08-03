@@ -12,8 +12,40 @@ const ZENDESK_SNIPPET_SRC =
  */
 export function ZendeskWidget() {
   useEffect(() => {
+    const w = window as Window & {
+      zESettings?: unknown;
+      zE?: (...args: unknown[]) => void;
+    };
+
+    w.zESettings = {
+      webWidget: {
+        color: {
+          theme: "#000016",
+          launcher: "#000016",
+          launcherText: "#FFFFFF",
+          button: "#000016",
+        },
+      },
+    };
+
+    if (typeof w.zE === "function") {
+      try {
+        w.zE("webWidget", "updateSettings", {
+          webWidget: {
+            color: {
+              theme: "#000016",
+              launcher: "#000016",
+              launcherText: "#FFFFFF",
+              button: "#000016",
+            },
+          },
+        });
+      } catch {
+        /* noop */
+      }
+    }
+
     return () => {
-      const w = window as Window & { zE?: (...args: unknown[]) => void };
       if (typeof w.zE !== "function") return;
       try {
         w.zE("webWidget", "hide");
@@ -28,10 +60,30 @@ export function ZendeskWidget() {
   }, []);
 
   return (
-    <Script
-      id="ze-snippet"
-      src={ZENDESK_SNIPPET_SRC}
-      strategy="afterInteractive"
-    />
+    <>
+      <Script
+        id="ze-snippet-config"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.zESettings = {
+              webWidget: {
+                color: {
+                  theme: '#000016',
+                  launcher: '#000016',
+                  launcherText: '#FFFFFF',
+                  button: '#000016'
+                }
+              }
+            };
+          `,
+        }}
+      />
+      <Script
+        id="ze-snippet"
+        src={ZENDESK_SNIPPET_SRC}
+        strategy="afterInteractive"
+      />
+    </>
   );
 }
