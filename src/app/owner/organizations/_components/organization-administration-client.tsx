@@ -43,9 +43,9 @@ function normalizeText(value: string | null | undefined): string {
 
 function statusBadgeClass(status: string | null | undefined): string {
   const normalized = normalizeText(status);
-  if (normalized === "active") return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300";
-  if (normalized === "pending") return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
-  return "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+  if (normalized === "active") return "bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
+  if (normalized === "pending") return "bg-amber-50 border border-amber-100 text-amber-700 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
+  return "bg-gray-50 border border-gray-100 text-slate-600 rounded-xl px-2.5 py-0.5 text-[10px] font-light";
 }
 
 export function OrganizationAdministrationClient() {
@@ -197,12 +197,12 @@ export function OrganizationAdministrationClient() {
     <div className="mx-auto w-full max-w-[1440px] space-y-6">
       <Breadcrumb pageName={PAGE_TITLE} />
 
-      <div className="flex flex-col gap-4 rounded-[10px] bg-white p-6 shadow-1 dark:bg-gray-dark dark:shadow-card lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Solo OWNER</p>
-          <h1 className="text-2xl font-semibold text-dark dark:text-white">{PAGE_TITLE}</h1>
-          <p className="max-w-3xl text-sm text-dark-6 dark:text-dark-6">
-            Espacio global para crear, supervisar y operar organizaciones sin mezclar esta experiencia con la administracion restringida que usa `ORG_ADMIN`.
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm lg:flex-row lg:items-end lg:justify-between animate-in fade-in duration-300">
+        <div className="space-y-1">
+          <p className="text-[10px] uppercase tracking-wider text-dark-6 font-light">Solo OWNER</p>
+          <h1 className="text-2xl font-light text-dark">{PAGE_TITLE}</h1>
+          <p className="max-w-3xl text-xs font-light text-dark-6">
+            Espacio global para crear, supervisar y operar organizaciones sin mezclar esta experiencia con la administración restringida que usa `ORG_ADMIN`.
           </p>
         </div>
         <button
@@ -211,7 +211,7 @@ export function OrganizationAdministrationClient() {
             resetCreateState();
             setCreateOpen(true);
           }}
-          className="rounded-lg bg-primary px-5 py-3 text-sm font-medium text-white transition hover:bg-opacity-90"
+          className="rounded-xl bg-zelify-midnight px-4 py-2 text-xs font-light text-white transition hover:bg-black active:scale-95"
         >
           Crear organizacion
         </button>
@@ -237,12 +237,12 @@ export function OrganizationAdministrationClient() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar por nombre, ID, razon social o identificacion fiscal"
-            className="rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+            className="rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
           />
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
-            className="rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+            className="rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
           >
             <option value="ALL">Todos los estados</option>
             <option value="ACTIVE">ACTIVE</option>
@@ -251,7 +251,7 @@ export function OrganizationAdministrationClient() {
           <select
             value={typeFilter}
             onChange={(event) => setTypeFilter(event.target.value)}
-            className="rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+            className="rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
           >
             <option value="ALL">Todos los tipos</option>
             {organizationTypes.map((type) => (
@@ -267,7 +267,7 @@ export function OrganizationAdministrationClient() {
               setStatusFilter("ALL");
               setTypeFilter("ALL");
             }}
-            className="rounded-lg border border-stroke px-4 py-3 text-sm font-medium text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
+            className="rounded-xl border border-gray-250 bg-white px-4 py-2 text-xs font-light text-dark transition hover:bg-gray-50 active:scale-95"
           >
             Limpiar filtros
           </button>
@@ -281,18 +281,18 @@ export function OrganizationAdministrationClient() {
 
         <div className="overflow-hidden rounded-xl border border-stroke dark:border-dark-3">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1120px] text-left text-sm">
-              <thead className="bg-gray-2/70 dark:bg-dark-2/80">
-                <tr className="border-b border-stroke dark:border-dark-3">
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Organizacion</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Tipo</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Estado</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Entorno</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Pais / Moneda</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Legal / Fiscal</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Permisos</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Onboarding</th>
-                  <th className="px-4 py-3 font-medium text-dark dark:text-white">Acciones</th>
+            <table className="w-full min-w-[1120px] text-left text-xs">
+              <thead className="bg-gray-50/50 border-b border-gray-100 text-[10px] uppercase tracking-wider text-dark-6">
+                <tr>
+                  <th className="px-4 py-3 font-normal">Organizacion</th>
+                  <th className="px-4 py-3 font-normal">Tipo</th>
+                  <th className="px-4 py-3 font-normal">Estado</th>
+                  <th className="px-4 py-3 font-normal">Entorno</th>
+                  <th className="px-4 py-3 font-normal">Pais / Moneda</th>
+                  <th className="px-4 py-3 font-normal">Legal / Fiscal</th>
+                  <th className="px-4 py-3 font-normal">Permisos</th>
+                  <th className="px-4 py-3 font-normal">Onboarding</th>
+                  <th className="px-4 py-3 font-normal text-right pr-6">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -310,67 +310,67 @@ export function OrganizationAdministrationClient() {
                   </tr>
                 ) : (
                   filteredOrganizations.map((organization) => (
-                    <tr key={organization.id} className="border-b border-stroke align-top dark:border-dark-3">
-                      <td className="px-4 py-4">
+                    <tr key={organization.id} className="border-b border-gray-100/60 align-middle hover:bg-gray-50/20 transition font-light text-dark-6">
+                      <td className="px-4 py-3.5">
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <div className="font-medium text-dark dark:text-white">{organization.name}</div>
+                            <div className="font-normal text-dark">{organization.name}</div>
                             {pendingOrgIds.has(organization.id) && (
                               <Link
                                 href="/owner/production-requests?status=PENDING"
-                                className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[9px] font-bold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 animate-pulse hover:bg-rose-200"
+                                className="inline-flex items-center rounded-xl border border-rose-100 bg-rose-50 px-2 py-0.5 text-[9px] font-normal text-rose-700 animate-pulse hover:bg-rose-100"
                               >
                                 Solicitud Pendiente
                               </Link>
                             )}
                           </div>
-                          <div className="font-mono text-xs text-dark-6 dark:text-dark-6">{organization.id}</div>
+                          <div className="inline-block font-mono text-[10px] text-dark-6 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100/50">{organization.id}</div>
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-dark dark:text-white">{organization.organization_type || "Sin tipo"}</td>
-                      <td className="px-4 py-4">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusBadgeClass(organization.status)}`}>
+                      <td className="px-4 py-3.5 text-dark-6">{organization.organization_type || "Sin tipo"}</td>
+                      <td className="px-4 py-3.5">
+                        <span className={statusBadgeClass(organization.status)}>
                           {organization.status || "UNKNOWN"}
                         </span>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-3.5">
                         <span
-                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium uppercase ${
+                          className={`inline-flex rounded-xl border px-2.5 py-0.5 text-[10px] font-light uppercase ${
                             organization.environment === "PRODUCTION"
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300"
-                              : "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+                              ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                              : "bg-amber-50 border-amber-100 text-amber-700"
                           }`}
                         >
                           {organization.environment === "PRODUCTION" ? "Producción" : "Sandbox"}
                         </span>
                       </td>
-                      <td className="px-4 py-4 text-dark dark:text-white">
+                      <td className="px-4 py-3.5 text-dark-6">
                         {(organization.country || "N/A") + " / " + (organization.currency || "N/A")}
                       </td>
-                      <td className="px-4 py-4 text-dark dark:text-white">
-                        <div>{organization.company_legal_name || "Sin razon social"}</div>
-                        <div className="text-xs text-dark-6 dark:text-dark-6">{organization.fiscal_id || "Sin identificacion fiscal"}</div>
+                      <td className="px-4 py-3.5 text-dark-6">
+                        <div className="text-dark font-normal">{organization.company_legal_name || "Sin razon social"}</div>
+                        <div className="text-[10px] text-dark-6">{organization.fiscal_id || "Sin identificacion fiscal"}</div>
                       </td>
-                      <td className="px-4 py-4 text-dark dark:text-white">{organization.scopes?.length ?? 0}</td>
-                      <td className="px-4 py-4 text-dark dark:text-white">
+                      <td className="px-4 py-3.5 text-dark">{organization.scopes?.length ?? 0}</td>
+                      <td className="px-4 py-3.5 text-dark-6">
                         {(() => {
                           const pct = onboardingPercentages[organization.id];
                           const isLoaded = pct !== undefined;
 
                           return (
-                            <div className="w-28 space-y-1.5">
-                              <div className="flex justify-between text-xs font-semibold">
+                            <div className="w-28 space-y-1">
+                              <div className="flex justify-between text-[10px] font-light">
                                 <span>{!isLoaded ? "Cargando..." : pct === 100 ? "Verificado" : "En progreso"}</span>
                                 <span>{isLoaded ? `${pct}%` : "--%"}</span>
                               </div>
-                              <div className="h-1.5 w-full rounded-full bg-gray-2 dark:bg-dark-3 overflow-hidden">
+                              <div className="h-1 w-full rounded-full bg-gray-100 overflow-hidden">
                                 <div
                                   className={`h-full rounded-full transition-all duration-500 ${
                                     !isLoaded
-                                      ? "bg-gray-400 dark:bg-gray-600 animate-pulse w-1/3"
+                                      ? "bg-gray-400 animate-pulse w-1/3"
                                       : pct === 100
                                       ? "bg-emerald-500"
-                                      : "bg-primary"
+                                      : "bg-zelify-midnight"
                                   }`}
                                   style={isLoaded ? { width: `${pct}%` } : undefined}
                                 />
@@ -379,14 +379,14 @@ export function OrganizationAdministrationClient() {
                           );
                         })()}
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-3.5 text-right pr-6">
                         <Dropdown
                           isOpen={activeDropdownOrgId === organization.id}
                           setIsOpen={(open) => setActiveDropdownOrgId(open ? organization.id : null)}
                         >
-                          <DropdownTrigger className="rounded-full p-1.5 hover:bg-gray-2 dark:hover:bg-dark-3 text-dark-6 dark:text-dark-6 hover:text-dark dark:hover:text-white transition">
+                          <DropdownTrigger className="rounded-xl p-1.5 hover:bg-gray-50 text-dark-6 hover:text-dark transition inline-flex justify-center items-center">
                             <svg
-                              className="h-5 w-5 fill-current"
+                              className="h-4 w-4 fill-current"
                               viewBox="0 0 24 24"
                               xmlns="http://www.w3.org/2000/svg"
                             >
@@ -395,12 +395,12 @@ export function OrganizationAdministrationClient() {
                           </DropdownTrigger>
                           <DropdownContent
                             align="end"
-                            className="bg-white border border-stroke dark:bg-gray-dark dark:border-dark-3 py-1.5 w-48 shadow-lg z-50"
+                            className="bg-white border border-gray-100 py-1.5 w-48 shadow-lg z-50 rounded-2xl animate-in fade-in duration-200"
                           >
                             <DropdownClose>
                               <Link
                                 href={`/owner/organizations/${organization.id}`}
-                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                className="flex w-full items-center px-4 py-2 text-xs font-light text-dark hover:bg-gray-50"
                               >
                                 Resumen General
                               </Link>
@@ -408,7 +408,7 @@ export function OrganizationAdministrationClient() {
                             <DropdownClose>
                               <Link
                                 href={`/owner/organizations/${organization.id}?tab=general`}
-                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                className="flex w-full items-center px-4 py-2 text-xs font-light text-dark hover:bg-gray-50"
                               >
                                 Editar Datos
                               </Link>
@@ -416,7 +416,7 @@ export function OrganizationAdministrationClient() {
                             <DropdownClose>
                               <Link
                                 href={`/owner/organizations/${organization.id}?tab=members`}
-                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                className="flex w-full items-center px-4 py-2 text-xs font-light text-dark hover:bg-gray-50"
                               >
                                 Miembros
                               </Link>
@@ -424,7 +424,7 @@ export function OrganizationAdministrationClient() {
                             <DropdownClose>
                               <Link
                                 href={`/owner/organizations/${organization.id}?tab=branding`}
-                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                className="flex w-full items-center px-4 py-2 text-xs font-light text-dark hover:bg-gray-50"
                               >
                                 Personalización y Marca
                               </Link>
@@ -432,7 +432,7 @@ export function OrganizationAdministrationClient() {
                             <DropdownClose>
                               <Link
                                 href={`/owner/organizations/${organization.id}?tab=scopes`}
-                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                className="flex w-full items-center px-4 py-2 text-xs font-light text-dark hover:bg-gray-50"
                               >
                                 Permisos y Scopes
                               </Link>
@@ -440,7 +440,7 @@ export function OrganizationAdministrationClient() {
                             <DropdownClose>
                               <Link
                                 href={`/owner/organizations/${organization.id}?tab=api-keys`}
-                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                className="flex w-full items-center px-4 py-2 text-xs font-light text-dark hover:bg-gray-50"
                               >
                                 Claves de API
                               </Link>
@@ -448,7 +448,7 @@ export function OrganizationAdministrationClient() {
                             <DropdownClose>
                               <Link
                                 href={`/owner/organizations/${organization.id}?tab=onboarding`}
-                                className="flex w-full items-center px-4 py-2 text-xs font-semibold text-dark hover:bg-gray-2 dark:text-white dark:hover:bg-dark-3"
+                                className="flex w-full items-center px-4 py-2 text-xs font-light text-dark hover:bg-gray-50"
                               >
                                 Estado de Onboarding
                               </Link>
@@ -466,15 +466,15 @@ export function OrganizationAdministrationClient() {
       </ShowcaseSection>
 
       {createOpen ? (
-        <div className="fixed inset-0 z-999 flex items-center justify-center bg-black/60 p-4">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">
-            <div className="border-b border-stroke px-6 py-4 dark:border-dark-3">
-              <h2 className="text-lg font-semibold text-dark dark:text-white">Crear organizacion global</h2>
-              <p className="mt-1 text-sm text-dark-6 dark:text-dark-6">
+        <div className="fixed inset-0 z-999 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-md transition-all duration-300 animate-in fade-in">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-auto rounded-3xl border border-gray-100 bg-white shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="border-b border-gray-100 px-6 py-4">
+              <h2 className="text-sm font-normal text-dark">Crear organizacion global</h2>
+              <p className="mt-1 text-xs font-light text-dark-6">
                 Este flujo existe solo dentro del modulo exclusivo de OWNER.
               </p>
             </div>
-            <form onSubmit={submitCreate} className="space-y-6 p-6">
+            <form onSubmit={submitCreate} className="space-y-4 p-6">
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField label="Nombre de la organizacion" value={createForm.name} onChange={(value) => updateForm("name", value)} required />
                 <FormSelect label="Estado" value={createForm.status || "ACTIVE"} onChange={(value) => updateForm("status", value)} options={["ACTIVE", "DISABLED"]} />
@@ -486,29 +486,29 @@ export function OrganizationAdministrationClient() {
                 <FormField label="Industria" value={createForm.industry || ""} onChange={(value) => updateForm("industry", value)} />
               </div>
               <FormField label="Sitio web" value={createForm.website || ""} onChange={(value) => updateForm("website", value)} />
-              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-900/20 dark:text-amber-300">
+              <div className="rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 text-xs text-amber-700">
                 Para organizaciones `CLIENT`, los datos legales viajan dentro del bloque `cliente` del backend. `website` e `industry` siguen siendo campos de UI hasta que backend extienda el DTO de creacion.
               </div>
               {createError ? (
-                <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-300">
+                <div className="rounded-xl border border-rose-100 bg-rose-50/40 px-4 py-3 text-xs text-rose-700">
                   {createError}
                 </div>
               ) : null}
-              <div className="flex justify-end gap-3 border-t border-stroke pt-4 dark:border-dark-3">
+              <div className="flex justify-end gap-3 border-t border-gray-100 pt-4">
                 <button
                   type="button"
                   onClick={() => {
                     setCreateOpen(false);
                     resetCreateState();
                   }}
-                  className="rounded-lg border border-stroke px-4 py-2.5 text-sm font-medium text-dark transition hover:border-primary hover:text-primary dark:border-dark-3 dark:text-white"
+                  className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-xs font-light text-dark hover:bg-gray-50 active:scale-95 transition"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={createLoading}
-                  className="rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-xl bg-zelify-midnight px-5 py-2 text-xs font-light text-white hover:bg-black active:scale-95 transition disabled:opacity-50"
                 >
                   {createLoading ? "Creando..." : "Crear organizacion"}
                 </button>
@@ -523,10 +523,10 @@ export function OrganizationAdministrationClient() {
 
 function Metric({ title, value, helper }: { title: string; value: number; helper: string }) {
   return (
-    <div className="rounded-[10px] bg-white p-5 shadow-1 dark:bg-gray-dark dark:shadow-card">
-      <div className="text-sm font-medium text-dark-6 dark:text-dark-6">{title}</div>
-      <div className="mt-2 text-3xl font-semibold text-dark dark:text-white">{value}</div>
-      <div className="mt-2 text-xs text-dark-6 dark:text-dark-6">{helper}</div>
+    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm animate-in fade-in duration-300">
+      <div className="text-xs font-light text-dark-6">{title}</div>
+      <div className="mt-1 text-2xl font-light text-dark">{value}</div>
+      <div className="mt-1.5 text-[10px] font-light text-dark-6">{helper}</div>
     </div>
   );
 }
@@ -554,8 +554,8 @@ function FormField({
   required?: boolean;
 }) {
   return (
-    <label className="space-y-2">
-      <span className="block text-sm font-medium text-dark dark:text-white">
+    <label className="block mb-2">
+      <span className="block text-[10px] uppercase tracking-wider font-light text-dark-6 mb-1">
         {label}
         {required ? " *" : ""}
       </span>
@@ -564,7 +564,7 @@ function FormField({
         value={value}
         onChange={(event) => onChange(event.target.value)}
         required={required}
-        className="w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+        className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
       />
     </label>
   );
@@ -582,12 +582,12 @@ function FormSelect({
   options: Array<string | SelectOption>;
 }) {
   return (
-    <label className="space-y-2">
-      <span className="block text-sm font-medium text-dark dark:text-white">{label}</span>
+    <label className="block mb-2">
+      <span className="block text-[10px] uppercase tracking-wider font-light text-dark-6 mb-1">{label}</span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-lg border border-stroke bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary dark:border-dark-3 dark:bg-dark-2 dark:text-white"
+        className="w-full rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-2 text-xs font-light text-dark outline-none transition focus:border-gray-200"
       >
         {options.map((option) => (
           <option
