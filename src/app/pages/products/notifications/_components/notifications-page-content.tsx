@@ -1351,30 +1351,32 @@ export function NotificationsPageContent() {
                 <p className="text-xs text-rose-500 dark:text-rose-300">{newTemplateHtmlError}</p>
               )}
             </div>
-            <div className="space-y-1 lg:mt-1">
-              <div className="rounded-[32px] bg-slate-900/90 px-6 py-10 text-sm text-white shadow-2xl dark:bg-slate-950">
-                <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4">
-                  <div className="rounded-3xl border border-white/10 bg-slate-800/80 px-6 py-4">
-                    <div className="flex items-center gap-3 text-sm text-white/90">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-base font-semibold">
-                        {(previewFrom?.charAt(0) ?? "U").toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold">{previewFrom}</p>
-                        <p className="text-xs text-white/70">{previewSubject}</p>
-                      </div>
-                    </div>
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-dark-6">Vista previa en vivo</label>
+                <span className="inline-flex items-center gap-1.5 rounded-xl border border-gray-100 bg-gray-50/50 px-2.5 py-1 text-[10px] font-light text-dark-6">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Mailing HTML
+                </span>
+              </div>
+              <div className="flex-1 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm flex flex-col min-h-[720px]">
+                <div className="mb-3 rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-zelify-midnight text-xs font-light text-white">
+                    {(previewFrom?.charAt(0) ?? "U").toUpperCase()}
                   </div>
-		                  <iframe
-		                    key={previewFrameKey}
-		                    ref={previewFrameRef}
-		                    srcDoc={previewSrcDocResolved}
-		                    onLoad={handlePreviewLoad}
-		                    className="w-full rounded-[32px] border border-slate-200 bg-white text-dark shadow-xl dark:border-dark-3 dark:bg-dark-2 dark:text-white"
-		                    style={{ minHeight: "600px", width: "100%" }}
-		                    sandbox="allow-same-origin allow-popups allow-forms"
-		                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-normal text-dark">{previewFrom || "notifications@zelify.com"}</p>
+                    <p className="truncate text-[11px] font-light text-dark-6">{previewSubject || "Vista previa de asunto"}</p>
+                  </div>
                 </div>
+                <iframe
+                  key={previewFrameKey}
+                  ref={previewFrameRef}
+                  srcDoc={previewSrcDocResolved}
+                  onLoad={handlePreviewLoad}
+                  className="w-full flex-1 min-h-[640px] rounded-xl border border-gray-100 bg-white text-dark"
+                  sandbox="allow-same-origin allow-popups allow-forms"
+                />
               </div>
             </div>
           </div>
