@@ -960,14 +960,12 @@ export function PreviewPanel({
           Pagos
         </button>
 
-        {/* Tab Activo: Tarjetas */}
-        <button type="button" className="flex flex-col items-center gap-0.5 text-slate-900 dark:text-white font-semibold">
-          <div className="rounded-xl bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 flex items-center justify-center">
-            <svg className="size-4 text-slate-900 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <rect x="2" y="5" width="20" height="14" rx="3" />
-              <line x1="2" y1="10" x2="22" y2="10" />
-            </svg>
-          </div>
+        {/* Tab Activo: Tarjetas (Cápsula gris envolviendo icono + texto) */}
+        <button type="button" className="flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-slate-100 dark:bg-slate-800 px-3.5 py-1.5 text-slate-900 dark:text-white font-semibold shadow-xs">
+          <svg className="size-4 text-slate-900 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <rect x="2" y="5" width="20" height="14" rx="3" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
           Tarjetas
         </button>
 
