@@ -112,6 +112,22 @@ export function TransfersManagement() {
       .finally(() => setLoadingUsers(false));
   }, [org?.id]);
 
+  // Vincular automáticamente los usuarios reales cargados con el historial de transferencias
+  useEffect(() => {
+    if (!users || users.length === 0) return;
+    setTransfers((prevTransfers) =>
+      prevTransfers.map((t, idx) => {
+        const user = users[idx % users.length];
+        return {
+          ...t,
+          userName: user.full_name || user.email,
+          userEmail: user.email,
+          userId: user.id,
+        };
+      })
+    );
+  }, [users]);
+
   // Filtrado de la lista
   const filteredTransfers = useMemo(() => {
     return transfers.filter((t) => {

@@ -132,6 +132,21 @@ export function DisbursementManagement() {
       });
   }, [org?.id]);
 
+  // Vincular automáticamente los usuarios reales cargados con el historial de dispersiones
+  useEffect(() => {
+    if (!users || users.length === 0) return;
+    setDisbursements((prevDisbursements) =>
+      prevDisbursements.map((d, idx) => {
+        const user = users[idx % users.length];
+        return {
+          ...d,
+          createdByName: user.full_name || user.email,
+          createdByEmail: user.email,
+        };
+      })
+    );
+  }, [users]);
+
   // Cálculos de Métricas KPIs
   const metrics = useMemo(() => {
     let totalDispersed = 0;
