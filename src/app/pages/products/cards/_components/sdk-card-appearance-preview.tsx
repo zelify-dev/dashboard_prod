@@ -135,14 +135,14 @@ function EmvChip({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative h-6 w-8 rounded-md bg-gradient-to-br from-amber-200 via-amber-400 to-yellow-600 p-[1px] shadow-sm overflow-hidden",
+        "relative h-6 w-8 rounded-md bg-gradient-to-br from-slate-200 via-slate-400 to-slate-600 p-[1px] shadow-sm overflow-hidden border border-white/20",
         className
       )}
     >
-      <div className="h-full w-full rounded-[4px] border border-amber-800/40 bg-gradient-to-tr from-amber-300 to-yellow-200 opacity-90 grid grid-cols-2 gap-[1px] p-[2px]">
-        <div className="border-r border-b border-amber-700/40 rounded-tl-[2px]" />
-        <div className="border-b border-amber-700/40 rounded-tr-[2px]" />
-        <div className="border-r border-amber-700/40 rounded-bl-[2px]" />
+      <div className="h-full w-full rounded-[4px] border border-slate-600/40 bg-gradient-to-tr from-slate-300 via-slate-200 to-slate-400 opacity-90 grid grid-cols-2 gap-[1px] p-[2px]">
+        <div className="border-r border-b border-slate-700/30 rounded-tl-[2px]" />
+        <div className="border-b border-slate-700/30 rounded-tr-[2px]" />
+        <div className="border-r border-slate-700/30 rounded-bl-[2px]" />
         <div className="rounded-br-[2px]" />
       </div>
     </div>
@@ -172,7 +172,6 @@ export function SdkCardAppearancePreview({
 }: SdkCardAppearancePreviewProps) {
   const { language } = useLanguage();
   const previewT = cardsTranslations[language].configurator.preview;
-  const [showFullPan, setShowFullPan] = useState(false);
 
   const isLightFace = cardFaceLuminance(config) > 0.55;
   const networkSrc = config.cardNetwork === "visa" ? "/visa.svg" : "/mastercard.svg";
@@ -243,37 +242,18 @@ export function SdkCardAppearancePreview({
               </div>
             </div>
 
-            {/* Fila Central: Número PAN de Tarjeta */}
-            <div className="my-auto flex items-center justify-between pt-1">
-              <div className="min-w-0 flex-1">
-                {showFullPan ? (
-                  <span className={cn("font-mono text-sm font-medium tracking-[0.2em]", fg)}>
-                    {DEMO_PAN_FULL}
-                  </span>
-                ) : (
-                  <MaskedPanSquares className={fg} />
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowFullPan((v) => !v)}
-                className={cn(
-                  "shrink-0 rounded-lg p-1.5 transition-colors outline-none",
-                  isLightFace ? "text-slate-900 hover:bg-black/5" : "text-white/80 hover:bg-white/10"
-                )}
-                aria-label={showFullPan ? previewT.sdkHidePanAria : previewT.sdkShowPanAria}
-              >
-                {showFullPan ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
-              </button>
+            {/* Fila Central: Número PAN de Tarjeta limpio sin ojo */}
+            <div className="my-auto flex items-center pt-2">
+              <MaskedPanSquares className={fg} />
             </div>
 
             {/* Fila Inferior: Titular y Red / Saldo */}
             <div className="flex items-end justify-between">
-              <div className="min-w-0 max-w-[60%] space-y-0.5">
-                <span className={cn("block text-[9px] font-medium uppercase tracking-[0.18em]", fgMuted)}>
+              <div className="min-w-0 max-w-[65%] space-y-1">
+                <span className={cn("block text-[9px] font-semibold uppercase tracking-[0.18em]", fgMuted)}>
                   {previewT.sdkCardholderCaption || "TITULAR"}
                 </span>
-                <p className={cn("truncate text-xs font-semibold uppercase tracking-wider", fg)}>
+                <p className={cn("truncate text-xs font-bold uppercase tracking-wider", fg)}>
                   {config.cardholderName || "CARLOS MENDOZA"}
                 </p>
               </div>
