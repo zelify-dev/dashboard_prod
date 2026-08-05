@@ -29,10 +29,10 @@ export const DEFAULT_CARD_DESIGN_CONFIG: CardDesignConfig = {
   expirationDate: "2032-01-21",
   spendingLimit: "1000",
   limitInterval: "weekly",
-  colorType: "solid",
-  solidColor: "#1e3a8a",
-  gradientColors: ["#1e3a8a", "#1e40af", "#2563eb"],
-  finishType: "standard",
+  colorType: "gradient",
+  solidColor: "#000016",
+  gradientColors: ["#000016", "#070724", "#0a0a30"],
+  finishType: "metallic",
   cardNetwork: "visa",
 };
 

@@ -144,6 +144,72 @@ export function CardCustomizationPanel({
             </div>
           </div>
 
+          {/* Presets Rápidos de Lujo */}
+          <div>
+            <label className={fieldLabel}>Estilos de Lujo Predefinidos</label>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <button
+                type="button"
+                onClick={() =>
+                  onConfigChange({
+                    colorType: "gradient",
+                    gradientColors: ["#000016", "#070724", "#0a0a30"],
+                    finishType: "metallic",
+                  })
+                }
+                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-2 text-xs font-medium text-dark shadow-sm transition hover:border-dark dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              >
+                <span className="h-4 w-4 rounded-full bg-gradient-to-r from-[#000016] to-[#0a0a30] border border-white/40" />
+                Zelify Black
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  onConfigChange({
+                    colorType: "gradient",
+                    gradientColors: ["#09090b", "#18181b", "#27272a"],
+                    finishType: "metallic",
+                  })
+                }
+                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-2 text-xs font-medium text-dark shadow-sm transition hover:border-dark dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              >
+                <span className="h-4 w-4 rounded-full bg-gradient-to-r from-[#09090b] to-[#27272a] border border-white/40" />
+                Titanium
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  onConfigChange({
+                    colorType: "gradient",
+                    gradientColors: ["#0f172a", "#1e293b", "#334155"],
+                    finishType: "metallic",
+                  })
+                }
+                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-2 text-xs font-medium text-dark shadow-sm transition hover:border-dark dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              >
+                <span className="h-4 w-4 rounded-full bg-gradient-to-r from-[#0f172a] to-[#334155] border border-white/40" />
+                Obsidian
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  onConfigChange({
+                    colorType: "gradient",
+                    gradientColors: ["#022c22", "#064e3b", "#047857"],
+                    finishType: "metallic",
+                  })
+                }
+                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-2 text-xs font-medium text-dark shadow-sm transition hover:border-dark dark:border-dark-3 dark:bg-dark-3 dark:text-white"
+              >
+                <span className="h-4 w-4 rounded-full bg-gradient-to-r from-[#022c22] to-[#047857] border border-white/40" />
+                Emerald
+              </button>
+            </div>
+          </div>
+
           {/* Solid Color Picker */}
           {config.colorType === "solid" && (
             <div className="pt-1">

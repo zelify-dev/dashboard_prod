@@ -131,6 +131,41 @@ function formatBalanceUsd(n: number): string {
   })}`;
 }
 
+function EmvChip({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "relative h-6 w-8 rounded-md bg-gradient-to-br from-amber-200 via-amber-400 to-yellow-600 p-[1px] shadow-sm overflow-hidden",
+        className
+      )}
+    >
+      <div className="h-full w-full rounded-[4px] border border-amber-800/40 bg-gradient-to-tr from-amber-300 to-yellow-200 opacity-90 grid grid-cols-2 gap-[1px] p-[2px]">
+        <div className="border-r border-b border-amber-700/40 rounded-tl-[2px]" />
+        <div className="border-b border-amber-700/40 rounded-tr-[2px]" />
+        <div className="border-r border-amber-700/40 rounded-bl-[2px]" />
+        <div className="rounded-br-[2px]" />
+      </div>
+    </div>
+  );
+}
+
+function ContactlessIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      <path d="M8.5 14.5A4.5 4.5 0 0 0 8.5 9.5" />
+      <path d="M12 17A8 8 0 0 0 12 7" />
+      <path d="M15.5 19.5A11.5 11.5 0 0 0 15.5 4.5" />
+    </svg>
+  );
+}
+
 export function SdkCardAppearancePreview({
   config,
   brandLogoUrl,
@@ -139,18 +174,20 @@ export function SdkCardAppearancePreview({
   const previewT = cardsTranslations[language].configurator.preview;
   const [showFullPan, setShowFullPan] = useState(false);
 
-  const isLightFace = cardFaceLuminance(config) > 0.45;
+  const isLightFace = cardFaceLuminance(config) > 0.55;
   const networkSrc = config.cardNetwork === "visa" ? "/visa.svg" : "/mastercard.svg";
 
   const bgStyle: CSSProperties =
     config.colorType === "solid"
-      ? { backgroundColor: config.solidColor }
+      ? { backgroundColor: config.solidColor || "#000016" }
       : {
-          backgroundImage: `linear-gradient(135deg, ${config.gradientColors.join(", ")})`,
+          backgroundImage: `linear-gradient(135deg, ${
+            config.gradientColors?.length ? config.gradientColors.join(", ") : "#000016, #070724, #0a0a30"
+          })`,
         };
 
-  const fg = isLightFace ? "text-gray-900" : "text-white";
-  const fgMuted = isLightFace ? "text-gray-500" : "text-white/55";
+  const fg = isLightFace ? "text-slate-900" : "text-white";
+  const fgMuted = isLightFace ? "text-slate-500" : "text-white/60";
 
   const balanceDemo = useMemo(() => {
     const base = parseFloat(config.spendingLimit || "1000") || 1000;
@@ -161,113 +198,102 @@ export function SdkCardAppearancePreview({
 
   return (
     <div className="flex justify-center">
-      <div className="relative w-full max-w-[300px]">
+      <div className="relative w-full max-w-[320px]">
+        {/* Cuerpo de la Tarjeta */}
         <div
           className={cn(
-            "relative aspect-[1.586/1] w-full overflow-hidden rounded-[1.65rem] shadow-[0_16px_40px_rgba(0,0,0,0.35)] ring-1 ring-white/10",
+            "relative aspect-[1.586/1] w-full overflow-hidden rounded-[1.25rem] border border-white/15 p-5 transition-all duration-300",
             config.finishType === "embossed" &&
-              "shadow-[inset_0_2px_4px_rgba(255,255,255,0.2),inset_0_-4px_12px_rgba(0,0,0,0.35),0_16px_40px_rgba(0,0,0,0.35)]",
+              "border-white/25 shadow-inner",
             config.finishType === "metallic" &&
-              "after:pointer-events-none after:absolute after:inset-0 after:rounded-[1.65rem] after:content-[''] after:bg-gradient-to-br after:from-white/25 after:via-transparent after:to-white/10"
+              "before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/10 before:via-transparent before:to-white/5"
           )}
           style={bgStyle}
         >
-          <div
-            className={cn(
-              "absolute inset-0 flex flex-col px-[10%] pb-[10%] pt-[9%] antialiased",
-              fg
-            )}
-          >
-            {/* Arriba derecha: logo o wordmark Zelify */}
-            <div className="flex shrink-0 justify-end">
-              {brandLogoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={brandLogoUrl}
-                  alt=""
-                  className={cn(
-                    "h-8 max-h-9 w-auto max-w-[55%] object-contain object-right",
-                    invertBrandLogo && "brightness-0 invert"
-                  )}
-                />
-              ) : (
-                <div
-                  className={cn(
-                    "flex items-center gap-2",
-                    isLightFace ? "text-gray-900" : "text-white"
-                  )}
-                >
-                  <ZelifyMark className="size-7 shrink-0" />
-                  <span className="text-[1.15rem] font-semibold tracking-tight">
-                    Zelify
-                  </span>
-                </div>
-              )}
+          {/* Textura mate de fondo sutil */}
+          <div className="absolute inset-0 bg-radial-at-t from-white/10 via-transparent to-black/20 pointer-events-none" />
+
+          <div className="relative z-10 flex h-full flex-col justify-between antialiased">
+            {/* Fila Superior: Chip EMV + NFC e Isotipo/Marca */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <EmvChip />
+                <ContactlessIcon className={cn("size-4 rotate-90", fgMuted)} />
+              </div>
+
+              <div>
+                {brandLogoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={brandLogoUrl}
+                    alt="Logo Marca"
+                    className={cn(
+                      "h-6 max-h-7 w-auto max-w-[80px] object-contain object-right",
+                      invertBrandLogo && "brightness-0 invert"
+                    )}
+                  />
+                ) : (
+                  <div className={cn("flex items-center gap-1.5", fg)}>
+                    <ZelifyMark className="size-5 shrink-0" />
+                    <span className="text-xs font-semibold tracking-wider uppercase">
+                      Zelify
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Centro: PAN a la izquierda, ojo a la derecha (misma fila) */}
-            <div className="flex min-h-0 flex-1 items-center justify-between gap-6 py-2">
-              <div className="min-w-0 flex-1 text-left">
+            {/* Fila Central: Número PAN de Tarjeta */}
+            <div className="my-auto flex items-center justify-between pt-1">
+              <div className="min-w-0 flex-1">
                 {showFullPan ? (
-                  <span className="font-mono text-[17px] font-semibold tracking-[0.2em]">
+                  <span className={cn("font-mono text-sm font-medium tracking-[0.2em]", fg)}>
                     {DEMO_PAN_FULL}
                   </span>
                 ) : (
-                  <MaskedPanSquares />
+                  <MaskedPanSquares className={fg} />
                 )}
               </div>
               <button
                 type="button"
                 onClick={() => setShowFullPan((v) => !v)}
                 className={cn(
-                  "shrink-0 rounded-lg p-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-offset-0",
-                  isLightFace
-                    ? "text-gray-900 hover:bg-black/[0.06] focus-visible:ring-primary/50"
-                    : "text-white hover:bg-white/10 focus-visible:ring-white/40"
+                  "shrink-0 rounded-lg p-1.5 transition-colors outline-none",
+                  isLightFace ? "text-slate-900 hover:bg-black/5" : "text-white/80 hover:bg-white/10"
                 )}
-                aria-label={
-                  showFullPan ? previewT.sdkHidePanAria : previewT.sdkShowPanAria
-                }
+                aria-label={showFullPan ? previewT.sdkHidePanAria : previewT.sdkShowPanAria}
               >
-                {showFullPan ? (
-                  <EyeOffIcon className="size-6" />
-                ) : (
-                  <EyeIcon className="size-6" />
-                )}
+                {showFullPan ? <EyeOffIcon className="size-4" /> : <EyeIcon className="size-4" />}
               </button>
             </div>
 
-            {/* Abajo: titular izq. · red + importe der., misma línea base en datos */}
-            <div className="flex shrink-0 items-end justify-between gap-4">
-              <div className="min-w-0 max-w-[55%]">
-                <p
-                  className={cn(
-                    "mb-1 text-[10px] font-semibold uppercase tracking-[0.14em]",
-                    fgMuted
-                  )}
-                >
-                  {previewT.sdkCardholderCaption}
-                </p>
-                <p className="truncate text-base font-bold leading-none tracking-tight">
-                  {config.cardholderName || "—"}
+            {/* Fila Inferior: Titular y Red / Saldo */}
+            <div className="flex items-end justify-between">
+              <div className="min-w-0 max-w-[60%] space-y-0.5">
+                <span className={cn("block text-[9px] font-medium uppercase tracking-[0.18em]", fgMuted)}>
+                  {previewT.sdkCardholderCaption || "TITULAR"}
+                </span>
+                <p className={cn("truncate text-xs font-semibold uppercase tracking-wider", fg)}>
+                  {config.cardholderName || "CARLOS MENDOZA"}
                 </p>
               </div>
-              <div className="flex shrink-0 flex-col items-end text-right">
+
+              <div className="flex flex-col items-end space-y-1">
                 <div
                   className={cn(
-                    "relative mb-1.5 h-7 w-[56px]",
+                    "relative h-5 w-[42px]",
                     config.cardNetwork === "visa" && !isLightFace && "brightness-0 invert"
                   )}
                 >
                   <Image
                     src={networkSrc}
-                    alt=""
+                    alt={config.cardNetwork}
                     fill
-                    className="object-contain object-right object-bottom"
-                    sizes="56px"
+                    className="object-contain object-right"
+                    sizes="42px"
                   />
                 </div>
-                <span className="text-base font-bold tabular-nums leading-none tracking-tight">
+                <span className={cn("text-[11px] font-medium tabular-nums tracking-tight", fgMuted)}>
                   {balanceDemo}
                 </span>
               </div>
