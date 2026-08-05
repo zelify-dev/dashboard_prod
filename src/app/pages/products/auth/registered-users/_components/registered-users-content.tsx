@@ -6,6 +6,7 @@ import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { getStoredOrganization } from "@/lib/auth-api";
 import {
   listDashboardMembers,
+  listOrgUsers,
   type OrgUserListItem,
   type OrgUserStatus,
 } from "@/lib/organization-users-api";
@@ -33,7 +34,7 @@ export function RegisteredUsersContent() {
   const [statusFilter, setStatusFilter] = useState<OrgUserStatus | "">("");
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     if (!org?.id) {
       setItems([]);
       setTotal(0);
@@ -41,22 +42,41 @@ export function RegisteredUsersContent() {
       return;
     }
     setLoading(true);
-    listDashboardMembers(org.id, {
-      role_code: "USER_APP",
+    const filterParams = {
       page,
       limit: LIMIT,
       search: search || undefined,
       status: statusFilter || undefined,
-    })
-      .then((res) => {
-        setItems(res.items);
-        setTotal(res.total);
-      })
-      .catch(() => {
+    };
+
+    try {
+      // 1. Intentar con role_code: USER_APP
+      let res = await listDashboardMembers(org.id, { ...filterParams, role_code: "USER_APP" });
+
+      // 2. Si la lista viene vacía, intentar con endpoint genérico listOrgUsers
+      if (!res.items || res.items.length === 0) {
+        res = await listOrgUsers(org.id, filterParams);
+      }
+
+      // 3. Si sigue vacía, consultar listDashboardMembers general (sin role_code)
+      if (!res.items || res.items.length === 0) {
+        res = await listDashboardMembers(org.id, filterParams);
+      }
+
+      setItems(res.items || []);
+      setTotal(res.total || 0);
+    } catch {
+      try {
+        const fallbackRes = await listDashboardMembers(org.id, filterParams);
+        setItems(fallbackRes.items || []);
+        setTotal(fallbackRes.total || 0);
+      } catch {
         setItems([]);
         setTotal(0);
-      })
-      .finally(() => setLoading(false));
+      }
+    } finally {
+      setLoading(false);
+    }
   }, [org?.id, page, search, statusFilter]);
 
   useEffect(() => {
