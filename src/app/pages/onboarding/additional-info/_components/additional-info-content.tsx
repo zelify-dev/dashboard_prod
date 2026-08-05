@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Button } from "@/components/ui-elements/button";
 import { useEffect, useMemo, useState } from "react";
@@ -159,6 +160,7 @@ export function AdditionalInfoContent() {
       setUploaded(true);
       setFile(null);
       notifyOnboardingStatusUpdated();
+      toast.success("Información adicional enviada y guardada correctamente.");
     } catch (e) {
       const msg =
         e instanceof AuthError
@@ -167,6 +169,7 @@ export function AdditionalInfoContent() {
             ? e.message
             : "Error al enviar la información adicional";
       setError(msg);
+      toast.error(msg);
     } finally {
       setUploading(false);
     }
@@ -272,14 +275,19 @@ export function AdditionalInfoContent() {
         )}
 
         <div className="mt-8">
-          <Button
-            label={uploading ? "Enviando…" : "Enviar información adicional"}
-            variant="primary"
-            onClick={handleSubmit}
-            className="w-full sm:w-auto bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
-            disabled={!additionalInfoVisible || !file || uploading || loadingStatus}
-            shape="rounded"
-          />
+          <div className="relative inline-block overflow-hidden rounded-[14px] p-[2px]">
+            {file && !uploading && (
+              <span className="absolute -inset-[100%] bg-[conic-gradient(from_0deg,transparent_0_260deg,#75fa4c_360deg)] animate-[spin_2.5s_linear_infinite]" />
+            )}
+            <Button
+              label={uploading ? "Enviando…" : "Enviar información adicional"}
+              variant="primary"
+              onClick={handleSubmit}
+              className="relative z-10 w-full sm:w-auto bg-zelify-midnight hover:bg-black text-white rounded-xl text-xs font-light active:scale-95 transition"
+              disabled={!additionalInfoVisible || !file || uploading || loadingStatus}
+              shape="rounded"
+            />
+          </div>
         </div>
       </div>
     </div>
