@@ -131,41 +131,6 @@ function formatBalanceUsd(n: number): string {
   })}`;
 }
 
-function EmvChip({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "relative h-6 w-8 rounded-md bg-gradient-to-br from-slate-200 via-slate-400 to-slate-600 p-[1px] shadow-sm overflow-hidden border border-white/20",
-        className
-      )}
-    >
-      <div className="h-full w-full rounded-[4px] border border-slate-600/40 bg-gradient-to-tr from-slate-300 via-slate-200 to-slate-400 opacity-90 grid grid-cols-2 gap-[1px] p-[2px]">
-        <div className="border-r border-b border-slate-700/30 rounded-tl-[2px]" />
-        <div className="border-b border-slate-700/30 rounded-tr-[2px]" />
-        <div className="border-r border-slate-700/30 rounded-bl-[2px]" />
-        <div className="rounded-br-[2px]" />
-      </div>
-    </div>
-  );
-}
-
-function ContactlessIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-    >
-      <path d="M8.5 14.5A4.5 4.5 0 0 0 8.5 9.5" />
-      <path d="M12 17A8 8 0 0 0 12 7" />
-      <path d="M15.5 19.5A11.5 11.5 0 0 0 15.5 4.5" />
-    </svg>
-  );
-}
-
 export function SdkCardAppearancePreview({
   config,
   brandLogoUrl,
@@ -213,13 +178,8 @@ export function SdkCardAppearancePreview({
           <div className="absolute inset-0 bg-radial-at-t from-white/10 via-transparent to-black/20 pointer-events-none" />
 
           <div className="relative z-10 flex h-full flex-col justify-between antialiased">
-            {/* Fila Superior: Chip EMV + NFC e Isotipo/Marca */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <EmvChip />
-                <ContactlessIcon className={cn("size-4 rotate-90", fgMuted)} />
-              </div>
-
+            {/* Fila Superior: Marca / Logo de la Organización */}
+            <div className="flex items-center justify-end">
               <div>
                 {brandLogoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -242,7 +202,7 @@ export function SdkCardAppearancePreview({
               </div>
             </div>
 
-            {/* Fila Central: Número PAN de Tarjeta limpio sin ojo */}
+            {/* Fila Central: Número PAN de Tarjeta limpio */}
             <div className="my-auto flex items-center pt-2">
               <MaskedPanSquares className={fg} />
             </div>
