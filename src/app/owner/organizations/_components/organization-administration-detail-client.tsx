@@ -1551,7 +1551,7 @@ export function OrganizationAdministrationDetailClient() {
     }
   };
 
-  const handleToggleVisibility = async (key: "kyb" | "aml_documentation" | "technical_documentation" | "business_plan", enabled: boolean) => {
+  const handleToggleVisibility = async (key: "kyb" | "aml_documentation" | "technical_documentation" | "business_plan" | "additional_info", enabled: boolean) => {
     if (!onboardingVisibility) return;
     setOnboardingActionLoading(key);
     setOnboardingError("");
@@ -1561,6 +1561,7 @@ export function OrganizationAdministrationDetailClient() {
         aml_documentation: onboardingVisibility.amlDocumentation,
         technical_documentation: onboardingVisibility.technicalDocumentation,
         business_plan: onboardingVisibility.businessPlan,
+        additional_info: onboardingVisibility.additionalInfo,
       };
       payload[key] = enabled;
       await updateOrganizationOnboardingVisibility(orgId, payload);
@@ -2794,6 +2795,12 @@ export function OrganizationAdministrationDetailClient() {
                         label: "Plan de Negocio",
                         desc: "Formularios y balances financieros requeridos para la aprobación comercial.",
                         val: onboardingVisibility.businessPlan
+                      },
+                      {
+                        key: "additional_info" as const,
+                        label: "Información Adicional",
+                        desc: "Permite la subida de documentos y expedientes anexos solicitados para verificación.",
+                        val: onboardingVisibility.additionalInfo
                       }
                     ].map((item) => (
                       <div

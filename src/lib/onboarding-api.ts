@@ -16,6 +16,7 @@ export type OnboardingVisibility = {
   amlDocumentation: boolean;
   technicalDocumentation: boolean;
   businessPlan: boolean;
+  additionalInfo: boolean;
 };
 
 export const DEFAULT_ONBOARDING_VISIBILITY: OnboardingVisibility = {
@@ -23,6 +24,7 @@ export const DEFAULT_ONBOARDING_VISIBILITY: OnboardingVisibility = {
   amlDocumentation: true,
   technicalDocumentation: true,
   businessPlan: true,
+  additionalInfo: true,
 };
 
 type OnboardingVisibilityApiResponse = {
@@ -32,6 +34,7 @@ type OnboardingVisibilityApiResponse = {
     aml_documentation?: boolean;
     technical_documentation?: boolean;
     business_plan?: boolean;
+    additional_info?: boolean;
   };
 };
 
@@ -74,6 +77,7 @@ export function parseOnboardingVisibilityPayload(data: unknown): OnboardingVisib
     amlDocumentation: raw?.aml_documentation !== false,
     technicalDocumentation: raw?.technical_documentation !== false,
     businessPlan: raw?.business_plan !== false,
+    additionalInfo: raw?.additional_info !== false,
   };
 }
 
@@ -83,6 +87,7 @@ export type OnboardingSectionPercents = {
   aml: number | null;
   technical: number | null;
   businessPlan: number | null;
+  additionalInfo: number | null;
 };
 
 function clampPercent(n: number): number {
@@ -424,6 +429,7 @@ export function onboardingPercentForPath(
   if (pathnameOrUrl.includes("/pages/onboarding/aml-documentation")) return percents.aml;
   if (pathnameOrUrl.includes("/pages/onboarding/technical-documentation")) return percents.technical;
   if (pathnameOrUrl.includes("/pages/onboarding/business-info")) return percents.businessPlan;
+  if (pathnameOrUrl.includes("/pages/onboarding/additional-info")) return percents.additionalInfo;
   return null;
 }
 

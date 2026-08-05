@@ -45,6 +45,7 @@ export type UiTranslations = {
       amlDocumentation: string;
       technicalDocumentation: string;
       businessPlan: string;
+      additionalInfo: string;
       subItems: {
         ecommerce: string;
         profile: string;
@@ -545,6 +546,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         amlDocumentation: "AML Documentation",
         technicalDocumentation: "Technical Documentation",
         businessPlan: "Business Plan",
+        additionalInfo: "Additional Info",
         subItems: {
           ecommerce: "Panel",
           profile: "Company Profile",
@@ -1043,6 +1045,7 @@ const UI_TRANSLATIONS: Record<Language, UiTranslations> = {
         amlDocumentation: "Documentación AML",
         technicalDocumentation: "Documentación técnica",
         businessPlan: "Plan de negocio",
+        additionalInfo: "Información adicional",
         subItems: {
           ecommerce: "Panel",
           profile: "Perfil de la empresa",

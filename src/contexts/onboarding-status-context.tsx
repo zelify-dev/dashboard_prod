@@ -37,6 +37,7 @@ const defaultPercents: OnboardingSectionPercents = {
   aml: null,
   technical: null,
   businessPlan: null,
+  additionalInfo: null,
 };
 
 const defaultFlags: OnboardingModuleFlags = {

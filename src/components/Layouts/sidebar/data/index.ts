@@ -492,6 +492,16 @@ export function getNavData(
               },
             ]
           : []),
+        ...(onboardingVisibility.additionalInfo
+          ? [
+              {
+                title: translations.sidebar.menuItems.additionalInfo,
+                icon: Icons.DocumentTextIcon,
+                url: "/pages/onboarding/additional-info",
+                items: [],
+              },
+            ]
+          : []),
         {
           title: translations.sidebar.menuItems.integrationSupport,
           icon: Icons.ChatSupportIcon,
