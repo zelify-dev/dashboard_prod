@@ -240,7 +240,16 @@ export function parseOnboardingStatusPayload(data: Record<string, unknown>): Onb
     }
   }
 
-  return { kyb, aml, technical, businessPlan };
+  /** Contrato backend: additional_info: { uploaded: boolean, ... } */
+  let additionalInfo = pick(["additional_info", "additional_info_percent", "additional_info_completion_percent"]);
+  if (additionalInfo == null) {
+    const add = data.additional_info ?? data.additionalInfo;
+    if (add && typeof add === "object") {
+      additionalInfo = (add as Record<string, unknown>).uploaded === true ? 100 : 0;
+    }
+  }
+
+  return { kyb, aml, technical, businessPlan, additionalInfo };
 }
 
 /** Estado derivado de GET .../onboarding/status para deshabilitar campos ya completados tras recargar. */
@@ -700,4 +709,27 @@ export async function updateOrganizationOnboardingVisibility(
     );
   }
   return data as { ok: boolean };
+}
+
+/** POST /api/organizations/:organizationId/onboarding/additional-info — subir ZIP de información adicional */
+export async function postAdditionalInfoFiles(
+  organizationId: string,
+  file: File
+): Promise<Record<string, unknown>> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetchWithAuth(`${onboardingBase(organizationId)}/additional-info`, {
+    method: "POST",
+    headers: { "x-org-id": organizationId },
+    body: formData,
+  });
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) {
+    throw new AuthError(
+      (data.message as string) ?? "No se pudo subir la información adicional",
+      res.status,
+      data
+    );
+  }
+  return data;
 }
