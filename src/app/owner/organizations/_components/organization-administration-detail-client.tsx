@@ -401,6 +401,12 @@ function getOnboardingAssets(raw: Record<string, unknown> | null | undefined) {
       : null,
     "Plan de negocio"
   );
+  const additionalInfo = readUploadedAsset(
+    root.additional_info && typeof root.additional_info === "object"
+      ? (root.additional_info as Record<string, unknown>)
+      : null,
+    "Información adicional"
+  );
   const technicalRoot =
     root.technical_documentation && typeof root.technical_documentation === "object"
       ? (root.technical_documentation as Record<string, unknown>)
@@ -437,7 +443,7 @@ function getOnboardingAssets(raw: Record<string, unknown> | null | undefined) {
       : {};
 
   return {
-    primary: [kyb, aml, businessPlan],
+    primary: [kyb, aml, businessPlan, additionalInfo],
     technical: technicalAssets,
     development: {
       urls:

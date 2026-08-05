@@ -193,7 +193,7 @@ export function AdditionalInfoContent() {
               <span className="font-medium text-dark block mb-0.5">
                 Información importante
               </span>
-              Esta sección se habilita para subir documentación adicional requerida para la verificación de tu organización.
+              Esta sección se habilita para subir documentación adicional.
             </div>
           </div>
 
@@ -223,9 +223,7 @@ export function AdditionalInfoContent() {
                 </h4>
               </div>
               <ul className="list-inside list-disc text-xs font-normal text-slate-700 pl-1 space-y-1.5">
-                <li>Archivos o anexos complementarios solicitados por el equipo de cumplimiento.</li>
-                <li>Estados de cuenta, licencias operativas u oficios regulatorios extra.</li>
-                <li>Comprime todos los documentos solicitados en un único paquete ZIP.</li>
+                <li>Comprime todos los documentos en un único paquete ZIP.</li>
               </ul>
             </div>
           </div>
