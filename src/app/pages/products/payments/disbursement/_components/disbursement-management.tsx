@@ -192,7 +192,12 @@ export function DisbursementManagement() {
       }
 
       if (statusFilter !== "ALL" && d.status !== statusFilter) return false;
-      if (selectedUserEmail && d.createdByEmail !== selectedUserEmail) return false;
+      if (selectedUserEmail.trim()) {
+        const uQuery = selectedUserEmail.toLowerCase().trim();
+        const matchesName = d.createdByName.toLowerCase().includes(uQuery);
+        const matchesEmail = d.createdByEmail.toLowerCase().includes(uQuery);
+        if (!matchesName && !matchesEmail) return false;
+      }
       if (sourceAccountFilter.trim() && !d.sourceAccount.includes(sourceAccountFilter.trim())) return false;
       if (minAmount && d.totalAmount < parseFloat(minAmount)) return false;
       if (maxAmount && d.totalAmount > parseFloat(maxAmount)) return false;
@@ -448,28 +453,16 @@ export function DisbursementManagement() {
 
           <div>
             <label className="mb-1 block text-[11px] font-medium text-dark-6">Usuario Creador</label>
-            <select
+            <input
+              type="text"
+              placeholder="Buscar por usuario o email..."
               value={selectedUserEmail}
               onChange={(e) => {
                 setSelectedUserEmail(e.target.value);
                 setPage(1);
               }}
               className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2 text-xs text-dark outline-none focus:border-dark transition"
-            >
-              <option value="">Todos los usuarios</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.email}>
-                  {u.full_name || u.email}
-                </option>
-              ))}
-              {users.length === 0 && (
-                <>
-                  <option value="admin@pegala.com">Juan Pérez (admin@pegala.com)</option>
-                  <option value="maria.garcia@zelify.com">María García (maria.garcia@zelify.com)</option>
-                  <option value="carlos.rodriguez@zelify.com">Carlos Rodríguez (carlos.rodriguez@zelify.com)</option>
-                </>
-              )}
-            </select>
+            />
           </div>
 
           <div>

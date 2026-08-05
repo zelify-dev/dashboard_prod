@@ -144,9 +144,14 @@ export function TransfersManagement() {
         }
       }
 
-      // Filtro de usuario
-      if (selectedUserEmail && t.userEmail !== selectedUserEmail) {
-        return false;
+      // Filtro de usuario por texto
+      if (selectedUserEmail.trim()) {
+        const uQuery = selectedUserEmail.toLowerCase().trim();
+        const matchesName = t.userName.toLowerCase().includes(uQuery);
+        const matchesEmail = t.userEmail.toLowerCase().includes(uQuery);
+        if (!matchesName && !matchesEmail) {
+          return false;
+        }
       }
 
       // Filtro de estado
@@ -282,34 +287,19 @@ export function TransfersManagement() {
             />
           </div>
 
-          {/* Selector de Usuario Real */}
+          {/* Input de búsqueda de Usuario Relacionado */}
           <div>
             <label className="mb-1 block text-[11px] font-medium text-dark-6">Usuario Relacionado</label>
-            <select
+            <input
+              type="text"
+              placeholder="Buscar por usuario o email..."
               value={selectedUserEmail}
               onChange={(e) => {
                 setSelectedUserEmail(e.target.value);
                 setPage(1);
               }}
               className="w-full rounded-xl border border-gray-200 bg-gray-50/50 px-3 py-2 text-xs text-dark outline-none focus:border-dark transition"
-            >
-              <option value="">Todos los usuarios</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.email}>
-                  {u.full_name || u.email} ({u.email})
-                </option>
-              ))}
-              {/* Opción fallback con los nombres principales si aún no cargan */}
-              {users.length === 0 && (
-                <>
-                  <option value="admin@pegala.com">Juan Pérez (admin@pegala.com)</option>
-                  <option value="maria.garcia@zelify.com">María García (maria.garcia@zelify.com)</option>
-                  <option value="carlos.rodriguez@zelify.com">Carlos Rodríguez (carlos.rodriguez@zelify.com)</option>
-                  <option value="ana.martinez@zelify.com">Ana Martínez (ana.martinez@zelify.com)</option>
-                  <option value="sofia.lopez@zelify.com">Sofía López (sofia.lopez@zelify.com)</option>
-                </>
-              )}
-            </select>
+            />
           </div>
 
           {/* Selector de Estado */}
