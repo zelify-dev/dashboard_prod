@@ -324,7 +324,7 @@ export function TransfersManagement() {
 
           {/* CLABE Origen */}
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-dark-6">CLABE Origen</label>
+            <label className="mb-1 block text-[11px] font-medium text-dark-6">Cuenta o CLABE Origen</label>
             <input
               type="text"
               placeholder="Filtrar por origen..."
@@ -339,7 +339,7 @@ export function TransfersManagement() {
 
           {/* CLABE Destino */}
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-dark-6">CLABE Destino</label>
+            <label className="mb-1 block text-[11px] font-medium text-dark-6">Cuenta o CLABE Destino</label>
             <input
               type="text"
               placeholder="Filtrar por destino..."
@@ -419,8 +419,8 @@ export function TransfersManagement() {
               <tr>
                 <th className="px-4 py-3.5">Referencia / Clave SPEI</th>
                 <th className="px-4 py-3.5">Usuario</th>
-                <th className="px-4 py-3.5">Origen</th>
-                <th className="px-4 py-3.5">Destino</th>
+                <th className="px-4 py-3.5">Cuenta CLABE Origen</th>
+                <th className="px-4 py-3.5">Cuenta CLABE Destino</th>
                 <th
                   className="px-4 py-3.5 cursor-pointer hover:text-dark transition"
                   onClick={() => handleSort("amount")}

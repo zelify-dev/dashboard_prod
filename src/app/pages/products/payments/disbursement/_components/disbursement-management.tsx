@@ -466,7 +466,7 @@ export function DisbursementManagement() {
           </div>
 
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-dark-6">Cuenta Origen</label>
+            <label className="mb-1 block text-[11px] font-medium text-dark-6">Cuenta o CLABE Origen</label>
             <input
               type="text"
               placeholder="Filtrar por origen..."
@@ -543,7 +543,7 @@ export function DisbursementManagement() {
             <thead className="bg-gray-50/60 border-b border-gray-100 text-[11px] font-medium uppercase tracking-wider text-dark-6">
               <tr>
                 <th className="px-4 py-3.5">ID / Nombre Dispersión</th>
-                <th className="px-4 py-3.5">Cuenta Origen</th>
+                <th className="px-4 py-3.5">Cuenta CLABE Origen</th>
                 <th className="px-4 py-3.5 text-center">Beneficiarios</th>
                 <th
                   className="px-4 py-3.5 cursor-pointer hover:text-dark transition"
