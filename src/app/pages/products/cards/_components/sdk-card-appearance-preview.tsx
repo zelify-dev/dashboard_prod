@@ -131,6 +131,34 @@ function formatBalanceUsd(n: number): string {
   })}`;
 }
 
+function ZelifyIsotype({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 32 32"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M6 26 L26 6 M26 6 H14 M26 6 V18"
+        stroke="#75fa4c"
+        strokeWidth="5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MastercardBadge({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 38 24" fill="none">
+      <circle cx="14" cy="12" r="10" fill="#EB001B" />
+      <circle cx="24" cy="12" r="10" fill="#F79E1B" fillOpacity="0.9" />
+    </svg>
+  );
+}
+
 export function SdkCardAppearancePreview({
   config,
   brandLogoUrl,
@@ -139,14 +167,14 @@ export function SdkCardAppearancePreview({
   const previewT = cardsTranslations[language].configurator.preview;
 
   const isLightFace = cardFaceLuminance(config) > 0.55;
-  const networkSrc = config.cardNetwork === "visa" ? "/visa.svg" : "/mastercard.svg";
+  const isVisa = config.cardNetwork === "visa";
 
   const bgStyle: CSSProperties =
     config.colorType === "solid"
-      ? { backgroundColor: config.solidColor || "#000016" }
+      ? { backgroundColor: config.solidColor || "#0f2347" }
       : {
           backgroundImage: `linear-gradient(135deg, ${
-            config.gradientColors?.length ? config.gradientColors.join(", ") : "#000016, #070724, #0a0a30"
+            config.gradientColors?.length ? config.gradientColors.join(", ") : "#0e2246, #122c5a, #1a3c75"
           })`,
         };
 
@@ -154,11 +182,8 @@ export function SdkCardAppearancePreview({
   const fgMuted = isLightFace ? "text-slate-500" : "text-white/60";
 
   const balanceDemo = useMemo(() => {
-    const base = parseFloat(config.spendingLimit || "1000") || 1000;
-    return formatBalanceUsd(base * 4.57135);
-  }, [config.spendingLimit]);
-
-  const invertBrandLogo = !isLightFace;
+    return "$ 490.00";
+  }, []);
 
   return (
     <div className="flex justify-center">
@@ -166,74 +191,59 @@ export function SdkCardAppearancePreview({
         {/* Cuerpo de la Tarjeta */}
         <div
           className={cn(
-            "relative aspect-[1.586/1] w-full overflow-hidden rounded-[1.25rem] border border-white/15 p-5 transition-all duration-300",
-            config.finishType === "embossed" &&
-              "border-white/25 shadow-inner",
+            "relative aspect-[1.586/1] w-full overflow-hidden rounded-[1.25rem] border border-white/10 p-5 shadow-lg transition-all duration-300",
+            config.finishType === "embossed" && "border-white/20 shadow-inner",
             config.finishType === "metallic" &&
               "before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/10 before:via-transparent before:to-white/5"
           )}
           style={bgStyle}
         >
           {/* Textura mate de fondo sutil */}
-          <div className="absolute inset-0 bg-radial-at-t from-white/10 via-transparent to-black/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-radial-at-t from-white/5 via-transparent to-black/30 pointer-events-none" />
 
           <div className="relative z-10 flex h-full flex-col justify-between antialiased">
-            {/* Fila Superior: Marca / Logo de la Organización */}
+            {/* Fila Superior: Isotipo Zelify en Verde Bolt arriba a la derecha */}
             <div className="flex items-center justify-end">
-              <div>
-                {brandLogoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={brandLogoUrl}
-                    alt="Logo Marca"
-                    className={cn(
-                      "h-6 max-h-7 w-auto max-w-[80px] object-contain object-right",
-                      invertBrandLogo && "brightness-0 invert"
-                    )}
-                  />
-                ) : (
-                  <div className={cn("flex items-center gap-1.5", fg)}>
-                    <ZelifyMark className="size-5 shrink-0" />
-                    <span className="text-xs font-semibold tracking-wider uppercase">
-                      Zelify
-                    </span>
-                  </div>
-                )}
-              </div>
+              {brandLogoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={brandLogoUrl}
+                  alt="Logo Marca"
+                  className={cn(
+                    "h-7 max-h-8 w-auto max-w-[90px] object-contain object-right",
+                    !isLightFace && "brightness-0 invert"
+                  )}
+                />
+              ) : (
+                <ZelifyIsotype className="size-8 shrink-0" />
+              )}
             </div>
 
-            {/* Fila Central: Número PAN de Tarjeta limpio */}
-            <div className="my-auto flex items-center pt-2">
-              <MaskedPanSquares className={fg} />
-            </div>
-
-            {/* Fila Inferior: Titular y Red / Saldo */}
+            {/* Fila Inferior: Titular a la Izquierda | Marca + Saldo a la Derecha */}
             <div className="flex items-end justify-between">
-              <div className="min-w-0 max-w-[65%] space-y-1">
-                <span className={cn("block text-[9px] font-semibold uppercase tracking-[0.18em]", fgMuted)}>
+              <div className="min-w-0 max-w-[68%] space-y-0.5">
+                <span className={cn("block text-[9px] font-semibold uppercase tracking-[0.2em]", fgMuted)}>
                   {previewT.sdkCardholderCaption || "TITULAR"}
                 </span>
-                <p className={cn("truncate text-xs font-bold uppercase tracking-wider", fg)}>
-                  {config.cardholderName || "CARLOS MENDOZA"}
+                <p className={cn("truncate text-xs font-semibold tracking-wide", fg)}>
+                  {config.cardholderName || "Stalin Vicente Narvaez Molina"}
                 </p>
               </div>
 
-              <div className="flex flex-col items-end space-y-1">
-                <div
-                  className={cn(
-                    "relative h-5 w-[42px]",
-                    config.cardNetwork === "visa" && !isLightFace && "brightness-0 invert"
-                  )}
-                >
-                  <Image
-                    src={networkSrc}
-                    alt={config.cardNetwork}
-                    fill
-                    className="object-contain object-right"
-                    sizes="42px"
-                  />
-                </div>
-                <span className={cn("text-[11px] font-medium tabular-nums tracking-tight", fgMuted)}>
+              <div className="flex flex-col items-end space-y-1 text-right">
+                {isVisa ? (
+                  <div className="relative h-4 w-[36px]">
+                    <Image
+                      src="/visa.svg"
+                      alt="Visa"
+                      fill
+                      className={cn("object-contain object-right", !isLightFace && "brightness-0 invert")}
+                    />
+                  </div>
+                ) : (
+                  <MastercardBadge className="h-5 w-8" />
+                )}
+                <span className={cn("text-xs font-semibold tabular-nums tracking-tight", fg)}>
                   {balanceDemo}
                 </span>
               </div>
