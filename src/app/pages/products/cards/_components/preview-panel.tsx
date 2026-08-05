@@ -848,44 +848,36 @@ export function PreviewPanel({
           ¿Qué tipo de operación quieres hacer hoy?
         </p>
 
-        {/* Grid de 4 Acciones Rápidas en cajas grises suaves sin bordes */}
+        {/* Grid de 4 Acciones Rápidas en tarjetas grises unificadas (icono + texto juntos) */}
         <div className="grid grid-cols-4 gap-2">
-          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 p-2.5 transition hover:bg-slate-200/80">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-800 dark:text-slate-100 mb-1">
-              <svg className="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <rect x="2" y="5" width="20" height="14" rx="3" />
-                <line x1="2" y1="10" x2="22" y2="10" />
-              </svg>
-            </div>
-            <span className="text-[10.5px] font-semibold text-slate-800 dark:text-slate-200">Número</span>
+          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 py-3.5 px-1.5 transition hover:bg-slate-200/80">
+            <svg className="size-5 text-slate-800 dark:text-slate-100 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+              <rect x="2" y="5" width="20" height="14" rx="3" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+            </svg>
+            <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 tracking-tight">Número</span>
           </button>
 
-          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 p-2.5 transition hover:bg-slate-200/80">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-800 dark:text-slate-100 mb-1">
-              <svg className="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-            </div>
-            <span className="text-[10.5px] font-semibold text-slate-800 dark:text-slate-200">Movimientos</span>
+          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 py-3.5 px-1.5 transition hover:bg-slate-200/80">
+            <svg className="size-5 text-slate-800 dark:text-slate-100 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 tracking-tight">Movimientos</span>
           </button>
 
-          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 p-2.5 transition hover:bg-slate-200/80">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-800 dark:text-slate-100 mb-1">
-              <svg className="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v20m10-10H2m15.5-5.5L6.5 17.5m0-11l11 11" />
-              </svg>
-            </div>
-            <span className="text-[10.5px] font-semibold text-slate-800 dark:text-slate-200">Congelar</span>
+          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 py-3.5 px-1.5 transition hover:bg-slate-200/80">
+            <svg className="size-5 text-slate-800 dark:text-slate-100 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v20m10-10H2m15.5-5.5L6.5 17.5m0-11l11 11" />
+            </svg>
+            <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 tracking-tight">Congelar</span>
           </button>
 
-          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 p-2.5 transition hover:bg-slate-200/80">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-800 dark:text-slate-100 mb-1">
-              <svg className="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <rect x="5" y="11" width="14" height="10" rx="2" />
-                <path d="M8 11V7a4 4 0 018 0v4" />
-              </svg>
-            </div>
-            <span className="text-[10.5px] font-semibold text-slate-800 dark:text-slate-200">Bloquear</span>
+          <button type="button" className="flex flex-col items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 py-3.5 px-1.5 transition hover:bg-slate-200/80">
+            <svg className="size-5 text-slate-800 dark:text-slate-100 mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+              <rect x="5" y="11" width="14" height="10" rx="2" />
+              <path d="M8 11V7a4 4 0 018 0v4" />
+            </svg>
+            <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200 tracking-tight">Bloquear</span>
           </button>
         </div>
 

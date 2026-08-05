@@ -179,7 +179,7 @@ export function SdkCardAppearancePreview({
         };
 
   const fg = isLightFace ? "text-slate-900" : "text-white";
-  const fgMuted = isLightFace ? "text-slate-500" : "text-white/60";
+  const fgMuted = isLightFace ? "text-slate-500" : "text-white/65";
 
   const balanceDemo = useMemo(() => {
     return "$ 490.00";
@@ -191,7 +191,7 @@ export function SdkCardAppearancePreview({
         {/* Cuerpo de la Tarjeta */}
         <div
           className={cn(
-            "relative aspect-[1.586/1] w-full overflow-hidden rounded-[1.25rem] border border-white/10 p-5 shadow-lg transition-all duration-300",
+            "relative aspect-[1.586/1] w-full overflow-hidden rounded-[1.25rem] border border-white/10 p-5 pb-4 shadow-lg transition-all duration-300",
             config.finishType === "embossed" && "border-white/20 shadow-inner",
             config.finishType === "metallic" &&
               "before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/10 before:via-transparent before:to-white/5"
@@ -220,17 +220,17 @@ export function SdkCardAppearancePreview({
             </div>
 
             {/* Fila Inferior: Titular a la Izquierda | Marca + Saldo a la Derecha */}
-            <div className="flex items-end justify-between">
-              <div className="min-w-0 max-w-[68%] space-y-0.5">
-                <span className={cn("block text-[9px] font-semibold uppercase tracking-[0.2em]", fgMuted)}>
+            <div className="flex items-end justify-between gap-3 pt-4">
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <span className={cn("block text-[9px] font-medium uppercase tracking-[0.18em]", fgMuted)}>
                   {previewT.sdkCardholderCaption || "TITULAR"}
                 </span>
-                <p className={cn("truncate text-xs font-semibold tracking-wide", fg)}>
+                <p className={cn("truncate text-[11.5px] font-semibold tracking-wide leading-tight", fg)}>
                   {config.cardholderName || "Stalin Vicente Narvaez Molina"}
                 </p>
               </div>
 
-              <div className="flex flex-col items-end space-y-1 text-right">
+              <div className="flex shrink-0 flex-col items-end space-y-1 text-right">
                 {isVisa ? (
                   <div className="relative h-4 w-[36px]">
                     <Image
@@ -243,7 +243,7 @@ export function SdkCardAppearancePreview({
                 ) : (
                   <MastercardBadge className="h-5 w-8" />
                 )}
-                <span className={cn("text-xs font-semibold tabular-nums tracking-tight", fg)}>
+                <span className={cn("text-[11.5px] font-semibold tabular-nums tracking-tight leading-none", fg)}>
                   {balanceDemo}
                 </span>
               </div>
