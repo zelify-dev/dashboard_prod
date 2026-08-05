@@ -604,3 +604,94 @@ export async function updateDashboardOtpStatus(
   }
   return data as { ok: boolean; user_id: string; dashboard_otp_enabled: boolean };
 }
+
+export type RegisteredUserItem = {
+  id: string;
+  email: string;
+  full_name: string;
+  status: OrgUserStatus;
+  organization_id?: string;
+  must_change_password?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  phone?: string;
+  username?: string;
+  identity_verified?: boolean;
+  roles?: string[] | { id: string; code: string; name: string }[];
+};
+
+export type ListRegisteredUsersResponse = {
+  users: RegisteredUserItem[];
+  page: number;
+  limit: number;
+  total: number;
+};
+
+/**
+ * GET /api/users/registered — listar usuarios registrados de la organización (Auth).
+ * Headers: Authorization: Bearer <token>, x-org-id: orgId.
+ * Query: page, limit, search, status.
+ */
+export async function listRegisteredUsers(
+  orgId: string,
+  params: ListOrgUsersParams = {}
+): Promise<{ items: OrgUserListItem[]; page: number; limit: number; total: number }> {
+  const { page = 1, limit = 20, search, status } = params;
+  const searchParams = new URLSearchParams();
+  searchParams.set("page", String(page));
+  searchParams.set("limit", String(Math.min(limit, 100)));
+  if (search) searchParams.set("search", search);
+  if (status) searchParams.set("status", status);
+
+  const res = await fetchWithAuth(`/api/users/registered?${searchParams}`, {
+    headers: { "x-org-id": orgId },
+  });
+  const data = (await res.json().catch(() => ({}))) as ListRegisteredUsersResponse & { message?: string };
+  if (!res.ok) {
+    throw new AuthError(
+      data.message ?? "Error al listar usuarios registrados",
+      res.status,
+      data
+    );
+  }
+
+  const rawUsers = data.users ?? [];
+  const normalizedItems: OrgUserListItem[] = rawUsers.map((u) => ({
+    id: u.id,
+    organization_id: u.organization_id ?? orgId,
+    email: u.email,
+    full_name: u.full_name,
+    status: u.status ?? "ACTIVE",
+    must_change_password: u.must_change_password ?? false,
+    created_at: u.created_at,
+    updated_at: u.updated_at,
+    identity_verified: u.identity_verified,
+    roles: u.roles as any,
+  }));
+
+  return {
+    items: normalizedItems,
+    page: data.page ?? page,
+    limit: data.limit ?? limit,
+    total: data.total ?? 0,
+  };
+}
+
+/** GET /api/users/registered/:userId — detalle completo del usuario registrado */
+export async function getRegisteredUserDetail(
+  orgId: string,
+  userId: string
+): Promise<Record<string, unknown>> {
+  const res = await fetchWithAuth(`/api/users/registered/${encodeURIComponent(userId)}`, {
+    headers: { "x-org-id": orgId },
+  });
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!res.ok) {
+    throw new AuthError(
+      (data.message as string) ?? "Error al obtener detalle del usuario registrado",
+      res.status,
+      data
+    );
+  }
+  return data;
+}

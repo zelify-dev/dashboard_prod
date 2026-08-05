@@ -13,7 +13,7 @@ import {
   validateClabeMexico,
 } from "@/lib/payments-mock-data";
 import { getStoredOrganization } from "@/lib/auth-api";
-import { listDashboardMembers, OrgUserListItem } from "@/lib/organization-users-api";
+import { listDashboardMembers, listRegisteredUsers, OrgUserListItem } from "@/lib/organization-users-api";
 import { cn } from "@/lib/utils";
 
 function StatusBadge({ status }: { status: DisbursementStatus }) {
@@ -114,12 +114,22 @@ export function DisbursementManagement() {
   // Modal de Detalle
   const [selectedDisbursement, setSelectedDisbursement] = useState<DisbursementItem | null>(null);
 
-  // Cargar usuarios reales para filtros y autor de la dispersión
+  // Cargar usuarios reales de Auth/Identity para filtros y autor de la dispersión
   useEffect(() => {
     if (!org?.id) return;
-    listDashboardMembers(org.id, { page: 1, limit: 50 })
-      .then((res) => setUsers(res.items))
-      .catch(() => setUsers([]));
+    listRegisteredUsers(org.id, { page: 1, limit: 50 })
+      .then((res) => {
+        if (res.items && res.items.length > 0) {
+          setUsers(res.items);
+        } else {
+          return listDashboardMembers(org.id, { page: 1, limit: 50 }).then((mRes) => setUsers(mRes.items));
+        }
+      })
+      .catch(() => {
+        listDashboardMembers(org.id, { page: 1, limit: 50 })
+          .then((mRes) => setUsers(mRes.items))
+          .catch(() => setUsers([]));
+      });
   }, [org?.id]);
 
   // Cálculos de Métricas KPIs

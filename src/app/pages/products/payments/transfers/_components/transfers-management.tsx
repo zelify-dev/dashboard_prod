@@ -9,7 +9,7 @@ import {
   TransferStatus,
 } from "@/lib/payments-mock-data";
 import { getStoredOrganization } from "@/lib/auth-api";
-import { listDashboardMembers, OrgUserListItem } from "@/lib/organization-users-api";
+import { listDashboardMembers, listRegisteredUsers, OrgUserListItem } from "@/lib/organization-users-api";
 import { cn } from "@/lib/utils";
 
 function StatusBadge({ status }: { status: TransferStatus }) {
@@ -89,19 +89,25 @@ export function TransfersManagement() {
   // Modal de Detalle
   const [selectedTransfer, setSelectedTransfer] = useState<TransferItem | null>(null);
 
-  // Cargar usuarios reales de la organización para poblar los filtros
+  // Cargar usuarios reales de la organización (Auth/Identity) para poblar los filtros
   useEffect(() => {
     if (!org?.id) {
       setLoadingUsers(false);
       return;
     }
     setLoadingUsers(true);
-    listDashboardMembers(org.id, { page: 1, limit: 50 })
+    listRegisteredUsers(org.id, { page: 1, limit: 50 })
       .then((res) => {
-        setUsers(res.items);
+        if (res.items && res.items.length > 0) {
+          setUsers(res.items);
+        } else {
+          return listDashboardMembers(org.id, { page: 1, limit: 50 }).then((mRes) => setUsers(mRes.items));
+        }
       })
       .catch(() => {
-        setUsers([]);
+        listDashboardMembers(org.id, { page: 1, limit: 50 })
+          .then((mRes) => setUsers(mRes.items))
+          .catch(() => setUsers([]));
       })
       .finally(() => setLoadingUsers(false));
   }, [org?.id]);

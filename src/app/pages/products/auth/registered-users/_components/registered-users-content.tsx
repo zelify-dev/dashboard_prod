@@ -5,6 +5,7 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { useUiTranslations } from "@/hooks/use-ui-translations";
 import { getStoredOrganization } from "@/lib/auth-api";
 import {
+  listRegisteredUsers,
   listDashboardMembers,
   listOrgUsers,
   type OrgUserListItem,
@@ -50,15 +51,16 @@ export function RegisteredUsersContent() {
     };
 
     try {
-      // 1. Intentar con role_code: USER_APP
-      let res = await listDashboardMembers(org.id, { ...filterParams, role_code: "USER_APP" });
+      // 1. Endpoint oficial: GET /api/users/registered
+      let res = await listRegisteredUsers(org.id, filterParams);
 
-      // 2. Si la lista viene vacía, intentar con endpoint genérico listOrgUsers
+      // 2. Si la lista viene vacía o no responde, intentar con fallback de miembros/usuarios genéricos
+      if (!res.items || res.items.length === 0) {
+        res = await listDashboardMembers(org.id, { ...filterParams, role_code: "USER_APP" });
+      }
       if (!res.items || res.items.length === 0) {
         res = await listOrgUsers(org.id, filterParams);
       }
-
-      // 3. Si sigue vacía, consultar listDashboardMembers general (sin role_code)
       if (!res.items || res.items.length === 0) {
         res = await listDashboardMembers(org.id, filterParams);
       }
@@ -67,7 +69,7 @@ export function RegisteredUsersContent() {
       setTotal(res.total || 0);
     } catch {
       try {
-        const fallbackRes = await listDashboardMembers(org.id, filterParams);
+        const fallbackRes = await listOrgUsers(org.id, filterParams);
         setItems(fallbackRes.items || []);
         setTotal(fallbackRes.total || 0);
       } catch {
