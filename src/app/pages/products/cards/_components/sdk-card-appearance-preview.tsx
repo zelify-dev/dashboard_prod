@@ -191,7 +191,7 @@ export function SdkCardAppearancePreview({
         {/* Cuerpo de la Tarjeta */}
         <div
           className={cn(
-            "relative aspect-[1.586/1] w-full overflow-hidden rounded-[1.25rem] border border-white/10 p-5 pb-4 shadow-lg transition-all duration-300",
+            "relative aspect-[1.586/1] w-full overflow-hidden rounded-[1.25rem] border border-white/10 p-5 shadow-lg transition-all duration-300 flex flex-col justify-between antialiased",
             config.finishType === "embossed" && "border-white/20 shadow-inner",
             config.finishType === "metallic" &&
               "before:pointer-events-none before:absolute before:inset-0 before:bg-gradient-to-tr before:from-white/10 before:via-transparent before:to-white/5"
@@ -201,52 +201,50 @@ export function SdkCardAppearancePreview({
           {/* Textura mate de fondo sutil */}
           <div className="absolute inset-0 bg-radial-at-t from-white/5 via-transparent to-black/30 pointer-events-none" />
 
-          <div className="relative z-10 flex h-full flex-col justify-between antialiased">
-            {/* Fila Superior: Isotipo Zelify en Verde Bolt arriba a la derecha */}
-            <div className="flex items-center justify-end">
-              {brandLogoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={brandLogoUrl}
-                  alt="Logo Marca"
-                  className={cn(
-                    "h-7 max-h-8 w-auto max-w-[90px] object-contain object-right",
-                    !isLightFace && "brightness-0 invert"
-                  )}
-                />
-              ) : (
-                <ZelifyIsotype className="size-8 shrink-0" />
-              )}
+          {/* Fila Superior: Isotipo Zelify en Verde Bolt arriba a la derecha */}
+          <div className="relative z-10 flex items-center justify-end shrink-0">
+            {brandLogoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={brandLogoUrl}
+                alt="Logo Marca"
+                className={cn(
+                  "h-7 max-h-8 w-auto max-w-[90px] object-contain object-right",
+                  !isLightFace && "brightness-0 invert"
+                )}
+              />
+            ) : (
+              <ZelifyIsotype className="size-7.5 shrink-0" />
+            )}
+          </div>
+
+          {/* Fila Inferior: Titular a la Izquierda | Marca + Saldo a la Derecha */}
+          <div className="relative z-10 flex items-end justify-between gap-3 shrink-0">
+            <div className="min-w-0 flex-1 space-y-1">
+              <span className={cn("block text-[9px] font-semibold uppercase tracking-[0.2em] leading-none", fgMuted)}>
+                {previewT.sdkCardholderCaption || "TITULAR"}
+              </span>
+              <p className={cn("truncate text-[12px] font-semibold tracking-wide leading-snug", fg)}>
+                {config.cardholderName || "Stalin Vicente Narvaez Molina"}
+              </p>
             </div>
 
-            {/* Fila Inferior: Titular a la Izquierda | Marca + Saldo a la Derecha */}
-            <div className="flex items-end justify-between gap-3 pt-4">
-              <div className="min-w-0 flex-1 space-y-0.5">
-                <span className={cn("block text-[9px] font-medium uppercase tracking-[0.18em]", fgMuted)}>
-                  {previewT.sdkCardholderCaption || "TITULAR"}
-                </span>
-                <p className={cn("truncate text-[11.5px] font-semibold tracking-wide leading-tight", fg)}>
-                  {config.cardholderName || "Stalin Vicente Narvaez Molina"}
-                </p>
-              </div>
-
-              <div className="flex shrink-0 flex-col items-end space-y-1 text-right">
-                {isVisa ? (
-                  <div className="relative h-4 w-[36px]">
-                    <Image
-                      src="/visa.svg"
-                      alt="Visa"
-                      fill
-                      className={cn("object-contain object-right", !isLightFace && "brightness-0 invert")}
-                    />
-                  </div>
-                ) : (
-                  <MastercardBadge className="h-5 w-8" />
-                )}
-                <span className={cn("text-[11.5px] font-semibold tabular-nums tracking-tight leading-none", fg)}>
-                  {balanceDemo}
-                </span>
-              </div>
+            <div className="flex shrink-0 flex-col items-end space-y-1 text-right">
+              {isVisa ? (
+                <div className="relative h-4.5 w-[40px]">
+                  <Image
+                    src="/visa.svg"
+                    alt="Visa"
+                    fill
+                    className={cn("object-contain object-right", !isLightFace && "brightness-0 invert")}
+                  />
+                </div>
+              ) : (
+                <MastercardBadge className="h-5.5 w-9" />
+              )}
+              <span className={cn("text-[12px] font-semibold tabular-nums tracking-tight leading-none", fg)}>
+                {balanceDemo}
+              </span>
             </div>
           </div>
         </div>
